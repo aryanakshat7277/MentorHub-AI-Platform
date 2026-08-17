@@ -1,0 +1,43 @@
+<div class="verify-page">
+  <div class="verify-card glass-card" *ngIf="certificate">
+    <div class="verify-status-banner">
+      <span class="status-icon">✓</span>
+      <div>
+        <h2 class="orbitron-font">OFFICIAL VERIFIED CREDENTIAL</h2>
+        <span class="cert-status-tag">STATUS: {{ certificate.status || 'VALID & ACTIVE' }}</span>
+      </div>
+    </div>
+
+    <div class="cert-details-grid">
+      <div class="detail-item">
+        <span class="detail-label">CERTIFICATE ID</span>
+        <span class="detail-val orbitron-font cyan-text">{{ certificate.certificateNumber }}</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">RECIPIENT NAME</span>
+        <span class="detail-val orbitron-font">{{ certificate.studentName }}</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">SPECIALIZATION / COURSE</span>
+        <span class="detail-val">{{ certificate.courseName }}</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">VERIFYING MENTOR</span>
+        <span class="detail-val purple-text">{{ certificate.mentorName }}</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">ISSUE DATE</span>
+        <span class="detail-val">{{ certificate.completionDate }}</span>
+      </div>
+    </div>
+
+    <div class="verify-footer">
+      <span class="issuer-tag">AUTHENTICATED BY MENTORHUB GLOBAL PEER REGISTRY</span>
+      <a routerLink="/certificates" class="btn-cyan btn-sm">RETURN TO PLATFORM →</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,187 @@
+.goals-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  h1 { font-size: 24px; color: #FFF; }
+  .subtitle { color: #94A3B8; margin-top: 4px; }
+}
+
+.overall-progress-banner {
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .banner-title { font-size: 14px; color: #FFF; letter-spacing: 1px; }
+    .banner-sub { font-size: 12px; color: #94A3B8; margin-top: 2px; }
+    .progress-pct-display { font-size: 32px; color: #00D4FF; font-weight: 900; text-shadow: 0 0 15px rgba(0, 212, 255, 0.6); }
+  }
+
+  .progress-track {
+    height: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    overflow: hidden;
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00D4FF, #A855F7);
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.7);
+      border-radius: 6px;
+      transition: width 0.5s ease;
+    }
+  }
+}
+
+.smart-blocks-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+
+  .smart-block-card {
+    padding: 20px;
+    border-top: 4px solid #EF4444;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .block-3d-letter {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFF;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+      position: relative;
+
+      .letter { font-size: 22px; font-weight: 900; }
+      .block-icon { position: absolute; top: -6px; right: -6px; font-size: 14px; }
+    }
+
+    .block-info {
+      display: flex;
+      flex-direction: column;
+      .block-name { font-size: 13px; font-weight: 800; }
+      .block-desc { font-size: 10px; color: #94A3B8; }
+    }
+  }
+}
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+
+  .kanban-column {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 400px;
+
+    .column-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+      .column-title { font-size: 13px; font-weight: 800; }
+      .text-orange { color: #FB923C; }
+      .text-cyan { color: #00D4FF; }
+      .text-green { color: #4ADE80; }
+
+      .count-pill {
+        background: rgba(255, 255, 255, 0.1);
+        color: #FFF;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 700;
+      }
+    }
+
+    .column-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .kanban-card {
+      background: rgba(11, 17, 32, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      &.achieved {
+        border-color: rgba(74, 222, 128, 0.3);
+        background: rgba(34, 197, 94, 0.05);
+      }
+
+      .card-category-badge {
+        align-self: flex-start;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: rgba(0, 212, 255, 0.15);
+        color: #00D4FF;
+
+        &.cat-achieved { background: rgba(34, 197, 94, 0.2); color: #4ADE80; }
+      }
+
+      .card-title { font-size: 14px; color: #FFF; }
+      .card-desc { font-size: 12px; color: #94A3B8; line-height: 1.4; }
+
+      .card-progress {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 10px;
+        color: #94A3B8;
+
+        .prog-info { display: flex; justify-content: space-between; .pct { color: #00D4FF; font-weight: 700; } }
+        .prog-bar { height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; .fill { height: 100%; background: #00D4FF; } }
+      }
+
+      .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 8px;
+        font-size: 11px;
+        color: #64748B;
+        .btn-xs { padding: 4px 8px; font-size: 10px; }
+      }
+    }
+  }
+}
+
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(6, 9, 17, 0.7); backdrop-filter: blur(6px); z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.modal-content {
+  width: 480px; padding: 28px; display: flex; flex-direction: column; gap: 20px;
+  .modal-header { display: flex; justify-content: space-between; h2 { font-size: 18px; color: #FFF; } .close-modal { background: none; border: none; color: #94A3B8; font-size: 18px; cursor: pointer; } }
+  .modal-body { display: flex; flex-direction: column; gap: 14px; .form-group { display: flex; flex-direction: column; gap: 4px; label { font-size: 11px; color: #94A3B8; } .modal-input { background: rgba(14, 23, 41, 0.9); border: 1px solid rgba(255, 255, 255, 0.12); padding: 10px; border-radius: 8px; color: #FFF; } } }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 12px; }
+}

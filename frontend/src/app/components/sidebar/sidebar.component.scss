@@ -1,0 +1,185 @@
+.sidebar-container {
+  width: 240px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: var(--bg-sidebar);
+  border-right: 1px solid rgba(0, 240, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &.collapsed {
+    width: 72px;
+
+    .sidebar-brand {
+      justify-content: center;
+      padding: 20px 0;
+    }
+
+    .nav-link {
+      justify-content: center;
+      padding: 14px 0;
+    }
+  }
+}
+
+.sidebar-brand {
+  padding: 20px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  .brand-logo {
+    width: 48px;
+    height: 48px;
+    background: radial-gradient(circle at center, #0B1426 0%, #040711 100%);
+    border: 1.5px solid rgba(0, 240, 255, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 22px rgba(0, 240, 255, 0.5);
+    overflow: hidden;
+    flex-shrink: 0;
+
+    .sidebar-circular-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+
+    .brand-title {
+      font-family: var(--font-heading) !important;
+      font-weight: 900 !important;
+      font-size: 18px !important;
+      letter-spacing: 1px;
+      color: #FFFFFF !important;
+
+      .cyan-glow {
+        color: var(--accent-cyan);
+        text-shadow: 0 0 14px rgba(0, 240, 255, 0.8);
+      }
+    }
+
+    .brand-sub {
+      font-size: 9px !important;
+      color: var(--accent-cyan) !important;
+      letter-spacing: 1px;
+      font-weight: 800 !important;
+      opacity: 0.95;
+      white-space: nowrap;
+    }
+  }
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  overflow-y: auto;
+
+  ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 18px;
+    color: #E2E8F0;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 800 !important;
+    position: relative;
+    transition: all 0.25s ease;
+
+    .nav-icon {
+      font-size: 22px !important;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .nav-label {
+      font-size: 16px !important;
+      font-weight: 800 !important;
+      white-space: nowrap;
+      color: #FFFFFF !important;
+    }
+
+    &:hover {
+      color: #FFFFFF !important;
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(4px);
+    }
+
+    &.active {
+      color: var(--accent-cyan) !important;
+      background: rgba(0, 240, 255, 0.16) !important;
+      border: 1px solid rgba(0, 240, 255, 0.45) !important;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.3) !important;
+
+      .nav-label {
+        color: #00F0FF !important;
+        text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+      }
+
+      .active-indicator {
+        position: absolute;
+        right: 0;
+        top: 20%;
+        height: 60%;
+        width: 4px;
+        background: var(--accent-cyan);
+        border-radius: 4px 0 0 4px;
+        box-shadow: 0 0 12px var(--accent-cyan);
+      }
+    }
+  }
+}
+
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+
+  .collapse-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(18, 27, 47, 0.95);
+    border: 1px solid rgba(0, 240, 255, 0.35);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.5);
+      transform: scale(1.08);
+    }
+
+    .arrow-icon {
+      font-size: 14px;
+      font-weight: 800;
+    }
+  }
+}

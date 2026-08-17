@@ -1,0 +1,54 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: mentorhub-backend
+  datasource:
+    url: ${DB_URL:jdbc:h2:file:./data/mentoring_db;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  secret: ${JWT_SECRET:YOUR_SECURE_JWT_SECRET_KEY_HERE_MIN_64_CHARS}
+
+piston:
+  base-url: ${PISTON_BASE_URL:http://localhost:2000}
+  execute-path: /api/v2/execute
+  runtimes-path: /api/v2/runtimes
+  connect-timeout: 5000
+  read-timeout: 10000
+  max-code-size: 65536
+  max-input-size: 10240
+  rate-limit-per-min: 20
+
+ai:
+  gemini:
+    api-key: ${AI_GEMINI_KEY:YOUR_GEMINI_API_KEY}
+    text-model: ${AI_GEMINI_TEXT_MODEL:gemini-3.1-flash}
+    live-model: ${AI_GEMINI_LIVE_MODEL:gemini-3.1-flash-live-preview}
+  groq:
+    api-key: ${AI_GROQ_KEY:YOUR_GROQ_API_KEY}
+    stt-model: ${AI_GROQ_STT_MODEL:whisper-large-v3-turbo}
+    tts-model: ${AI_GROQ_TTS_MODEL:canopylabs/orpheus-v1-english}
+  deepseek:
+    api-key: ${AI_DEEPSEEK_KEY:YOUR_DEEPSEEK_API_KEY}
+
+logging:
+  level:
+    root: INFO
+    com.mentorhub: DEBUG

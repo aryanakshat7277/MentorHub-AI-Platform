@@ -1,0 +1,307 @@
+.learning-path-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h1 {
+    font-size: 26px !important;
+    color: #FFFFFF !important;
+  }
+
+  .subtitle {
+    color: #CBD5E1 !important;
+    margin-top: 4px;
+    font-size: 15px;
+  }
+}
+
+.path-container {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 28px;
+}
+
+.column-title {
+  font-size: 16px !important;
+  color: #FFFFFF !important;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+
+/* Left Column: Stacked Circular Progress Cards */
+.left-cards-column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  .circular-progress-card {
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: var(--bg-surface);
+    border: var(--border-surface);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:hover {
+      border-color: rgba(0, 240, 255, 0.7);
+      box-shadow: 0 14px 40px rgba(0, 240, 255, 0.25);
+      transform: translateY(-3px);
+    }
+
+    .card-circle-wrapper {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      flex-shrink: 0;
+
+      .circular-chart {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+
+        .circle-bg {
+          fill: none;
+          stroke: rgba(255, 255, 255, 0.1);
+          stroke-width: 3.8;
+        }
+
+        .circle {
+          fill: none;
+          stroke-width: 3.8;
+          stroke-linecap: round;
+          transition: stroke-dasharray 0.8s ease;
+        }
+
+        .percentage {
+          fill: #FFFFFF;
+          font-size: 9px;
+          font-weight: 800;
+          text-anchor: middle;
+          transform: rotate(90deg) translate(0px, -32px);
+        }
+      }
+    }
+
+    .card-details {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      .title-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .tech-icon {
+          font-size: 22px;
+        }
+
+        .card-title {
+          font-size: 16px !important;
+          color: #FFFFFF !important;
+          margin: 0;
+          font-weight: 800 !important;
+        }
+      }
+
+      .status-tag {
+        align-self: flex-start;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 3px 10px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+    }
+  }
+}
+
+/* Right Column: Vertical Roadmap Tree */
+.right-roadmap-column {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+
+  .roadmap-tree {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    position: relative;
+    padding-left: 20px;
+
+    /* Vertical Connection Line */
+    &::before {
+      content: '';
+      position: absolute;
+      left: 39px;
+      top: 20px;
+      bottom: 30px;
+      width: 2px;
+      background: linear-gradient(180deg, #00F0FF 0%, #A855F7 60%, rgba(255, 255, 255, 0.15) 100%);
+      z-index: 1;
+    }
+
+    .tree-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      position: relative;
+      z-index: 2;
+
+      .node-badge {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #0B1221 !important;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #FFFFFF;
+        font-size: 14px;
+        font-weight: 900;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+        flex-shrink: 0;
+        position: relative;
+        z-index: 3;
+
+        .node-number {
+          font-weight: 900;
+          position: relative;
+          z-index: 4;
+        }
+      }
+
+      .step-card {
+        flex: 1;
+        background: rgba(18, 27, 47, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        padding: 16px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        transition: all 0.25s ease;
+
+        &:hover {
+          background: rgba(18, 27, 47, 0.95);
+          transform: translateX(4px);
+        }
+
+        .step-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+
+          .step-title {
+            font-size: 14px !important;
+            color: #FFFFFF !important;
+            margin: 0;
+            font-weight: 700 !important;
+          }
+
+          .step-status-tag {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 8px;
+          }
+        }
+
+        .step-date {
+          font-size: 12px;
+          color: #CBD5E1;
+        }
+      }
+
+      /* State Styling with Solid Dark Bases */
+      &.completed {
+        .node-badge {
+          border-color: #34D399;
+          background: #081C15 !important;
+          color: #34D399;
+          box-shadow: 0 0 16px rgba(52, 211, 153, 0.6);
+        }
+
+        .step-card {
+          border-color: rgba(52, 211, 153, 0.3);
+
+          .step-status-tag {
+            background: rgba(52, 211, 153, 0.15);
+            color: #34D399;
+          }
+        }
+      }
+
+      &.in_progress {
+        .node-badge {
+          border-color: #00F0FF;
+          background: #041B26 !important;
+          color: #00F0FF;
+          box-shadow: 0 0 20px rgba(0, 240, 255, 0.7);
+          animation: pulse-node 2s infinite alternate;
+        }
+
+        .step-card {
+          border-color: rgba(0, 240, 255, 0.5);
+          box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+
+          .step-status-tag {
+            background: rgba(0, 240, 255, 0.2);
+            color: #00F0FF;
+          }
+        }
+      }
+
+      &.upcoming {
+        .node-badge {
+          border-color: #FBBF24;
+          background: #1C1608 !important;
+          color: #FBBF24;
+          box-shadow: 0 0 14px rgba(251, 191, 36, 0.5);
+        }
+
+        .step-card {
+          .step-status-tag {
+            background: rgba(251, 191, 36, 0.15);
+            color: #FBBF24;
+          }
+        }
+      }
+
+      &.locked {
+        opacity: 0.65;
+
+        .node-badge {
+          border-color: rgba(255, 255, 255, 0.25);
+          background: #0B1221 !important;
+          color: #94A3B8;
+        }
+
+        .step-card {
+          .step-status-tag {
+            background: rgba(255, 255, 255, 0.08);
+            color: #CBD5E1;
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes pulse-node {
+  0% { box-shadow: 0 0 10px rgba(0, 240, 255, 0.4); }
+  100% { box-shadow: 0 0 25px rgba(0, 240, 255, 0.9); }
+}

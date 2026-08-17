@@ -1,0 +1,77 @@
+# ==========================================
+# Sensitive Credentials & Environment Files
+# ==========================================
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+*.pfx
+
+# ==========================================
+# Database Storage & Local Runtime Data
+# ==========================================
+data/
+backend/data/
+*.db
+*.mv.db
+*.trace.db
+mentoring_db*
+
+# ==========================================
+# Java / Spring Boot Maven Build Outputs
+# ==========================================
+backend/target/
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# ==========================================
+# Node.js / Angular Frontend Build & Dependencies
+# ==========================================
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.sass-cache/
+frontend/tmp/
+node_modules/
+dist/
+.angular/
+.tmp/
+
+# ==========================================
+# Log Files & Server Diagnostics
+# ==========================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.tmp
+
+# ==========================================
+# IDEs, Editors & OS Metadata
+# ==========================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ==========================================
+# AGY & Antigravity System Folders
+# ==========================================
+.antigravity/
+.gemini/

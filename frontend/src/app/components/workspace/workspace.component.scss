@@ -1,0 +1,554 @@
+.workspace-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Backdrop Overlay for Maximized Editor Pane */
+.editor-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 17, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 99880;
+}
+
+.collaboration-toolbar {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .participant-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .live-dot {
+      width: 10px;
+      height: 10px;
+      background: #EF4444;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #EF4444;
+      animation: blink-dot 1.5s infinite;
+    }
+
+    .room-title { font-size: 13px; color: #FFF; }
+
+    .ws-status, .video-status {
+      font-size: 11px;
+      font-weight: 700;
+      color: #F59E0B;
+      &.online { color: #00F0FF; text-shadow: 0 0 8px rgba(0,240,255,0.6); }
+    }
+
+    .video-status.online {
+      color: #34D399 !important;
+      text-shadow: 0 0 8px rgba(52, 211, 153, 0.6) !important;
+    }
+  }
+
+  .invite-btn {
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(181, 95, 230, 0.2));
+    border: 1px solid #00F0FF;
+    color: #00F0FF;
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+
+    &:hover {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.35), rgba(181, 95, 230, 0.35));
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.cyber-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(9, 14, 26, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid #00F0FF;
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.4);
+  color: #00F0FF;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  z-index: 99999;
+  animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+
+.dual-pane-workspace {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 20px;
+  height: calc(100vh - 180px);
+}
+
+.left-pane, .right-pane {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .pane-tabs {
+    padding: 10px 16px;
+    background: #090E1A;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &.right-tabs {
+      justify-content: flex-start;
+      gap: 10px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #A0AEC0;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-heading);
+      transition: all 0.2s ease;
+
+      &.active {
+        color: #00F0FF;
+        background: rgba(0, 240, 255, 0.12);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+      }
+    }
+
+    .tab-selectors {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .lang-select {
+        background: #121B2F;
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        color: #00F0FF;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-family: var(--font-heading);
+        font-size: 11px;
+        font-weight: 700;
+        outline: none;
+      }
+
+      .version-badge {
+        font-size: 10px;
+        font-weight: 700;
+        color: #A0AEC0;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 3px 7px;
+        border-radius: 4px;
+      }
+
+      .maximize-btn, .reset-code-btn {
+        background: rgba(0, 240, 255, 0.12);
+        border: 1px solid rgba(0, 240, 255, 0.35);
+        color: #00F0FF;
+        font-family: var(--font-heading);
+        font-size: 10px;
+        font-weight: 800;
+        padding: 5px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: rgba(0, 240, 255, 0.25);
+          box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+          transform: translateY(-1px);
+        }
+      }
+
+      .compiler-badge { font-size: 10px; color: #A0AEC0; font-weight: 700; }
+    }
+
+    .run-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      .running-spinner {
+        animation: pulse 1s infinite alternate;
+      }
+    }
+  }
+}
+
+/* Maximized Fullscreen Editor Pane State */
+.left-pane.maximized {
+  position: fixed !important;
+  top: 20px !important;
+  left: 20px !important;
+  right: 20px !important;
+  bottom: 20px !important;
+  width: calc(100vw - 40px) !important;
+  height: calc(100vh - 40px) !important;
+  z-index: 99990 !important;
+  box-shadow: 0 0 80px rgba(0, 240, 255, 0.4), 0 20px 90px rgba(0, 0, 0, 0.95) !important;
+  border-radius: 20px !important;
+  border-color: rgba(0, 240, 255, 0.5) !important;
+
+  .execution-output {
+    height: 220px !important;
+  }
+}
+
+/* ==========================================================================
+   VS CODE SYNTAX HIGHLIGHTING CODE EDITOR (.code-editor-wrapper)
+   ========================================================================== */
+.left-pane {
+  .code-editor-wrapper {
+    flex: 1;
+    display: flex;
+    background: #040711;
+    position: relative;
+    overflow: hidden;
+
+    /* VS Code Line Numbers Gutter Column */
+    .gutter-column {
+      width: 52px;
+      background: #060A14;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 16px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      user-select: none;
+      pointer-events: none;
+
+      .line-number {
+        font-family: 'Consolas', 'Courier New', monospace !important;
+        font-size: 14px !important;
+        line-height: 22px !important;
+        letter-spacing: 0px !important;
+        color: #64748B;
+        font-weight: 500 !important;
+        font-style: normal !important;
+      }
+    }
+
+    /* Synchronized Overlay Editor Surface */
+    .editor-surface {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: #040711;
+
+      .highlight-layer, .code-textarea {
+        position: absolute;
+        inset: 0;
+        margin: 0 !important;
+        padding: 16px !important;
+        border: none !important;
+        outline: none !important;
+        box-sizing: border-box !important;
+        font-family: 'Consolas', 'Courier New', monospace !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        font-style: normal !important;
+        line-height: 22px !important;
+        tab-size: 4 !important;
+        -moz-tab-size: 4 !important;
+        letter-spacing: 0px !important;
+        word-spacing: 0px !important;
+        white-space: pre !important;
+        word-wrap: normal !important;
+        word-break: normal !important;
+        font-variant-ligatures: none !important;
+        font-feature-settings: "liga" 0, "calt" 0 !important;
+        overflow: auto;
+
+        * {
+          font-family: 'Consolas', 'Courier New', monospace !important;
+          font-size: 14px !important;
+          font-weight: 500 !important;
+          font-style: normal !important;
+          line-height: 22px !important;
+          letter-spacing: 0px !important;
+          word-spacing: 0px !important;
+          font-variant-ligatures: none !important;
+          font-feature-settings: "liga" 0, "calt" 0 !important;
+        }
+      }
+
+      /* Bottom Layer: Multi-Color Syntax Highlighting */
+      .highlight-layer {
+        z-index: 1;
+        pointer-events: none;
+        background: transparent;
+        color: #D4D4D4;
+
+        code {
+          font-family: 'Consolas', 'Courier New', monospace !important;
+          font-size: 14px !important;
+          font-weight: 500 !important;
+          font-style: normal !important;
+          line-height: 22px !important;
+          letter-spacing: 0px !important;
+          word-spacing: 0px !important;
+          font-variant-ligatures: none !important;
+          font-feature-settings: "liga" 0, "calt" 0 !important;
+
+          * {
+            font-family: 'Consolas', 'Courier New', monospace !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            font-style: normal !important;
+            line-height: 22px !important;
+            letter-spacing: 0px !important;
+            word-spacing: 0px !important;
+            font-variant-ligatures: none !important;
+            font-feature-settings: "liga" 0, "calt" 0 !important;
+          }
+        }
+
+        /* VS Code Dark+ Language Color Tokens (Strict Uniform Font Width & Weight) */
+        ::ng-deep {
+          .token-keyword { color: #569CD6; font-size: 14px !important; font-weight: 500 !important; font-style: normal !important; font-family: 'Consolas', 'Courier New', monospace !important; }
+          .token-function { color: #DCDCAA; font-size: 14px !important; font-weight: 500 !important; font-style: normal !important; font-family: 'Consolas', 'Courier New', monospace !important; }
+          .token-class { color: #4EC9B0; font-size: 14px !important; font-weight: 500 !important; font-style: normal !important; font-family: 'Consolas', 'Courier New', monospace !important; }
+          .token-string { color: #CE9178; font-size: 14px !important; font-weight: 500 !important; font-style: normal !important; font-family: 'Consolas', 'Courier New', monospace !important; }
+          .token-comment { color: #6A9955; font-size: 14px !important; font-weight: 500 !important; font-style: normal !important; font-family: 'Consolas', 'Courier New', monospace !important; }
+          .token-number { color: #B5CEA8; font-size: 14px !important; font-weight: 500 !important; font-style: normal !important; font-family: 'Consolas', 'Courier New', monospace !important; }
+        }
+      }
+
+      /* Top Layer: Transparent Textarea with Bright Caret */
+      .code-textarea {
+        z-index: 2;
+        background: transparent !important;
+        color: transparent !important;
+        caret-color: #00F0FF;
+        resize: none;
+        font-family: 'Consolas', 'Courier New', monospace !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        font-style: normal !important;
+        line-height: 22px !important;
+        letter-spacing: 0px !important;
+        word-spacing: 0px !important;
+      }
+    }
+  }
+
+  .execution-output {
+    height: 175px;
+    background: #080D18;
+    border-top: 1px solid rgba(0, 240, 255, 0.15);
+    display: flex;
+    flex-direction: column;
+
+    .output-header {
+      padding: 6px 12px;
+      background: rgba(18, 27, 47, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .terminal-tabs {
+        display: flex;
+        gap: 6px;
+
+        .term-tab {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: #A0AEC0;
+          font-family: var(--font-heading);
+          font-size: 10px;
+          font-weight: 700;
+          padding: 4px 10px;
+          border-radius: 4px;
+          cursor: pointer;
+
+          &.active {
+            color: #00F0FF;
+            background: rgba(0, 240, 255, 0.15);
+            border-color: rgba(0, 240, 255, 0.4);
+          }
+
+          &.has-err {
+            color: #F87171;
+            border-color: rgba(248, 113, 113, 0.4);
+          }
+
+          &.stdin-tab {
+            color: #F59E0B;
+            border-color: rgba(245, 158, 11, 0.3);
+          }
+        }
+      }
+
+      .status-summary {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .status-tag {
+          font-size: 9px;
+          font-weight: 800;
+          padding: 2px 7px;
+          border-radius: 4px;
+          text-transform: uppercase;
+          background: rgba(255, 255, 255, 0.1);
+          color: #A0AEC0;
+
+          &.success { background: rgba(52, 211, 153, 0.18); color: #34D399; }
+          &.compilation_error, &.runtime_error { background: rgba(248, 113, 113, 0.18); color: #F87171; }
+          &.running { background: rgba(0, 240, 255, 0.18); color: #00F0FF; }
+          &.time_limit_exceeded, &.rate_limit_exceeded { background: rgba(245, 158, 11, 0.18); color: #F59E0B; }
+        }
+
+        .exec-time { font-size: 10px; color: #94A3B8; }
+        .clear-btn { background: none; border: none; color: #64748B; font-size: 10px; font-weight: 700; cursor: pointer; &:hover { color: #FFF; } }
+      }
+    }
+
+    .logs-content {
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #34D399;
+      overflow-y: auto;
+      flex: 1;
+      font-family: 'Consolas', monospace !important;
+
+      p {
+        line-height: 1.5;
+        font-family: 'Consolas', monospace !important;
+        margin: 0 0 2px 0;
+        &.stdout-line { color: #34D399; }
+        &.stderr-line { color: #F87171; }
+        &.compile-line { color: #F59E0B; }
+        &.empty-log-msg { color: #64748B; font-style: italic; }
+      }
+    }
+
+    .stdin-panel {
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+
+      .stdin-label { font-size: 10px; color: #F59E0B; font-weight: 700; }
+      .stdin-textarea {
+        flex: 1;
+        background: #040711;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 6px;
+        color: #FFF;
+        font-family: 'Consolas', monospace !important;
+        font-size: 12px;
+        padding: 8px 10px;
+        outline: none;
+        resize: none;
+      }
+    }
+  }
+}
+
+.right-pane {
+  .video-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #040711;
+
+    app-jitsi-meeting {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      flex: 1;
+    }
+  }
+
+  .notes-area {
+    flex: 1;
+
+    .notes-textarea {
+      width: 100%;
+      height: 100%;
+      background: rgba(9, 14, 26, 0.7);
+      border: none;
+      outline: none;
+      padding: 18px;
+      color: #FFF;
+      font-size: 14px;
+      line-height: 1.6;
+      resize: none;
+    }
+  }
+
+  .chat-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #080D18;
+
+    .chat-messages {
+      flex: 1;
+      padding: 14px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      .chat-msg {
+        background: rgba(18, 27, 47, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 10px 14px;
+
+        .msg-meta { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; .msg-sender { color: #00F0FF; } .msg-time { color: #64748B; } }
+        .msg-text { font-size: 13px; color: #FFF; }
+      }
+    }
+
+    .chat-input-row {
+      padding: 12px 14px;
+      display: flex;
+      gap: 8px;
+      background: #0E1729;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+      input {
+        flex: 1;
+        background: rgba(6, 10, 20, 0.85);
+        border: 1px solid rgba(0, 240, 255, 0.2);
+        padding: 8px 12px;
+        border-radius: 8px;
+        color: #FFF;
+        font-size: 13px;
+        outline: none;
+      }
+    }
+  }
+}

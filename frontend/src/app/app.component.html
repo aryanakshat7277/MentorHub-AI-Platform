@@ -1,0 +1,65 @@
+<!-- Ultra-Clean Graphical 3-Second Futuristic Startup Overlay -->
+<div class="cyber-startup-overlay" *ngIf="isBooting" [class.fade-out]="isFadingOut">
+  <!-- Background Grid & Vertical Sweeping Laser Beam -->
+  <div class="startup-background-grid"></div>
+  <div class="laser-scan-line"></div>
+
+  <!-- Central Graphic Core Box -->
+  <div class="graphic-hero-box">
+    <!-- 4-Ring Cybernetic Spinning Neural Core & Radar Sweep -->
+    <div class="graphic-rings-container">
+      <div class="radar-sweep"></div>
+      <div class="pulse-wave-ring"></div>
+      <div class="ring outer-ring">
+        <span class="satellite sat-1"></span>
+        <span class="satellite sat-2"></span>
+      </div>
+      <div class="ring middle-ring"></div>
+      <div class="ring inner-ring"></div>
+      
+      <!-- Official Circular Logo Orb -->
+      <div class="center-orb official-logo-orb">
+        <img src="assets/mentorhub-logo.png" alt="MentorHub Official Logo" class="startup-circular-logo-img" />
+      </div>
+    </div>
+
+    <!-- Clean Graphical Neon Progress Bar -->
+    <div class="minimal-progress-box">
+      <div class="line-track">
+        <div class="line-fill" [style.width.%]="bootProgress"></div>
+        <div class="line-glow-head" [style.left.%]="bootProgress"></div>
+      </div>
+      <span class="percent-val orbitron-font">{{ bootProgress | number:'1.0-0' }}%</span>
+    </div>
+  </div>
+</div>
+
+<!-- Standalone Fullscreen Login View (When Logged Out or on /login Route) -->
+<div class="auth-fullscreen-container" *ngIf="isAuthPage && !isBooting">
+  <router-outlet></router-outlet>
+</div>
+
+<!-- Main Application Layout (Only Rendered When Authenticated) -->
+<div class="app-layout" *ngIf="!isAuthPage">
+  <!-- Fixed Left Sidebar -->
+  <app-sidebar (toggleCollapse)="onSidebarToggle($event)"></app-sidebar>
+
+  <!-- Main View Container -->
+  <div class="main-wrapper" [class.sidebar-collapsed]="isSidebarCollapsed">
+    <!-- Top Header Bar -->
+    <app-header [isCollapsed]="isSidebarCollapsed"></app-header>
+
+    <!-- Router View Content -->
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <!-- Floating AI Sparkle Button -->
+  <button class="floating-sparkle-btn" *ngIf="!isAiChatbotOpen" (click)="toggleAiChatbot()" title="Open Multi-Provider AI Chatbot">
+    <span class="sparkle-icon">✨</span>
+  </button>
+
+  <!-- Multi-Provider AI Chatbot Drawer -->
+  <app-ai-chatbot [isOpen]="isAiChatbotOpen" (closeChatbot)="isAiChatbotOpen = false"></app-ai-chatbot>
+</div>

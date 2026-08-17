@@ -1,0 +1,288 @@
+<div class="certificates-page">
+  <div class="page-header">
+    <div>
+      <h1 class="orbitron-font">VERIFIED CREDENTIALS & CERTIFICATES</h1>
+      <p class="subtitle">Official MentorHub AI Academy certificates with cryptographic verification QR codes & ultra-high resolution PDF exports</p>
+    </div>
+    <div class="header-actions" *ngIf="!isMentor">
+      <button class="btn-cyan request-btn orbitron-font" (click)="openRequestModal()">
+        📜 REQUEST COURSE CERTIFICATE
+      </button>
+    </div>
+  </div>
+
+  <!-- MENTOR APPROVAL DASHBOARD -->
+  <div class="mentor-approval-banner glass-card" *ngIf="isMentor && pendingCertificates.length > 0">
+    <div class="banner-header">
+      <span class="banner-icon">📋</span>
+      <div>
+        <h3 class="orbitron-font">PENDING MENTEE CERTIFICATE REQUESTS</h3>
+        <p>Review course completion requests. Approving generates the cryptographic QR Code and unlocks 300 DPI PDF download.</p>
+      </div>
+    </div>
+    <div class="pending-cards-row">
+      <div *ngFor="let pending of pendingCertificates" class="pending-card">
+        <div class="pending-info">
+          <span class="student-name orbitron-font">{{ pending.studentName }}</span>
+          <span class="course-name">{{ pending.courseName }}</span>
+          <span class="date-tag">Requested: {{ pending.completionDate }}</span>
+        </div>
+        <div class="pending-btn-group">
+          <button class="btn-approve orbitron-font" (click)="approveRequest(pending.id)">✅ APPROVE & ISSUE QR</button>
+          <button class="btn-reject orbitron-font" (click)="rejectRequest(pending.id)">❌ REJECT</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="certificates-layout">
+    <!-- Left Sidebar: Certificate List -->
+    <div class="certificates-list-sidebar glass-card">
+      <h3 class="sidebar-title orbitron-font">YOUR CREDENTIALS</h3>
+      <div class="certs-list">
+        <div *ngFor="let cert of myCertificates" 
+             class="cert-list-item" 
+             [class.active]="selectedCert?.id === cert.id" 
+             (click)="selectCertificate(cert)">
+          <div class="cert-item-header">
+            <span [class]="'status-badge ' + (cert.status ? cert.status.toLowerCase() : 'requested')">
+              {{ cert.status === 'APPROVED' || cert.status === 'VALID' ? '✅ APPROVED' : '⏳ PENDING' }}
+            </span>
+          </div>
+          <h4 class="cert-title orbitron-font">{{ cert.courseName }}</h4>
+          <span class="student-label">Recipient: <strong>{{ cert.studentName }}</strong></span>
+          <span class="cert-number">{{ cert.certificateNumber }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Certificate Display Area -->
+    <div class="certificate-display-area glass-card" *ngIf="selectedCert">
+      
+      <!-- Status Notice Bar -->
+      <div class="cert-status-notice" [class.approved]="selectedCert.status === 'APPROVED' || selectedCert.status === 'VALID'">
+        <span class="notice-icon">{{ selectedCert.status === 'APPROVED' || selectedCert.status === 'VALID' ? '✅' : '🔒' }}</span>
+        <span class="notice-text">
+          <strong *ngIf="selectedCert.status === 'APPROVED' || selectedCert.status === 'VALID'">OFFICIAL VERIFIED CREDENTIAL:</strong>
+          <span *ngIf="selectedCert.status === 'APPROVED' || selectedCert.status === 'VALID'"> Cryptographic QR code active. Ultra HD 300 DPI PDF export unlocked.</span>
+          <strong *ngIf="selectedCert.status !== 'APPROVED' && selectedCert.status !== 'VALID'">IN-APP DRAFT PREVIEW (PENDING MENTOR APPROVAL):</strong>
+          <span *ngIf="selectedCert.status !== 'APPROVED' && selectedCert.status !== 'VALID'"> Viewable in-app. Verification QR Code & PDF download unlock upon Mentor approval.</span>
+        </span>
+      </div>
+
+      <!-- ======= ULTRA-HIGH DEFINITION CERTIFICATE FRAME ======= -->
+      <div class="cert-viewport-container">
+        <div class="cert-outer-shadow-frame">
+          <div class="cert-parchment" id="printable-certificate">
+
+            <!-- Banknote/Diploma Security Lattice Overlay -->
+            <div class="guilloche-security-bg"></div>
+
+            <!-- Monogram Watermark Layer -->
+            <div class="watermark-layer">
+              <span class="wm-text">MH</span>
+              <span class="wm-sub">ACADEMY</span>
+            </div>
+
+            <!-- 3-Tier Metallic Engraved Border System -->
+            <div class="border-outer">
+              <div class="border-mid">
+                <div class="border-inner">
+
+                  <!-- Intricate Vector Corner Flourishes (Top-Left, Top-Right, Bottom-Left, Bottom-Right) -->
+                  <div class="corner-flourish tl">
+                    <svg viewBox="0 0 50 50" class="flourish-svg">
+                      <path d="M4,4 L4,26 C4,14 14,4 26,4 L4,4 Z M8,8 L8,20 C8,13 13,8 20,8 L8,8 Z M2,2 L48,2 M2,2 L2,48" stroke="#B89745" stroke-width="1.8" fill="none"/>
+                      <circle cx="12" cy="12" r="2.5" fill="#B89745"/>
+                    </svg>
+                  </div>
+                  <div class="corner-flourish tr">
+                    <svg viewBox="0 0 50 50" class="flourish-svg">
+                      <path d="M46,4 L46,26 C46,14 36,4 24,4 L46,4 Z M42,8 L42,20 C42,13 37,8 30,8 L42,8 Z M48,2 L2,2 M48,2 L48,48" stroke="#B89745" stroke-width="1.8" fill="none"/>
+                      <circle cx="38" cy="12" r="2.5" fill="#B89745"/>
+                    </svg>
+                  </div>
+                  <div class="corner-flourish bl">
+                    <svg viewBox="0 0 50 50" class="flourish-svg">
+                      <path d="M4,46 L4,24 C4,36 14,46 26,46 L4,46 Z M8,42 L8,30 C8,37 13,42 20,42 L8,42 Z M2,48 L48,48 M2,48 L2,2" stroke="#B89745" stroke-width="1.8" fill="none"/>
+                      <circle cx="12" cy="38" r="2.5" fill="#B89745"/>
+                    </svg>
+                  </div>
+                  <div class="corner-flourish br">
+                    <svg viewBox="0 0 50 50" class="flourish-svg">
+                      <path d="M46,46 L46,24 C46,36 36,46 24,46 L46,46 Z M42,42 L42,30 C42,37 37,42 30,42 L42,42 Z M48,48 L2,48 M48,48 L48,2" stroke="#B89745" stroke-width="1.8" fill="none"/>
+                      <circle cx="38" cy="38" r="2.5" fill="#B89745"/>
+                    </svg>
+                  </div>
+
+                  <!-- Guilloche Top Ornamental Accent -->
+                  <div class="guilloche-strip top-strip">
+                    <span class="guill-line"></span>
+                    <span class="guill-dots">● ● ●</span>
+                    <span class="guill-diamond">◆</span>
+                    <span class="guill-dots">● ● ●</span>
+                    <span class="guill-line"></span>
+                  </div>
+
+                  <div class="cert-body">
+
+                    <!-- Official Heraldic Academy Crest -->
+                    <div class="crest-emblem">
+                      <div class="crest-shield">
+                        <div class="crest-inner-ring">
+                          <span class="crest-icon">🏛️</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Academy Header Block -->
+                    <p class="academy-label">MENTORHUB ACADEMY</p>
+                    <p class="academy-sub">— ACCREDITATION OF PROFESSIONAL EXCELLENCE · EST. 2026 —</p>
+
+                    <!-- Top Filigree Wing Divider -->
+                    <div class="filigree-divider">
+                      <span class="fili-wing left">━━━━━━━━━━━━</span>
+                      <span class="fili-center">❖</span>
+                      <span class="fili-wing right">━━━━━━━━━━━━</span>
+                    </div>
+
+                    <!-- Main Formal Title -->
+                    <h1 class="main-title">CERTIFICATE OF MENTORSHIP</h1>
+                    <p class="sub-title">FOR DEMONSTRATED TECHNICAL MASTERY & CURRICULAR EXCELLENCE</p>
+
+                    <!-- Recipient Presentation Line -->
+                    <p class="presented-to">This official credential is proudly awarded to</p>
+
+                    <!-- ===== HERO MENTEE RECIPIENT NAME ===== -->
+                    <h2 class="mentee-name">{{ selectedCert.studentName || 'Kriti Sagar' }}</h2>
+                    <div class="name-underline"></div>
+
+                    <!-- Certification Statement -->
+                    <p class="description">
+                      for demonstrating exceptional technical capability, architectural mastery, and 100% completion of mentorship requirements in
+                    </p>
+
+                    <!-- Course Title Calligraphy -->
+                    <h3 class="course-name">{{ selectedCert.courseName || 'Full-Stack Spring Boot & Angular Architecture' }}</h3>
+
+                    <!-- Bottom Filigree Wing Divider -->
+                    <div class="filigree-divider bottom-fili">
+                      <span class="fili-wing left">━━━━━━━━━━━━━━━</span>
+                      <span class="fili-center">✦</span>
+                      <span class="fili-wing right">━━━━━━━━━━━━━━━</span>
+                    </div>
+
+                    <!-- ===== FOOTER: TWO-COLUMN HIGH RESOLUTION AUDIT BLOCK ===== -->
+                    <div class="cert-footer">
+
+                      <!-- Left: Mentor Signatory & Accreditation -->
+                      <div class="footer-left">
+                        <span class="footer-label">CERTIFIED & AUDITED BY</span>
+                        <div class="signature-area">
+                          <span class="signature-script">{{ selectedCert.mentorName || 'Akshat Aryan' }}</span>
+                        </div>
+                        <span class="sig-line"></span>
+                        <span class="mentor-name">{{ selectedCert.mentorName || 'Akshat Aryan' }}</span>
+                        <span class="mentor-title">Senior Software Architect & Master Mentor</span>
+                        <span class="mentor-org">MentorHub AI Engineering Academy</span>
+                      </div>
+
+                      <!-- Right: Cryptographic Verification QR & Security Metadata -->
+                      <div class="footer-right">
+                        <!-- Live Cryptographic QR (Approved Only) -->
+                        <div class="qr-box" *ngIf="selectedCert.status === 'APPROVED' || selectedCert.status === 'VALID'">
+                          <img [src]="getQrCodeUrl(selectedCert)" alt="Verification QR Code" class="qr-img" />
+                        </div>
+                        <div class="cert-id-block">
+                          <span class="cert-line"></span>
+                          <span class="cert-code">{{ selectedCert.certificateNumber || 'CERT-JRIN-OFFICIAL' }}</span>
+                          <span class="cert-date">Issue Date: {{ selectedCert.completionDate || '2026-07-10' }}</span>
+                          <span class="verify-link">mentorhub.ai/verify</span>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <!-- Guilloche Bottom Ornamental Accent -->
+                  <div class="guilloche-strip bottom-strip">
+                    <span class="guill-line"></span>
+                    <span class="guill-dots">● ● ●</span>
+                    <span class="guill-diamond">◆</span>
+                    <span class="guill-dots">● ● ●</span>
+                    <span class="guill-line"></span>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden 300 DPI Export Canvas -->
+      <canvas #certCanvas style="display: none;"></canvas>
+
+      <!-- Action Toolbar -->
+      <div class="cert-actions-toolbar">
+        <div class="toolbar-info">
+          <span class="info-text" *ngIf="selectedCert.status === 'APPROVED' || selectedCert.status === 'VALID'">
+            ✅ Certificate is cryptographically verified. Ready for Ultra HD 300 DPI PDF export.
+          </span>
+          <span class="info-text warning-text" *ngIf="selectedCert.status !== 'APPROVED' && selectedCert.status !== 'VALID'">
+            🔒 In-App draft mode. Ultra HD PDF download with verification QR Code unlocks upon Mentor approval.
+          </span>
+        </div>
+        <div class="toolbar-btns" *ngIf="selectedCert.status === 'APPROVED' || selectedCert.status === 'VALID'">
+          <button class="btn-cyan download-btn orbitron-font"
+                  [disabled]="isGeneratingPdf"
+                  (click)="downloadCertificate(selectedCert)">
+            <span *ngIf="!isGeneratingPdf">
+              📄 DOWNLOAD CERTIFICATE (300 DPI PDF)
+            </span>
+            <span *ngIf="isGeneratingPdf">
+              ⏳ GENERATING ULTRA HD PDF...
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MENTEE REQUEST CERTIFICATE MODAL -->
+<div class="modal-backdrop" *ngIf="showRequestModal" (click)="closeRequestModal()"></div>
+<div class="request-modal glass-card" *ngIf="showRequestModal">
+  <div class="modal-header">
+    <h2 class="orbitron-font">📜 REQUEST COURSE CERTIFICATE</h2>
+    <button class="close-modal-btn" (click)="closeRequestModal()">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="form-row">
+      <label class="orbitron-font">RECIPIENT NAME (MENTEE)</label>
+      <input type="text" [(ngModel)]="requestForm.studentName" readonly />
+    </div>
+    <div class="form-row">
+      <label class="orbitron-font">SELECT COMPLETED COURSE *</label>
+      <select [(ngModel)]="requestForm.courseName">
+        <option *ngFor="let c of availableCourses" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="orbitron-font">ASSIGNED MENTOR</label>
+      <input type="text" [(ngModel)]="requestForm.mentorName" readonly />
+    </div>
+    <div class="workflow-notice">
+      <span class="notice-icon">💡</span>
+      <p>Submitting this request creates an in-app certificate preview. Once Mentor <strong>Akshat Aryan</strong> approves, the Verification QR Code and 300 DPI PDF download will unlock.</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-cancel" (click)="closeRequestModal()">CANCEL</button>
+    <button class="btn-cyan btn-save" (click)="submitCertificateRequest()" [disabled]="isSubmittingRequest">
+      <span *ngIf="!isSubmittingRequest">🚀 SUBMIT REQUEST</span>
+      <span *ngIf="isSubmittingRequest">⏳ SUBMITTING...</span>
+    </button>
+  </div>
+</div>

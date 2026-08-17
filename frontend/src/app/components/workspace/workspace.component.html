@@ -1,0 +1,204 @@
+<div class="workspace-page">
+  <!-- Backdrop for Maximized Editor Pane -->
+  <div class="editor-modal-backdrop" *ngIf="isEditorMaximized" (click)="toggleEditorMaximize()"></div>
+
+  <!-- Top Audio/Video Collaboration Toolbar -->
+  <div class="collaboration-toolbar glass-card">
+    <div class="participant-info">
+      <span class="live-dot"></span>
+      <span class="room-title orbitron-font">LIVE WORKSPACE #{{ sessionId }} — REAL-TIME PISTON COMPILER & SESSION SYNC</span>
+      <span class="ws-status" [class.online]="wsService.isConnected">
+        {{ wsService.isConnected ? '⚡ WEBSOCKET CONNECTED' : '🔌 WEBSOCKET RECONNECTING' }}
+      </span>
+      <span class="video-status" [class.online]="isVideoConnected">
+        {{ isVideoConnected ? '● VIDEO CONNECTED' : '📹 VIDEO STANDBY' }}
+      </span>
+    </div>
+
+    <button class="invite-btn orbitron-font" (click)="copyInviteLink()" title="Copy Session Meeting Invite Link for Mentees (KRITI SAGAR, VANAJA, PAVANI)">
+      🔗 INVITE MENTEE
+    </button>
+  </div>
+
+  <!-- Cyber Toast Notification Popup -->
+  <div class="cyber-toast orbitron-font" *ngIf="toastMessage">
+    {{ toastMessage }}
+  </div>
+
+  <!-- Dual-Column Workspace Interface -->
+  <div class="dual-pane-workspace">
+    <!-- Left Column: Code Editor & Piston Compiler Terminal Output -->
+    <div class="left-pane glass-card" [class.maximized]="isEditorMaximized">
+      <div class="pane-tabs">
+        <div class="tab-selectors">
+          <select [(ngModel)]="activeLanguage" (change)="onLanguageChange()" class="lang-select">
+            <option *ngFor="let r of runtimes" [value]="r.language">{{ r.language | uppercase }} (v{{ r.version }})</option>
+            <option *ngIf="runtimes.length === 0" value="javascript">JAVASCRIPT (v18.15.0)</option>
+            <option *ngIf="runtimes.length === 0" value="python">PYTHON (v3.10.0)</option>
+            <option *ngIf="runtimes.length === 0" value="java">JAVA (v17.0.0)</option>
+            <option *ngIf="runtimes.length === 0" value="cpp">C++ (v10.2.0)</option>
+            <option *ngIf="runtimes.length === 0" value="typescript">TYPESCRIPT (v5.0.3)</option>
+            <option *ngIf="runtimes.length === 0" value="csharp">C# (v6.12.0)</option>
+            <option *ngIf="runtimes.length === 0" value="go">GO (v1.16.2)</option>
+            <option *ngIf="runtimes.length === 0" value="rust">RUST (v1.68.2)</option>
+          </select>
+
+          <!-- Version Badge -->
+          <span class="version-badge">v{{ activeVersion }}</span>
+
+          <!-- Maximize / Restore Editor Button -->
+          <button class="maximize-btn" (click)="toggleEditorMaximize()" [title]="isEditorMaximized ? 'Restore View' : 'Maximize Code Editor'">
+            {{ isEditorMaximized ? '🗗 RESTORE' : '🗖 MAXIMIZE' }}
+          </button>
+
+          <!-- Reset Code Template Button -->
+          <button class="reset-code-btn" (click)="resetCodeToTemplate()" title="Reset code to default language template">
+            🔄 RESET TEMPLATE
+          </button>
+
+          <span class="compiler-badge">⚡ PISTON SANDBOX</span>
+        </div>
+
+        <button class="btn-cyan btn-sm run-btn" (click)="runCode()" [disabled]="isCompiling">
+          <span *ngIf="!isCompiling">▶ RUN CODE</span>
+          <span *ngIf="isCompiling" class="running-spinner">⏳ RUNNING...</span>
+        </button>
+      </div>
+
+      <!-- VS Code Style Multi-Color Syntax Highlighting Code Editor -->
+      <div class="code-editor-wrapper">
+        <!-- Line Numbers Gutter Bar -->
+        <div class="gutter-column" #gutterCol>
+          <span *ngFor="let num of lineNumbers" class="line-number">{{ num }}</span>
+        </div>
+
+        <!-- Synchronized Overlay Editor Surface -->
+        <div class="editor-surface">
+          <!-- Bottom Layer: Multi-Color Syntax Highlighting -->
+          <pre class="highlight-layer" #highlightLayer><code [innerHTML]="getHighlightedCode()"></code></pre>
+
+          <!-- Top Layer: Transparent Textarea with Bright Caret -->
+          <textarea [(ngModel)]="code" 
+                    (ngModelChange)="updateCode($event)" 
+                    (scroll)="onEditorScroll($event)"
+                    (input)="onEditorScroll($event)"
+                    (keyup)="onEditorScroll($event)"
+                    (click)="onEditorScroll($event)"
+                    class="code-textarea" 
+                    spellcheck="false" 
+                    placeholder="Write code here..."></textarea>
+        </div>
+      </div>
+
+      <!-- Normalized Piston IDE Terminal & STDIN Panel -->
+      <div class="execution-output">
+        <div class="output-header">
+          <div class="terminal-tabs">
+            <button class="term-tab" [class.active]="terminalTab === 'stdout'" (click)="terminalTab = 'stdout'">
+              STDOUT ({{ outputLogs.length }})
+            </button>
+            <button class="term-tab" [class.active]="terminalTab === 'stderr'" [class.has-err]="stderrLogs.length > 0" (click)="terminalTab = 'stderr'">
+              STDERR ({{ stderrLogs.length }})
+            </button>
+            <button class="term-tab" [class.active]="terminalTab === 'compile'" [class.has-err]="compileOutputLogs.length > 0" (click)="terminalTab = 'compile'">
+              COMPILE ({{ compileOutputLogs.length }})
+            </button>
+            <button class="term-tab stdin-tab" [class.active]="terminalTab === 'stdin'" (click)="terminalTab = 'stdin'">
+              ⌨️ STDIN INPUT
+            </button>
+          </div>
+
+          <div class="status-summary">
+            <span class="status-tag" [ngClass]="executionStatus.toLowerCase()">
+              {{ executionStatus }}
+            </span>
+            <span class="exec-time" *ngIf="executionTime !== null">⏱️ {{ executionTime }}ms</span>
+            <button class="clear-btn" (click)="clearTerminal()">CLEAR</button>
+          </div>
+        </div>
+
+        <!-- Terminal Output Body -->
+        <div class="logs-content orbitron-font" *ngIf="terminalTab !== 'stdin'">
+          <!-- STDOUT View -->
+          <ng-container *ngIf="terminalTab === 'stdout'">
+            <p *ngFor="let log of outputLogs" class="stdout-line">{{ log }}</p>
+            <p *ngIf="outputLogs.length === 0" class="empty-log-msg">// No standard output recorded yet. Click '▶ RUN CODE' to execute.</p>
+          </ng-container>
+
+          <!-- STDERR View -->
+          <ng-container *ngIf="terminalTab === 'stderr'">
+            <p *ngFor="let log of stderrLogs" class="stderr-line">{{ log }}</p>
+            <p *ngIf="stderrLogs.length === 0" class="empty-log-msg">// Clean execution. Zero runtime errors recorded.</p>
+          </ng-container>
+
+          <!-- Compile Output View -->
+          <ng-container *ngIf="terminalTab === 'compile'">
+            <p *ngFor="let log of compileOutputLogs" class="compile-line">{{ log }}</p>
+            <p *ngIf="compileOutputLogs.length === 0" class="empty-log-msg">// Zero compilation errors recorded.</p>
+          </ng-container>
+        </div>
+
+        <!-- STDIN Panel View -->
+        <div class="stdin-panel" *ngIf="terminalTab === 'stdin'">
+          <label class="stdin-label orbitron-font">PROGRAM STANDARD INPUT (STDIN):</label>
+          <textarea [(ngModel)]="stdin" class="stdin-textarea" placeholder="Enter standard input values for programs reading input (e.g. input() in Python, Scanner in Java)..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Tabs for Live Jitsi Video Call, Collaborative Notes & Live Session Chat -->
+    <div class="right-pane glass-card">
+      <div class="pane-tabs right-tabs">
+        <button class="tab-btn" [class.active]="activeTab === 'video'" (click)="activeTab = 'video'">
+          📹 LIVE VIDEO
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'notes'" (click)="activeTab = 'notes'">
+          📝 NOTES
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'chat'" (click)="activeTab = 'chat'">
+          💬 CHAT ({{ chatMessages.length }})
+        </button>
+      </div>
+
+      <!-- Tab Content 1: Jitsi Live Video Call Panel -->
+      <div class="video-area" *ngIf="activeTab === 'video'">
+        <app-jitsi-meeting
+          #jitsiComp
+          [roomName]="roomName"
+          [displayName]="currentUser.name + ' (' + currentUser.role + ')'"
+          [email]="currentUser.email"
+          [role]="currentUser.role"
+          (meetingJoined)="onMeetingJoined()"
+          (meetingEnded)="onMeetingEnded()"
+          (audioMuteChanged)="onAudioMuteChanged($event)"
+          (videoMuteChanged)="onVideoMuteChanged($event)"
+          (screenShareChanged)="onScreenShareChanged($event)"
+          (statusChanged)="onJitsiStatusChanged($event)">
+        </app-jitsi-meeting>
+      </div>
+
+      <!-- Tab Content 2: Collaborative Notes -->
+      <div class="notes-area" *ngIf="activeTab === 'notes'">
+        <textarea [(ngModel)]="notes" (ngModelChange)="updateNotes($event)" class="notes-textarea" placeholder="Type shared mentoring notes here... (Synced live across all peers)"></textarea>
+      </div>
+
+      <!-- Tab Content 3: Live Chat Timeline -->
+      <div class="chat-section" *ngIf="activeTab === 'chat'">
+        <div class="chat-messages">
+          <div *ngFor="let msg of chatMessages" class="chat-msg">
+            <div class="msg-meta">
+              <span class="msg-sender orbitron-font">{{ msg.sender }}</span>
+              <span class="msg-time">{{ msg.time }}</span>
+            </div>
+            <p class="msg-text">{{ msg.text }}</p>
+          </div>
+        </div>
+
+        <div class="chat-input-row">
+          <input type="text" [(ngModel)]="chatInput" (keyup.enter)="sendChatMessage()" placeholder="Type chat message to session peers..." />
+          <button class="btn-purple btn-sm" (click)="sendChatMessage()">SEND</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

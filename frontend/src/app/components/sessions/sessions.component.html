@@ -1,0 +1,112 @@
+<div class="sessions-page">
+  <div class="page-header">
+    <div>
+      <h1 class="orbitron-font">AI SESSION SCHEDULER</h1>
+      <p class="subtitle">Manage, schedule, and track peer collaboration milestones</p>
+    </div>
+
+    <button class="btn-cyan" (click)="showBookingModal = true">+ SCHEDULE NEW SESSION</button>
+  </div>
+
+  <!-- Top Stat Badges -->
+  <div class="top-stat-badges">
+    <div class="stat-badge-card glass-card">
+      <span class="badge-label">TOTAL SESSIONS</span>
+      <span class="badge-value orbitron-font cyan-text">{{ stats.total || 18 }}</span>
+    </div>
+    <div class="stat-badge-card glass-card">
+      <span class="badge-label">PENDING SESSIONS</span>
+      <span class="badge-value orbitron-font orange-text">{{ stats.pending || 2 }}</span>
+    </div>
+    <div class="stat-badge-card glass-card">
+      <span class="badge-label">COMPLETED SESSIONS</span>
+      <span class="badge-value orbitron-font green-text">{{ stats.completed || 14 }}</span>
+    </div>
+  </div>
+
+  <!-- Progress Milestone Tracker -->
+  <div class="milestone-tracker glass-card">
+    <div class="tracker-header">
+      <span class="tracker-title orbitron-font">MONTHLY MENTORSHIP MILESTONE</span>
+      <span class="tracker-status">78% COMPLETED</span>
+    </div>
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" style="width: 78%;"></div>
+    </div>
+    <div class="milestone-steps">
+      <span class="step completed">✓ 5 Sessions</span>
+      <span class="step completed">✓ 10 Sessions</span>
+      <span class="step completed">✓ 15 Sessions</span>
+      <span class="step pending">🎯 20 Sessions Milestone</span>
+    </div>
+  </div>
+
+  <!-- Session List Cards -->
+  <div class="sessions-list">
+    <div *ngFor="let s of sessions" class="session-card glass-card">
+      <div class="session-main">
+        <div class="status-indicator" [class]="s.status.toLowerCase()"></div>
+        <div class="session-info">
+          <div class="topic-header">
+            <h3 class="session-topic orbitron-font">{{ s.topic }}</h3>
+            <span [class]="'status-pill ' + s.status.toLowerCase()">{{ s.status }}</span>
+          </div>
+          <p class="mentor-mentee">
+            <span class="user-avatar-badge">
+              <img [src]="getAvatarByName(s.mentorName)" class="mini-avatar-img" alt="Mentor" />
+              Mentor: <strong>{{ s.mentorName }}</strong>
+            </span>
+            <span class="avatar-divider">|</span>
+            <span class="user-avatar-badge">
+              <img [src]="getAvatarByName(s.menteeName)" class="mini-avatar-img" alt="Mentee" />
+              Mentee: <strong>{{ s.menteeName }}</strong>
+            </span>
+          </p>
+          <div class="meta-row">
+            <span class="meta-item">🕒 {{ s.scheduledAt | date:'medium' }}</span>
+            <span class="meta-item">⌛ {{ s.durationMinutes }} mins</span>
+            <a [href]="s.meetingLink" target="_blank" class="meet-link">🔗 Join Room</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="session-actions">
+        <button *ngIf="s.status === 'PENDING'" class="btn-cyan btn-sm" (click)="updateStatus(s, 'CONFIRMED')">CONFIRM</button>
+        <button *ngIf="s.status === 'CONFIRMED'" class="btn-purple btn-sm" (click)="updateStatus(s, 'COMPLETED')">MARK COMPLETED</button>
+        <button *ngIf="s.status !== 'CANCELLED' && s.status !== 'COMPLETED'" class="btn-outline btn-sm" (click)="updateStatus(s, 'CANCELLED')">CANCEL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div class="modal-overlay" *ngIf="showBookingModal">
+    <div class="modal-content glass-card">
+      <div class="modal-header">
+        <h2 class="orbitron-font">SCHEDULE SESSION</h2>
+        <button class="close-modal" (click)="showBookingModal = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Mentor Name</label>
+          <input type="text" [(ngModel)]="newSession.mentorName" class="modal-input" />
+        </div>
+        <div class="form-group">
+          <label>Topic</label>
+          <input type="text" [(ngModel)]="newSession.topic" class="modal-input" />
+        </div>
+        <div class="form-group">
+          <label>Duration (Mins)</label>
+          <input type="number" [(ngModel)]="newSession.durationMinutes" class="modal-input" />
+        </div>
+        <div class="form-group">
+          <label>Date & Time</label>
+          <input type="datetime-local" [(ngModel)]="newSession.scheduledAt" class="modal-input" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" (click)="showBookingModal = false">Cancel</button>
+        <button class="btn-purple" (click)="createSession()">BOOK SESSION</button>
+      </div>
+    </div>
+  </div>
+</div>

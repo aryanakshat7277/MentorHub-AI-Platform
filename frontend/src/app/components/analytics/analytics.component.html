@@ -1,0 +1,73 @@
+<div class="analytics-page">
+  <div class="page-header">
+    <div>
+      <h1 class="orbitron-font">MENTORSHIP PERFORMANCE ANALYTICS</h1>
+      <p class="subtitle">Weekly velocity, session completion rates, and learning distribution</p>
+    </div>
+  </div>
+
+  <!-- Key Metrics Row -->
+  <div class="metrics-row">
+    <div class="metric-card glass-card">
+      <span class="metric-label">COMPLETION RATE</span>
+      <span class="metric-value orbitron-font green-glow">96.4%</span>
+      <span class="metric-sub">↑ 3.2% vs last week</span>
+    </div>
+    <div class="metric-card glass-card">
+      <span class="metric-label">AVG FEEDBACK SCORE</span>
+      <span class="metric-value orbitron-font gold-glow">4.92 / 5.0</span>
+      <span class="metric-sub">⭐ 98 Positive Reviews</span>
+    </div>
+    <div class="metric-card glass-card">
+      <span class="metric-label">HOURS THIS MONTH</span>
+      <span class="metric-value orbitron-font cyan-glow">34 Hours</span>
+      <span class="metric-sub">↑ 8 Hours teaching</span>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <!-- Left: Weekly Session Velocity Line Chart -->
+    <div class="chart-card glass-card">
+      <div class="chart-header">
+        <h3 class="orbitron-font">📈 WEEKLY SESSION VELOCITY & XP GAIN</h3>
+        <span class="chart-badge">PAST 7 DAYS</span>
+      </div>
+
+      <div class="svg-bar-chart">
+        <div *ngFor="let p of weeklyPoints" class="bar-col">
+          <span class="bar-xp orbitron-font">+{{ p.xp }}</span>
+          <div class="bar-wrapper">
+            <div class="bar-fill" [style.height.%]="p.height"></div>
+          </div>
+          <span class="bar-day orbitron-font">{{ p.day }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Time Distribution Donut Chart -->
+    <div class="chart-card glass-card">
+      <div class="chart-header">
+        <h3 class="orbitron-font">🍩 TOPIC TIME DISTRIBUTION</h3>
+        <span class="chart-badge">DOMAIN SHARE</span>
+      </div>
+
+      <div class="donut-chart-wrapper">
+        <svg viewBox="0 0 36 36" class="donut-chart">
+          <circle cx="18" cy="18" r="15.9155" class="donut-ring"></circle>
+          <circle cx="18" cy="18" r="15.9155" class="donut-segment cyan" stroke-dasharray="40 60" stroke-dashoffset="25"></circle>
+          <circle cx="18" cy="18" r="15.9155" class="donut-segment purple" stroke-dasharray="25 75" stroke-dashoffset="85"></circle>
+          <circle cx="18" cy="18" r="15.9155" class="donut-segment green" stroke-dasharray="20 80" stroke-dashoffset="60"></circle>
+          <circle cx="18" cy="18" r="15.9155" class="donut-segment gold" stroke-dasharray="15 85" stroke-dashoffset="40"></circle>
+        </svg>
+
+        <div class="donut-legend">
+          <div *ngFor="let t of topicsDistribution" class="legend-item">
+            <span class="legend-color-dot" [style.background]="t.color"></span>
+            <span class="legend-name">{{ t.name }}</span>
+            <span class="legend-pct orbitron-font" [style.color]="t.color">{{ t.pct }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

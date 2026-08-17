@@ -1,0 +1,178 @@
+.sessions-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h1 { font-size: 24px; color: #FFF; }
+  .subtitle { color: #94A3B8; margin-top: 4px; }
+}
+
+.top-stat-badges {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+
+  .stat-badge-card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .badge-label { font-size: 11px; color: #94A3B8; font-family: var(--font-heading); }
+    .badge-value { font-size: 28px; font-weight: 800; }
+    .cyan-text { color: #00D4FF; }
+    .orange-text { color: #FB923C; }
+    .green-text { color: #4ADE80; }
+  }
+}
+
+.milestone-tracker {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .tracker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .tracker-title { font-size: 14px; color: #FFF; }
+    .tracker-status { color: #00D4FF; font-weight: 700; font-size: 12px; }
+  }
+
+  .progress-bar-container {
+    height: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 5px;
+    overflow: hidden;
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00D4FF, #A855F7);
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+      border-radius: 5px;
+    }
+  }
+
+  .milestone-steps {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    .completed { color: #4ADE80; }
+    .pending { color: #94A3B8; }
+  }
+}
+
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.session-card {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .session-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .status-indicator {
+    width: 6px;
+    height: 50px;
+    border-radius: 3px;
+    &.confirmed { background: #00D4FF; box-shadow: 0 0 10px #00D4FF; }
+    &.pending { background: #FB923C; box-shadow: 0 0 10px #FB923C; }
+    &.completed { background: #4ADE80; box-shadow: 0 0 10px #4ADE80; }
+    &.cancelled { background: #EF4444; }
+  }
+
+  .session-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    .topic-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      .session-topic { font-size: 15px; color: #FFF; }
+      .status-pill {
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 700;
+        &.confirmed { background: rgba(0, 212, 255, 0.15); color: #00D4FF; }
+        &.pending { background: rgba(251, 146, 60, 0.15); color: #FB923C; }
+        &.completed { background: rgba(74, 222, 128, 0.15); color: #4ADE80; }
+        &.cancelled { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
+      }
+    }
+
+    .mentor-mentee {
+      font-size: 12px;
+      color: #94A3B8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+
+      .user-avatar-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+
+        .mini-avatar-img {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 1px solid rgba(0, 212, 255, 0.4);
+        }
+      }
+
+      .avatar-divider {
+        color: rgba(255, 255, 255, 0.2);
+      }
+    }
+    .meta-row {
+      display: flex;
+      gap: 16px;
+      font-size: 11px;
+      color: #CBD5E1;
+      .meet-link { color: #00D4FF; text-decoration: none; &:hover { text-decoration: underline; } }
+    }
+  }
+
+  .session-actions {
+    display: flex;
+    gap: 10px;
+    .btn-sm { padding: 6px 12px; font-size: 11px; }
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(6, 9, 17, 0.7);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.modal-content {
+  width: 480px; padding: 28px; display: flex; flex-direction: column; gap: 20px;
+  .modal-header { display: flex; justify-content: space-between; h2 { font-size: 18px; color: #FFF; } .close-modal { background: none; border: none; color: #94A3B8; font-size: 18px; cursor: pointer; } }
+  .modal-body { display: flex; flex-direction: column; gap: 14px; .form-group { display: flex; flex-direction: column; gap: 4px; label { font-size: 11px; color: #94A3B8; } .modal-input { background: rgba(14, 23, 41, 0.9); border: 1px solid rgba(255, 255, 255, 0.12); padding: 10px; border-radius: 8px; color: #FFF; } } }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 12px; }
+}

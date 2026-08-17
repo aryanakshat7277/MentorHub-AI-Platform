@@ -1,0 +1,239 @@
+<div class="dashboard-page">
+  <!-- Holographic Hero Banner -->
+  <div class="hero-card glass-card">
+    <div class="hero-user-profile">
+      <!-- Clean Avatar Ring with Online Badge (Navigates to Profile) -->
+      <a routerLink="/profile" class="avatar-glow-ring" title="View Cybernetic Profile">
+        <img [src]="user.avatarUrl || 'assets/mentorhub-logo.png'" alt="Avatar" class="hero-avatar" />
+        <span class="online-badge" title="AI Net Online"></span>
+      </a>
+
+      <div class="user-meta">
+        <div class="welcome-row">
+          <span class="greeting-prefix orbitron-font">WELCOME BACK,</span>
+          <span class="level-pill orbitron-font" [class.mentee-pill]="user.role === 'MENTEE'" [class.admin-pill]="user.role === 'ADMIN'">
+            {{ user.role === 'ADMIN' ? '🛡️ SYSTEM OVERSEER' : (user.role === 'MENTEE' ? '⚡ SCHOLAR LVL ' + (user.level || 5) : '👑 MENTOR LVL ' + (user.level || 10)) }}
+          </span>
+        </div>
+        <h1 class="user-display-name orbitron-font">
+          <a routerLink="/profile" class="profile-link">{{ user.name }}</a>
+        </h1>
+
+        <!-- XP Level Progress Bar -->
+        <div class="xp-level-bar-box">
+          <div class="bar-info">
+            <span class="bar-lbl orbitron-font">LEVEL PROGRESS</span>
+            <span class="bar-val orbitron-font">{{ user.xpPoints || 4890 | number }} / {{ user.nextLevelXp || 6000 | number }} XP ({{ getXpPercentage() }}%)</span>
+          </div>
+          <div class="track">
+            <div class="fill" [style.width.%]="getXpPercentage()"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-digital-clock">
+      <div class="clock-display orbitron-font">{{ currentTime || '13:58:46' }}</div>
+      <div class="date-display">{{ currentDate }}</div>
+      <span class="status-net-pill orbitron-font">⚡ AI NET ONLINE 99.9%</span>
+    </div>
+  </div>
+
+  <!-- Top Stat Cards Grid (6-column layout) -->
+  <div class="stats-grid">
+    <div class="stat-card glass-card">
+      <div class="stat-header">
+        <span class="stat-title">TOTAL SESSIONS</span>
+        <span class="stat-badge cyan">↑ Active</span>
+      </div>
+      <div class="stat-value orbitron-font">{{ user.totalSessions || 94 }}</div>
+      <div class="sparkline-bar"><span class="bar-fill" style="width: 82%;"></span></div>
+    </div>
+
+    <div class="stat-card glass-card xp-highlighted">
+      <div class="stat-header">
+        <span class="stat-title">XP POINTS</span>
+        <span class="stat-badge green">↑ Level Up!</span>
+      </div>
+      <div class="stat-value orbitron-font purple-glow">{{ user.xpPoints || 4890 | number }}</div>
+      <div class="sparkline-bar purple"><span class="bar-fill" style="width: 88%;"></span></div>
+    </div>
+
+    <div class="stat-card glass-card">
+      <div class="stat-header">
+        <span class="stat-title">CURRENT STREAK</span>
+        <span class="stat-badge orange">🔥 On Fire</span>
+      </div>
+      <div class="stat-value orbitron-font orange-glow">{{ user.currentStreak || 32 }}d</div>
+      <div class="sparkline-bar orange"><span class="bar-fill" style="width: 90%;"></span></div>
+    </div>
+
+    <div class="stat-card glass-card">
+      <div class="stat-header">
+        <span class="stat-title">BADGES EARNED</span>
+        <span class="stat-badge cyan">↑ Collecting</span>
+      </div>
+      <div class="stat-value orbitron-font">{{ user.badgesCount || 16 }}</div>
+      <div class="sparkline-bar"><span class="bar-fill" style="width: 70%;"></span></div>
+    </div>
+
+    <div class="stat-card glass-card">
+      <div class="stat-header">
+        <span class="stat-title">{{ user.role === 'MENTEE' ? 'HOURS LEARNED' : (user.role === 'ADMIN' ? 'PLATFORM HOURS' : 'HOURS MENTORED') }}</span>
+        <span class="stat-badge green">↑ {{ user.role === 'MENTEE' ? 'Learning' : 'Teaching' }}</span>
+      </div>
+      <div class="stat-value orbitron-font green-glow">{{ user.hoursMentored || 142 }}h</div>
+      <div class="sparkline-bar green"><span class="bar-fill" style="width: 95%;"></span></div>
+    </div>
+
+    <div class="stat-card glass-card">
+      <div class="stat-header">
+        <span class="stat-title">AVG. RATING</span>
+        <span class="stat-badge gold">⭐ Excellent</span>
+      </div>
+      <div class="stat-value orbitron-font gold-glow">{{ user.rating || 5.0 }}</div>
+      <div class="sparkline-bar gold"><span class="bar-fill" style="width: 100%;"></span></div>
+    </div>
+  </div>
+
+  <!-- Mid Section: Analytics Velocity + Radial Gauges -->
+  <div class="middle-section">
+    <!-- Mentorship Velocity Wave Chart -->
+    <div class="chart-card glass-card">
+      <div class="card-header">
+        <div class="title-group">
+          <span class="chart-icon">📈</span>
+          <h2 class="orbitron-font">MENTORSHIP SYNC VELOCITY</h2>
+        </div>
+        <span class="time-range-pill">WEEKLY TREND</span>
+      </div>
+
+      <div class="svg-chart-container">
+        <svg viewBox="0 0 700 220" class="velocity-svg">
+          <defs>
+            <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00D4FF" />
+              <stop offset="50%" stop-color="#A855F7" />
+              <stop offset="100%" stop-color="#4ADE80" />
+            </linearGradient>
+
+            <linearGradient id="areaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="rgba(0, 212, 255, 0.25)" />
+              <stop offset="100%" stop-color="rgba(0, 212, 255, 0)" />
+            </linearGradient>
+          </defs>
+
+          <!-- Smooth Bezier Area Fill -->
+          <path d="M 40 180 C 140 100, 220 190, 320 130 C 420 70, 500 160, 660 50 L 660 200 L 40 200 Z" fill="url(#areaGrad)" />
+          
+          <!-- Curved Neon Line -->
+          <path d="M 40 180 C 140 100, 220 190, 320 130 C 420 70, 500 160, 660 50" fill="none" stroke="url(#waveGrad)" stroke-width="4.5" stroke-linecap="round" />
+
+          <!-- Pulsing Data Nodes -->
+          <circle cx="40" cy="180" r="5" fill="#00D4FF" />
+          <circle cx="215" cy="182" r="5" fill="#38BDF8" />
+          <circle cx="320" cy="130" r="6" fill="#A855F7" />
+          <circle cx="435" cy="85" r="7" fill="#00D4FF" />
+          <circle cx="530" cy="142" r="5" fill="#38BDF8" />
+          <circle cx="660" cy="50" r="6" fill="#4ADE80" />
+        </svg>
+
+        <div class="x-axis-labels">
+          <span>MON</span>
+          <span>TUE</span>
+          <span>WED</span>
+          <span>THU</span>
+          <span>FRI</span>
+          <span>SAT</span>
+          <span>SUN</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Radial Gauges (Goal Achievements) -->
+    <div class="radial-card glass-card">
+      <div class="card-header">
+        <div class="title-group">
+          <span class="chart-icon">🎯</span>
+          <h2 class="orbitron-font">GOAL ACHIEVEMENTS</h2>
+        </div>
+        <span class="target-pill orbitron-font">TARGET 90%+</span>
+      </div>
+
+      <div class="gauges-container">
+        <div *ngFor="let gauge of radialGauges" class="gauge-item">
+          <div class="gauge-circle-box">
+            <svg viewBox="0 0 120 120" class="gauge-svg">
+              <!-- Background Circle -->
+              <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="10" />
+              <!-- Progress Circle -->
+              <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="gauge.color" stroke-width="10" stroke-linecap="round" [attr.stroke-dasharray]="gauge.strokeDash" stroke-dashoffset="0" transform="rotate(-90 60 60)" />
+            </svg>
+            <span class="gauge-percent orbitron-font">{{ gauge.percent }}%</span>
+          </div>
+          <span class="gauge-title">{{ gauge.title }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Section: Upcoming Sessions + Cyber Radar Feed -->
+  <div class="bottom-section">
+    <!-- Upcoming Sessions List -->
+    <div class="sessions-card glass-card">
+      <div class="card-header">
+        <div class="title-group">
+          <span class="chart-icon">📅</span>
+          <h2 class="orbitron-font">UPCOMING MENTORSHIP SESSIONS</h2>
+        </div>
+        <a routerLink="/sessions" class="view-all-link">VIEW ALL →</a>
+      </div>
+
+      <div class="sessions-list">
+        <div *ngFor="let session of upcomingSessions" class="session-row">
+          <img [src]="session.avatar || 'assets/mentorhub-logo.png'" alt="Avatar" class="session-avatar" />
+          <div class="session-info">
+            <h4 class="topic-title orbitron-font">{{ session.topic }}</h4>
+            <span class="mentor-name">{{ user.role === 'MENTOR' ? ('Mentee: ' + session.mentee) : ('Mentor: ' + session.mentor) }}</span>
+          </div>
+          <div class="session-meta">
+            <span class="time-text">{{ session.time }}</span>
+            <span [class]="'status-pill ' + session.status.toLowerCase()">{{ session.status }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cyber Radar Feed -->
+    <div class="radar-card glass-card">
+      <div class="card-header">
+        <div class="title-group">
+          <span class="chart-icon">📡</span>
+          <h2 class="orbitron-font">REAL-TIME ACTIVITY RADAR</h2>
+        </div>
+        <span class="live-tag orbitron-font">● LIVE</span>
+      </div>
+
+      <div class="radar-feed-list">
+        <div *ngFor="let item of radarFeed" class="feed-item">
+          <span class="item-icon">{{ item.icon }}</span>
+          <div class="feed-content">
+            <p class="feed-text">{{ item.text }}</p>
+            <span class="feed-time">{{ item.time }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Action Floating Bar -->
+  <div class="quick-actions-bar glass-card">
+    <div class="actions-title orbitron-font">QUICK COMMANDS</div>
+    <div class="actions-buttons">
+      <a *ngFor="let action of quickActions" [routerLink]="action.route" class="action-btn">
+        <span class="act-icon">{{ action.icon }}</span>
+        <span class="act-name">{{ action.title }}</span>
+      </a>
+    </div>
+  </div>
+</div>

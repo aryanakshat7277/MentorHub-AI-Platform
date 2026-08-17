@@ -1,0 +1,125 @@
+<div class="profile-page" *ngIf="user">
+  <div class="page-header">
+    <div>
+      <h1 class="orbitron-font">MY CYBERNETIC PROFILE</h1>
+      <p class="subtitle">Personal identity, skills matrix, and peer reputation settings</p>
+    </div>
+
+    <button class="btn-cyan edit-trigger-btn" (click)="openEditModal()">
+      ✏️ EDIT PROFILE
+    </button>
+  </div>
+
+  <!-- Profile Card (View Mode) -->
+  <div class="profile-card glass-card">
+    <div class="profile-hero">
+      <div class="avatar-box" (click)="triggerProfileFileInput()" title="Click to Choose Profile Picture from System">
+        <img [src]="user.avatarUrl" alt="Avatar" class="avatar-large" />
+        <button class="avatar-edit-overlay" (click)="triggerProfileFileInput()" title="Change Avatar from Computer System">📷</button>
+        <input type="file" #profileFileInput (change)="onProfileFileSelected($event)" accept="image/*" style="display: none;" />
+      </div>
+
+      <div class="user-identity">
+        <h2 class="user-name orbitron-font">{{ user.name }}</h2>
+        <span class="user-title">{{ user.title }} &#64; {{ user.company }}</span>
+        <span class="user-email">📧 {{ user.email }}</span>
+      </div>
+
+      <div class="rep-badge glass-card">
+        <span class="rep-label">REPUTATION RATING</span>
+        <span class="rep-value orbitron-font gold-text">⭐ {{ user.rating }}</span>
+      </div>
+    </div>
+
+    <div class="profile-body">
+      <div class="info-section">
+        <div class="section-hdr">
+          <h3 class="section-title orbitron-font">BIOGRAPHY & BACKGROUND</h3>
+          <button class="quick-edit-link" (click)="openEditModal()">✏️ Edit</button>
+        </div>
+        <p class="bio-text">{{ user.bio }}</p>
+      </div>
+
+      <div class="info-section">
+        <div class="section-hdr">
+          <h3 class="section-title orbitron-font">VERIFIED SKILLS MATRIX</h3>
+          <button class="quick-edit-link" (click)="openEditModal()">✏️ Edit</button>
+        </div>
+        <div class="skills-tags">
+          <span *ngFor="let s of skillsList" class="neon-tag">{{ s }}</span>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h3 class="section-title orbitron-font">MENTORSHIP STATS SUMMARY</h3>
+        <div class="stats-mini-grid">
+          <div class="mini-stat"><span class="lbl">Total XP:</span><span class="val cyan">{{ user.xpPoints }}</span></div>
+          <div class="mini-stat"><span class="lbl">Streak:</span><span class="val orange">{{ user.currentStreak }} Days</span></div>
+          <div class="mini-stat"><span class="lbl">Hours:</span><span class="val green">{{ user.hoursMentored }}h</span></div>
+          <div class="mini-stat"><span class="lbl">Sessions:</span><span class="val purple">{{ user.totalSessions }}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Profile Glassmorphic Modal Overlay -->
+  <div class="modal-backdrop" *ngIf="isEditing" (click)="cancelEdit()"></div>
+
+  <div class="edit-modal glass-card" *ngIf="isEditing">
+    <div class="modal-header">
+      <h3 class="orbitron-font"><span class="cyan-text">✏️ EDIT</span> CYBERNETIC PROFILE</h3>
+      <button class="close-modal-btn" (click)="cancelEdit()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="orbitron-font">FULL NAME</label>
+          <input type="text" [(ngModel)]="editForm.name" class="form-control" placeholder="Enter full name..." />
+        </div>
+
+        <div class="form-group">
+          <label class="orbitron-font">PROFESSIONAL TITLE</label>
+          <input type="text" [(ngModel)]="editForm.title" class="form-control" placeholder="e.g. Full Stack AI Architect" />
+        </div>
+
+        <div class="form-group">
+          <label class="orbitron-font">ORGANIZATION / COMPANY</label>
+          <input type="text" [(ngModel)]="editForm.company" class="form-control" placeholder="e.g. MetaLab Cybernetics" />
+        </div>
+
+        <div class="form-group">
+          <label class="orbitron-font">EMAIL ADDRESS</label>
+          <input type="email" [(ngModel)]="editForm.email" class="form-control" placeholder="user@mentorhub.ai" />
+        </div>
+
+        <div class="form-group full-width">
+          <label class="orbitron-font">AVATAR PICTURE (CHOOSE FROM SYSTEM)</label>
+          <div class="system-file-picker-row">
+            <input type="text" [(ngModel)]="editForm.avatarUrl" class="form-control" placeholder="Image URL or System File Data..." />
+            <button type="button" class="btn-cyan btn-sm orbitron-font" (click)="triggerProfileFileInput()">
+              📷 CHOOSE FILE FROM SYSTEM
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label class="orbitron-font">BIOGRAPHY & BACKGROUND</label>
+          <textarea [(ngModel)]="editForm.bio" rows="3" class="form-control textarea" placeholder="Describe your engineering focus and mentoring background..."></textarea>
+        </div>
+
+        <div class="form-group full-width">
+          <label class="orbitron-font">VERIFIED SKILLS MATRIX (Comma Separated)</label>
+          <input type="text" [(ngModel)]="editForm.skills" class="form-control" placeholder="Java 21, Spring Boot 3, Angular 17, WebSockets..." />
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-outline" (click)="cancelEdit()">✕ CANCEL</button>
+      <button class="btn-cyan" (click)="saveProfile()" [disabled]="isSaving">
+        {{ isSaving ? '⏳ SAVING...' : '💾 SAVE CHANGES' }}
+      </button>
+    </div>
+  </div>
+</div>

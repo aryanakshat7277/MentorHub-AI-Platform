@@ -1,0 +1,50 @@
+<div class="gamification-page">
+  <div class="page-header">
+    <div>
+      <h1 class="orbitron-font">GAMIFICATION & LEADERBOARD</h1>
+      <p class="subtitle">Level up through peer mentoring, sessions, and continuous learning</p>
+    </div>
+  </div>
+
+  <div class="gamification-grid">
+    <!-- Left: Community Top Mentors Rank List (#1 AKSHAT ARYAN) -->
+    <div class="leaderboard-card glass-card">
+      <h2 class="section-title orbitron-font">🏆 TOP MENTORS LEADERBOARD</h2>
+
+      <div class="ranks-list">
+        <div *ngFor="let m of leaderboard; let i = index" class="rank-item" [class.top-3]="i < 3">
+          <div class="rank-position orbitron-font" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
+            #{{ i + 1 }}
+          </div>
+
+          <img [src]="m.avatarUrl || 'assets/mentorhub-logo.png'" alt="Avatar" class="rank-avatar" />
+
+          <div class="rank-details">
+            <h4 class="rank-name orbitron-font">{{ m.name }}</h4>
+            <span class="rank-role">{{ m.title }}</span>
+          </div>
+
+          <div class="rank-xp orbitron-font">
+            {{ m.xpPoints | number }} XP
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Badge Wall -->
+    <div class="badge-wall-card glass-card">
+      <h2 class="section-title orbitron-font">🎖️ BADGE WALL</h2>
+
+      <div class="badges-grid">
+        <div *ngFor="let b of badges" class="badge-item glass-card">
+          <div class="badge-icon-wrapper">
+            <span class="badge-icon">{{ b.iconUrl }}</span>
+          </div>
+          <h4 class="badge-name orbitron-font">{{ b.name }}</h4>
+          <p class="badge-desc">{{ b.description }}</p>
+          <span class="badge-xp orbitron-font">+{{ b.xpValue }} XP</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

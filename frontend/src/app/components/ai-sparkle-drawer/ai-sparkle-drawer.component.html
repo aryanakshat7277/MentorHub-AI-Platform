@@ -1,0 +1,46 @@
+<div class="drawer-overlay" *ngIf="isOpen" (click)="close()"></div>
+
+<div class="drawer-container glass-card" [class.open]="isOpen">
+  <div class="drawer-header">
+    <div class="ai-brand">
+      <span class="sparkle-icon">✨</span>
+      <div>
+        <h3 class="orbitron-font">MENTOR<span class="purple-text">AI</span> ASSISTANT</h3>
+        <span class="sub-status">Neural Copilot v3.2 Active</span>
+      </div>
+    </div>
+    <button class="close-btn" (click)="close()">✕</button>
+  </div>
+
+  <div class="drawer-body">
+    <div class="chat-messages">
+      <div *ngFor="let msg of messages" [class]="'chat-bubble ' + msg.sender">
+        <div class="bubble-header">
+          <span class="sender-tag orbitron-font">{{ msg.sender === 'ai' ? '✨ MENTOR AI' : '👤 ARYANAKSHAT7277' }}</span>
+          <span class="time-tag">{{ msg.time }}</span>
+        </div>
+        <p class="bubble-text">{{ msg.text }}</p>
+      </div>
+
+      <div class="chat-bubble ai thinking" *ngIf="isGenerating">
+        <span class="thinking-dots"><span>.</span><span>.</span><span>.</span> Computing Neural Recommendations</span>
+      </div>
+    </div>
+
+    <div class="suggested-prompts" *ngIf="messages.length < 5">
+      <span class="section-title orbitron-font">QUICK PROMPTS</span>
+      <div class="prompt-chips">
+        <button *ngFor="let p of suggestedPrompts" (click)="selectPrompt(p)" class="prompt-chip">
+          {{ p }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <div class="input-wrapper">
+      <input type="text" [(ngModel)]="userPrompt" (keyup.enter)="sendPrompt()" placeholder="Ask AI Assistant about mentors, code, or goals..." />
+      <button (click)="sendPrompt()" class="send-btn">✨ SEND</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,54 @@
+<div class="learning-path-page">
+  <div class="page-header">
+    <div>
+      <h1 class="orbitron-font">AI LEARNING PATH & ROADMAP TREE</h1>
+      <p class="subtitle">Personalized technical progression powered by skill vectors</p>
+    </div>
+  </div>
+
+  <div class="path-container">
+    <!-- Left Side: 4 Stacked Circular Progress Cards (39%, 21%, 63%, 15%) -->
+    <div class="left-cards-column">
+      <h2 class="column-title orbitron-font">ACTIVE CURRICULA</h2>
+
+      <div *ngFor="let card of circularProgressCards" class="circular-progress-card glass-card">
+        <div class="card-circle-wrapper">
+          <svg viewBox="0 0 36 36" class="circular-chart">
+            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            <path class="circle" [attr.stroke-dasharray]="card.pct + ', 100'" [style.stroke]="card.color" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            <text x="18" y="20.35" class="percentage orbitron-font">{{ card.pct }}%</text>
+          </svg>
+        </div>
+
+        <div class="card-details">
+          <div class="title-row">
+            <span class="tech-icon">{{ card.icon }}</span>
+            <h3 class="card-title orbitron-font">{{ card.title }}</h3>
+          </div>
+          <span class="status-tag" [style.color]="card.color">{{ card.status }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side: Vertical Roadmap Tree (Nodes 1, 2, 5, 6, 7, 8) -->
+    <div class="right-roadmap-column glass-card">
+      <h2 class="column-title orbitron-font">VERTICAL ROADMAP TREE</h2>
+
+      <div class="roadmap-tree">
+        <div *ngFor="let step of roadmapTree" [class]="'tree-step ' + step.status.toLowerCase()">
+          <div class="node-badge orbitron-font">
+            <span class="node-number">{{ step.node }}</span>
+          </div>
+
+          <div class="step-card">
+            <div class="step-header">
+              <h4 class="step-title orbitron-font">{{ step.title }}</h4>
+              <span class="step-status-tag">{{ step.status }}</span>
+            </div>
+            <span class="step-date">📅 {{ step.date }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,61 @@
+<header class="header-container" [class.sidebar-collapsed]="isCollapsed">
+  <div class="header-search">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="Search mentors, skills, sessions, SMART goals..." />
+    <span class="shortcut-tag">⌘K</span>
+  </div>
+
+  <div class="header-actions">
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      <span class="status-text">AI NET ONLINE</span>
+    </div>
+
+    <div class="notification-btn" title="Notifications">
+      <span class="bell-icon">🔔</span>
+      <span class="badge-count">3</span>
+    </div>
+
+    <!-- User Profile Area with Sci-Fi Dropdown Menu -->
+    <div class="user-profile-wrapper">
+      <div class="user-profile-btn" *ngIf="user" (click)="toggleDropdown($event)" title="Click for Profile & Logout Options">
+        <img [src]="user.avatarUrl || 'assets/mentorhub-logo.png'" alt="Avatar" class="avatar-img" />
+        <div class="user-info">
+          <span class="user-name orbitron-font">{{ user.name || 'AKSHAT ARYAN' }}</span>
+          <span class="user-role">{{ user.title || 'Principal AI & Full Stack Mentor' }}</span>
+        </div>
+        <span class="dropdown-chevron">{{ showDropdown ? '▲' : '▼' }}</span>
+      </div>
+
+      <!-- Futuristic Profile & Logout Dropdown Menu -->
+      <div class="profile-dropdown-menu glass-card" *ngIf="showDropdown" (click)="$event.stopPropagation()">
+        <div class="dropdown-user-header" *ngIf="user">
+          <div class="dd-title-row">
+            <span class="dd-name orbitron-font">{{ user.name }}</span>
+            <span class="dd-role-pill orbitron-font" [class.mentee]="user.role === 'MENTEE'">{{ user.role || 'MENTOR' }}</span>
+          </div>
+          <span class="dd-email">{{ user.email }}</span>
+        </div>
+
+        <div class="dropdown-divider"></div>
+
+        <a routerLink="/profile" (click)="showDropdown = false" class="dropdown-item">
+          <span class="item-icon">👤</span> My Cybernetic Profile
+        </a>
+        <a routerLink="/certificates" (click)="showDropdown = false" class="dropdown-item">
+          <span class="item-icon">🎓</span> My Certificates
+        </a>
+        <a routerLink="/login" (click)="showDropdown = false" class="dropdown-item">
+          <span class="item-icon">🔄</span> Switch Account / Role
+        </a>
+
+        <div class="dropdown-divider"></div>
+
+        <!-- LOG OUT BUTTON -->
+        <button class="dropdown-item logout-item" (click)="logout()">
+          <span class="item-icon">🚪</span> LOG OUT
+        </button>
+      </div>
+    </div>
+  </div>
+</header>

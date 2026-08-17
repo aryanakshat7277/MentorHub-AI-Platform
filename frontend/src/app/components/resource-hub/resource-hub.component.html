@@ -1,0 +1,201 @@
+<div class="resource-hub-page">
+  <div class="page-header">
+    <div>
+      <h1 class="orbitron-font">KNOWLEDGE & RESOURCE HUB</h1>
+      <p class="subtitle">Curated enterprise articles, videos, PDFs, pictures, and study guides</p>
+    </div>
+
+    <div class="header-actions">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search resources..." />
+      </div>
+
+      <!-- Upload Resource Button (Always Available for Mentors) -->
+      <button class="btn-cyan upload-btn orbitron-font" (click)="openUploadModal()">
+        📤 UPLOAD RESOURCE
+      </button>
+    </div>
+  </div>
+
+  <!-- Category Filter Pills (ALL, ARTICLE, VIDEO, PDF & DOCS, PICTURES, COURSE, BOOK) -->
+  <div class="filter-pills-row">
+    <button *ngFor="let pill of filterPills" 
+            class="filter-pill" 
+            [class.active]="selectedCategory === pill.value" 
+            (click)="selectFilter(pill.value)">
+      {{ pill.label }}
+    </button>
+  </div>
+
+  <!-- Resource Cards Grid -->
+  <div class="resources-grid">
+    <div *ngFor="let res of filteredResources" class="resource-card glass-card">
+      <div class="card-header">
+        <span [class]="'type-badge ' + (res.type ? res.type.toLowerCase() : 'article')">{{ res.type }}</span>
+        
+        <div class="top-card-actions">
+          <button class="bookmark-btn" (click)="toggleBookmark(res)">
+            {{ res.bookmarked ? '⭐ BOOKMARKED' : '☆ BOOKMARK' }}
+          </button>
+          
+          <!-- Delete Resource Button (Mentor Permission) -->
+          <button class="delete-btn" (click)="deleteResource(res.id)" title="Delete Resource (Mentor Permission)">
+            🗑️
+          </button>
+        </div>
+      </div>
+
+      <h3 class="resource-title orbitron-font">{{ res.title }}</h3>
+      <p class="resource-desc">{{ res.description }}</p>
+
+      <!-- Uploaded File Details Pill -->
+      <div class="file-info-pill" *ngIf="res.fileName">
+        <span class="file-icon">📎</span>
+        <span class="file-name">{{ res.fileName }}</span>
+      </div>
+
+      <div class="card-footer">
+        <div class="author-info">
+          <span class="author-name">By {{ res.author }}</span>
+          <span class="read-time">⏱️ {{ res.readTime }}</span>
+        </div>
+
+        <div class="footer-btn-group">
+          <!-- View / Preview Button -->
+          <button class="btn-cyan btn-sm" (click)="openPreview(res)">
+            {{ res.fileData ? '👁️ VIEW' : 'VIEW RESOURCE →' }}
+          </button>
+
+          <!-- Direct Download Button for Uploaded Files -->
+          <button class="btn-purple btn-sm download-btn" *ngIf="res.fileData" (click)="downloadResourceFile(res)">
+            📥 DOWNLOAD
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state glass-card" *ngIf="filteredResources.length === 0">
+      <span class="empty-icon">📁</span>
+      <h3 class="orbitron-font">NO RESOURCES FOUND</h3>
+      <p>No resources found matching your current filter. Click '📤 UPLOAD RESOURCE' to add pictures, PDFs, or guides.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     SCI-FI UPLOAD RESOURCE MODAL
+     ========================================================================== -->
+<div class="modal-backdrop" *ngIf="showUploadModal" (click)="closeUploadModal()"></div>
+
+<div class="upload-modal glass-card" *ngIf="showUploadModal">
+  <div class="modal-header">
+    <h2 class="orbitron-font">📤 UPLOAD KNOWLEDGE RESOURCE</h2>
+    <button class="close-modal-btn" (click)="closeUploadModal()">✕</button>
+  </div>
+
+  <div class="modal-body">
+    <div class="form-row">
+      <label class="orbitron-font">RESOURCE TITLE *</label>
+      <input type="text" [(ngModel)]="newResource.title" placeholder="e.g., Spring Boot 3 & Angular 17 Architecture Guide" />
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-row">
+        <label class="orbitron-font">RESOURCE TYPE</label>
+        <select [(ngModel)]="newResource.type">
+          <option value="PDF">PDF DOCUMENT (.pdf)</option>
+          <option value="PICTURE">PICTURE / IMAGE (.png, .jpg, .svg)</option>
+          <option value="DOCUMENT">OFFICE DOC (.docx, .txt, .zip)</option>
+          <option value="VIDEO">VIDEO (.mp4, .webm)</option>
+          <option value="ARTICLE">ARTICLE / GUIDE</option>
+          <option value="COURSE">COURSE</option>
+          <option value="BOOK">E-BOOK</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label class="orbitron-font">CATEGORY</label>
+        <select [(ngModel)]="newResource.category">
+          <option value="Backend">Backend (Java / Spring)</option>
+          <option value="Frontend">Frontend (Angular / TypeScript)</option>
+          <option value="AI/ML">AI / Machine Learning</option>
+          <option value="DevOps">DevOps & Cloud</option>
+          <option value="Database">Database & Microservices</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Drag & Drop File Input Zone -->
+    <div class="form-row">
+      <label class="orbitron-font">ATTACH FILE (PICTURE, PDF, DOC, VIDEO)</label>
+      <div class="file-dropzone" (click)="fileInput.click()">
+        <input #fileInput type="file" (change)="onFileSelected($event)" style="display: none;" accept="image/*,.pdf,.doc,.docx,.txt,.zip,.mp4" />
+        <span class="upload-icon">📁</span>
+        <span class="upload-text" *ngIf="!newResource.fileName">Click or drop file here (PDF, Pictures, Documents)</span>
+        <span class="upload-selected" *ngIf="newResource.fileName">Selected File: <strong>{{ newResource.fileName }}</strong></span>
+      </div>
+    </div>
+
+    <!-- Web Link URL (Optional) -->
+    <div class="form-row" *ngIf="!newResource.fileName">
+      <label class="orbitron-font">RESOURCE URL (OPTIONAL)</label>
+      <input type="text" [(ngModel)]="newResource.url" placeholder="https://..." />
+    </div>
+
+    <div class="form-row">
+      <label class="orbitron-font">DESCRIPTION / SUMMARY</label>
+      <textarea [(ngModel)]="newResource.description" placeholder="Brief summary of what this resource covers..."></textarea>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn-cancel" (click)="closeUploadModal()">CANCEL</button>
+    <button class="btn-cyan btn-save" (click)="submitResourceUpload()" [disabled]="isUploading">
+      <span *ngIf="!isUploading">💾 SAVE TO APP DATABASE</span>
+      <span *ngIf="isUploading">⏳ SAVING TO H2 DATABASE...</span>
+    </button>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     FILE PREVIEW MODAL
+     ========================================================================== -->
+<div class="modal-backdrop" *ngIf="showPreviewModal" (click)="closePreviewModal()"></div>
+
+<div class="preview-modal glass-card" *ngIf="showPreviewModal && selectedPreviewResource">
+  <div class="modal-header">
+    <div class="preview-title-box">
+      <span class="type-badge">{{ selectedPreviewResource.type }}</span>
+      <h2 class="orbitron-font">{{ selectedPreviewResource.title }}</h2>
+    </div>
+    <button class="close-modal-btn" (click)="closePreviewModal()">✕</button>
+  </div>
+
+  <div class="modal-body preview-body">
+    <!-- Picture Preview -->
+    <div class="image-preview-container" *ngIf="selectedPreviewResource.fileType?.includes('image') || selectedPreviewResource.type === 'PICTURE'">
+      <img [src]="selectedPreviewResource.fileData" [alt]="selectedPreviewResource.title" />
+    </div>
+
+    <!-- PDF / Document Preview -->
+    <div class="pdf-preview-container" *ngIf="selectedPreviewResource.fileType?.includes('pdf') || selectedPreviewResource.type === 'PDF'">
+      <iframe [src]="selectedPreviewResource.fileData" width="100%" height="500px" style="border: none; border-radius: 8px;"></iframe>
+    </div>
+
+    <!-- General File Text Preview -->
+    <div class="general-file-info" *ngIf="!selectedPreviewResource.fileType?.includes('image') && !selectedPreviewResource.fileType?.includes('pdf')">
+      <span class="file-big-icon">📄</span>
+      <h3 class="orbitron-font">{{ selectedPreviewResource.fileName || selectedPreviewResource.title }}</h3>
+      <p>{{ selectedPreviewResource.description }}</p>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn-cancel" (click)="closePreviewModal()">CLOSE</button>
+    <button class="btn-purple btn-save" (click)="downloadResourceFile(selectedPreviewResource)">
+      📥 DOWNLOAD FILE
+    </button>
+  </div>
+</div>

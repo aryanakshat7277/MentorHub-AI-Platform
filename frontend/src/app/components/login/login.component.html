@@ -1,0 +1,107 @@
+<div class="login-page">
+  <div class="glow-sphere sphere-1"></div>
+  <div class="glow-sphere sphere-2"></div>
+
+  <div class="login-card glass-card">
+    <div class="brand-header">
+      <div class="logo-circle">
+        <img src="assets/mentorhub-logo.png" alt="MentorHub Logo" class="brand-logo" />
+      </div>
+      <h1 class="orbitron-font">MENTOR<span class="highlight">HUB</span></h1>
+      <p class="subtitle">AUTOMATIC ROLE-BASED ACCESS GATEWAY</p>
+    </div>
+
+    <!-- Alert Messages -->
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <span>⚠️ {{ errorMessage }}</span>
+    </div>
+    <div class="alert alert-success" *ngIf="successMessage">
+      <span>{{ successMessage }}</span>
+    </div>
+
+    <!-- Auth Mode Tabs (Sign In / Register) -->
+    <div class="tab-switcher">
+      <button class="tab-btn" [class.active]="activeTab === 'login'" (click)="activeTab = 'login'">
+        SIGN IN
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'register'" (click)="activeTab = 'register'">
+        CREATE ACCOUNT
+      </button>
+    </div>
+
+    <!-- SIGN IN FORM (AUTO ROLE DETECTION) -->
+    <form (ngSubmit)="onLogin()" *ngIf="activeTab === 'login'" class="auth-form">
+      <div class="form-group">
+        <label class="orbitron-font">USER EMAIL / ACCOUNT ID</label>
+        <div class="input-wrapper">
+          <span class="input-icon">👤</span>
+          <input type="email" [(ngModel)]="email" name="email" placeholder="e.g. akshat@mentorhub.com, kriti@..., admin@..." required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="orbitron-font">ASSIGNED PASSWORD</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔒</span>
+          <input type="password" [(ngModel)]="password" name="password" placeholder="••••••••••••" required />
+        </div>
+      </div>
+
+      <button type="submit" class="btn-cyan submit-btn orbitron-font" [disabled]="isLoading">
+        <span *ngIf="!isLoading">🔑 SIGN IN & AUTO-DETECT ROLE</span>
+        <span *ngIf="isLoading">⚡ VERIFYING CREDENTIALS...</span>
+      </button>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form (ngSubmit)="onRegister()" *ngIf="activeTab === 'register'" class="auth-form">
+      <div class="form-group">
+        <label class="orbitron-font">FULL NAME</label>
+        <input type="text" [(ngModel)]="regName" name="regName" placeholder="Enter Full Name" required />
+      </div>
+
+      <div class="form-group">
+        <label class="orbitron-font">EMAIL ADDRESS</label>
+        <input type="email" [(ngModel)]="regEmail" name="regEmail" placeholder="name@mentorhub.com" required />
+      </div>
+
+      <div class="form-group">
+        <label class="orbitron-font">PASSWORD</label>
+        <input type="password" [(ngModel)]="regPassword" name="regPassword" placeholder="••••••••••••" required />
+      </div>
+
+      <div class="form-group">
+        <label class="orbitron-font">ACCOUNT ROLE</label>
+        <div class="role-selector-group">
+          <button type="button" class="role-select-pill" [class.active]="selectedRole === 'MENTOR'" (click)="selectedRole = 'MENTOR'">👑 MENTOR</button>
+          <button type="button" class="role-select-pill" [class.active]="selectedRole === 'MENTEE'" (click)="selectedRole = 'MENTEE'">⚡ MENTEE</button>
+          <button type="button" class="role-select-pill" [class.active]="selectedRole === 'ADMIN'" (click)="selectedRole = 'ADMIN'">🛡️ ADMIN</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-cyan submit-btn orbitron-font" [disabled]="isLoading">
+        🚀 REGISTER & SIGN IN
+      </button>
+    </form>
+
+    <!-- PRE-ASSIGNED ACCOUNTS MATRIX (1-CLICK ROLE DETECT) -->
+    <div class="preset-accounts-section">
+      <div class="section-title orbitron-font">PRE-ASSIGNED ROLE ACCOUNTS (1-CLICK LOG IN)</div>
+      
+      <div class="preset-cards-grid">
+        <button *ngFor="let acc of assignedAccounts" 
+                class="preset-card" 
+                [class]="'preset-' + acc.color"
+                (click)="selectPresetAccount(acc)">
+          <div class="preset-header">
+            <span class="preset-icon">{{ acc.icon }}</span>
+            <span class="preset-role orbitron-font">{{ acc.role }}</span>
+          </div>
+          <span class="preset-name">{{ acc.name }}</span>
+          <span class="preset-email">{{ acc.email }}</span>
+          <span class="preset-pass">Pass: {{ acc.pass }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

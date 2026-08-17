@@ -1,0 +1,89 @@
+<div class="jitsi-wrapper">
+  <!-- Standby Prejoin Overlay (Camera & Mic remain OFF until opened by user) -->
+  <div class="jitsi-status-overlay" *ngIf="status === 'IDLE' && !isUnsecureContext">
+    <div class="spinner-box glass-card" style="padding: 28px 36px; text-align: center; border-color: rgba(0, 240, 255, 0.4); max-width: 480px; background: rgba(4, 7, 17, 0.95);">
+      <div style="font-size: 44px; margin-bottom: 10px;">📹</div>
+      <h3 class="orbitron-font" style="font-size: 16px; color: #00F0FF; margin-bottom: 8px;">LIVE VIDEO STANDBY</h3>
+      <p style="font-size: 12px; color: #CBD5E1; margin-bottom: 20px; line-height: 1.5;">
+        Camera and microphone are currently turned <strong>OFF</strong>. Click below to open your camera and join the live video session.
+      </p>
+      <button class="btn-cyan orbitron-font" (click)="initMeeting()" style="padding: 12px 24px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 0 20px rgba(0,240,255,0.4);">
+        🎥 OPEN CAMERA & JOIN MEETING
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State Spinner Overlay (Absolute over iframe) -->
+  <div class="jitsi-status-overlay" *ngIf="status === 'LOADING'">
+    <div class="spinner-box">
+      <div class="cyber-spinner"></div>
+      <span class="status-msg orbitron-font">INITIALIZING JITSI WEBRTC ENGINE...</span>
+      <span class="sub-msg">Room: {{ roomName }}</span>
+    </div>
+  </div>
+
+  <!-- Unsecure HTTP Origin WebRTC Notice -->
+  <div class="jitsi-status-overlay error-overlay" *ngIf="isUnsecureContext">
+    <div class="error-box glass-card">
+      <span class="error-icon">🌐</span>
+      <h3 class="orbitron-font">HTTP NETWORK WEBRTC NOTICE</h3>
+      <p class="error-desc">
+        Chrome and Edge disable WebRTC camera/microphone access on plain HTTP IP addresses (<code>{{ currentHost }}</code>).
+      </p>
+      <a [href]="'https://meet.jit.si/' + roomName" target="_blank" class="btn-cyan btn-sm orbitron-font" style="text-decoration: none; padding: 10px 18px; display: inline-block; margin-top: 6px;">
+        🚀 JOIN DIRECT SECURE HTTPS VIDEO CALL
+      </a>
+      <span class="sub-msg" style="margin-top: 10px; display: block;">Or test locally on: <code>http://localhost:4200/workspace</code></span>
+    </div>
+  </div>
+
+  <!-- Error State Display -->
+  <div class="jitsi-status-overlay error-overlay" *ngIf="status === 'ERROR' && !isUnsecureContext">
+    <div class="error-box glass-card">
+      <span class="error-icon">⚠️</span>
+      <h3 class="orbitron-font">VIDEO SERVICE CONNECTION ERROR</h3>
+      <p class="error-desc">{{ errorMessage }}</p>
+      <button class="btn-cyan btn-sm" (click)="retryConnection()">🔄 RETRY CONNECTION</button>
+    </div>
+  </div>
+
+  <!-- Main Jitsi IFrame Mount Container (Always visible in DOM for 100% width/height calculation) -->
+  <div #jitsiContainer class="jitsi-iframe-container"></div>
+
+  <!-- Floating Sci-Fi Overlay Status Badge & Quick Controls -->
+  <div class="jitsi-overlay-bar" *ngIf="status === 'CONNECTED' && !isUnsecureContext">
+    <div class="overlay-left">
+      <span class="live-dot"></span>
+      <span class="status-text orbitron-font">● VIDEO CONNECTED</span>
+      <span class="room-pill orbitron-font">{{ roomName }}</span>
+    </div>
+
+    <div class="overlay-right">
+      <span class="participant-badge orbitron-font">👥 {{ participantCount }} PARTICIPANT{{ participantCount === 1 ? '' : 'S' }}</span>
+
+      <button class="overlay-btn" [class.off]="isAudioMuted" (click)="toggleAudio()" [title]="isAudioMuted ? 'Unmute Mic' : 'Mute Mic'">
+        {{ isAudioMuted ? '🎙️ OFF' : '🎙️ ON' }}
+      </button>
+
+      <button class="overlay-btn" [class.off]="isVideoMuted" (click)="toggleVideo()" [title]="isVideoMuted ? 'Turn On Cam' : 'Turn Off Cam'">
+        {{ isVideoMuted ? '📹 OFF' : '📹 ON' }}
+      </button>
+
+      <button class="overlay-btn share" [class.active]="isSharingScreen" (click)="toggleShareScreen()" title="Toggle Screen Share">
+        {{ isSharingScreen ? '🖥️ STOP' : '🖥️ SHARE' }}
+      </button>
+
+      <button class="overlay-btn" (click)="toggleTileView()" title="Toggle Grid / Speaker View">
+        {{ isTileView ? '🗂️ GRID' : '👤 SPEAKER' }}
+      </button>
+
+      <button class="overlay-btn" (click)="toggleFullscreen()" title="Toggle Fullscreen Video">
+        ⛶ FULLSCREEN
+      </button>
+
+      <button class="overlay-btn hangup" (click)="hangup()" title="Leave Meeting Call">
+        📞 LEAVE
+      </button>
+    </div>
+  </div>
+</div>

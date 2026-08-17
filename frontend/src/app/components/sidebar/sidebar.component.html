@@ -1,0 +1,29 @@
+<aside class="sidebar-container" [class.collapsed]="isCollapsed">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <img src="assets/mentorhub-logo.png" alt="MentorHub Official Logo" class="sidebar-circular-logo-img" />
+    </div>
+    <div class="brand-text" *ngIf="!isCollapsed">
+      <span class="brand-title">MENTOR<span class="cyan-glow">HUB</span></span>
+      <span class="brand-sub">GUIDANCE | GROWTH</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <ul>
+      <li *ngFor="let item of menuItems">
+        <a [routerLink]="item.route" routerLinkActive="active" class="nav-link" [title]="item.label">
+          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+          <span class="active-indicator" *ngIf="!isCollapsed"></span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="collapse-btn" (click)="toggleSidebar()" [title]="isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'">
+      <span class="arrow-icon">{{ isCollapsed ? '❯' : '❮' }}</span>
+    </button>
+  </div>
+</aside>
