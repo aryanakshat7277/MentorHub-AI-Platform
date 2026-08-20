@@ -16,7 +16,7 @@ export interface ModelRoutingConfig {
 })
 export class AiModelRouterService {
   public readonly config: ModelRoutingConfig = {
-    textModel: 'gemini-3.1-flash',
+    textModel: 'gemini-3.5-flash',
     liveModel: 'gemini-3.1-flash-live-preview',
     fallbackSttModel: 'whisper-large-v3-turbo',
     fallbackTtsModel: 'canopylabs/orpheus-v1-english'
@@ -32,6 +32,17 @@ export class AiModelRouterService {
 
   public sendTextMessage(message: string, history?: { role: string; content: string }[]): Observable<any> {
     return this.chatService.sendMessage(
+      message,
+      'GEMINI',
+      this.config.textModel,
+      'You are MentorHub AI Copilot for AKSHAT ARYAN, KRITI SAGAR, VANAJA, & PAVANI.',
+      'en-US',
+      history
+    );
+  }
+
+  public streamTextMessage(message: string, history?: { role: string; content: string }[]): Observable<any> {
+    return this.chatService.streamMessage(
       message,
       'GEMINI',
       this.config.textModel,

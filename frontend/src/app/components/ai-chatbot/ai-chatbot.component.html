@@ -19,7 +19,7 @@
           <div class="status-indicator">
             <span class="online-dot" [class.live-active]="isLiveVoiceActive"></span>
             <span class="sub-status orbitron-font">
-              {{ isLiveVoiceActive ? 'Gemini 3.1 Flash Live' : 'Gemini 3.1 Flash Active' }}
+              {{ isLiveVoiceActive ? 'Gemini 3.1 Flash Live Preview' : 'Gemini 3.6 Flash Active' }}
             </span>
           </div>
         </div>
@@ -30,7 +30,7 @@
         <button class="action-icon-btn voice-toggle-btn orbitron-font" 
                 [class.active-mode]="isLiveVoiceActive" 
                 (click)="toggleLiveVoice()" 
-                [title]="isLiveVoiceActive ? 'End Continuous Live Voice Conversation' : 'Start Continuous Live Voice Session (Gemini 3.1 Flash Live)'">
+                [title]="isLiveVoiceActive ? 'End Continuous Live Voice Conversation' : 'Start Continuous Live Voice Session (Gemini 3.1 Flash Live Preview)'">
           {{ isLiveVoiceActive ? '🔴 END VOICE' : '🟢 LIVE VOICE' }}
         </button>
 
@@ -92,10 +92,7 @@
     </div>
 
     <!-- Streaming Live Transcripts Preview -->
-    <div class="live-transcripts-container" *ngIf="isLiveVoiceActive && (liveService.inputTranscript$.value || liveService.outputTranscript$.value)">
-      <div class="live-transcript user-live" *ngIf="liveService.inputTranscript$.value">
-        <span class="tx-label orbitron-font">YOU:</span> {{ liveService.inputTranscript$.value }}
-      </div>
+    <div class="live-transcripts-container" *ngIf="isLiveVoiceActive && liveService.outputTranscript$.value">
       <div class="live-transcript ai-live" *ngIf="liveService.outputTranscript$.value">
         <span class="tx-label orbitron-font">AI:</span> {{ liveService.outputTranscript$.value }}
       </div>
@@ -103,38 +100,40 @@
 
     <!-- Chat Messages Timeline -->
     <div class="chat-messages">
-      <div *ngFor="let msg of messages; let i = index" [class]="'chat-bubble ' + msg.sender + ' animated-msg'">
-        <div class="bubble-header">
-          <div class="sender-tag-group">
-            <div class="icon-avatar" [class.user-icon]="msg.sender === 'user'">
-              <img *ngIf="msg.sender === 'user'" [src]="getUserAvatarUrl()" class="chat-user-avatar-img" alt="User Avatar" />
-              <span *ngIf="msg.sender === 'ai'">🤖</span>
+      <ng-container *ngFor="let msg of messages; let i = index">
+        <div *ngIf="msg.sender === 'user' || (msg.text && msg.text.trim().length > 0)" [class]="'chat-bubble ' + msg.sender + ' animated-msg'">
+          <div class="bubble-header">
+            <div class="sender-tag-group">
+              <div class="icon-avatar" [class.user-icon]="msg.sender === 'user'">
+                <img *ngIf="msg.sender === 'user'" [src]="getUserAvatarUrl()" class="chat-user-avatar-img" alt="User Avatar" />
+                <span *ngIf="msg.sender === 'ai'">🤖</span>
+              </div>
+              <span class="sender-tag orbitron-font">
+                {{ msg.sender === 'ai' ? 'MENTOR COPILOT (AI)' : 'YOU' }}
+              </span>
+              <span class="mode-badge orbitron-font" [class.voice-mode]="msg.mode === 'VOICE'">
+                {{ msg.mode === 'VOICE' ? '🎙️ VOICE' : '💬 TEXT' }}
+              </span>
             </div>
-            <span class="sender-tag orbitron-font">
-              {{ msg.sender === 'ai' ? 'MENTOR COPILOT (AI)' : 'YOU' }}
-            </span>
-            <span class="mode-badge orbitron-font" [class.voice-mode]="msg.mode === 'VOICE'">
-              {{ msg.mode === 'VOICE' ? '🎙️ VOICE' : '💬 TEXT' }}
-            </span>
+            <span class="time-tag">{{ msg.timestamp }}</span>
           </div>
-          <span class="time-tag">{{ msg.timestamp }}</span>
-        </div>
 
-        <div class="bubble-content" [innerHTML]="formatMarkdown(msg.text)"></div>
+          <div class="bubble-content" [innerHTML]="formatMarkdown(msg.text)"></div>
 
-        <!-- Action Toolbar per Message -->
-        <div class="bubble-actions-bar" *ngIf="msg.sender === 'ai'">
-          <button class="action-sub-btn orbitron-font" (click)="copyMessage(msg)" [title]="msg.isCopied ? 'Copied!' : 'Copy response text'">
-            {{ msg.isCopied ? '✅ COPIED' : '📋 COPY' }}
-          </button>
-          <button class="action-sub-btn orbitron-font" [class.active-react]="msg.reaction === 'like'" (click)="toggleReaction(msg, 'like')">
-            👍
-          </button>
-          <button class="action-sub-btn orbitron-font" [class.active-react]="msg.reaction === 'dislike'" (click)="toggleReaction(msg, 'dislike')">
-            👎
-          </button>
+          <!-- Action Toolbar per Message -->
+          <div class="bubble-actions-bar" *ngIf="msg.sender === 'ai'">
+            <button class="action-sub-btn orbitron-font" (click)="copyMessage(msg)" [title]="msg.isCopied ? 'Copied!' : 'Copy response text'">
+              {{ msg.isCopied ? '✅ COPIED' : '📋 COPY' }}
+            </button>
+            <button class="action-sub-btn orbitron-font" [class.active-react]="msg.reaction === 'like'" (click)="toggleReaction(msg, 'like')">
+              👍
+            </button>
+            <button class="action-sub-btn orbitron-font" [class.active-react]="msg.reaction === 'dislike'" (click)="toggleReaction(msg, 'dislike')">
+              👎
+            </button>
+          </div>
         </div>
-      </div>
+      </ng-container>
 
       <!-- Thinking Indicator -->
       <div class="chat-bubble ai thinking animated-msg" *ngIf="isGenerating">

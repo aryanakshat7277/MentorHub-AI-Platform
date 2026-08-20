@@ -115,7 +115,7 @@ export class AudioCaptureService {
         sum += dataArray[i];
       }
       const avg = sum / dataArray.length;
-      const normalized = Math.min(1, avg / 64); // Increased sensitivity threshold
+      const normalized = Math.min(1, avg / 128); // Standardized threshold
 
       this.ngZone.runOutsideAngular(() => {
         this.volumeRms$.next(normalized);

@@ -7,9 +7,8 @@ import { BehaviorSubject } from 'rxjs';
 export class AudioPlaybackService {
   private audioCtx: AudioContext | null = null;
   private analyser: AnalyserNode | null = null;
-  private currentSourceNode: AudioBufferSourceNode | null = null;
-  private audioQueue: ArrayBuffer[] = [];
-  private isPlaying = false;
+  private activeSources: AudioBufferSourceNode[] = [];
+  private nextStartTime = 0;
   private animFrameId: number | null = null;
 
   public isSpeaking$ = new BehaviorSubject<boolean>(false);
@@ -31,7 +30,7 @@ export class AudioPlaybackService {
   }
 
   /**
-   * Enqueues Base64 encoded PCM 24kHz audio or binary ArrayBuffer for immediate streaming playback
+   * Enqueues Base64 encoded PCM 24kHz audio or binary ArrayBuffer for sample-accurate WebAudio streaming playback
    */
   public enqueueBase64Pcm(base64Audio: string, sampleRate = 24000) {
     if (!base64Audio) return;
@@ -50,67 +49,60 @@ export class AudioPlaybackService {
 
   public enqueueArrayBuffer(buffer: ArrayBuffer, sampleRate = 24000) {
     this.initContextIfNeeded(sampleRate);
-    this.audioQueue.push(buffer);
+    if (!this.audioCtx) return;
 
-    if (!this.isPlaying) {
-      this.processQueue();
-    }
-  }
-
-  private async processQueue() {
-    if (this.audioQueue.length === 0 || !this.audioCtx || this.audioCtx.state === 'closed') {
-      this.isPlaying = false;
-      this.isSpeaking$.next(false);
-      this.outputVolumeRms$.next(0);
-      return;
-    }
-
-    this.isPlaying = true;
-    this.isSpeaking$.next(true);
-
-    const chunk = this.audioQueue.shift()!;
     try {
-      const audioBuffer = this.pcm16ToAudioBuffer(chunk, this.audioCtx, 24000);
-      
-      this.currentSourceNode = this.audioCtx.createBufferSource();
-      this.currentSourceNode.buffer = audioBuffer;
-      
+      const audioBuffer = this.pcm16ToAudioBuffer(buffer, this.audioCtx, sampleRate);
+      const source = this.audioCtx.createBufferSource();
+      source.buffer = audioBuffer;
+
       if (this.analyser) {
-        this.currentSourceNode.connect(this.analyser);
+        source.connect(this.analyser);
       } else {
-        this.currentSourceNode.connect(this.audioCtx.destination);
+        source.connect(this.audioCtx.destination);
       }
 
+      const currentTime = this.audioCtx.currentTime;
+      if (this.nextStartTime < currentTime) {
+        this.nextStartTime = currentTime + 0.03; // 30ms buffer jitter compensation
+      }
+
+      source.start(this.nextStartTime);
+      this.nextStartTime += audioBuffer.duration;
+
+      this.activeSources.push(source);
+      this.isSpeaking$.next(true);
       this.startVolumeMonitoring();
 
-      this.currentSourceNode.onended = () => {
-        this.currentSourceNode = null;
-        this.processQueue();
+      source.onended = () => {
+        const idx = this.activeSources.indexOf(source);
+        if (idx !== -1) {
+          this.activeSources.splice(idx, 1);
+        }
+        if (this.activeSources.length === 0 && this.audioCtx && this.audioCtx.currentTime >= this.nextStartTime - 0.05) {
+          this.isSpeaking$.next(false);
+          this.outputVolumeRms$.next(0);
+        }
       };
 
-      this.currentSourceNode.start(0);
-
     } catch (err) {
-      console.warn('AudioPlaybackService: Audio chunk decoding error:', err);
-      this.processQueue();
+      console.warn('AudioPlaybackService: Audio chunk scheduling error:', err);
     }
   }
 
   /**
-   * Immediate Barge-in / Interruption: Stops active playback and flushes queue instantly (< 10ms)
+   * Immediate Barge-in / Interruption: Stops active playback and flushes hardware queue instantly (< 10ms)
    */
   public interrupt() {
-    this.audioQueue = [];
-
-    if (this.currentSourceNode) {
+    this.activeSources.forEach(source => {
       try {
-        this.currentSourceNode.stop(0);
-        this.currentSourceNode.disconnect();
+        source.stop(0);
+        source.disconnect();
       } catch (e) {}
-      this.currentSourceNode = null;
-    }
+    });
+    this.activeSources = [];
+    this.nextStartTime = 0;
 
-    this.isPlaying = false;
     this.isSpeaking$.next(false);
     this.outputVolumeRms$.next(0);
 
@@ -124,7 +116,7 @@ export class AudioPlaybackService {
     const dataArray = new Uint8Array(32);
 
     const updateVolume = () => {
-      if (!this.isPlaying || !this.analyser) {
+      if (this.activeSources.length === 0 || !this.analyser) {
         this.outputVolumeRms$.next(0);
         return;
       }

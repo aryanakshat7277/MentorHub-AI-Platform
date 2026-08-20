@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -29,7 +29,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   isMaximized = false;
   selectedProvider = 'GEMINI';
-  selectedModel = 'gemini-3.1-flash';
+  selectedModel = 'gemini-2.5-flash';
 
   userInput = '';
   isGenerating = false;
@@ -59,9 +59,9 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       id: 'msg-1',
       sender: 'ai',
       avatar: 'AI',
-      text: 'Greetings! I am the **MentorHub AI Copilot** (Gemini 3.1 Flash).\n\nAsk me code questions in text chat, or click **🟢 LIVE VOICE** for a continuous, real-time voice conversation with barge-in interruption support!',
+      text: 'Greetings! I am the **MentorHub AI Copilot** (Gemini 2.5 Flash).\n\nAsk me code questions in text chat, or click **🟢 LIVE VOICE** for a continuous, real-time voice conversation with barge-in interruption support!',
       provider: 'GEMINI',
-      model: 'gemini-3.1-flash',
+      model: 'gemini-2.5-flash',
       mode: 'TEXT',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
@@ -72,7 +72,8 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     public modelRouter: AiModelRouterService,
     public liveService: GeminiLiveService,
     public audioCapture: AudioCaptureService,
-    public audioPlayback: AudioPlaybackService
+    public audioPlayback: AudioPlaybackService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -197,6 +198,12 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   private processVoiceQuery(queryText: string) {
+    // Only send voice transcript to text API during fallback mode.
+    // When Gemini Live is connected natively, audio responses come via WebSocket.
+    if (!this.liveService.isFallbackMode) {
+      return;
+    }
+
     if (this.voiceQuerySub) this.voiceQuerySub.unsubscribe();
 
     const historyPayload = this.buildHistoryPayload();
@@ -212,7 +219,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
           avatar: 'AI',
           text: aiResponseText,
           provider: res.provider || 'GEMINI',
-          model: res.model || 'gemini-3.1-flash',
+          model: res.model || 'gemini-3.6-flash',
           mode: 'VOICE',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         });
@@ -289,27 +296,44 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     const historyPayload = this.buildHistoryPayload();
 
-    this.textChatSub = this.modelRouter.sendTextMessage(query, historyPayload).subscribe({
+    // Create a placeholder message for the AI response
+    const aiMessageId = 'msg-' + Date.now();
+    const aiMessage: LiveChatMessage = {
+      id: aiMessageId,
+      sender: 'ai',
+      avatar: 'AI',
+      text: '',
+      provider: 'GEMINI',
+      model: 'gemini-3.6-flash',
+      mode: 'TEXT',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    this.messages.push(aiMessage);
+    this.scrollToBottom();
+
+    this.textChatSub = this.modelRouter.streamTextMessage(query, historyPayload).subscribe({
       next: (res) => {
-        this.isGenerating = false;
-        this.textChatSub = null;
+        // As chunks arrive, append them to the aiMessage
+        if (res && res.text) {
+          aiMessage.text += res.text;
+          
+          if (res.provider) aiMessage.provider = res.provider;
+          if (res.model) aiMessage.model = res.model;
 
-        const aiResponseText = res.response || res.message || 'I have processed your request.';
-
-        this.messages.push({
-          id: 'msg-' + Date.now(),
-          sender: 'ai',
-          avatar: 'AI',
-          text: aiResponseText,
-          provider: res.provider || 'GEMINI',
-          model: res.model || 'gemini-3.1-flash',
-          mode: 'TEXT',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        });
-
-        this.scrollToBottom();
+          // Force view update if necessary, but Angular array reference mutates fine
+          this.cdr.detectChanges();
+          this.scrollToBottom();
+        }
       },
       error: () => {
+        this.isGenerating = false;
+        this.textChatSub = null;
+        if (!aiMessage.text) {
+          aiMessage.text = "I'm unable to reach the AI server right now. Please try again.";
+        }
+        this.scrollToBottom();
+      },
+      complete: () => {
         this.isGenerating = false;
         this.textChatSub = null;
         this.scrollToBottom();

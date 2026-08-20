@@ -24,7 +24,7 @@ spring:
         format_sql: true
 
 jwt:
-  secret: ${JWT_SECRET:YOUR_SECURE_JWT_SECRET_KEY_HERE_MIN_64_CHARS}
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
 
 piston:
   base-url: ${PISTON_BASE_URL:http://localhost:2000}
@@ -38,15 +38,16 @@ piston:
 
 ai:
   gemini:
-    api-key: ${AI_GEMINI_KEY:YOUR_GEMINI_API_KEY}
-    text-model: ${AI_GEMINI_TEXT_MODEL:gemini-3.1-flash}
+    api-key: ${AI_GEMINI_KEY:}
+    fallback-api-key: ${AI_GEMINI_FALLBACK_KEY:}
+    text-model: ${AI_GEMINI_TEXT_MODEL:gemini-2.5-flash}
     live-model: ${AI_GEMINI_LIVE_MODEL:gemini-3.1-flash-live-preview}
   groq:
-    api-key: ${AI_GROQ_KEY:YOUR_GROQ_API_KEY}
+    api-key: ${AI_GROQ_KEY:}
     stt-model: ${AI_GROQ_STT_MODEL:whisper-large-v3-turbo}
     tts-model: ${AI_GROQ_TTS_MODEL:canopylabs/orpheus-v1-english}
   deepseek:
-    api-key: ${AI_DEEPSEEK_KEY:YOUR_DEEPSEEK_API_KEY}
+    api-key: ${AI_DEEPSEEK_KEY:}
 
 logging:
   level:
