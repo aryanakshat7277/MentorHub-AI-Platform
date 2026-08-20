@@ -8,6 +8,10 @@
 *.pem
 *.p12
 *.pfx
+application-local.yml
+application-*.yml
+backend/src/main/resources/application-local.yml
+backend/src/main/resources/application-*.yml
 
 # ==========================================
 # Database Storage & Local Runtime Data
