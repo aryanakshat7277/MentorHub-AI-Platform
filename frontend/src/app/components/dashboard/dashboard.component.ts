@@ -41,12 +41,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   radarFeed: any[] = [];
 
   quickActions = [
-    { title: 'Goal Tracker', route: '/goals', icon: '🎯', color: '#38BDF8', desc: 'S.M.A.R.T Tracking' },
-    { title: 'Book Session', route: '/sessions', icon: '📅', color: '#00D4FF', desc: 'Schedule 1-on-1' },
-    { title: 'Analytics', route: '/analytics', icon: '📈', color: '#818CF8', desc: 'Velocity Metrics' },
-    { title: 'Leaderboard', route: '/gamification', icon: '🏆', color: '#F59E0B', desc: 'XP & Badges' },
-    { title: 'Resource Hub', route: '/resource-hub', icon: '📚', color: '#A855F7', desc: 'Study Guides' },
-    { title: 'Live Workspace', route: '/workspace', icon: '💻', color: '#10B981', desc: 'Real Compiler' }
+    { title: 'Goal Tracker', route: '/goals', icon: '🎯', hotkey: 'G', color: '#DE7048', desc: 'S.M.A.R.T Tracking' },
+    { title: 'Book Session', route: '/sessions', icon: '📅', hotkey: 'S', color: '#B35E17', desc: 'Schedule 1-on-1' },
+    { title: 'Analytics', route: '/analytics', icon: '📈', hotkey: 'A', color: '#2A5A3D', desc: 'Velocity Metrics' },
+    { title: 'Leaderboard', route: '/gamification', icon: '🏆', hotkey: 'L', color: '#D4AF37', desc: 'XP & Badges' },
+    { title: 'Resource Hub', route: '/resource-hub', icon: '📚', hotkey: 'R', color: '#8E3013', desc: 'Study Guides' },
+    { title: 'Live Workspace', route: '/workspace', icon: '💻', hotkey: 'W', color: '#1B4D3E', desc: 'Real Compiler' },
+    { title: 'Certificates', route: '/certificates', icon: '📜', hotkey: 'C', color: '#AA7A1E', desc: 'Verified QR' },
+    { title: 'My Profile', route: '/profile', icon: '👤', hotkey: 'P', color: '#663914', desc: 'Skills Matrix' }
   ];
 
   constructor(private apiService: ApiService) {
@@ -119,9 +121,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     if (role === 'ADMIN') {
       this.radialGauges = [
-        { title: 'System Uptime', percent: 99, color: '#00D4FF', strokeDash: '310, 314' },
-        { title: 'Platform Security', percent: 100, color: '#4ADE80', strokeDash: '314, 314' },
-        { title: 'Active AI Nodes', percent: 94, color: '#A855F7', strokeDash: '295, 314' }
+        { title: 'System Uptime', percent: 99, color: '#A63B19', strokeDash: '310, 314' },
+        { title: 'Platform Security', percent: 100, color: '#2A5A3D', strokeDash: '314, 314' },
+        { title: 'Active AI Nodes', percent: 94, color: '#B35E17', strokeDash: '295, 314' }
       ];
 
       this.upcomingSessions = [
@@ -138,9 +140,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       ];
     } else if (role === 'MENTOR') {
       this.radialGauges = [
-        { title: 'Mentorship Velocity', percent: 95, color: '#00D4FF', strokeDash: '298, 314' },
-        { title: 'Code Review Score', percent: 88, color: '#A855F7', strokeDash: '276, 314' },
-        { title: 'Peer Leadership', percent: 98, color: '#4ADE80', strokeDash: '308, 314' }
+        { title: 'Mentorship Velocity', percent: 95, color: '#A63B19', strokeDash: '298, 314' },
+        { title: 'Code Review Score', percent: 88, color: '#B35E17', strokeDash: '276, 314' },
+        { title: 'Peer Leadership', percent: 98, color: '#2A5A3D', strokeDash: '308, 314' }
       ];
 
       this.upcomingSessions = [
@@ -158,9 +160,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     } else {
       // MENTEE (KRITI SAGAR / PAVANI / VANAJA)
       this.radialGauges = [
-        { title: 'Curriculum Progress', percent: 82, color: '#00D4FF', strokeDash: '257, 314' },
-        { title: 'Assignment Score', percent: 94, color: '#4ADE80', strokeDash: '295, 314' },
-        { title: 'Streak Power', percent: 88, color: '#F59E0B', strokeDash: '276, 314' }
+        { title: 'Curriculum Progress', percent: 82, color: '#A63B19', strokeDash: '257, 314' },
+        { title: 'Assignment Score', percent: 94, color: '#2A5A3D', strokeDash: '295, 314' },
+        { title: 'Streak Power', percent: 88, color: '#B35E17', strokeDash: '276, 314' }
       ];
 
       this.upcomingSessions = [

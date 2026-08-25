@@ -1,111 +1,287 @@
 <div class="sessions-page">
-  <div class="page-header">
-    <div>
-      <h1 class="orbitron-font">AI SESSION SCHEDULER</h1>
-      <p class="subtitle">Manage, schedule, and track peer collaboration milestones</p>
+  <!-- Page Header with 3D Seal and Action Button -->
+  <div class="page-header-row">
+    <div class="header-branding">
+      <div class="gold-seal-emboss header-seal" title="AI Mentorship Session Scheduler">
+        <span class="seal-glyph">📅</span>
+      </div>
+      <div>
+        <div class="title-with-pill">
+          <h1 class="serif-title">AI SESSION SCHEDULER</h1>
+          <span class="status-pill active-webrtc-pill">⚡ WEBRTC MATRIX ACTIVE</span>
+        </div>
+        <p class="subtitle serif-title">Manage, schedule, and track real-time peer mentorship milestones</p>
+      </div>
     </div>
 
-    <button class="btn-cyan" (click)="showBookingModal = true">+ SCHEDULE NEW SESSION</button>
+    <button class="btn-primary schedule-session-btn tactile-btn-3d serif-title" (click)="showBookingModal = true">
+      <span class="btn-icon">✨</span>
+      <span>+ SCHEDULE NEW SESSION</span>
+      <span class="shine-sweep"></span>
+    </button>
   </div>
 
-  <!-- Top Stat Badges -->
-  <div class="top-stat-badges">
-    <div class="stat-badge-card glass-card">
-      <span class="badge-label">TOTAL SESSIONS</span>
-      <span class="badge-value orbitron-font cyan-text">{{ stats.total || 18 }}</span>
+  <!-- Top Stat Badges (4-column 3D Grid with Mini Gauges) -->
+  <div class="top-stat-badges stat-cards-stagger">
+    <div class="stat-badge-card clay-panel elevated-card-3d">
+      <div class="grid-watermark"></div>
+      <div class="stat-badge-header">
+        <span class="badge-label serif-title">TOTAL SESSIONS</span>
+        <span class="stat-pill-badge cyan pulse-badge">● Total</span>
+      </div>
+      <div class="stat-body-row">
+        <span class="badge-value cyan-text serif-title">{{ stats.total || 18 }}</span>
+        <div class="mini-gauge-wrap">
+          <svg viewBox="0 0 36 36" class="stat-mini-svg">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--bg-surface-sunken)" stroke-width="3.5" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--accent-terracotta)" stroke-width="3.5" stroke-dasharray="90, 100" stroke-linecap="round" />
+          </svg>
+          <span class="mini-gauge-icon float-icon">🎯</span>
+        </div>
+      </div>
+      <div class="sparkline-bar debossed-bar"><span class="bar-fill animated-bar-fill" style="width: 90%;"></span></div>
     </div>
-    <div class="stat-badge-card glass-card">
-      <span class="badge-label">PENDING SESSIONS</span>
-      <span class="badge-value orbitron-font orange-text">{{ stats.pending || 2 }}</span>
+
+    <div class="stat-badge-card clay-panel elevated-card-3d">
+      <div class="grid-watermark"></div>
+      <div class="stat-badge-header">
+        <span class="badge-label serif-title">CONFIRMED SESSIONS</span>
+        <span class="stat-pill-badge green pulse-badge">✓ Ready</span>
+      </div>
+      <div class="stat-body-row">
+        <span class="badge-value green-text serif-title">{{ stats.confirmed || 4 }}</span>
+        <div class="mini-gauge-wrap">
+          <svg viewBox="0 0 36 36" class="stat-mini-svg">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--bg-surface-sunken)" stroke-width="3.5" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--accent-forest)" stroke-width="3.5" stroke-dasharray="75, 100" stroke-linecap="round" />
+          </svg>
+          <span class="mini-gauge-icon float-icon">⚡</span>
+        </div>
+      </div>
+      <div class="sparkline-bar green debossed-bar"><span class="bar-fill animated-bar-fill" style="width: 75%;"></span></div>
     </div>
-    <div class="stat-badge-card glass-card">
-      <span class="badge-label">COMPLETED SESSIONS</span>
-      <span class="badge-value orbitron-font green-text">{{ stats.completed || 14 }}</span>
+
+    <div class="stat-badge-card clay-panel elevated-card-3d">
+      <div class="grid-watermark"></div>
+      <div class="stat-badge-header">
+        <span class="badge-label serif-title">PENDING APPROVAL</span>
+        <span class="stat-pill-badge orange pulse-badge">⏳ Queue</span>
+      </div>
+      <div class="stat-body-row">
+        <span class="badge-value orange-text serif-title">{{ stats.pending || 2 }}</span>
+        <div class="mini-gauge-wrap">
+          <svg viewBox="0 0 36 36" class="stat-mini-svg">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--bg-surface-sunken)" stroke-width="3.5" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--accent-amber)" stroke-width="3.5" stroke-dasharray="35, 100" stroke-linecap="round" />
+          </svg>
+          <span class="mini-gauge-icon float-icon">🕒</span>
+        </div>
+      </div>
+      <div class="sparkline-bar orange debossed-bar"><span class="bar-fill animated-bar-fill" style="width: 35%;"></span></div>
+    </div>
+
+    <div class="stat-badge-card clay-panel elevated-card-3d">
+      <div class="grid-watermark"></div>
+      <div class="stat-badge-header">
+        <span class="badge-label serif-title">COMPLETED SESSIONS</span>
+        <span class="stat-pill-badge gold pulse-badge">👑 Mastered</span>
+      </div>
+      <div class="stat-body-row">
+        <span class="badge-value gold-text serif-title">{{ stats.completed || 12 }}</span>
+        <div class="mini-gauge-wrap">
+          <svg viewBox="0 0 36 36" class="stat-mini-svg">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--bg-surface-sunken)" stroke-width="3.5" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#D4AF37" stroke-width="3.5" stroke-dasharray="95, 100" stroke-linecap="round" />
+          </svg>
+          <span class="mini-gauge-icon float-icon">🏆</span>
+        </div>
+      </div>
+      <div class="sparkline-bar gold debossed-bar"><span class="bar-fill animated-bar-fill" style="width: 95%;"></span></div>
     </div>
   </div>
 
-  <!-- Progress Milestone Tracker -->
-  <div class="milestone-tracker glass-card">
+  <!-- Progress Milestone Tracker (3D Studio Panel) -->
+  <div class="milestone-tracker clay-panel elevated-card-3d">
+    <div class="tracker-particles-bg">
+      <div class="ambient-orbit orbit-1"></div>
+      <div class="ambient-orbit orbit-2"></div>
+    </div>
+
     <div class="tracker-header">
-      <span class="tracker-title orbitron-font">MONTHLY MENTORSHIP MILESTONE</span>
-      <span class="tracker-status">78% COMPLETED</span>
+      <div class="tracker-title-col">
+        <div class="tracker-tag-row">
+          <span class="cadence-badge serif-title">📈 MONTHLY TARGET TRAJECTORY</span>
+          <span class="velocity-badge pulse-badge">● HIGH CADENCE</span>
+        </div>
+        <h3 class="tracker-title serif-title">MONTHLY MENTORSHIP MILESTONE MATRIX</h3>
+      </div>
+      <div class="tracker-status-dial">
+        <span class="tracker-pct serif-title">78%</span>
+        <span class="tracker-pct-lbl serif-title">COMPLETED</span>
+      </div>
     </div>
-    <div class="progress-bar-container">
-      <div class="progress-bar-fill" style="width: 78%;"></div>
+
+    <div class="progress-bar-container debossed-track">
+      <div class="progress-bar-fill animated-bar-fill" style="width: 78%;">
+        <div class="shine-sweep-bar"></div>
+        <div class="comet-node"></div>
+      </div>
     </div>
-    <div class="milestone-steps">
-      <span class="step completed">✓ 5 Sessions</span>
-      <span class="step completed">✓ 10 Sessions</span>
-      <span class="step completed">✓ 15 Sessions</span>
-      <span class="step pending">🎯 20 Sessions Milestone</span>
+
+    <div class="milestone-steps-grid">
+      <div class="milestone-node completed">
+        <div class="node-seal-circle">✓</div>
+        <div class="node-info">
+          <span class="node-title serif-title">5 Sessions</span>
+          <span class="node-sub serif-title">Bronze Tier</span>
+        </div>
+      </div>
+
+      <div class="milestone-node completed">
+        <div class="node-seal-circle">✓</div>
+        <div class="node-info">
+          <span class="node-title serif-title">10 Sessions</span>
+          <span class="node-sub serif-title">Silver Tier</span>
+        </div>
+      </div>
+
+      <div class="milestone-node completed">
+        <div class="node-seal-circle">✓</div>
+        <div class="node-info">
+          <span class="node-title serif-title">15 Sessions</span>
+          <span class="node-sub serif-title">Gold Tier</span>
+        </div>
+      </div>
+
+      <div class="milestone-node pending current-target">
+        <div class="node-seal-circle target-pulse">🎯</div>
+        <div class="node-info">
+          <span class="node-title serif-title">20 Sessions</span>
+          <span class="node-sub serif-title">Mastery Crown</span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Session List Cards -->
-  <div class="sessions-list">
-    <div *ngFor="let s of sessions" class="session-card glass-card">
+  <!-- Session List Cards with 3D Clay Skeuomorphic Layout -->
+  <div class="sessions-list list-stagger">
+    <div *ngFor="let s of sessions" class="session-card clay-panel elevated-card-3d" [class.in-progress-active]="s.status === 'CONFIRMED'">
       <div class="session-main">
-        <div class="status-indicator" [class]="s.status.toLowerCase()"></div>
+        <div class="status-indicator-bar" [class]="s.status.toLowerCase()"></div>
+
         <div class="session-info">
           <div class="topic-header">
-            <h3 class="session-topic orbitron-font">{{ s.topic }}</h3>
-            <span [class]="'status-pill ' + s.status.toLowerCase()">{{ s.status }}</span>
+            <div class="topic-title-wrap">
+              <h3 class="session-topic serif-title">{{ s.topic }}</h3>
+              <span class="session-id-tag serif-title">#MH-{{ s.id || 101 }}</span>
+            </div>
+            <span [class]="'status-pill ' + s.status.toLowerCase() + ' serif-title'">
+              {{ s.status === 'CONFIRMED' ? '⚡ CONFIRMED' : (s.status === 'PENDING' ? '⏳ PENDING APPROVAL' : (s.status === 'COMPLETED' ? '✓ COMPLETED' : '✕ CANCELLED')) }}
+            </span>
           </div>
-          <p class="mentor-mentee">
-            <span class="user-avatar-badge">
-              <img [src]="getAvatarByName(s.mentorName)" class="mini-avatar-img" alt="Mentor" />
-              Mentor: <strong>{{ s.mentorName }}</strong>
-            </span>
-            <span class="avatar-divider">|</span>
-            <span class="user-avatar-badge">
-              <img [src]="getAvatarByName(s.menteeName)" class="mini-avatar-img" alt="Mentee" />
-              Mentee: <strong>{{ s.menteeName }}</strong>
-            </span>
-          </p>
-          <div class="meta-row">
-            <span class="meta-item">🕒 {{ s.scheduledAt | date:'medium' }}</span>
-            <span class="meta-item">⌛ {{ s.durationMinutes }} mins</span>
-            <a [href]="s.meetingLink" target="_blank" class="meet-link">🔗 Join Room</a>
+
+          <!-- Dual Mentor & Mentee Avatars Row -->
+          <div class="mentor-mentee-roster">
+            <div class="user-avatar-badge-card">
+              <div class="avatar-crest-container gold-rim">
+                <img [src]="getAvatarByName(s.mentorName)" class="mini-avatar-img" alt="Mentor" />
+                <span class="avatar-online-beacon"></span>
+              </div>
+              <div class="user-meta-info">
+                <span class="role-lbl serif-title">👑 MENTOR</span>
+                <span class="user-name serif-title">{{ s.mentorName }}</span>
+              </div>
+            </div>
+
+            <div class="roster-sync-icon">⚡</div>
+
+            <div class="user-avatar-badge-card">
+              <div class="avatar-crest-container terracotta-rim">
+                <img [src]="getAvatarByName(s.menteeName)" class="mini-avatar-img" alt="Mentee" />
+                <span class="avatar-online-beacon"></span>
+              </div>
+              <div class="user-meta-info">
+                <span class="role-lbl serif-title">🎓 MENTEE</span>
+                <span class="user-name serif-title">{{ s.menteeName }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metadata Telemetry Well -->
+          <div class="meta-row debossed-well">
+            <span class="meta-item serif-title">🕒 {{ s.scheduledAt | date:'medium' }}</span>
+            <span class="meta-item serif-title">⌛ {{ s.durationMinutes || 60 }} mins duration</span>
+            <a [href]="s.meetingLink || 'http://localhost:4200/workspace'" target="_blank" class="meet-link-btn tactile-btn-3d serif-title">
+              <span class="video-icon">🎥</span>
+              <span>JOIN WEBRTC ROOM →</span>
+            </a>
           </div>
         </div>
       </div>
 
       <div class="session-actions">
-        <button *ngIf="s.status === 'PENDING'" class="btn-cyan btn-sm" (click)="updateStatus(s, 'CONFIRMED')">CONFIRM</button>
-        <button *ngIf="s.status === 'CONFIRMED'" class="btn-purple btn-sm" (click)="updateStatus(s, 'COMPLETED')">MARK COMPLETED</button>
-        <button *ngIf="s.status !== 'CANCELLED' && s.status !== 'COMPLETED'" class="btn-outline btn-sm" (click)="updateStatus(s, 'CANCELLED')">CANCEL</button>
+        <button *ngIf="s.status === 'PENDING'" class="btn-primary btn-sm confirm-btn tactile-btn-3d serif-title" (click)="updateStatus(s, 'CONFIRMED')">
+          <span>✓ CONFIRM SESSION</span>
+        </button>
+        <button *ngIf="s.status === 'CONFIRMED'" class="btn-primary btn-sm complete-btn tactile-btn-3d serif-title" (click)="updateStatus(s, 'COMPLETED')">
+          <span>🏆 MARK COMPLETED</span>
+        </button>
+        <button *ngIf="s.status !== 'CANCELLED' && s.status !== 'COMPLETED'" class="btn-outline btn-sm cancel-btn tactile-btn-3d serif-title" (click)="updateStatus(s, 'CANCELLED')">
+          <span>✕ CANCEL</span>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Booking Modal -->
+  <!-- Booking Modal (3D Skeuomorphic Studio Dialog) -->
   <div class="modal-overlay" *ngIf="showBookingModal">
-    <div class="modal-content glass-card">
+    <div class="modal-content clay-panel elevated-modal-3d">
       <div class="modal-header">
-        <h2 class="orbitron-font">SCHEDULE SESSION</h2>
-        <button class="close-modal" (click)="showBookingModal = false">✕</button>
+        <div class="modal-title-wrap">
+          <div class="modal-seal-badge">📅</div>
+          <div>
+            <h2 class="serif-title">SCHEDULE MENTORSHIP SESSION</h2>
+            <p class="modal-sub serif-title">Book 1-on-1 WebRTC video & collaborative IDE peer review</p>
+          </div>
+        </div>
+        <button class="close-modal tactile-btn-3d" (click)="showBookingModal = false">✕</button>
       </div>
+
       <div class="modal-body">
         <div class="form-group">
-          <label>Mentor Name</label>
-          <input type="text" [(ngModel)]="newSession.mentorName" class="modal-input" />
+          <label class="serif-title">SELECT MENTOR</label>
+          <div class="input-wrapper">
+            <input type="text" [(ngModel)]="newSession.mentorName" class="modal-input inset-input-3d" placeholder="e.g. AKSHAT ARYAN, KRITI SAGAR, PAVANI, VANAJA" />
+          </div>
         </div>
+
         <div class="form-group">
-          <label>Topic</label>
-          <input type="text" [(ngModel)]="newSession.topic" class="modal-input" />
+          <label class="serif-title">MENTORSHIP TOPIC / CURRICULUM</label>
+          <div class="input-wrapper">
+            <input type="text" [(ngModel)]="newSession.topic" class="modal-input inset-input-3d" placeholder="e.g. Spring Boot Microservices & Reactive Angular UI" />
+          </div>
         </div>
+
         <div class="form-group">
-          <label>Duration (Mins)</label>
-          <input type="number" [(ngModel)]="newSession.durationMinutes" class="modal-input" />
+          <label class="serif-title">ESTIMATED DURATION (MINUTES)</label>
+          <div class="input-wrapper">
+            <input type="number" [(ngModel)]="newSession.durationMinutes" class="modal-input inset-input-3d" />
+          </div>
         </div>
+
         <div class="form-group">
-          <label>Date & Time</label>
-          <input type="datetime-local" [(ngModel)]="newSession.scheduledAt" class="modal-input" />
+          <label class="serif-title">TARGET DATE & TIME</label>
+          <div class="input-wrapper">
+            <input type="datetime-local" [(ngModel)]="newSession.scheduledAt" class="modal-input inset-input-3d" />
+          </div>
         </div>
       </div>
+
       <div class="modal-footer">
-        <button class="btn-outline" (click)="showBookingModal = false">Cancel</button>
-        <button class="btn-purple" (click)="createSession()">BOOK SESSION</button>
+        <button class="btn-outline tactile-btn-3d serif-title" (click)="showBookingModal = false">CANCEL</button>
+        <button class="btn-primary create-confirm-btn tactile-btn-3d serif-title" (click)="createSession()">
+          <span>✓ CONFIRM & BOOK SESSION</span>
+        </button>
       </div>
     </div>
   </div>

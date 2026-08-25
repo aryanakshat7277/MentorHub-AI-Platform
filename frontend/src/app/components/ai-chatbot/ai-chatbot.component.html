@@ -1,25 +1,30 @@
 <div class="chatbot-overlay" *ngIf="isOpen" (click)="close()"></div>
 
-<div class="chatbot-drawer glass-card" [class.open]="isOpen" [class.maximized]="isMaximized">
+<div class="chatbot-drawer clay-panel elevated-card-3d" [class.open]="isOpen" [class.maximized]="isMaximized" [class.voice-active-drawer]="isLiveVoiceActive">
   
   <!-- Toast Alert Popup -->
-  <div class="chatbot-toast orbitron-font" *ngIf="toastMessage">
-    {{ toastMessage }}
+  <div class="chatbot-toast clay-panel elevated-card-3d serif-title" *ngIf="toastMessage">
+    <span class="toast-icon">✨</span>
+    <span>{{ toastMessage }}</span>
   </div>
 
-  <!-- Header Section -->
+  <!-- 3D Studio Header Section -->
   <div class="chatbot-header">
     <div class="brand-row">
       <div class="title-box">
-        <div class="sparkle-glow-ring">
-          <img src="assets/mentorhub-official-banner-logo.jpg" alt="MentorHub Logo" class="chatbot-circular-logo-img" />
+        <div class="gemini-stellar-crest gold-seal-emboss" title="Gemini 3.6 Flash Neural Core">
+          <div class="orbit-glow-ring"></div>
+          <span class="gemini-sparkle-icon">✨</span>
         </div>
         <div>
-          <h3 class="orbitron-font">MENTORHUB <span class="cyan-text">AI CHATBOT</span></h3>
+          <h3 class="serif-title">
+            <span class="gold-foil-text">MENTORHUB</span>
+            <span class="gemini-gradient-text"> AI ASSISTANT</span>
+          </h3>
           <div class="status-indicator">
             <span class="online-dot" [class.live-active]="isLiveVoiceActive"></span>
-            <span class="sub-status orbitron-font">
-              {{ isLiveVoiceActive ? 'Gemini 3.1 Flash Live Preview' : 'Gemini 3.6 Flash Active' }}
+            <span class="sub-status serif-title">
+              {{ isLiveVoiceActive ? 'Gemini Live Multimodal Voice Stream' : 'Gemini 3.6 Flash Neural Core' }}
             </span>
           </div>
         </div>
@@ -27,108 +32,130 @@
 
       <div class="header-actions-right">
         <!-- Main Live Voice Toggle Button -->
-        <button class="action-icon-btn voice-toggle-btn orbitron-font" 
+        <button class="gemini-live-pill-btn tactile-btn-3d serif-title" 
                 [class.active-mode]="isLiveVoiceActive" 
                 (click)="toggleLiveVoice()" 
-                [title]="isLiveVoiceActive ? 'End Continuous Live Voice Conversation' : 'Start Continuous Live Voice Session (Gemini 3.1 Flash Live Preview)'">
-          {{ isLiveVoiceActive ? '🔴 END VOICE' : '🟢 LIVE VOICE' }}
+                [title]="isLiveVoiceActive ? 'End Live Voice Conversation' : 'Start Google Gemini Continuous Voice'">
+          <span class="live-pulse-dot"></span>
+          <span>{{ isLiveVoiceActive ? 'END VOICE' : 'LIVE VOICE' }}</span>
+          <span class="shine-sweep"></span>
         </button>
 
-        <button class="action-icon-btn orbitron-font" (click)="clearChat()" title="Clear Conversation" *ngIf="messages.length > 1">
-          🧹 CLEAR
+        <button class="action-icon-btn tactile-btn-3d" (click)="clearChat()" title="Clear Conversation" *ngIf="messages.length > 1">
+          🧹
         </button>
 
-        <button class="action-icon-btn orbitron-font" (click)="toggleMaximize()" [title]="isMaximized ? 'Restore Down' : 'Maximize Window'">
-          {{ isMaximized ? '🗗 RESTORE' : '🗖 MAXIMIZE' }}
+        <button class="action-icon-btn tactile-btn-3d" (click)="toggleMaximize()" [title]="isMaximized ? 'Restore Down' : 'Maximize Window'">
+          {{ isMaximized ? '🗗' : '🗖' }}
+        </button>
+
+        <button class="action-icon-btn close-btn tactile-btn-3d" (click)="close()" title="Close AI Assistant">
+          ✕
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Chat Feed Scroll Area with Auto-Scroll Anchor -->
-  <div class="chatbot-body" #chatContainer>
+  <!-- Google Gemini Style Live Voice Full Visualizer Hero Stage (Active when Live Voice is ON) -->
+  <div class="gemini-live-hero-stage clay-panel 3d-inset-well" *ngIf="isLiveVoiceActive">
     
-    <!-- Live Session Status Banner Bar -->
-    <div class="live-status-bar glass-card" *ngIf="isLiveVoiceActive">
-      <div class="status-pill-group">
-        <span class="status-badge" [ngClass]="liveStatus.toLowerCase()">
-          {{ liveStatus === 'CONNECTED' ? '🟢 LIVE VOICE CONNECTED' :
-             liveStatus === 'LISTENING' ? '🎙️ LISTENING...' :
-             liveStatus === 'THINKING' ? '🧠 THINKING...' :
-             liveStatus === 'SPEAKING' ? '🔊 AI SPEAKING...' :
-             liveStatus === 'INTERRUPTED' ? '⚡ INTERRUPTED' :
-             liveStatus === 'RECONNECTING' ? '🔄 RECONNECTING...' :
-             liveStatus === 'FALLBACK' ? '⚠️ VOICE FALLBACK (GROQ)' : '🟢 LIVE VOICE' }}
-        </span>
-        <span class="live-hint-text">Multi-turn continuous conversation active</span>
-      </div>
+    <!-- Concentric Ripple Wave Aura & Multi-Layered Liquid Orb -->
+    <div class="gemini-stage-orb-wrap">
+      <!-- Expanding Soundwave Ripples -->
+      <div class="sound-wave-ripple ripple-1" [class.active]="isSpeakingAudio || userVolumeRms > 0.05"></div>
+      <div class="sound-wave-ripple ripple-2" [class.active]="isSpeakingAudio || userVolumeRms > 0.1"></div>
+      <div class="sound-wave-ripple ripple-3" [class.active]="isSpeakingAudio || userVolumeRms > 0.2"></div>
 
-      <button class="interrupt-btn orbitron-font" *ngIf="isSpeakingAudio" (click)="triggerBargeInInterruption()" title="Instantly mute & interrupt AI response">
-        ⚡ INTERRUPT
+      <!-- Fluid Glowing Aura -->
+      <div class="gemini-fluid-aura" [class.speaking]="isSpeakingAudio" [class.listening]="!isSpeakingAudio"></div>
+
+      <!-- Center Iridescent Multimodal Core -->
+      <div class="gemini-multimodal-orb gold-seal-emboss" [class.speaking-orb]="isSpeakingAudio">
+        <div class="orb-glass-surface">
+          <span class="orb-glyph" *ngIf="!isSpeakingAudio">🎙️</span>
+          <span class="orb-glyph speaking-glyph" *ngIf="isSpeakingAudio">✨</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voice State Caption -->
+    <div class="live-voice-state-meta">
+      <h4 class="voice-state-title serif-title">
+        {{ isSpeakingAudio ? 'Gemini AI is Speaking...' : (liveStatus === 'THINKING' ? 'Gemini is thinking...' : 'Listening to your voice...') }}
+      </h4>
+      <span class="voice-badge-pill serif-title">
+        ⚡ Continuous Real-Time Speech • Instant Barge-In Active
+      </span>
+    </div>
+
+    <!-- Harmonic 11-Bar Audio Frequency Waveform (Properly Capped to Max 36px) -->
+    <div class="gemini-harmonic-waves">
+      <span class="harmonic-bar bar-1" [style.height.px]="Math.min(36, Math.max(6, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 28 + 6))"></span>
+      <span class="harmonic-bar bar-2" [style.height.px]="Math.min(36, Math.max(10, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 30 + 8))"></span>
+      <span class="harmonic-bar bar-3" [style.height.px]="Math.min(36, Math.max(14, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 32 + 10))"></span>
+      <span class="harmonic-bar bar-4" [style.height.px]="Math.min(36, Math.max(18, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 34 + 12))"></span>
+      <span class="harmonic-bar bar-5" [style.height.px]="Math.min(36, Math.max(15, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 32 + 10))"></span>
+      <span class="harmonic-bar bar-6" [style.height.px]="Math.min(36, Math.max(22, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 36 + 14))"></span>
+      <span class="harmonic-bar bar-7" [style.height.px]="Math.min(36, Math.max(16, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 33 + 11))"></span>
+      <span class="harmonic-bar bar-8" [style.height.px]="Math.min(36, Math.max(18, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 34 + 12))"></span>
+      <span class="harmonic-bar bar-9" [style.height.px]="Math.min(36, Math.max(14, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 32 + 10))"></span>
+      <span class="harmonic-bar bar-10" [style.height.px]="Math.min(36, Math.max(10, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 28 + 8))"></span>
+      <span class="harmonic-bar bar-11" [style.height.px]="Math.min(36, Math.max(6, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 24 + 6))"></span>
+    </div>
+
+    <!-- Live Transcript Ribbon Preview -->
+    <div class="live-transcript-ribbon 3d-inset-well" *ngIf="liveService.outputTranscript$.value">
+      <span class="tx-sparkle">✨</span>
+      <span class="tx-content serif-title">{{ liveService.outputTranscript$.value }}</span>
+    </div>
+
+    <!-- Interrupt Action Control -->
+    <div class="live-controls-row">
+      <button class="live-interrupt-btn tactile-btn-3d serif-title" *ngIf="isSpeakingAudio" (click)="triggerBargeInInterruption()">
+        ⚡ INTERRUPT AI
+      </button>
+      <button class="live-stop-btn tactile-btn-3d serif-title" (click)="endLiveVoice()">
+        ⏹️ END VOICE SESSION
       </button>
     </div>
+  </div>
 
-    <!-- Web Audio-Reactive Frequency Waveform Visualizer -->
-    <div class="audio-reactive-waveform glass-card" *ngIf="isLiveVoiceActive">
-      <div class="waveform-info">
-        <span class="wave-source orbitron-font">
-          {{ isSpeakingAudio ? '🔊 AI AUDIO OUTPUT STREAM' : '🎙️ USER MICROPHONE RMS' }}
-        </span>
-        <span class="rms-value orbitron-font">
-          {{ (isSpeakingAudio ? aiVolumeRms : userVolumeRms) | percent:'1.0-0' }}
-        </span>
-      </div>
-
-      <!-- Real-time Amplitude Bars -->
-      <div class="reactive-bars">
-        <span class="rms-bar" [style.height.%]="Math.max(15, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 100)"></span>
-        <span class="rms-bar" [style.height.%]="Math.max(25, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 85)"></span>
-        <span class="rms-bar" [style.height.%]="Math.max(35, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 120)"></span>
-        <span class="rms-bar" [style.height.%]="Math.max(20, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 90)"></span>
-        <span class="rms-bar" [style.height.%]="Math.max(40, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 110)"></span>
-        <span class="rms-bar" [style.height.%]="Math.max(30, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 95)"></span>
-        <span class="rms-bar" [style.height.%]="Math.max(18, (isSpeakingAudio ? aiVolumeRms : userVolumeRms) * 75)"></span>
-      </div>
-    </div>
-
-    <!-- Streaming Live Transcripts Preview -->
-    <div class="live-transcripts-container" *ngIf="isLiveVoiceActive && liveService.outputTranscript$.value">
-      <div class="live-transcript ai-live" *ngIf="liveService.outputTranscript$.value">
-        <span class="tx-label orbitron-font">AI:</span> {{ liveService.outputTranscript$.value }}
-      </div>
-    </div>
+  <!-- Chat Feed Scroll Area with Auto-Scroll Anchor -->
+  <div class="chatbot-body debossed-track" #chatContainer>
 
     <!-- Chat Messages Timeline -->
-    <div class="chat-messages">
+    <div class="chat-messages list-stagger">
       <ng-container *ngFor="let msg of messages; let i = index">
-        <div *ngIf="msg.sender === 'user' || (msg.text && msg.text.trim().length > 0)" [class]="'chat-bubble ' + msg.sender + ' animated-msg'">
+        <div *ngIf="msg.sender === 'user' || (msg.text && msg.text.trim().length > 0)" 
+             [class]="'chat-bubble ' + msg.sender + ' elevated-card-3d animated-msg'"
+             [class.voice-bubble]="msg.mode === 'VOICE'">
           <div class="bubble-header">
             <div class="sender-tag-group">
-              <div class="icon-avatar" [class.user-icon]="msg.sender === 'user'">
+              <div class="icon-avatar gold-seal-emboss" [class.user-icon]="msg.sender === 'user'">
                 <img *ngIf="msg.sender === 'user'" [src]="getUserAvatarUrl()" class="chat-user-avatar-img" alt="User Avatar" />
-                <span *ngIf="msg.sender === 'ai'">🤖</span>
+                <span *ngIf="msg.sender === 'ai'" class="gemini-sparkle-mini">✨</span>
               </div>
-              <span class="sender-tag orbitron-font">
-                {{ msg.sender === 'ai' ? 'MENTOR COPILOT (AI)' : 'YOU' }}
+              <span class="sender-tag serif-title">
+                {{ msg.sender === 'ai' ? 'MENTORHUB AI ASSISTANT' : 'YOU' }}
               </span>
-              <span class="mode-badge orbitron-font" [class.voice-mode]="msg.mode === 'VOICE'">
+              <span class="mode-badge 3d-inset-well serif-title" [class.voice-mode]="msg.mode === 'VOICE'">
                 {{ msg.mode === 'VOICE' ? '🎙️ VOICE' : '💬 TEXT' }}
               </span>
             </div>
-            <span class="time-tag">{{ msg.timestamp }}</span>
+            <span class="time-tag serif-title">{{ msg.timestamp }}</span>
           </div>
 
-          <div class="bubble-content" [innerHTML]="formatMarkdown(msg.text)"></div>
+          <div class="bubble-content serif-title" [innerHTML]="formatMarkdown(msg.text)"></div>
 
           <!-- Action Toolbar per Message -->
           <div class="bubble-actions-bar" *ngIf="msg.sender === 'ai'">
-            <button class="action-sub-btn orbitron-font" (click)="copyMessage(msg)" [title]="msg.isCopied ? 'Copied!' : 'Copy response text'">
+            <button class="action-sub-btn tactile-btn-3d serif-title" (click)="copyMessage(msg)" [title]="msg.isCopied ? 'Copied!' : 'Copy response text'">
               {{ msg.isCopied ? '✅ COPIED' : '📋 COPY' }}
             </button>
-            <button class="action-sub-btn orbitron-font" [class.active-react]="msg.reaction === 'like'" (click)="toggleReaction(msg, 'like')">
+            <button class="action-sub-btn tactile-btn-3d" [class.active-react]="msg.reaction === 'like'" (click)="toggleReaction(msg, 'like')">
               👍
             </button>
-            <button class="action-sub-btn orbitron-font" [class.active-react]="msg.reaction === 'dislike'" (click)="toggleReaction(msg, 'dislike')">
+            <button class="action-sub-btn tactile-btn-3d" [class.active-react]="msg.reaction === 'dislike'" (click)="toggleReaction(msg, 'dislike')">
               👎
             </button>
           </div>
@@ -136,33 +163,41 @@
       </ng-container>
 
       <!-- Thinking Indicator -->
-      <div class="chat-bubble ai thinking animated-msg" *ngIf="isGenerating">
+      <div class="chat-bubble ai thinking elevated-card-3d animated-msg" *ngIf="isGenerating">
         <div class="thinking-row">
-          <div class="pulse-ring"></div>
-          <span class="thinking-text orbitron-font">Computing Gemini 3.1 Neural Response...</span>
+          <div class="gemini-thinking-sparkle gold-seal-emboss">
+            <span>✨</span>
+          </div>
+          <span class="thinking-text serif-title">Gemini 3.6 Flash synthesizing answer</span>
+          <span class="thinking-dots">
+            <span></span><span></span><span></span>
+          </span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Interactive Controls Footer -->
+  <!-- Interactive Controls Footer (3D Studio Command Deck) -->
   <div class="chatbot-footer">
     <div class="input-row">
-      <!-- User Input Textarea -->
-      <textarea [(ngModel)]="userInput" 
-                (keyup.enter)="$event.preventDefault(); sendMessage()" 
-                rows="1" 
-                placeholder="Ask MentorHub AI Assistant or start Live Voice..." 
-                class="chat-textarea"></textarea>
+      <!-- 3D Inset Track with Textarea and Mic Button -->
+      <div class="input-deck-track 3d-inset-well">
+        <textarea [(ngModel)]="userInput" 
+                  (keyup.enter)="$event.preventDefault(); sendMessage()" 
+                  rows="1" 
+                  placeholder="Ask MentorHub AI Assistant anything or tap 🎙️ for Live Voice..." 
+                  class="chat-textarea serif-title"></textarea>
 
-      <!-- Live Voice Toggle Button -->
-      <button class="stt-btn" [class.live-active]="isLiveVoiceActive" (click)="toggleLiveVoice()" [title]="isLiveVoiceActive ? 'End Live Voice Session' : 'Start Live Voice Session'">
-        {{ isLiveVoiceActive ? '🔴' : '🎙️' }}
-      </button>
+        <!-- Live Voice Toggle Button -->
+        <button class="stt-btn tactile-btn-3d" [class.live-active]="isLiveVoiceActive" (click)="toggleLiveVoice()" [title]="isLiveVoiceActive ? 'End Live Voice Session' : 'Start Google Gemini Live Voice Session'">
+          <span class="mic-wave-icon">{{ isLiveVoiceActive ? '🔴' : '🎙️' }}</span>
+        </button>
+      </div>
 
-      <!-- Send Button -->
-      <button class="send-btn" (click)="sendMessage()" [disabled]="isGenerating || !userInput.trim()">
-        ✨ SEND
+      <!-- 3D Terracotta Send Button -->
+      <button class="send-btn btn-primary tactile-btn-3d serif-title" (click)="sendMessage()" [disabled]="isGenerating || !userInput.trim()">
+        <span>✨ SEND</span>
+        <span class="shine-sweep"></span>
       </button>
     </div>
   </div>

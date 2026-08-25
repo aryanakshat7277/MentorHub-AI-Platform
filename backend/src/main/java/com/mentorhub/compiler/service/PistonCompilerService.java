@@ -56,30 +56,20 @@ public class PistonCompilerService implements CompilerService {
             return cachedRuntimes;
         }
 
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(pistonProperties.getBaseUrl() + pistonProperties.getRuntimesPath()))
-                    .timeout(Duration.ofMillis(pistonProperties.getReadTimeout()))
-                    .GET()
-                    .build();
+        List<RuntimeResponse> runtimes = fetchRuntimesFromUrl(pistonProperties.getBaseUrl());
+        if (runtimes != null && !runtimes.isEmpty()) {
+            cachedRuntimes = runtimes;
+            lastRuntimesFetchTime = now;
+            return runtimes;
+        }
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() == 200) {
-                List<Map<String, Object>> list = objectMapper.readValue(response.body(), new TypeReference<>() {});
-                List<RuntimeResponse> runtimes = new ArrayList<>();
-                for (Map<String, Object> item : list) {
-                    String lang = String.valueOf(item.get("language"));
-                    String ver = String.valueOf(item.get("version"));
-                    @SuppressWarnings("unchecked")
-                    List<String> aliases = (List<String>) item.getOrDefault("aliases", Collections.emptyList());
-                    runtimes.add(new RuntimeResponse(lang, ver, aliases));
-                }
+        if (!pistonProperties.getBaseUrl().contains("emkc.org")) {
+            runtimes = fetchRuntimesFromUrl("https://emkc.org");
+            if (runtimes != null && !runtimes.isEmpty()) {
                 cachedRuntimes = runtimes;
                 lastRuntimesFetchTime = now;
                 return runtimes;
             }
-        } catch (Exception e) {
-            System.err.println("Notice: Could not fetch runtimes from Piston service (" + e.getMessage() + "). Using local runtime defaults.");
         }
 
         // Fallback default runtimes
@@ -95,6 +85,31 @@ public class PistonCompilerService implements CompilerService {
         );
         cachedRuntimes = fallback;
         return fallback;
+    }
+
+    private List<RuntimeResponse> fetchRuntimesFromUrl(String baseUrl) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + pistonProperties.getRuntimesPath()))
+                    .timeout(Duration.ofMillis(pistonProperties.getReadTimeout()))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                List<Map<String, Object>> list = objectMapper.readValue(response.body(), new TypeReference<>() {});
+                List<RuntimeResponse> runtimes = new ArrayList<>();
+                for (Map<String, Object> item : list) {
+                    String lang = String.valueOf(item.get("language"));
+                    String ver = String.valueOf(item.get("version"));
+                    @SuppressWarnings("unchecked")
+                    List<String> aliases = (List<String>) item.getOrDefault("aliases", Collections.emptyList());
+                    runtimes.add(new RuntimeResponse(lang, ver, aliases));
+                }
+                return runtimes;
+            }
+        } catch (Exception ignored) {}
+        return null;
     }
 
     @Override
@@ -122,38 +137,25 @@ public class PistonCompilerService implements CompilerService {
 
         long startTime = System.currentTimeMillis();
 
-        // 1. Try Calling Self-Hosted Piston API
+        // 1. Try Primary Base URL (e.g. https://emkc.org or http://localhost:2000)
         try {
-            Map<String, Object> pistonPayload = new HashMap<>();
-            pistonPayload.put("language", language);
-            pistonPayload.put("version", version);
-            pistonPayload.put("files", List.of(Map.of(
-                    "name", getFileNameForLanguage(language),
-                    "content", code
-            )));
-            if (!stdin.isEmpty()) {
-                pistonPayload.put("stdin", stdin);
-            }
-
-            String jsonBody = objectMapper.writeValueAsString(pistonPayload);
-            HttpRequest httpRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(pistonProperties.getBaseUrl() + pistonProperties.getExecutePath()))
-                    .header("Content-Type", "application/json")
-                    .timeout(Duration.ofMillis(pistonProperties.getReadTimeout()))
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-
-            HttpResponse<String> httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-
-            if (httpResponse.statusCode() == 200) {
-                Map<String, Object> pistonResp = objectMapper.readValue(httpResponse.body(), new TypeReference<>() {});
-                return parsePistonResponse(pistonResp, language, version, System.currentTimeMillis() - startTime);
-            }
+            CodeExecutionResponse resp = executeViaPistonApi(pistonProperties.getBaseUrl(), language, version, code, stdin, startTime);
+            if (resp != null) return resp;
         } catch (Exception e) {
-            System.err.println("Piston API notice: " + e.getMessage() + ". Utilizing fallback execution engine.");
+            System.err.println("Piston Primary API notice: " + e.getMessage() + ". Attempting Cloud Piston API failover...");
         }
 
-        // 2. Fallback Engine Execution
+        // 2. Try Public Cloud Piston API Failover (https://emkc.org)
+        if (!pistonProperties.getBaseUrl().contains("emkc.org")) {
+            try {
+                CodeExecutionResponse resp = executeViaPistonApi("https://emkc.org", language, version, code, stdin, startTime);
+                if (resp != null) return resp;
+            } catch (Exception e) {
+                System.err.println("Piston Cloud API notice: " + e.getMessage() + ". Utilizing local process execution engine.");
+            }
+        }
+
+        // 3. Fallback Local Process Execution
         Map<String, String> localResult = executeLocally(language, code, stdin);
         long execTime = System.currentTimeMillis() - startTime;
 
@@ -165,6 +167,35 @@ public class PistonCompilerService implements CompilerService {
             return CodeExecutionResponse.error("RUNTIME_ERROR", language, version, stdout, stderr, "", exitCode);
         }
         return CodeExecutionResponse.ok(language, version, stdout, stderr, 0, execTime);
+    }
+
+    private CodeExecutionResponse executeViaPistonApi(String baseUrl, String language, String version, String code, String stdin, long startTime) throws Exception {
+        Map<String, Object> pistonPayload = new HashMap<>();
+        pistonPayload.put("language", language);
+        pistonPayload.put("version", version);
+        pistonPayload.put("files", List.of(Map.of(
+                "name", getFileNameForLanguage(language),
+                "content", code
+        )));
+        if (!stdin.isEmpty()) {
+            pistonPayload.put("stdin", stdin);
+        }
+
+        String jsonBody = objectMapper.writeValueAsString(pistonPayload);
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + pistonProperties.getExecutePath()))
+                .header("Content-Type", "application/json")
+                .timeout(Duration.ofMillis(pistonProperties.getReadTimeout()))
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        HttpResponse<String> httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (httpResponse.statusCode() == 200) {
+            Map<String, Object> pistonResp = objectMapper.readValue(httpResponse.body(), new TypeReference<>() {});
+            return parsePistonResponse(pistonResp, language, version, System.currentTimeMillis() - startTime);
+        }
+        return null;
     }
 
     @Override
@@ -182,7 +213,22 @@ public class PistonCompilerService implements CompilerService {
             }
         } catch (Exception ignored) {}
 
-        return Map.of("available", false, "service", "piston", "message", "Self-hosted Piston API is offline or starting up.");
+        if (!pistonProperties.getBaseUrl().contains("emkc.org")) {
+            try {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("https://emkc.org" + pistonProperties.getRuntimesPath()))
+                        .timeout(Duration.ofMillis(2000))
+                        .GET()
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200) {
+                    return Map.of("available", true, "service", "piston-cloud", "baseUrl", "https://emkc.org");
+                }
+            } catch (Exception ignored) {}
+        }
+
+        return Map.of("available", false, "service", "piston", "message", "Self-hosted & Cloud Piston APIs are offline.");
     }
 
     private void checkRateLimit(String clientIp) {
@@ -302,6 +348,9 @@ public class PistonCompilerService implements CompilerService {
             Path file = Files.createTempFile(TEMP_DIR, "script_", ".py");
             Files.writeString(file, code, StandardCharsets.UTF_8);
             Map<String, String> result = runProcess(file.getParent(), stdin, "python", file.getFileName().toString());
+            if (result.getOrDefault("stderr", "").contains("Cannot run program \"python\"")) {
+                result = runProcess(file.getParent(), stdin, "py", file.getFileName().toString());
+            }
             tryDelete(file);
             return result;
         } catch (Exception e) {
@@ -316,7 +365,8 @@ public class PistonCompilerService implements CompilerService {
                 int idx = code.indexOf("class ") + 6;
                 int endIdx = code.indexOf(" ", idx);
                 if (endIdx > idx) {
-                    className = code.substring(idx, endIdx).replaceAll("[^{]", "").trim();
+                    String extracted = code.substring(idx, endIdx).replaceAll("[^{]", "").trim();
+                    if (!extracted.isEmpty()) className = extracted;
                 }
             }
             Path javaFile = TEMP_DIR.resolve(className + ".java");
@@ -332,8 +382,26 @@ public class PistonCompilerService implements CompilerService {
     }
 
     private Map<String, String> runCpp(String code, String stdin) {
-        String jsCode = convertCppToJs(code);
-        return runJavaScript(jsCode, stdin);
+        try {
+            Path sourceFile = Files.createTempFile(TEMP_DIR, "cpp_src_", ".cpp");
+            Files.writeString(sourceFile, code, StandardCharsets.UTF_8);
+            String exeName = "cpp_exec_" + System.nanoTime() + (isWindows() ? ".exe" : "");
+            Path exeFile = TEMP_DIR.resolve(exeName);
+
+            Map<String, String> compileRes = runProcess(TEMP_DIR, "", "g++", "-O2", sourceFile.getFileName().toString(), "-o", exeFile.getFileName().toString());
+            tryDelete(sourceFile);
+
+            if (!"0".equals(compileRes.getOrDefault("exitCode", "1"))) {
+                tryDelete(exeFile);
+                return Map.of("stdout", "", "stderr", compileRes.getOrDefault("stderr", ""), "exitCode", "1");
+            }
+
+            Map<String, String> execRes = runProcess(TEMP_DIR, stdin, exeFile.toAbsolutePath().toString());
+            tryDelete(exeFile);
+            return execRes;
+        } catch (Exception e) {
+            return Map.of("stdout", "", "stderr", "C++ Execution Error: " + e.getMessage(), "exitCode", "1");
+        }
     }
 
     private Map<String, String> runCSharp(String code, String stdin) {
@@ -342,13 +410,42 @@ public class PistonCompilerService implements CompilerService {
     }
 
     private Map<String, String> runGo(String code, String stdin) {
-        String jsCode = convertGoToJs(code);
-        return runJavaScript(jsCode, stdin);
+        try {
+            Path file = Files.createTempFile(TEMP_DIR, "main_", ".go");
+            Files.writeString(file, code, StandardCharsets.UTF_8);
+            Map<String, String> result = runProcess(file.getParent(), stdin, "go", "run", file.getFileName().toString());
+            tryDelete(file);
+            return result;
+        } catch (Exception e) {
+            return Map.of("stdout", "", "stderr", "Go Execution Error: " + e.getMessage(), "exitCode", "1");
+        }
     }
 
     private Map<String, String> runRust(String code, String stdin) {
-        String jsCode = convertRustToJs(code);
-        return runJavaScript(jsCode, stdin);
+        try {
+            Path sourceFile = Files.createTempFile(TEMP_DIR, "rust_src_", ".rs");
+            Files.writeString(sourceFile, code, StandardCharsets.UTF_8);
+            String exeName = "rust_exec_" + System.nanoTime() + (isWindows() ? ".exe" : "");
+            Path exeFile = TEMP_DIR.resolve(exeName);
+
+            Map<String, String> compileRes = runProcess(TEMP_DIR, "", "rustc", sourceFile.getFileName().toString(), "-o", exeFile.getFileName().toString());
+            tryDelete(sourceFile);
+
+            if (!"0".equals(compileRes.getOrDefault("exitCode", "1"))) {
+                tryDelete(exeFile);
+                return Map.of("stdout", "", "stderr", compileRes.getOrDefault("stderr", ""), "exitCode", "1");
+            }
+
+            Map<String, String> execRes = runProcess(TEMP_DIR, stdin, exeFile.toAbsolutePath().toString());
+            tryDelete(exeFile);
+            return execRes;
+        } catch (Exception e) {
+            return Map.of("stdout", "", "stderr", "Rust Execution Error: " + e.getMessage(), "exitCode", "1");
+        }
+    }
+
+    private boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("win");
     }
 
     private Map<String, String> runProcess(Path workingDir, String stdin, String... command) {

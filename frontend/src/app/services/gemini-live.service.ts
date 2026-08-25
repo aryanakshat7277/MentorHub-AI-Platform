@@ -36,6 +36,8 @@ export class GeminiLiveService {
   public isFallbackMode = false;
 
   private heartbeatInterval: any = null;
+  private loudFrameCount = 0;
+  private lastAiSpeechStartTime = 0;
 
   constructor(
     private http: HttpClient,
@@ -203,8 +205,27 @@ export class GeminiLiveService {
   private handleUserMicChunk(chunkBase64: string) {
     if (!this.isSetupComplete) return;
 
-    if (this.audioPlayback.isSpeaking$.value && this.audioCapture.volumeRms$.value > 0.70) {
-      this.triggerBargeInInterruption();
+    // Require sustained intentional human speech (3 consecutive audio frames above 0.70 RMS, ~100ms)
+    // to prevent transient noise spikes, clicks, desk bumps or breathing from triggering accidental interruptions
+    if (this.audioPlayback.isSpeaking$.value) {
+      // 600ms grace period right when AI starts speaking to prevent initial speaker output from self-triggering barge-in
+      const timeSinceSpeechStart = Date.now() - this.lastAiSpeechStartTime;
+      if (timeSinceSpeechStart > 600) {
+        if (this.audioCapture.volumeRms$.value > 0.80) {
+          this.loudFrameCount++;
+          if (this.loudFrameCount >= 5) {
+            this.triggerBargeInInterruption();
+            this.loudFrameCount = 0;
+          }
+        } else {
+          this.loudFrameCount = 0;
+        }
+      } else {
+        this.loudFrameCount = 0;
+      }
+    } else {
+      this.lastAiSpeechStartTime = Date.now();
+      this.loudFrameCount = 0;
     }
 
     if (this.isFallbackMode) {

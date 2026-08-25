@@ -15,6 +15,7 @@ export class HeaderComponent implements OnInit {
   @Input() isCollapsed = false;
   user: any = null;
   showDropdown = false;
+  isFullScreen = false;
 
   constructor(
     private apiService: ApiService,
@@ -45,6 +46,31 @@ export class HeaderComponent implements OnInit {
         }
       }
     });
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('fullscreenchange', () => {
+        this.isFullScreen = !!document.fullscreenElement;
+      });
+    }
+  }
+
+  toggleFullScreen() {
+    if (typeof document === 'undefined') return;
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        this.isFullScreen = true;
+      }).catch(err => {
+        console.warn('Fullscreen request failed:', err);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().then(() => {
+          this.isFullScreen = false;
+        }).catch(err => {
+          console.warn('Exit fullscreen failed:', err);
+        });
+      }
+    }
   }
 
   toggleDropdown(event: Event) {

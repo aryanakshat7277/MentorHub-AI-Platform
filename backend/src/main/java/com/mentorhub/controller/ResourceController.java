@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/resources")
+@RequestMapping({"/api/resources", "/api/v1/resources"})
 public class ResourceController {
 
     private final ResourceRepository resourceRepository;

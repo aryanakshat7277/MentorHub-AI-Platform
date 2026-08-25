@@ -1,6 +1,10 @@
 .app-layout {
   min-height: 100vh;
-  background-color: var(--bg-primary);
+  background-color: var(--bg-canvas);
+  background-image:
+    radial-gradient(ellipse 70% 50% at 15% 0%,  rgba(212,175,55,0.07) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 40% at 85% 100%, rgba(166,59,25,0.05) 0%, transparent 65%);
+  background-attachment: fixed;
   display: flex;
   position: relative;
 }
@@ -8,7 +12,7 @@
 .auth-fullscreen-container {
   width: 100vw;
   min-height: 100vh;
-  background-color: var(--bg-primary, #060911);
+  background-color: var(--bg-canvas);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -17,32 +21,38 @@
 
 .main-wrapper {
   flex: 1;
-  margin-left: 240px;
+  margin-left: 248px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: margin-left 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 
   &.sidebar-collapsed {
-    margin-left: 72px;
+    margin-left: 76px;
   }
 }
 
 .page-content {
-  margin-top: 68px;
-  padding: 32px 36px 60px 36px;
+  margin-top: 70px;
+  padding: 34px 38px 64px 38px;
   flex: 1;
+  animation: pageReveal 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pageReveal {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ==========================================================================
-   3-SECOND GRAPHICAL STARTUP ANIMATION (.cyber-startup-overlay)
+   ULTRA-LUXURY 3D SKEUOMORPHIC STARTUP ANIMATION (.cyber-startup-overlay)
    ========================================================================== */
 .cyber-startup-overlay {
   position: fixed;
   inset: 0;
   width: 100vw;
   height: 100vh;
-  background: radial-gradient(circle at center, #0B1426 0%, #040711 100%);
+  background: radial-gradient(circle at center, #1E120A 0%, #100905 60%, #080402 100%);
   z-index: 99999;
   display: flex;
   align-items: center;
@@ -52,32 +62,43 @@
 
   &.fade-out {
     opacity: 0;
-    transform: scale(1.06);
+    transform: scale(1.04);
     pointer-events: none;
   }
 
-  /* Animated Hexagonal Grid Background */
+  /* Warm Atmospheric Background & Grid */
   .startup-background-grid {
     position: absolute;
     inset: 0;
-    background-size: 50px 50px;
+    background-size: 48px 48px;
     background-image: 
-      linear-gradient(to right, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+      linear-gradient(to right, rgba(212, 175, 55, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(212, 175, 55, 0.05) 1px, transparent 1px);
     pointer-events: none;
   }
 
-  /* Vertical Sweeping Laser Scan Beam */
+  .warm-ambient-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, rgba(166, 59, 25, 0.12) 45%, transparent 70%);
+    filter: blur(50px);
+    pointer-events: none;
+    animation: ambientBreath 4s ease-in-out infinite alternate;
+  }
+
+  /* Sweeping Ambient Laser Beam */
   .laser-scan-line {
     position: absolute;
     left: 0;
     width: 100%;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, #00F0FF, #B55FE6, transparent);
-    box-shadow: 0 0 25px #00F0FF, 0 0 45px #B55FE6;
-    animation: laser-sweep 2.8s ease-in-out infinite alternate;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.6), rgba(222, 112, 72, 0.8), transparent);
+    box-shadow: 0 0 18px rgba(212, 175, 55, 0.5);
+    animation: laser-sweep 3s ease-in-out infinite alternate;
     pointer-events: none;
-    opacity: 0.85;
+    opacity: 0.65;
   }
 
   .graphic-hero-box {
@@ -86,34 +107,34 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 36px;
+    gap: 28px;
 
-    /* 4-Ring Cybernetic Spinning Neural Core & Radar Sweep */
+    /* Multi-Ring 3D Gold Orbital Reactor Core */
     .graphic-rings-container {
       position: relative;
-      width: 290px;
-      height: 290px;
+      width: 280px;
+      height: 280px;
       display: flex;
       align-items: center;
       justify-content: center;
 
-      /* Radial Pulse Sonar Wave */
+      /* Radial Pulse Halo */
       .pulse-wave-ring {
         position: absolute;
         width: 100%;
         height: 100%;
         border-radius: 50%;
-        border: 2px solid rgba(0, 240, 255, 0.4);
-        animation: sonar-pulse 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+        border: 2px solid rgba(212, 175, 55, 0.35);
+        animation: sonar-pulse 2.2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
       }
 
-      /* Radar Sweep Shader */
+      /* Radar Sweep Conic Gradient */
       .radar-sweep {
         position: absolute;
-        inset: 0;
+        inset: -10px;
         border-radius: 50%;
-        background: conic-gradient(from 0deg at 50% 50%, rgba(0, 240, 255, 0.3) 0deg, transparent 60deg, transparent 360deg);
-        animation: radar-rotate 2.4s linear infinite;
+        background: conic-gradient(from 0deg at 50% 50%, rgba(212, 175, 55, 0.22) 0deg, transparent 70deg, transparent 360deg);
+        animation: radar-rotate 2.8s linear infinite;
       }
 
       .ring {
@@ -121,129 +142,233 @@
         border-radius: 50%;
 
         &.outer-ring {
-          width: 290px;
-          height: 290px;
-          border: 2px dashed rgba(0, 240, 255, 0.6);
-          box-shadow: 0 0 35px rgba(0, 240, 255, 0.4);
-          animation: spin-cw 5s linear infinite;
+          width: 270px;
+          height: 270px;
+          border: 2px dashed rgba(212, 175, 55, 0.55);
+          box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);
+          animation: spin-cw 7s linear infinite;
 
           .satellite {
             position: absolute;
-            width: 10px;
-            height: 10px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            background: #00F0FF;
-            box-shadow: 0 0 15px #00F0FF;
+            background: linear-gradient(135deg, #FBF1C7 0%, #D4AF37 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #583F07;
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.8);
 
-            &.sat-1 { top: -5px; left: 50%; transform: translateX(-50%); }
-            &.sat-2 { bottom: -5px; left: 50%; transform: translateX(-50%); background: #B55FE6; box-shadow: 0 0 15px #B55FE6; }
+            &.sat-1 { top: -10px; left: 50%; transform: translateX(-50%); }
+            &.sat-2 { bottom: -10px; left: 50%; transform: translateX(-50%); font-size: 11px; }
           }
         }
 
         &.middle-ring {
-          width: 245px;
-          height: 245px;
+          width: 230px;
+          height: 230px;
           border: 2px solid transparent;
-          border-top-color: #00F0FF;
-          border-bottom-color: #00F0FF;
-          box-shadow: 0 0 30px rgba(0, 240, 255, 0.6);
-          animation: spin-ccw 3s linear infinite;
+          border-top-color: #DE7048;
+          border-bottom-color: #DE7048;
+          box-shadow: 0 0 20px rgba(222, 112, 72, 0.35);
+          animation: spin-ccw 4s linear infinite;
         }
 
         &.inner-ring {
-          width: 200px;
-          height: 200px;
+          width: 190px;
+          height: 190px;
           border: 2px solid transparent;
-          border-left-color: #B55FE6;
-          border-right-color: #B55FE6;
-          box-shadow: 0 0 30px rgba(181, 95, 230, 0.6);
-          animation: spin-cw 2s linear infinite;
+          border-left-color: #D4AF37;
+          border-right-color: #D4AF37;
+          box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+          animation: spin-cw 3s linear infinite;
         }
       }
 
-      /* Official Circular Logo Orb */
+      /* 3D Official Circular Logo Medallion */
       .center-orb.official-logo-orb {
-        width: 180px;
-        height: 180px;
+        width: 160px;
+        height: 160px;
         border-radius: 50%;
-        background: radial-gradient(circle at center, #0B1426 0%, #040711 100%);
-        backdrop-filter: blur(14px);
-        border: 2.5px solid #00F0FF;
-        box-shadow: 0 0 60px rgba(0, 240, 255, 0.9), inset 0 0 30px rgba(0, 240, 255, 0.4);
+        background: radial-gradient(circle at 35% 35%, #FDF8F3 0%, #EFE6DD 70%, #D8C5B2 100%);
+        border: 4px solid #D4AF37;
+        box-shadow: 
+          0 10px 30px rgba(0, 0, 0, 0.6),
+          0 0 35px rgba(212, 175, 55, 0.45),
+          inset 0 2px 6px rgba(255, 255, 255, 0.8),
+          inset 0 -3px 6px rgba(0, 0, 0, 0.35);
         display: flex;
         align-items: center;
         justify-content: center;
+        position: relative;
         overflow: hidden;
-        animation: orb-pulse 1.5s ease-in-out infinite alternate;
         z-index: 5;
+        animation: orb-pulse 2s ease-in-out infinite alternate;
 
-        .startup-circular-logo-img {
+        .orb-gold-bezel {
           width: 100%;
           height: 100%;
-          object-fit: cover;
           border-radius: 50%;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          .startup-circular-logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+          }
+        }
+
+        .orb-shine-overlay {
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, transparent 50%, rgba(0, 0, 0, 0.25) 100%);
+          pointer-events: none;
         }
       }
     }
 
-    /* Clean Graphical Neon Progress Meter */
+    /* Live Telemetry Status Pill */
+    .boot-telemetry-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 18px;
+      background: rgba(30, 18, 10, 0.75);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: var(--radius-full);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+
+      .beacon-pulse {
+        width: 8px;
+        height: 8px;
+        background: #2A5A3D;
+        border-radius: 50%;
+        box-shadow: 0 0 8px #2A5A3D;
+        animation: beaconGlow 1.5s infinite ease-in-out;
+      }
+
+      .telemetry-text {
+        font-family: "Times New Roman", Times, Georgia, serif;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        color: #FDF8F3;
+      }
+    }
+
+    /* 3D Debossed Progress Well Meter */
     .minimal-progress-box {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
-      width: 280px;
+      gap: 10px;
+      width: 320px;
 
       .line-track {
         position: relative;
         width: 100%;
-        height: 6px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(0, 240, 255, 0.3);
-        border-radius: 6px;
+        height: 9px;
+        background: #110B07;
+        border: 1px solid rgba(212, 175, 55, 0.35);
+        border-radius: 8px;
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8);
         overflow: visible;
 
         .line-fill {
           height: 100%;
-          background: linear-gradient(90deg, #00F0FF, #B55FE6);
-          box-shadow: 0 0 25px #00F0FF, 0 0 15px #B55FE6;
-          border-radius: 6px;
+          background: linear-gradient(90deg, #A63B19 0%, #DE7048 50%, #D4AF37 100%);
+          box-shadow: 0 0 18px rgba(212, 175, 55, 0.6);
+          border-radius: 8px;
           transition: width 0.02s linear;
         }
 
         .line-glow-head {
           position: absolute;
-          top: -4px;
-          width: 14px;
-          height: 14px;
+          top: -3.5px;
+          width: 16px;
+          height: 16px;
           border-radius: 50%;
-          background: #FFFFFF;
-          box-shadow: 0 0 20px #00F0FF, 0 0 35px #B55FE6;
+          background: #FAF4EE;
+          border: 2px solid #D4AF37;
+          box-shadow: 0 0 14px #D4AF37, 0 0 22px rgba(222, 112, 72, 0.8);
           transform: translateX(-50%);
           transition: left 0.02s linear;
         }
       }
 
-      .percent-val {
-        font-size: 13px;
-        color: #00F0FF;
-        font-weight: 800;
-        letter-spacing: 2px;
-        text-shadow: 0 0 12px rgba(0, 240, 255, 0.7);
+      .progress-footer-row {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .progress-sub-lbl {
+          font-family: "Times New Roman", Times, Georgia, serif;
+          font-size: 11px;
+          font-weight: 800;
+          color: rgba(250, 244, 238, 0.65);
+          letter-spacing: 0.6px;
+        }
+
+        .percent-val {
+          font-family: "Times New Roman", Times, Georgia, serif;
+          font-size: 14px;
+          color: #D4AF37;
+          font-weight: 900;
+          letter-spacing: 0.5px;
+          text-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+        }
       }
+    }
+  }
+
+  .skip-boot-btn {
+    position: absolute;
+    bottom: 24px;
+    right: 28px;
+    background: rgba(30, 18, 10, 0.6);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    color: rgba(250, 244, 238, 0.8);
+    font-family: "Times New Roman", Times, Georgia, serif;
+    font-size: 11.5px;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(212, 175, 55, 0.2);
+      border-color: #D4AF37;
+      color: #FAF4EE;
+      transform: translateX(3px);
     }
   }
 }
 
 /* Animations */
+@keyframes ambientBreath {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  100% { transform: scale(1.15); opacity: 1; }
+}
+
 @keyframes laser-sweep {
-  0% { top: 0%; }
-  100% { top: 100%; }
+  0% { top: 10%; }
+  100% { top: 90%; }
 }
 
 @keyframes sonar-pulse {
-  0% { transform: scale(0.6); opacity: 0.9; }
-  100% { transform: scale(1.4); opacity: 0; }
+  0% { transform: scale(0.7); opacity: 0.8; }
+  100% { transform: scale(1.35); opacity: 0; }
 }
 
 @keyframes radar-rotate {
@@ -262,6 +387,11 @@
 }
 
 @keyframes orb-pulse {
-  0% { transform: scale(0.96); box-shadow: 0 0 35px rgba(0, 240, 255, 0.6); }
-  100% { transform: scale(1.05); box-shadow: 0 0 65px rgba(0, 240, 255, 0.95), 0 0 35px rgba(181, 95, 230, 0.8); }
+  0% { transform: scale(0.97); }
+  100% { transform: scale(1.03); }
+}
+
+@keyframes beaconGlow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
 }

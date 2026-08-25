@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/meetings")
+@RequestMapping({"/api/meetings", "/api/v1/meetings"})
 public class MeetingController {
 
     private final MeetingService meetingService;

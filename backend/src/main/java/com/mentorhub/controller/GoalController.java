@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/goals")
+@RequestMapping({"/api/goals", "/api/v1/goals"})
 public class GoalController {
 
     private final GoalRepository goalRepository;

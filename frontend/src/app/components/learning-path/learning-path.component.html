@@ -1,51 +1,112 @@
 <div class="learning-path-page">
-  <div class="page-header">
-    <div>
-      <h1 class="orbitron-font">AI LEARNING PATH & ROADMAP TREE</h1>
-      <p class="subtitle">Personalized technical progression powered by skill vectors</p>
+  <!-- Page Header with 3D Seal -->
+  <div class="page-header-row">
+    <div class="header-branding">
+      <div class="gold-seal-emboss header-seal" title="AI Learning Path & Skill Vector Matrix">
+        <span class="seal-glyph">🗺️</span>
+      </div>
+      <div>
+        <div class="title-with-pill">
+          <h1 class="serif-title">AI LEARNING PATH & ROADMAP TREE</h1>
+          <span class="status-pill active-path-pill">⚡ NEURAL GRAPH ACTIVE</span>
+        </div>
+        <p class="subtitle serif-title">Personalized technical progression powered by skill vectors & real-time milestones</p>
+      </div>
+    </div>
+
+    <div class="header-telemetry-badge">
+      <span class="telemetry-beacon beacon-pulse"></span>
+      <span class="telemetry-text serif-title">4 ACTIVE CURRICULA • 6 ROADMAP NODES</span>
     </div>
   </div>
 
   <div class="path-container">
-    <!-- Left Side: 4 Stacked Circular Progress Cards (39%, 21%, 63%, 15%) -->
+    <!-- Left Side: 4 Stacked 3D Circular Progress Dial Cards -->
     <div class="left-cards-column">
-      <h2 class="column-title orbitron-font">ACTIVE CURRICULA</h2>
+      <div class="section-title-row">
+        <span class="sec-icon float-icon">📚</span>
+        <h2 class="column-title serif-title">ACTIVE CURRICULA MATRIX</h2>
+      </div>
 
-      <div *ngFor="let card of circularProgressCards" class="circular-progress-card glass-card">
-        <div class="card-circle-wrapper">
-          <svg viewBox="0 0 36 36" class="circular-chart">
-            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-            <path class="circle" [attr.stroke-dasharray]="card.pct + ', 100'" [style.stroke]="card.color" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-            <text x="18" y="20.35" class="percentage orbitron-font">{{ card.pct }}%</text>
-          </svg>
-        </div>
-
-        <div class="card-details">
-          <div class="title-row">
-            <span class="tech-icon">{{ card.icon }}</span>
-            <h3 class="card-title orbitron-font">{{ card.title }}</h3>
+      <div class="curricula-list list-stagger">
+        <div *ngFor="let card of circularProgressCards" class="circular-progress-card clay-panel elevated-card-3d">
+          <div class="grid-watermark"></div>
+          
+          <div class="card-circle-wrapper 3d-skeletal-dial">
+            <svg viewBox="0 0 36 36" class="circular-chart">
+              <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path class="circle glow-arc" [attr.stroke-dasharray]="card.pct + ', 100'" [style.stroke]="card.color" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            </svg>
+            <div class="dial-center-val">
+              <span class="percentage serif-title">{{ card.pct }}%</span>
+            </div>
           </div>
-          <span class="status-tag" [style.color]="card.color">{{ card.status }}</span>
+
+          <div class="card-details">
+            <div class="title-row">
+              <div class="tech-icon-crest" [style.border-color]="card.color">
+                <span class="tech-icon">{{ card.icon }}</span>
+              </div>
+              <div>
+                <h3 class="card-title serif-title">{{ card.title }}</h3>
+                <span class="track-cadence serif-title">Target: Master Level Certification</span>
+              </div>
+            </div>
+
+            <div class="card-bottom-row">
+              <span [class]="'status-tag serif-title ' + (card.status === 'ADVANCED' ? 'tag-forest' : (card.status === 'STARTING' ? 'tag-amber' : 'tag-terracotta'))">
+                {{ card.status === 'ADVANCED' ? '🏆 ADVANCED MASTERY' : (card.status === 'STARTING' ? '⏳ STARTING MODULE' : '⚡ IN PROGRESS') }}
+              </span>
+              <div class="mini-spark-track">
+                <div class="mini-spark-fill" [style.width.%]="card.pct" [style.background]="card.color"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Right Side: Vertical Roadmap Tree (Nodes 1, 2, 5, 6, 7, 8) -->
-    <div class="right-roadmap-column glass-card">
-      <h2 class="column-title orbitron-font">VERTICAL ROADMAP TREE</h2>
+    <!-- Right Side: 3D Vertical Roadmap Tree -->
+    <div class="right-roadmap-column clay-panel elevated-card-3d">
+      <div class="section-title-row">
+        <span class="sec-icon float-icon">🌿</span>
+        <h2 class="column-title serif-title">VERTICAL ROADMAP TREE</h2>
+        <span class="live-branch-pill pulse-badge">● LIVE BRANCH</span>
+      </div>
 
       <div class="roadmap-tree">
+        <div class="vertical-conduit-glow"></div>
+
         <div *ngFor="let step of roadmapTree" [class]="'tree-step ' + step.status.toLowerCase()">
-          <div class="node-badge orbitron-font">
-            <span class="node-number">{{ step.node }}</span>
+          <!-- 3D Node Medallion -->
+          <div class="node-badge-container">
+            <div class="node-badge 3d-node-medallion">
+              <span class="node-glyph" *ngIf="step.status === 'COMPLETED'">✓</span>
+              <span class="node-glyph" *ngIf="step.status === 'IN_PROGRESS'">⚡</span>
+              <span class="node-glyph" *ngIf="step.status === 'UPCOMING'">⏳</span>
+              <span class="node-glyph" *ngIf="step.status === 'LOCKED'">🔒</span>
+              <span class="node-number serif-title" *ngIf="step.status !== 'COMPLETED' && step.status !== 'IN_PROGRESS' && step.status !== 'UPCOMING' && step.status !== 'LOCKED'">{{ step.node }}</span>
+            </div>
+            <span class="node-pulse-beacon" *ngIf="step.status === 'IN_PROGRESS'"></span>
           </div>
 
-          <div class="step-card">
+          <!-- Step Info Card -->
+          <div class="step-card elevated-card-3d">
             <div class="step-header">
-              <h4 class="step-title orbitron-font">{{ step.title }}</h4>
-              <span class="step-status-tag">{{ step.status }}</span>
+              <div class="step-title-wrap">
+                <span class="step-index-lbl serif-title">NODE #0{{ step.node }}</span>
+                <h4 class="step-title serif-title">{{ step.title }}</h4>
+              </div>
+              <span [class]="'step-status-tag serif-title ' + (step.status === 'COMPLETED' ? 'completed-tag' : (step.status === 'IN_PROGRESS' ? 'progress-tag' : (step.status === 'UPCOMING' ? 'upcoming-tag' : 'locked-tag')))">
+                {{ step.status === 'COMPLETED' ? '✓ MASTERED' : (step.status === 'IN_PROGRESS' ? '⚡ ACTIVE NOW' : (step.status === 'UPCOMING' ? '⏳ NEXT STEP' : '🔒 LOCKED')) }}
+              </span>
             </div>
-            <span class="step-date">📅 {{ step.date }}</span>
+            
+            <div class="step-meta-row">
+              <span class="step-date serif-title">📅 {{ step.date }}</span>
+              <span class="step-action-hint serif-title" *ngIf="step.status === 'IN_PROGRESS'">🎯 Continue Learning →</span>
+              <span class="step-action-hint serif-title green-hint" *ngIf="step.status === 'COMPLETED'">⭐ Certificate Earned</span>
+            </div>
           </div>
         </div>
       </div>

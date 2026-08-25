@@ -1,141 +1,325 @@
 <div class="dashboard-page">
-  <!-- Holographic Hero Banner -->
-  <div class="hero-card glass-card">
+  <!-- Elevated 3D God-Level Hero Banner -->
+  <div class="hero-card wood-card elevated-3d">
+    <!-- Orbital Background Animations -->
+    <div class="orbital-bg-container">
+      <div class="orbit-ring ring-1"></div>
+      <div class="orbit-ring ring-2"></div>
+      <div class="orbit-ring ring-3"></div>
+      <div class="floating-particle p1">✨</div>
+      <div class="floating-particle p2">✦</div>
+      <div class="floating-particle p3">🌟</div>
+    </div>
+
     <div class="hero-user-profile">
       <!-- Clean Avatar Ring with Online Badge (Navigates to Profile) -->
-      <a routerLink="/profile" class="avatar-glow-ring" title="View Cybernetic Profile">
-        <img [src]="user.avatarUrl || 'assets/mentorhub-logo.png'" alt="Avatar" class="hero-avatar" />
-        <span class="online-badge" title="AI Net Online"></span>
+      <a routerLink="/profile" class="avatar-glow-ring avatar-crest-3d" title="View Profile">
+        <div class="avatar-bezel">
+          <img [src]="user.avatarUrl || 'assets/mentorhub-logo.png'" alt="Avatar" class="hero-avatar" />
+        </div>
+        <span class="online-badge beacon-pulse" title="AI Net Online"></span>
       </a>
 
       <div class="user-meta">
         <div class="welcome-row">
-          <span class="greeting-prefix orbitron-font">WELCOME BACK,</span>
-          <span class="level-pill orbitron-font" [class.mentee-pill]="user.role === 'MENTEE'" [class.admin-pill]="user.role === 'ADMIN'">
+          <span class="greeting-prefix">WELCOME BACK,</span>
+          <span class="level-pill pill-3d" [class.mentee-pill]="user.role === 'MENTEE'" [class.admin-pill]="user.role === 'ADMIN'">
             {{ user.role === 'ADMIN' ? '🛡️ SYSTEM OVERSEER' : (user.role === 'MENTEE' ? '⚡ SCHOLAR LVL ' + (user.level || 5) : '👑 MENTOR LVL ' + (user.level || 10)) }}
           </span>
+          <div class="gold-seal-emboss" title="Verified Master Credential">
+            <div class="seal-inner">👑</div>
+          </div>
         </div>
-        <h1 class="user-display-name orbitron-font">
+        <h1 class="user-display-name">
           <a routerLink="/profile" class="profile-link">{{ user.name }}</a>
         </h1>
 
-        <!-- XP Level Progress Bar -->
-        <div class="xp-level-bar-box">
+        <!-- XP Level Progress Bar (Shown for Mentors & Mentees) -->
+        <div class="xp-level-bar-box progress-well-3d" *ngIf="user.role !== 'ADMIN'">
           <div class="bar-info">
-            <span class="bar-lbl orbitron-font">LEVEL PROGRESS</span>
-            <span class="bar-val orbitron-font">{{ user.xpPoints || 4890 | number }} / {{ user.nextLevelXp || 6000 | number }} XP ({{ getXpPercentage() }}%)</span>
+            <span class="bar-lbl">LEVEL PROGRESS</span>
+            <span class="bar-val">{{ user.xpPoints || 4890 | number }} / {{ user.nextLevelXp || 6000 | number }} XP ({{ getXpPercentage() }}%)</span>
           </div>
-          <div class="track">
-            <div class="fill" [style.width.%]="getXpPercentage()"></div>
+          <div class="track debossed-track">
+            <div class="fill fill-3d" [style.width.%]="getXpPercentage()">
+              <div class="shine-sweep"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clean System Overseer Bar (Shown for ADMIN) -->
+        <div class="xp-level-bar-box progress-well-3d admin-telemetry-bar" *ngIf="user.role === 'ADMIN'">
+          <div class="bar-info">
+            <span class="bar-lbl serif-title">🛡️ SYSTEM OVERSEER PLATFORM TELEMETRY</span>
+            <span class="bar-val serif-title">FULL UNRESTRICTED ACCESS • 4 USERS • 99.98% UPTIME</span>
+          </div>
+          <div class="track debossed-track">
+            <div class="fill fill-3d admin-fill" style="width: 100%;">
+              <div class="shine-sweep"></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="hero-digital-clock">
-      <div class="clock-display orbitron-font">{{ currentTime || '13:58:46' }}</div>
+    <div class="hero-digital-clock clock-panel-3d">
+      <div class="clock-display">{{ currentTime || '13:58:46' }}</div>
       <div class="date-display">{{ currentDate }}</div>
-      <span class="status-net-pill orbitron-font">⚡ AI NET ONLINE 99.9%</span>
+      <span class="status-net-pill pulse-border">⚡ AI NET ONLINE 99.9%</span>
     </div>
   </div>
 
-  <!-- Top Stat Cards Grid (6-column layout) -->
-  <div class="stats-grid">
-    <div class="stat-card glass-card">
+  <!-- Top Stat Cards Grid (6-column layout with Graphical Mini Gauges) -->
+  <div class="stats-grid stat-cards-stagger">
+    <div class="stat-card clay-panel stat-card-3d">
+      <div class="grid-watermark"></div>
       <div class="stat-header">
         <span class="stat-title">TOTAL SESSIONS</span>
-        <span class="stat-badge cyan">↑ Active</span>
+        <span class="stat-badge cyan pulse-badge">↑ Active</span>
       </div>
-      <div class="stat-value orbitron-font">{{ user.totalSessions || 94 }}</div>
-      <div class="sparkline-bar"><span class="bar-fill" style="width: 82%;"></span></div>
+      <div class="stat-body-row">
+        <div class="stat-value animate-count">{{ user.totalSessions || 94 }}</div>
+        <div class="mini-gauge-wrap mini-gauge-3d">
+          <svg viewBox="0 0 36 36" class="stat-mini-svg">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--bg-surface-sunken)" stroke-width="3.5" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--accent-terracotta)" stroke-width="3.5" stroke-dasharray="82, 100" stroke-linecap="round" class="animate-dash" />
+          </svg>
+          <span class="mini-gauge-icon float-icon">🎯</span>
+        </div>
+      </div>
+      <div class="sparkline-bar debossed-bar"><span class="bar-fill animated-bar-fill" style="width: 82%;"></span></div>
     </div>
 
-    <div class="stat-card glass-card xp-highlighted">
+    <div class="stat-card clay-panel xp-highlighted stat-card-3d">
+      <div class="grid-watermark"></div>
       <div class="stat-header">
         <span class="stat-title">XP POINTS</span>
-        <span class="stat-badge green">↑ Level Up!</span>
+        <span class="stat-badge green pulse-badge">↑ Level Up!</span>
       </div>
-      <div class="stat-value orbitron-font purple-glow">{{ user.xpPoints || 4890 | number }}</div>
-      <div class="sparkline-bar purple"><span class="bar-fill" style="width: 88%;"></span></div>
+      <div class="stat-body-row">
+        <div class="stat-value purple-glow animate-count">{{ user.xpPoints || 4890 | number }}</div>
+        <div class="mini-gauge-wrap mini-gauge-3d">
+          <svg viewBox="0 0 36 36" class="stat-mini-svg">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--bg-surface-sunken)" stroke-width="3.5" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--accent-amber)" stroke-width="3.5" stroke-dasharray="88, 100" stroke-linecap="round" class="animate-dash" />
+          </svg>
+          <span class="mini-gauge-icon float-icon">✨</span>
+        </div>
+      </div>
+      <div class="sparkline-bar purple debossed-bar"><span class="bar-fill animated-bar-fill" style="width: 88%;"></span></div>
     </div>
 
-    <div class="stat-card glass-card">
+    <div class="stat-card clay-panel stat-card-3d">
+      <div class="grid-watermark"></div>
       <div class="stat-header">
         <span class="stat-title">CURRENT STREAK</span>
-        <span class="stat-badge orange">🔥 On Fire</span>
+        <span class="stat-badge orange pulse-badge">🔥 On Fire</span>
       </div>
-      <div class="stat-value orbitron-font orange-glow">{{ user.currentStreak || 32 }}d</div>
-      <div class="sparkline-bar orange"><span class="bar-fill" style="width: 90%;"></span></div>
+      <div class="stat-body-row">
+        <div class="stat-value orange-glow animate-count">{{ user.currentStreak || 32 }}d</div>
+        <div class="mini-gauge-wrap mini-gauge-3d">
+          <svg viewBox="0 0 36 36" class="stat-mini-svg">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--bg-surface-sunken)" stroke-width="3.5" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#DE7048" stroke-width="3.5" stroke-dasharray="90, 100" stroke-linecap="round" class="animate-dash" />
+          </svg>
+          <span class="mini-gauge-icon float-icon">🔥</span>
+        </div>
+      </div>
+      <div class="sparkline-bar orange debossed-bar"><span class="bar-fill animated-bar-fill" style="width: 90%;"></span></div>
     </div>
 
-    <div class="stat-card glass-card">
+    <div class="stat-card clay-panel stat-card-3d">
+      <div class="grid-watermark"></div>
       <div class="stat-header">
         <span class="stat-title">BADGES EARNED</span>
-        <span class="stat-badge cyan">↑ Collecting</span>
+        <span class="stat-badge cyan pulse-badge">↑ Collecting</span>
       </div>
-      <div class="stat-value orbitron-font">{{ user.badgesCount || 16 }}</div>
-      <div class="sparkline-bar"><span class="bar-fill" style="width: 70%;"></span></div>
+      <div class="stat-body-row">
+        <div class="stat-value animate-count">{{ user.badgesCount || 16 }}</div>
+        <div class="mini-gauge-wrap mini-gauge-3d">
+          <svg viewBox="0 0 36 36" class="stat-mini-svg">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--bg-surface-sunken)" stroke-width="3.5" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--accent-terracotta)" stroke-width="3.5" stroke-dasharray="70, 100" stroke-linecap="round" class="animate-dash" />
+          </svg>
+          <span class="mini-gauge-icon float-icon">🏆</span>
+        </div>
+      </div>
+      <div class="sparkline-bar debossed-bar"><span class="bar-fill animated-bar-fill" style="width: 70%;"></span></div>
     </div>
 
-    <div class="stat-card glass-card">
+    <div class="stat-card clay-panel stat-card-3d">
+      <div class="grid-watermark"></div>
       <div class="stat-header">
         <span class="stat-title">{{ user.role === 'MENTEE' ? 'HOURS LEARNED' : (user.role === 'ADMIN' ? 'PLATFORM HOURS' : 'HOURS MENTORED') }}</span>
-        <span class="stat-badge green">↑ {{ user.role === 'MENTEE' ? 'Learning' : 'Teaching' }}</span>
+        <span class="stat-badge green pulse-badge">↑ {{ user.role === 'MENTEE' ? 'Learning' : 'Teaching' }}</span>
       </div>
-      <div class="stat-value orbitron-font green-glow">{{ user.hoursMentored || 142 }}h</div>
-      <div class="sparkline-bar green"><span class="bar-fill" style="width: 95%;"></span></div>
+      <div class="stat-body-row">
+        <div class="stat-value green-glow animate-count">{{ user.hoursMentored || 142 }}h</div>
+        <div class="mini-gauge-wrap mini-gauge-3d">
+          <svg viewBox="0 0 36 36" class="stat-mini-svg">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--bg-surface-sunken)" stroke-width="3.5" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--accent-forest)" stroke-width="3.5" stroke-dasharray="95, 100" stroke-linecap="round" class="animate-dash" />
+          </svg>
+          <span class="mini-gauge-icon float-icon">⏱️</span>
+        </div>
+      </div>
+      <div class="sparkline-bar green debossed-bar"><span class="bar-fill animated-bar-fill" style="width: 95%;"></span></div>
     </div>
 
-    <div class="stat-card glass-card">
+    <div class="stat-card clay-panel stat-card-3d">
+      <div class="grid-watermark"></div>
       <div class="stat-header">
         <span class="stat-title">AVG. RATING</span>
-        <span class="stat-badge gold">⭐ Excellent</span>
+        <span class="stat-badge gold pulse-badge">⭐ Excellent</span>
       </div>
-      <div class="stat-value orbitron-font gold-glow">{{ user.rating || 5.0 }}</div>
-      <div class="sparkline-bar gold"><span class="bar-fill" style="width: 100%;"></span></div>
+      <div class="stat-body-row">
+        <div class="stat-value gold-glow animate-count">{{ user.rating || 5.0 }}</div>
+        <div class="mini-gauge-wrap mini-gauge-3d">
+          <svg viewBox="0 0 36 36" class="stat-mini-svg">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--bg-surface-sunken)" stroke-width="3.5" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#D4AF37" stroke-width="3.5" stroke-dasharray="100, 100" stroke-linecap="round" class="animate-dash" />
+          </svg>
+          <span class="mini-gauge-icon float-icon">⭐</span>
+        </div>
+      </div>
+      <div class="sparkline-bar gold debossed-bar"><span class="bar-fill animated-bar-fill" style="width: 100%;"></span></div>
     </div>
   </div>
 
   <!-- Mid Section: Analytics Velocity + Radial Gauges -->
   <div class="middle-section">
-    <!-- Mentorship Velocity Wave Chart -->
-    <div class="chart-card glass-card">
+    <!-- Mentorship Velocity Wave Chart (God Level 3D Precision Graph) -->
+    <div class="chart-card clay-panel elevated-card-3d">
       <div class="card-header">
         <div class="title-group">
-          <span class="chart-icon">📈</span>
-          <h2 class="orbitron-font">MENTORSHIP SYNC VELOCITY</h2>
+          <span class="chart-icon float-icon">📈</span>
+          <h2 class="serif-title">MENTORSHIP SYNC VELOCITY</h2>
         </div>
-        <span class="time-range-pill">WEEKLY TREND</span>
+        <div class="chart-legend-row">
+          <span class="legend-chip serif-title"><span class="chip-dot glow"></span> LIVE SYNC TREND</span>
+          <span class="time-range-pill pulse-badge">WEEKLY TREND</span>
+        </div>
       </div>
 
       <div class="svg-chart-container">
-        <svg viewBox="0 0 700 220" class="velocity-svg">
+        <svg viewBox="0 0 700 230" class="velocity-svg">
           <defs>
             <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#00D4FF" />
-              <stop offset="50%" stop-color="#A855F7" />
-              <stop offset="100%" stop-color="#4ADE80" />
+              <stop offset="0%" stop-color="#DE7048" />
+              <stop offset="35%" stop-color="#C85A32" />
+              <stop offset="65%" stop-color="#B35E17" />
+              <stop offset="85%" stop-color="#D4AF37" />
+              <stop offset="100%" stop-color="#2A5A3D" />
             </linearGradient>
 
             <linearGradient id="areaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="rgba(0, 212, 255, 0.25)" />
-              <stop offset="100%" stop-color="rgba(0, 212, 255, 0)" />
+              <stop offset="0%" stop-color="rgba(222, 112, 72, 0.38)" />
+              <stop offset="40%" stop-color="rgba(200, 90, 50, 0.18)" />
+              <stop offset="80%" stop-color="rgba(212, 175, 55, 0.08)" />
+              <stop offset="100%" stop-color="rgba(42, 90, 61, 0)" />
             </linearGradient>
+
+            <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="rgba(200, 90, 50, 0.45)" />
+            </filter>
+
+            <filter id="nodeGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(222, 112, 72, 0.6)" />
+            </filter>
+
+            <filter id="peakGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="rgba(42, 90, 61, 0.8)" />
+            </filter>
           </defs>
 
-          <!-- Smooth Bezier Area Fill -->
-          <path d="M 40 180 C 140 100, 220 190, 320 130 C 420 70, 500 160, 660 50 L 660 200 L 40 200 Z" fill="url(#areaGrad)" />
-          
-          <!-- Curved Neon Line -->
-          <path d="M 40 180 C 140 100, 220 190, 320 130 C 420 70, 500 160, 660 50" fill="none" stroke="url(#waveGrad)" stroke-width="4.5" stroke-linecap="round" />
+          <!-- Horizontal Grid Guidelines with Y-Axis Percentage Labels -->
+          <g class="grid-lines">
+            <line x1="45" y1="45" x2="655" y2="45" stroke="rgba(166, 59, 25, 0.12)" stroke-dasharray="4 6" stroke-width="1.5" />
+            <text x="35" y="49" fill="var(--text-tertiary)" font-size="10" font-weight="700" text-anchor="end" class="serif-title">100%</text>
 
-          <!-- Pulsing Data Nodes -->
-          <circle cx="40" cy="180" r="5" fill="#00D4FF" />
-          <circle cx="215" cy="182" r="5" fill="#38BDF8" />
-          <circle cx="320" cy="130" r="6" fill="#A855F7" />
-          <circle cx="435" cy="85" r="7" fill="#00D4FF" />
-          <circle cx="530" cy="142" r="5" fill="#38BDF8" />
-          <circle cx="660" cy="50" r="6" fill="#4ADE80" />
+            <line x1="45" y1="95" x2="655" y2="95" stroke="rgba(166, 59, 25, 0.12)" stroke-dasharray="4 6" stroke-width="1.5" />
+            <text x="35" y="99" fill="var(--text-tertiary)" font-size="10" font-weight="700" text-anchor="end" class="serif-title">75%</text>
+
+            <line x1="45" y1="145" x2="655" y2="145" stroke="rgba(166, 59, 25, 0.12)" stroke-dasharray="4 6" stroke-width="1.5" />
+            <text x="35" y="149" fill="var(--text-tertiary)" font-size="10" font-weight="700" text-anchor="end" class="serif-title">50%</text>
+
+            <line x1="45" y1="195" x2="655" y2="195" stroke="rgba(166, 59, 25, 0.12)" stroke-dasharray="4 6" stroke-width="1.5" />
+            <text x="35" y="199" fill="var(--text-tertiary)" font-size="10" font-weight="700" text-anchor="end" class="serif-title">25%</text>
+          </g>
+
+          <!-- Vertical Laser Guidelines -->
+          <g class="vertical-laser-lines">
+            <line x1="50" y1="45" x2="50" y2="195" stroke="rgba(166, 59, 25, 0.1)" stroke-dasharray="3 4" stroke-width="1" />
+            <line x1="150" y1="45" x2="150" y2="195" stroke="rgba(166, 59, 25, 0.1)" stroke-dasharray="3 4" stroke-width="1" />
+            <line x1="250" y1="45" x2="250" y2="195" stroke="rgba(166, 59, 25, 0.1)" stroke-dasharray="3 4" stroke-width="1" />
+            <line x1="350" y1="45" x2="350" y2="195" stroke="rgba(166, 59, 25, 0.1)" stroke-dasharray="3 4" stroke-width="1" />
+            <line x1="450" y1="45" x2="450" y2="195" stroke="rgba(166, 59, 25, 0.1)" stroke-dasharray="3 4" stroke-width="1" />
+            <line x1="550" y1="45" x2="550" y2="195" stroke="rgba(166, 59, 25, 0.1)" stroke-dasharray="3 4" stroke-width="1" />
+            <line x1="650" y1="45" x2="650" y2="195" stroke="rgba(166, 59, 25, 0.1)" stroke-dasharray="3 4" stroke-width="1" />
+          </g>
+
+          <!-- Smooth Bezier Area Fill -->
+          <path d="M 50 165 C 100 145, 110 135, 150 135 C 190 135, 210 148, 250 148 C 290 148, 305 110, 350 110 C 395 110, 410 90, 450 90 C 490 90, 510 120, 550 120 C 590 120, 600 48, 650 48 L 650 205 L 50 205 Z" fill="url(#areaGrad)" class="chart-area-fill" />
+          
+          <!-- Animated Master Curved Line -->
+          <path d="M 50 165 C 100 145, 110 135, 150 135 C 190 135, 210 148, 250 148 C 290 148, 305 110, 350 110 C 395 110, 410 90, 450 90 C 490 90, 510 120, 550 120 C 590 120, 600 48, 650 48" fill="none" stroke="url(#waveGrad)" stroke-width="5" stroke-linecap="round" class="animated-chart-line" filter="url(#glowFilter)" />
+
+          <!-- Data Node Groups (Node + Tooltip Tag + Glow) -->
+          <!-- 1. MON (x=50, y=165) -->
+          <g class="graph-node-group">
+            <rect x="26" y="135" width="48" height="20" rx="10" fill="#3D1C0B" opacity="0.92" class="tooltip-badge-bg" />
+            <text x="50" y="149" fill="#FAF4EE" font-size="10" font-weight="900" text-anchor="middle" class="serif-title">62%</text>
+            <circle cx="50" cy="165" r="10" fill="rgba(222, 112, 72, 0.25)" class="node-glow" />
+            <circle cx="50" cy="165" r="5.5" fill="#DE7048" stroke="#FAF4EE" stroke-width="2" class="node-dot" filter="url(#nodeGlow)" />
+          </g>
+
+          <!-- 2. TUE (x=150, y=135) -->
+          <g class="graph-node-group">
+            <rect x="126" y="105" width="48" height="20" rx="10" fill="#3D1C0B" opacity="0.92" class="tooltip-badge-bg" />
+            <text x="150" y="119" fill="#FAF4EE" font-size="10" font-weight="900" text-anchor="middle" class="serif-title">74%</text>
+            <circle cx="150" cy="135" r="10" fill="rgba(200, 90, 50, 0.25)" class="node-glow" />
+            <circle cx="150" cy="135" r="5.5" fill="#C85A32" stroke="#FAF4EE" stroke-width="2" class="node-dot" filter="url(#nodeGlow)" />
+          </g>
+
+          <!-- 3. WED (x=250, y=148) -->
+          <g class="graph-node-group">
+            <rect x="226" y="118" width="48" height="20" rx="10" fill="#3D1C0B" opacity="0.92" class="tooltip-badge-bg" />
+            <text x="250" y="132" fill="#FAF4EE" font-size="10" font-weight="900" text-anchor="middle" class="serif-title">68%</text>
+            <circle cx="250" cy="148" r="10" fill="rgba(200, 90, 50, 0.25)" class="node-glow" />
+            <circle cx="250" cy="148" r="5.5" fill="#C85A32" stroke="#FAF4EE" stroke-width="2" class="node-dot" filter="url(#nodeGlow)" />
+          </g>
+
+          <!-- 4. THU (x=350, y=110) -->
+          <g class="graph-node-group">
+            <rect x="326" y="80" width="48" height="20" rx="10" fill="#3D1C0B" opacity="0.92" class="tooltip-badge-bg" />
+            <text x="350" y="94" fill="#FAF4EE" font-size="10" font-weight="900" text-anchor="middle" class="serif-title">82%</text>
+            <circle cx="350" cy="110" r="11" fill="rgba(179, 94, 23, 0.25)" class="node-glow" />
+            <circle cx="350" cy="110" r="6.5" fill="#B35E17" stroke="#FAF4EE" stroke-width="2" class="node-dot" filter="url(#nodeGlow)" />
+          </g>
+
+          <!-- 5. FRI (x=450, y=90) -->
+          <g class="graph-node-group">
+            <rect x="426" y="60" width="48" height="20" rx="10" fill="#3D1C0B" opacity="0.92" class="tooltip-badge-bg" />
+            <text x="450" y="74" fill="#FAF4EE" font-size="10" font-weight="900" text-anchor="middle" class="serif-title">88%</text>
+            <circle cx="450" cy="90" r="12" fill="rgba(222, 112, 72, 0.3)" class="node-glow" />
+            <circle cx="450" cy="90" r="7" fill="#DE7048" stroke="#FAF4EE" stroke-width="2" class="node-dot" filter="url(#nodeGlow)" />
+          </g>
+
+          <!-- 6. SAT (x=550, y=120) -->
+          <g class="graph-node-group">
+            <rect x="526" y="90" width="48" height="20" rx="10" fill="#3D1C0B" opacity="0.92" class="tooltip-badge-bg" />
+            <text x="550" y="104" fill="#FAF4EE" font-size="10" font-weight="900" text-anchor="middle" class="serif-title">78%</text>
+            <circle cx="550" cy="120" r="10" fill="rgba(200, 90, 50, 0.25)" class="node-glow" />
+            <circle cx="550" cy="120" r="5.5" fill="#C85A32" stroke="#FAF4EE" stroke-width="2" class="node-dot" filter="url(#nodeGlow)" />
+          </g>
+
+          <!-- 7. SUN - ALL-TIME PEAK (x=650, y=48) -->
+          <g class="graph-node-group peak-group">
+            <rect x="600" y="14" width="92" height="24" rx="12" fill="url(#waveGrad)" class="tooltip-badge-bg peak-badge" />
+            <text x="646" y="30" fill="#FAF4EE" font-size="11" font-weight="900" text-anchor="middle" class="serif-title">98% PEAK 🔥</text>
+            <circle cx="650" cy="48" r="16" fill="rgba(42, 90, 61, 0.4)" class="node-glow active-peak" />
+            <circle cx="650" cy="48" r="8" fill="#2A5A3D" stroke="#FAF4EE" stroke-width="2.5" class="node-dot active-peak" filter="url(#peakGlow)" />
+          </g>
         </svg>
 
         <div class="x-axis-labels">
@@ -151,88 +335,112 @@
     </div>
 
     <!-- Radial Gauges (Goal Achievements) -->
-    <div class="radial-card glass-card">
+    <div class="radial-card clay-panel elevated-card-3d">
       <div class="card-header">
         <div class="title-group">
-          <span class="chart-icon">🎯</span>
-          <h2 class="orbitron-font">GOAL ACHIEVEMENTS</h2>
+          <span class="chart-icon float-icon">🎯</span>
+          <h2 class="serif-title">GOAL ACHIEVEMENTS</h2>
         </div>
-        <span class="target-pill orbitron-font">TARGET 90%+</span>
+        <span class="target-pill pulse-badge">TARGET 90%+</span>
       </div>
 
-      <div class="gauges-container">
-        <div *ngFor="let gauge of radialGauges" class="gauge-item">
-          <div class="gauge-circle-box">
+      <div class="gauges-container gauges-stagger">
+        <div *ngFor="let gauge of radialGauges" class="gauge-item gauge-item-3d">
+          <div class="gauge-circle-box skeletal-sphere-3d">
+            <div class="inner-glow"></div>
             <svg viewBox="0 0 120 120" class="gauge-svg">
               <!-- Background Circle -->
-              <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="10" />
+              <circle cx="60" cy="60" r="50" fill="none" stroke="var(--bg-surface-sunken)" stroke-width="11" class="gauge-bg-ring" />
               <!-- Progress Circle -->
-              <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="gauge.color" stroke-width="10" stroke-linecap="round" [attr.stroke-dasharray]="gauge.strokeDash" stroke-dashoffset="0" transform="rotate(-90 60 60)" />
+              <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="gauge.color" stroke-width="11" stroke-linecap="round" [attr.stroke-dasharray]="gauge.strokeDash" stroke-dashoffset="0" transform="rotate(-90 60 60)" class="gauge-progress-circle glow-stroke" />
             </svg>
-            <span class="gauge-percent orbitron-font">{{ gauge.percent }}%</span>
+            <span class="gauge-percent animate-count">{{ gauge.percent }}%</span>
           </div>
-          <span class="gauge-title">{{ gauge.title }}</span>
+          <span class="gauge-title serif-title">{{ gauge.title }}</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Bottom Section: Upcoming Sessions + Cyber Radar Feed -->
+  <!-- Bottom Section: Upcoming Sessions + Radar Feed (God Level 3D Studio Layout) -->
   <div class="bottom-section">
     <!-- Upcoming Sessions List -->
-    <div class="sessions-card glass-card">
+    <div class="sessions-card clay-panel elevated-card-3d">
       <div class="card-header">
         <div class="title-group">
-          <span class="chart-icon">📅</span>
-          <h2 class="orbitron-font">UPCOMING MENTORSHIP SESSIONS</h2>
+          <span class="chart-icon float-icon">📅</span>
+          <h2 class="serif-title">UPCOMING MENTORSHIP SESSIONS</h2>
         </div>
-        <a routerLink="/sessions" class="view-all-link">VIEW ALL →</a>
+        <a routerLink="/sessions" class="view-all-link tactile-btn-3d serif-title">VIEW ALL →</a>
       </div>
 
-      <div class="sessions-list">
-        <div *ngFor="let session of upcomingSessions" class="session-row">
-          <img [src]="session.avatar || 'assets/mentorhub-logo.png'" alt="Avatar" class="session-avatar" />
+      <div class="sessions-list list-stagger">
+        <div *ngFor="let session of upcomingSessions" class="session-row list-pill-3d tactile-btn-3d">
+          <div class="avatar-box avatar-crest-3d mini gold-seal-emboss">
+            <img [src]="session.avatar || 'assets/mentorhub-logo.png'" alt="Avatar" class="session-avatar" />
+            <span class="session-indicator beacon-pulse"></span>
+          </div>
           <div class="session-info">
-            <h4 class="topic-title orbitron-font">{{ session.topic }}</h4>
-            <span class="mentor-name">{{ user.role === 'MENTOR' ? ('Mentee: ' + session.mentee) : ('Mentor: ' + session.mentor) }}</span>
+            <h4 class="topic-title serif-title">{{ session.topic }}</h4>
+            <span class="mentor-name serif-title">{{ user.role === 'MENTOR' ? ('Mentee: ' + session.mentee) : ('Mentor: ' + session.mentor) }}</span>
           </div>
           <div class="session-meta">
-            <span class="time-text">{{ session.time }}</span>
-            <span [class]="'status-pill ' + session.status.toLowerCase()">{{ session.status }}</span>
+            <span class="time-text serif-title">🕒 {{ session.time }}</span>
+            <span [class]="'status-pill status-pill-3d serif-title ' + session.status.toLowerCase()">
+              {{ session.status === 'CONFIRMED' ? '✓ CONFIRMED' : (session.status === 'UPCOMING' ? '⌛ UPCOMING' : '🎉 COMPLETED') }}
+            </span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Cyber Radar Feed -->
-    <div class="radar-card glass-card">
+    <!-- Real-Time Activity Radar Feed -->
+    <div class="radar-card clay-panel elevated-card-3d">
       <div class="card-header">
         <div class="title-group">
-          <span class="chart-icon">📡</span>
-          <h2 class="orbitron-font">REAL-TIME ACTIVITY RADAR</h2>
+          <span class="chart-icon pulse-icon">📡</span>
+          <h2 class="serif-title">REAL-TIME ACTIVITY RADAR</h2>
         </div>
-        <span class="live-tag orbitron-font">● LIVE</span>
+        <span class="live-tag pulse-badge serif-title"><span class="radar-ping"></span>● LIVE RADAR</span>
       </div>
 
-      <div class="radar-feed-list">
-        <div *ngFor="let item of radarFeed" class="feed-item">
-          <span class="item-icon">{{ item.icon }}</span>
+      <div class="radar-feed-list feed-stagger">
+        <div *ngFor="let item of radarFeed" class="feed-item feed-item-3d tactile-btn-3d" [class]="'feed-' + (item.type ? item.type.toLowerCase() : 'info')">
+          <div class="feed-icon-box icon-box-3d gold-seal-emboss">
+            <span class="item-icon">{{ item.icon }}</span>
+          </div>
           <div class="feed-content">
-            <p class="feed-text">{{ item.text }}</p>
-            <span class="feed-time">{{ item.time }}</span>
+            <p class="feed-text serif-title">{{ item.text }}</p>
+            <span class="feed-time serif-title">⏱️ {{ item.time }}</span>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Quick Action Floating Bar -->
-  <div class="quick-actions-bar glass-card">
-    <div class="actions-title orbitron-font">QUICK COMMANDS</div>
-    <div class="actions-buttons">
-      <a *ngFor="let action of quickActions" [routerLink]="action.route" class="action-btn">
-        <span class="act-icon">{{ action.icon }}</span>
-        <span class="act-name">{{ action.title }}</span>
+  <!-- 3D God-Level Studio Command Deck -->
+  <div class="quick-actions-bar clay-panel elevated-card-3d command-dock-3d">
+    <div class="dock-header">
+      <div class="dock-seal-box gold-seal-emboss">
+        <span class="dock-glyph">⚡</span>
+      </div>
+      <div class="dock-title-group">
+        <h2 class="actions-title serif-title">QUICK COMMANDS</h2>
+        <span class="dock-sub-pill pulse-badge serif-title">● 8 ACTIVE MODULES</span>
+      </div>
+    </div>
+
+    <div class="command-deck-grid">
+      <a *ngFor="let action of quickActions" [routerLink]="action.route" class="command-keycap-3d tactile-btn-3d" [title]="action.desc">
+        <div class="keycap-icon-box gold-seal-emboss" [style.background]="action.color + '18'" [style.border-color]="action.color + '40'">
+          <span class="act-icon">{{ action.icon }}</span>
+        </div>
+        <div class="keycap-info">
+          <span class="act-name serif-title">{{ action.title }}</span>
+          <span class="act-desc serif-title">{{ action.desc }}</span>
+        </div>
+        <span class="hotkey-badge keycap-tile serif-title">[{{ action.hotkey }}]</span>
+        <div class="keycap-shine"></div>
       </a>
     </div>
   </div>

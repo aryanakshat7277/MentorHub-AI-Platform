@@ -1,145 +1,265 @@
 <div class="goals-page">
-  <div class="page-header">
-    <div>
-      <h1 class="orbitron-font">S.M.A.R.T. GOAL TRACKER</h1>
-      <p class="subtitle">Structured milestone management & peer accountability matrix</p>
-    </div>
-
-    <button class="btn-cyan" (click)="showCreateModal = true">+ ADD NEW GOAL</button>
-  </div>
-
-  <!-- Overall Progress Banner (65%) -->
-  <div class="overall-progress-banner glass-card">
-    <div class="progress-info">
-      <div>
-        <span class="banner-title orbitron-font">OVERALL MILESTONE COMPLETION</span>
-        <p class="banner-sub">Tracking active peer mentoring objectives</p>
+  <!-- Page Header with 3D Seal and Action Button -->
+  <div class="page-header-row">
+    <div class="header-branding">
+      <div class="gold-seal-emboss header-seal" title="SMART Milestone Tracking Matrix">
+        <span class="seal-glyph">🎯</span>
       </div>
-      <span class="progress-pct-display orbitron-font">{{ overallProgress }}%</span>
+      <div>
+        <div class="title-with-pill">
+          <h1 class="serif-title">S.M.A.R.T. GOAL TRACKER</h1>
+          <span class="status-pill active-matrix-pill">⚡ MATRIX ACTIVE</span>
+        </div>
+        <p class="subtitle serif-title">Structured milestone management & peer accountability matrix</p>
+      </div>
     </div>
-    <div class="progress-track">
-      <div class="progress-fill" [style.width.%]="overallProgress"></div>
+
+    <button class="btn-primary create-goal-btn tactile-btn-3d serif-title" (click)="showCreateModal = true">
+      <span class="btn-icon">✨</span>
+      <span>+ ADD NEW SMART GOAL</span>
+      <span class="shine-sweep"></span>
+    </button>
+  </div>
+
+  <!-- Overall Progress Banner (Elevated 3D Studio Panel) -->
+  <div class="overall-progress-banner clay-panel elevated-card-3d">
+    <div class="banner-particles-bg">
+      <div class="ambient-orbit orbit-1"></div>
+      <div class="ambient-orbit orbit-2"></div>
+    </div>
+
+    <div class="progress-info-row">
+      <div class="progress-meta-col">
+        <div class="badge-row">
+          <span class="matrix-tag serif-title">📈 PEER ACCOUNTABILITY METRIC</span>
+          <span class="cadence-tag pulse-badge">● LIVE SYNC</span>
+        </div>
+        <h3 class="banner-title serif-title">OVERALL MILESTONE COMPLETION</h3>
+        <p class="banner-sub serif-title">Targeting 100% mastery across active engineering & mentorship paths</p>
+      </div>
+
+      <div class="completion-gauge-box">
+        <div class="gauge-dial-container">
+          <svg viewBox="0 0 100 100" class="banner-radial-svg">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--bg-surface-sunken)" stroke-width="8" class="dial-bg" />
+            <circle cx="50" cy="50" r="42" fill="none" stroke="url(#goalProgressGrad)" stroke-width="8" stroke-linecap="round" 
+                    [attr.stroke-dasharray]="(overallProgress * 2.64) + ', 264'" class="dial-fill" />
+            <defs>
+              <linearGradient id="goalProgressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#DE7048" />
+                <stop offset="50%" stop-color="#D4AF37" />
+                <stop offset="100%" stop-color="#2A5A3D" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="dial-center-text">
+            <span class="progress-pct-display serif-title">{{ overallProgress }}%</span>
+            <span class="dial-sub-lbl">COMPLETE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-track debossed-track">
+      <div class="progress-fill animated-bar-fill" [style.width.%]="overallProgress">
+        <div class="shine-sweep-bar"></div>
+        <div class="comet-node"></div>
+      </div>
     </div>
   </div>
 
-  <!-- 3D Letter Block Cards Row -->
-  <div class="smart-blocks-row">
-    <div *ngFor="let block of smartBlocks" class="smart-block-card glass-card" [style.border-top-color]="block.color">
+  <!-- 3D SMART Principle Letter Block Cards Row -->
+  <div class="smart-blocks-row grid-stagger">
+    <div *ngFor="let block of smartBlocks" class="smart-block-card clay-panel 3d-cube-tile" [style.border-top-color]="block.color">
       <div class="block-3d-letter" [style.background]="block.color">
-        <span class="letter orbitron-font">{{ block.letter }}</span>
-        <span class="block-icon" *ngIf="block.letter === 'M'">🖥️</span>
+        <div class="letter-specular-sheen"></div>
+        <span class="letter serif-title">{{ block.letter }}</span>
+        <span class="block-icon float-icon">{{ block.icon }}</span>
       </div>
       <div class="block-info">
-        <span class="block-name orbitron-font" [style.color]="block.color">{{ block.name }}</span>
-        <span class="block-desc">Framework Principle</span>
+        <span class="block-name serif-title" [style.color]="block.color">{{ block.name }}</span>
+        <span class="block-desc serif-title">Framework Principle</span>
       </div>
+      <div class="cube-bottom-edge" [style.background]="block.color"></div>
     </div>
   </div>
 
   <!-- Kanban Status Columns (TO DO, IN PROGRESS, ACHIEVED) -->
-  <div class="kanban-board">
+  <div class="kanban-board kanban-stagger">
     <!-- TO DO Column -->
-    <div class="kanban-column glass-card">
+    <div class="kanban-column clay-panel inset-column-well">
       <div class="column-header">
-        <span class="column-title orbitron-font text-orange">⏳ TO DO</span>
-        <span class="count-pill">{{ getGoalsByStatus('TO_DO').length }}</span>
+        <div class="header-left">
+          <span class="column-beacon amber-beacon"></span>
+          <span class="column-title text-orange serif-title">⏳ TO DO</span>
+        </div>
+        <span class="count-pill count-amber">{{ getGoalsByStatus('TO_DO').length }}</span>
       </div>
-      <div class="column-cards">
-        <div *ngFor="let g of getGoalsByStatus('TO_DO')" class="kanban-card">
-          <div class="card-category-badge" [class]="'cat-' + g.category">{{ g.category }} - {{ g.categoryName }}</div>
-          <h4 class="card-title orbitron-font">{{ g.title }}</h4>
-          <p class="card-desc">{{ g.description }}</p>
-          <div class="card-footer">
-            <span class="target-date">📅 {{ g.targetDate }}</span>
-            <button class="btn-outline btn-xs" (click)="updateGoalStatus(g, 'IN_PROGRESS')">START →</button>
+      <div class="column-cards list-stagger">
+        <div *ngFor="let g of getGoalsByStatus('TO_DO')" class="kanban-card elevated-card-3d">
+          <div class="card-top-bar">
+            <div class="card-category-badge cat-pill" [class]="'cat-' + g.category">
+              <span class="cat-dot"></span>
+              <span class="cat-text serif-title">{{ g.category }} - {{ g.categoryName }}</span>
+            </div>
+            <span class="card-time-badge">⏱️ ACTIVE</span>
           </div>
+          
+          <h4 class="card-title serif-title">{{ g.title }}</h4>
+          <p class="card-desc serif-title">{{ g.description }}</p>
+
+          <div class="card-footer">
+            <span class="target-date serif-title">📅 {{ g.targetDate }}</span>
+            <button class="btn-outline btn-xs tactile-btn-3d serif-title" (click)="updateGoalStatus(g, 'IN_PROGRESS')">
+              <span>START GOAL →</span>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="getGoalsByStatus('TO_DO').length === 0" class="empty-column-card">
+          <span>✨ No pending goals in queue</span>
         </div>
       </div>
     </div>
 
     <!-- IN PROGRESS Column -->
-    <div class="kanban-column glass-card">
+    <div class="kanban-column clay-panel inset-column-well">
       <div class="column-header">
-        <span class="column-title orbitron-font text-cyan">⚡ IN PROGRESS</span>
-        <span class="count-pill">{{ getGoalsByStatus('IN_PROGRESS').length }}</span>
+        <div class="header-left">
+          <span class="column-beacon terracotta-beacon beacon-pulse"></span>
+          <span class="column-title text-cyan serif-title">⚡ IN PROGRESS</span>
+        </div>
+        <span class="count-pill count-terracotta">{{ getGoalsByStatus('IN_PROGRESS').length }}</span>
       </div>
-      <div class="column-cards">
-        <div *ngFor="let g of getGoalsByStatus('IN_PROGRESS')" class="kanban-card">
-          <div class="card-category-badge" [class]="'cat-' + g.category">{{ g.category }} - {{ g.categoryName }}</div>
-          <h4 class="card-title orbitron-font">{{ g.title }}</h4>
-          <p class="card-desc">{{ g.description }}</p>
+      <div class="column-cards list-stagger">
+        <div *ngFor="let g of getGoalsByStatus('IN_PROGRESS')" class="kanban-card elevated-card-3d in-progress-glow">
+          <div class="card-top-bar">
+            <div class="card-category-badge cat-pill" [class]="'cat-' + g.category">
+              <span class="cat-dot"></span>
+              <span class="cat-text serif-title">{{ g.category }} - {{ g.categoryName }}</span>
+            </div>
+            <span class="card-time-badge live-pulse-badge">🔥 ACCELERATING</span>
+          </div>
 
-          <div class="card-progress">
+          <h4 class="card-title serif-title">{{ g.title }}</h4>
+          <p class="card-desc serif-title">{{ g.description }}</p>
+
+          <div class="card-progress debossed-well">
             <div class="prog-info">
-              <span>Progress</span>
-              <span class="pct">{{ g.progressPercentage }}%</span>
+              <span class="prog-lbl serif-title">Milestone Velocity</span>
+              <span class="pct serif-title">{{ g.progressPercentage }}%</span>
             </div>
             <div class="prog-bar">
-              <div class="fill" [style.width.%]="g.progressPercentage"></div>
+              <div class="fill" [style.width.%]="g.progressPercentage">
+                <div class="shine-sweep-bar"></div>
+              </div>
             </div>
           </div>
 
           <div class="card-footer">
-            <span class="target-date">📅 {{ g.targetDate }}</span>
-            <button class="btn-cyan btn-xs" (click)="updateGoalStatus(g, 'ACHIEVED')">COMPLETE ✓</button>
+            <span class="target-date serif-title">📅 {{ g.targetDate }}</span>
+            <button class="btn-primary btn-xs tactile-btn-3d serif-title" (click)="updateGoalStatus(g, 'ACHIEVED')">
+              <span>COMPLETE ✓</span>
+            </button>
           </div>
+        </div>
+
+        <div *ngIf="getGoalsByStatus('IN_PROGRESS').length === 0" class="empty-column-card">
+          <span>🎯 Ready to accelerate next milestone</span>
         </div>
       </div>
     </div>
 
     <!-- ACHIEVED Column -->
-    <div class="kanban-column glass-card">
+    <div class="kanban-column clay-panel inset-column-well">
       <div class="column-header">
-        <span class="column-title orbitron-font text-green">🏆 ACHIEVED</span>
-        <span class="count-pill">{{ getGoalsByStatus('ACHIEVED').length }}</span>
+        <div class="header-left">
+          <span class="column-beacon green-beacon"></span>
+          <span class="column-title text-green serif-title">🏆 ACHIEVED</span>
+        </div>
+        <span class="count-pill count-forest">{{ getGoalsByStatus('ACHIEVED').length }}</span>
       </div>
-      <div class="column-cards">
-        <div *ngFor="let g of getGoalsByStatus('ACHIEVED')" class="kanban-card achieved">
-          <div class="card-category-badge cat-achieved">✓ ACHIEVED</div>
-          <h4 class="card-title orbitron-font">{{ g.title }}</h4>
-          <p class="card-desc">{{ g.description }}</p>
-          <div class="card-footer">
-            <span class="target-date green-text">100% Completed</span>
+      <div class="column-cards list-stagger">
+        <div *ngFor="let g of getGoalsByStatus('ACHIEVED')" class="kanban-card achieved elevated-card-3d">
+          <div class="card-top-bar">
+            <div class="card-category-badge cat-achieved cat-pill">
+              <span class="cat-dot green-dot"></span>
+              <span class="cat-text serif-title">✓ ACHIEVED</span>
+            </div>
+            <div class="gold-crown-mini">👑</div>
           </div>
+
+          <h4 class="card-title serif-title">{{ g.title }}</h4>
+          <p class="card-desc serif-title">{{ g.description }}</p>
+
+          <div class="card-footer">
+            <span class="target-date green-text serif-title">⭐ 100% Mastery Completed</span>
+            <span class="verified-seal-pill serif-title">✓ VERIFIED</span>
+          </div>
+        </div>
+
+        <div *ngIf="getGoalsByStatus('ACHIEVED').length === 0" class="empty-column-card">
+          <span>🏆 Completed milestones will appear here</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Create Goal Modal -->
+  <!-- Create Goal Modal (3D Skeuomorphic Studio Dialog) -->
   <div class="modal-overlay" *ngIf="showCreateModal">
-    <div class="modal-content glass-card">
+    <div class="modal-content clay-panel elevated-modal-3d">
       <div class="modal-header">
-        <h2 class="orbitron-font">ADD NEW SMART GOAL</h2>
-        <button class="close-modal" (click)="showCreateModal = false">✕</button>
+        <div class="modal-title-wrap">
+          <div class="modal-seal-badge">🎯</div>
+          <div>
+            <h2 class="serif-title">ADD NEW S.M.A.R.T. GOAL</h2>
+            <p class="modal-sub serif-title">Configure target milestone with measurable criteria</p>
+          </div>
+        </div>
+        <button class="close-modal tactile-btn-3d" (click)="showCreateModal = false">✕</button>
       </div>
+
       <div class="modal-body">
         <div class="form-group">
-          <label>Goal Title</label>
-          <input type="text" [(ngModel)]="newGoal.title" class="modal-input" placeholder="e.g. Master Angular Signals" />
+          <label class="serif-title">GOAL TITLE / OBJECTIVE</label>
+          <div class="input-wrapper">
+            <input type="text" [(ngModel)]="newGoal.title" class="modal-input inset-input-3d" placeholder="e.g. Master Angular Signals & Reactive Architecture" />
+          </div>
         </div>
+
         <div class="form-group">
-          <label>SMART Category</label>
-          <select [(ngModel)]="newGoal.category" class="modal-input">
-            <option value="S">S - Specific</option>
-            <option value="M">M - Measurable</option>
-            <option value="A">A - Achievable</option>
-            <option value="R">R - Relevant</option>
-            <option value="T">T - Time-bound</option>
-          </select>
+          <label class="serif-title">S.M.A.R.T. CATEGORY PRINCIPLE</label>
+          <div class="input-wrapper">
+            <select [(ngModel)]="newGoal.category" class="modal-input inset-input-3d">
+              <option value="S">S - Specific (Concrete engineering target)</option>
+              <option value="M">M - Measurable (Quantifiable outcome metrics)</option>
+              <option value="A">A - Achievable (Realistic capability stretch)</option>
+              <option value="R">R - Relevant (Aligned with engineering track)</option>
+              <option value="T">T - Time-bound (Target deadline bound)</option>
+            </select>
+          </div>
         </div>
+
         <div class="form-group">
-          <label>Description</label>
-          <textarea [(ngModel)]="newGoal.description" class="modal-input" rows="3"></textarea>
+          <label class="serif-title">DETAILED DESCRIPTION & ACCEPTANCE CRITERIA</label>
+          <div class="input-wrapper">
+            <textarea [(ngModel)]="newGoal.description" class="modal-input inset-input-3d" rows="3" placeholder="Describe concrete deliverables and verifiable milestones..."></textarea>
+          </div>
         </div>
+
         <div class="form-group">
-          <label>Target Date</label>
-          <input type="date" [(ngModel)]="newGoal.targetDate" class="modal-input" />
+          <label class="serif-title">TARGET COMPLETION DATE</label>
+          <div class="input-wrapper">
+            <input type="date" [(ngModel)]="newGoal.targetDate" class="modal-input inset-input-3d" />
+          </div>
         </div>
       </div>
+
       <div class="modal-footer">
-        <button class="btn-outline" (click)="showCreateModal = false">Cancel</button>
-        <button class="btn-purple" (click)="createGoal()">SAVE GOAL</button>
+        <button class="btn-outline tactile-btn-3d serif-title" (click)="showCreateModal = false">CANCEL</button>
+        <button class="btn-primary create-confirm-btn tactile-btn-3d serif-title" (click)="createGoal()">
+          <span>✓ SAVE S.M.A.R.T. GOAL</span>
+        </button>
       </div>
     </div>
   </div>

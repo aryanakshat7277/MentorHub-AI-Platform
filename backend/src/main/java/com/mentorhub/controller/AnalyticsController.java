@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/v1/analytics")
+@RequestMapping({"/api/analytics", "/api/v1/analytics"})
 public class AnalyticsController {
 
     @GetMapping("/{userId}")

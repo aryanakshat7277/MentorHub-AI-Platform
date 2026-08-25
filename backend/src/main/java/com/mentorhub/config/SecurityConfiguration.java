@@ -34,12 +34,13 @@ public class SecurityConfiguration {
             .headers(headers -> headers.frameOptions(frame -> frame.disable()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers("/api/v1/compiler/**").permitAll()
+                .requestMatchers("/", "/api", "/api-overview").permitAll()
+                .requestMatchers("/api/auth/**", "/api/v1/auth/**").permitAll()
+                .requestMatchers("/api/compiler/**", "/api/v1/compiler/**").permitAll()
                 .requestMatchers("/ws-workspace/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/api/v1/mentor/**").hasRole("MENTOR")
-                .requestMatchers("/api/v1/mentee/**").hasRole("MENTEE")
+                .requestMatchers("/api/mentor/**", "/api/v1/mentor/**").hasRole("MENTOR")
+                .requestMatchers("/api/mentee/**", "/api/v1/mentee/**").hasRole("MENTEE")
                 .anyRequest().permitAll()
             )
             .authenticationProvider(authenticationProvider)
@@ -51,7 +52,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:4200", "http://localhost:8080", "http://127.0.0.1:4200", "http://localhost:*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

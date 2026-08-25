@@ -35,7 +35,7 @@ export class AiModelRouterService {
       message,
       'GEMINI',
       this.config.textModel,
-      'You are MentorHub AI Copilot for AKSHAT ARYAN, KRITI SAGAR, VANAJA, & PAVANI.',
+      'You are MentorHub AI Assistant for AKSHAT ARYAN, KRITI SAGAR, VANAJA, & PAVANI.',
       'en-US',
       history
     );
@@ -46,7 +46,7 @@ export class AiModelRouterService {
       message,
       'GEMINI',
       this.config.textModel,
-      'You are MentorHub AI Copilot for AKSHAT ARYAN, KRITI SAGAR, VANAJA, & PAVANI.',
+      'You are MentorHub AI Assistant for AKSHAT ARYAN, KRITI SAGAR, VANAJA, & PAVANI.',
       'en-US',
       history
     );

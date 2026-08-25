@@ -10,37 +10,42 @@ export const routes: Routes = [
   { 
     path: 'dashboard', 
     loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
-    canActivate: [RoleGuard(['MENTOR', 'MENTEE'])]
+    canActivate: [RoleGuard(['MENTOR', 'MENTEE', 'ADMIN'])]
+  },
+  { 
+    path: 'admin-dashboard', 
+    loadComponent: () => import('./components/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent),
+    canActivate: [RoleGuard(['ADMIN'])]
   },
   { 
     path: 'workspace', 
     loadComponent: () => import('./components/workspace/workspace.component').then(m => m.WorkspaceComponent),
-    canActivate: [RoleGuard(['MENTOR', 'MENTEE'])]
+    canActivate: [RoleGuard(['MENTOR', 'MENTEE', 'ADMIN'])]
   },
   { 
     path: 'mentor-matching', 
     loadComponent: () => import('./components/mentor-matching/mentor-matching.component').then(m => m.MentorMatchingComponent),
-    canActivate: [RoleGuard(['MENTOR', 'MENTEE'])]
+    canActivate: [RoleGuard(['MENTOR', 'MENTEE', 'ADMIN'])]
   },
   { 
     path: 'sessions', 
     loadComponent: () => import('./components/sessions/sessions.component').then(m => m.SessionsComponent),
-    canActivate: [RoleGuard(['MENTOR', 'MENTEE'])]
+    canActivate: [RoleGuard(['MENTOR', 'MENTEE', 'ADMIN'])]
   },
   { 
     path: 'goals', 
     loadComponent: () => import('./components/goals/goals.component').then(m => m.GoalsComponent),
-    canActivate: [RoleGuard(['MENTOR', 'MENTEE'])]
+    canActivate: [RoleGuard(['MENTOR', 'MENTEE', 'ADMIN'])]
   },
   { 
     path: 'learning-path', 
     loadComponent: () => import('./components/learning-path/learning-path.component').then(m => m.LearningPathComponent),
-    canActivate: [RoleGuard(['MENTOR', 'MENTEE'])]
+    canActivate: [RoleGuard(['MENTOR', 'MENTEE', 'ADMIN'])]
   },
   { 
     path: 'certificates', 
     loadComponent: () => import('./components/certificates/certificates.component').then(m => m.CertificatesComponent),
-    canActivate: [RoleGuard(['MENTOR', 'MENTEE'])]
+    canActivate: [RoleGuard(['MENTOR', 'MENTEE', 'ADMIN'])]
   },
   { 
     path: 'resource-hub', 

@@ -1,37 +1,61 @@
-<!-- Ultra-Clean Graphical 3-Second Futuristic Startup Overlay -->
+<!-- Ultra-Luxury 3D Gold-Foil Skeuomorphic Startup & Boot Overlay -->
 <div class="cyber-startup-overlay" *ngIf="isBooting" [class.fade-out]="isFadingOut">
-  <!-- Background Grid & Vertical Sweeping Laser Beam -->
+  <!-- Warm Atmospheric Vignette & Subtle Laser Grid -->
   <div class="startup-background-grid"></div>
+  <div class="warm-ambient-glow"></div>
   <div class="laser-scan-line"></div>
 
   <!-- Central Graphic Core Box -->
   <div class="graphic-hero-box">
-    <!-- 4-Ring Cybernetic Spinning Neural Core & Radar Sweep -->
+    <!-- Multi-Ring 3D Gold Orbital Reactor & Radial Halo -->
     <div class="graphic-rings-container">
       <div class="radar-sweep"></div>
       <div class="pulse-wave-ring"></div>
+      
+      <!-- Outer Rotating Gold Ring with Orbital Satellite Beads -->
       <div class="ring outer-ring">
-        <span class="satellite sat-1"></span>
-        <span class="satellite sat-2"></span>
+        <span class="satellite sat-1">★</span>
+        <span class="satellite sat-2">👑</span>
       </div>
+
+      <!-- Middle Counter-Rotating Terracotta Ring -->
       <div class="ring middle-ring"></div>
+      
+      <!-- Inner Precision Gold Ring -->
       <div class="ring inner-ring"></div>
       
-      <!-- Official Circular Logo Orb -->
-      <div class="center-orb official-logo-orb">
-        <img src="assets/mentorhub-logo.png" alt="MentorHub Official Logo" class="startup-circular-logo-img" />
+      <!-- 3D Official Circular Logo Medallion with Metallic Gold Bezel -->
+      <div class="center-orb official-logo-orb gold-seal-emboss">
+        <div class="orb-gold-bezel">
+          <img src="assets/mentorhub-official-banner-logo.jpg" alt="MentorHub Official Banner Logo" class="startup-circular-logo-img" />
+        </div>
+        <div class="orb-shine-overlay"></div>
       </div>
     </div>
 
-    <!-- Clean Graphical Neon Progress Bar -->
+    <!-- Live Telemetry Status Pill -->
+    <div class="boot-telemetry-badge">
+      <span class="beacon-pulse"></span>
+      <span class="telemetry-text">{{ bootStatusText }}</span>
+    </div>
+
+    <!-- 3D Debossed Progress Well Meter -->
     <div class="minimal-progress-box">
       <div class="line-track">
         <div class="line-fill" [style.width.%]="bootProgress"></div>
         <div class="line-glow-head" [style.left.%]="bootProgress"></div>
       </div>
-      <span class="percent-val orbitron-font">{{ bootProgress | number:'1.0-0' }}%</span>
+      <div class="progress-footer-row">
+        <span class="progress-sub-lbl">INITIALIZING SECURE STUDIO</span>
+        <span class="percent-val">{{ bootProgress | number:'1.0-0' }}%</span>
+      </div>
     </div>
   </div>
+
+  <!-- Quick Skip Action -->
+  <button class="skip-boot-btn" (click)="skipBoot()" title="Skip Startup Animation">
+    <span>SKIP INTRO ➔</span>
+  </button>
 </div>
 
 <!-- Standalone Fullscreen Login View (When Logged Out or on /login Route) -->
@@ -55,9 +79,13 @@
     </main>
   </div>
 
-  <!-- Floating AI Sparkle Button -->
-  <button class="floating-sparkle-btn" *ngIf="!isAiChatbotOpen" (click)="toggleAiChatbot()" title="Open Multi-Provider AI Chatbot">
-    <span class="sparkle-icon">✨</span>
+  <!-- 3D Luxury Floating AI Sparkle Orb -->
+  <button class="floating-sparkle-btn ai-orb-3d" *ngIf="!isAiChatbotOpen" (click)="toggleAiChatbot()" title="Open MentorHub AI Assistant">
+    <div class="ai-orb-ring-orbit"></div>
+    <div class="ai-orb-core gold-seal-emboss">
+      <span class="sparkle-icon">✨</span>
+    </div>
+    <span class="ai-orb-beacon"></span>
   </button>
 
   <!-- Multi-Provider AI Chatbot Drawer -->

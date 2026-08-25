@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -17,12 +17,25 @@ import { JitsiMeetingComponent, JitsiMeetingStatus } from '../jitsi-meeting/jits
 export class WorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild('gutterCol') gutterCol!: ElementRef<HTMLDivElement>;
   @ViewChild('highlightLayer') highlightLayer!: ElementRef<HTMLDivElement>;
+  @ViewChild('workspaceContainer') workspaceContainer?: ElementRef<HTMLDivElement>;
   @ViewChild(JitsiMeetingComponent) jitsiComp?: JitsiMeetingComponent;
 
   sessionId = 1;
   activeLanguage = 'javascript';
   activeVersion = '18.15.0';
   isEditorMaximized = false;
+
+  // Resizable Display Area State
+  splitRatioPercent = 58; // Left pane width percentage
+  terminalHeightPx = 185; // Terminal height in pixels
+  isTerminalCollapsed = false;
+  isDraggingHorizontal = false;
+  isDraggingVertical = false;
+
+  private startX = 0;
+  private startWidthPercent = 58;
+  private startY = 0;
+  private startTerminalHeight = 185;
 
   // Jitsi Live Video Call State
   roomName = 'mentorhub-session-1-98a7b4c2';
@@ -519,5 +532,73 @@ fn main() {
   onJitsiStatusChanged(status: JitsiMeetingStatus) {
     this.jitsiStatus = status;
     this.isVideoConnected = status === 'CONNECTED';
+  }
+
+  // ==========================================
+  // Interactive Display Area Resizing Handlers
+  // ==========================================
+  startHorizontalResize(event: MouseEvent) {
+    event.preventDefault();
+    this.isDraggingHorizontal = true;
+    this.startX = event.clientX;
+    this.startWidthPercent = this.splitRatioPercent;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }
+
+  startVerticalResize(event: MouseEvent) {
+    event.preventDefault();
+    this.isDraggingVertical = true;
+    this.startY = event.clientY;
+    this.startTerminalHeight = this.terminalHeightPx;
+    document.body.style.cursor = 'row-resize';
+    document.body.style.userSelect = 'none';
+  }
+
+  @HostListener('window:mousemove', ['$event'])
+  onMouseMove(event: MouseEvent) {
+    if (this.isDraggingHorizontal) {
+      const containerWidth = this.workspaceContainer?.nativeElement?.clientWidth || window.innerWidth;
+      const deltaX = event.clientX - this.startX;
+      const deltaPercent = (deltaX / containerWidth) * 100;
+      let newRatio = this.startWidthPercent + deltaPercent;
+      // Clamp between 0% and 95% allowing slider to move completely left freely
+      newRatio = Math.max(0, Math.min(95, newRatio));
+      this.splitRatioPercent = Math.round(newRatio);
+    } else if (this.isDraggingVertical) {
+      // Dragging upward increases terminal height, dragging down decreases it
+      const deltaY = this.startY - event.clientY;
+      let newHeight = this.startTerminalHeight + deltaY;
+      // Clamp between 80px and 500px
+      newHeight = Math.max(80, Math.min(500, newHeight));
+      this.terminalHeightPx = Math.round(newHeight);
+      this.isTerminalCollapsed = false;
+    }
+  }
+
+  @HostListener('window:mouseup')
+  onMouseUp() {
+    if (this.isDraggingHorizontal || this.isDraggingVertical) {
+      this.isDraggingHorizontal = false;
+      this.isDraggingVertical = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+  }
+
+  setLayoutPreset(ratio: number) {
+    this.splitRatioPercent = ratio;
+    this.isEditorMaximized = false;
+  }
+
+  toggleTerminalCollapse() {
+    this.isTerminalCollapsed = !this.isTerminalCollapsed;
+  }
+
+  resetLayout() {
+    this.splitRatioPercent = 58;
+    this.terminalHeightPx = 185;
+    this.isTerminalCollapsed = false;
+    this.isEditorMaximized = false;
   }
 }

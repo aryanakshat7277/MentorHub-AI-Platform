@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping({"/api/auth", "/api/v1/auth"})
 public class AuthController {
 
     private final UserRepository userRepository;
@@ -146,19 +146,32 @@ public class AuthController {
     }
 
     @PutMapping("/me")
-    public ResponseEntity<User> updateCurrentUser(@RequestBody User updatedUser) {
-        return userRepository.findAll().stream().findFirst()
-                .map(user -> {
-                    if (updatedUser.getName() != null) user.setName(updatedUser.getName());
-                    if (updatedUser.getTitle() != null) user.setTitle(updatedUser.getTitle());
-                    if (updatedUser.getCompany() != null) user.setCompany(updatedUser.getCompany());
-                    if (updatedUser.getBio() != null) user.setBio(updatedUser.getBio());
-                    if (updatedUser.getSkills() != null) user.setSkills(updatedUser.getSkills());
-                    if (updatedUser.getAvatarUrl() != null) user.setAvatarUrl(updatedUser.getAvatarUrl());
-                    if (updatedUser.getRole() != null) user.setRole(updatedUser.getRole());
-                    User saved = userRepository.save(user);
-                    return ResponseEntity.ok(saved);
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<User> updateCurrentUser(@RequestBody User updatedUser, java.security.Principal principal) {
+        String emailToFind = (principal != null && principal.getName() != null) ? principal.getName() : updatedUser.getEmail();
+        User targetUser = null;
+
+        if (emailToFind != null && !emailToFind.trim().isEmpty()) {
+            targetUser = userRepository.findByEmail(emailToFind.trim()).orElse(null);
+        }
+        if (targetUser == null && updatedUser.getId() != null) {
+            targetUser = userRepository.findById(updatedUser.getId()).orElse(null);
+        }
+        if (targetUser == null) {
+            targetUser = userRepository.findAll().stream().findFirst().orElse(null);
+        }
+
+        if (targetUser != null) {
+            if (updatedUser.getName() != null) targetUser.setName(updatedUser.getName());
+            if (updatedUser.getTitle() != null) targetUser.setTitle(updatedUser.getTitle());
+            if (updatedUser.getCompany() != null) targetUser.setCompany(updatedUser.getCompany());
+            if (updatedUser.getBio() != null) targetUser.setBio(updatedUser.getBio());
+            if (updatedUser.getSkills() != null) targetUser.setSkills(updatedUser.getSkills());
+            if (updatedUser.getAvatarUrl() != null) targetUser.setAvatarUrl(updatedUser.getAvatarUrl());
+            if (updatedUser.getRole() != null) targetUser.setRole(updatedUser.getRole());
+            if (updatedUser.getXpPoints() != null) targetUser.setXpPoints(updatedUser.getXpPoints());
+            User saved = userRepository.save(targetUser);
+            return ResponseEntity.ok(saved);
+        }
+        return ResponseEntity.notFound().build();
     }
 }

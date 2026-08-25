@@ -1,43 +1,48 @@
 <div class="verify-page">
-  <div class="verify-card glass-card" *ngIf="certificate">
+  <div class="verify-card clay-panel elevated-card-3d" *ngIf="certificate">
     <div class="verify-status-banner">
-      <span class="status-icon">✓</span>
+      <div class="gold-seal-emboss status-seal">
+        <span class="seal-glyph">✓</span>
+      </div>
       <div>
-        <h2 class="orbitron-font">OFFICIAL VERIFIED CREDENTIAL</h2>
-        <span class="cert-status-tag">STATUS: {{ certificate.status || 'VALID & ACTIVE' }}</span>
+        <h2 class="serif-title">OFFICIAL VERIFIED CREDENTIAL</h2>
+        <span class="cert-status-tag serif-title">STATUS: {{ certificate.status || 'VALID & ACTIVE' }}</span>
       </div>
     </div>
 
-    <div class="cert-details-grid">
+    <div class="cert-details-grid debossed-track">
       <div class="detail-item">
-        <span class="detail-label">CERTIFICATE ID</span>
-        <span class="detail-val orbitron-font cyan-text">{{ certificate.certificateNumber }}</span>
+        <span class="detail-label serif-title">CERTIFICATE IDENTIFIER</span>
+        <span class="detail-val terracotta-text serif-title">{{ certificate.certificateNumber }}</span>
       </div>
 
       <div class="detail-item">
-        <span class="detail-label">RECIPIENT NAME</span>
-        <span class="detail-val orbitron-font">{{ certificate.studentName }}</span>
+        <span class="detail-label serif-title">RECIPIENT NAME</span>
+        <span class="detail-val serif-title">{{ certificate.studentName }}</span>
       </div>
 
       <div class="detail-item">
-        <span class="detail-label">SPECIALIZATION / COURSE</span>
-        <span class="detail-val">{{ certificate.courseName }}</span>
+        <span class="detail-label serif-title">SPECIALIZATION / COURSE</span>
+        <span class="detail-val serif-title">{{ certificate.courseName }}</span>
       </div>
 
       <div class="detail-item">
-        <span class="detail-label">VERIFYING MENTOR</span>
-        <span class="detail-val purple-text">{{ certificate.mentorName }}</span>
+        <span class="detail-label serif-title">VERIFYING MASTER MENTOR</span>
+        <span class="detail-val amber-text serif-title">{{ certificate.mentorName }}</span>
       </div>
 
       <div class="detail-item">
-        <span class="detail-label">ISSUE DATE</span>
-        <span class="detail-val">{{ certificate.completionDate }}</span>
+        <span class="detail-label serif-title">OFFICIAL ISSUE DATE</span>
+        <span class="detail-val serif-title">{{ certificate.completionDate }}</span>
       </div>
     </div>
 
     <div class="verify-footer">
-      <span class="issuer-tag">AUTHENTICATED BY MENTORHUB GLOBAL PEER REGISTRY</span>
-      <a routerLink="/certificates" class="btn-cyan btn-sm">RETURN TO PLATFORM →</a>
+      <span class="issuer-tag serif-title">AUTHENTICATED BY MENTORHUB GLOBAL PEER REGISTRY</span>
+      <a routerLink="/certificates" class="btn-primary btn-sm tactile-btn-3d serif-title" style="text-decoration: none;">
+        <span>RETURN TO PLATFORM →</span>
+        <span class="shine-sweep"></span>
+      </a>
     </div>
   </div>
 </div>

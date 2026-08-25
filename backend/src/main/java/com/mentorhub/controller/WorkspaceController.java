@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/v1/workspace")
+@RequestMapping({"/api/workspace", "/api/v1/workspace"})
 public class WorkspaceController {
 
     private final WorkspaceSessionRepository workspaceSessionRepository;

@@ -26,11 +26,11 @@ export class GoalsComponent implements OnInit {
   };
 
   smartBlocks = [
-    { letter: 'S', name: 'Specific', color: '#EF4444', icon: '🎯' },
-    { letter: 'M', name: 'Measurable', color: '#3B82F6', icon: '🖥️' },
-    { letter: 'A', name: 'Achievable', color: '#10B981', icon: '🚀' },
-    { letter: 'R', name: 'Relevant', color: '#A855F7', icon: '💡' },
-    { letter: 'T', name: 'Time-bound', color: '#F59E0B', icon: '⏱️' }
+    { letter: 'S', name: 'Specific', color: '#DE7048', icon: '🎯' },
+    { letter: 'M', name: 'Measurable', color: '#2563EB', icon: '📊' },
+    { letter: 'A', name: 'Achievable', color: '#2A5A3D', icon: '🚀' },
+    { letter: 'R', name: 'Relevant', color: '#B35E17', icon: '💡' },
+    { letter: 'T', name: 'Time-bound', color: '#D4AF37', icon: '⏱️' }
   ];
 
   constructor(private apiService: ApiService) {}

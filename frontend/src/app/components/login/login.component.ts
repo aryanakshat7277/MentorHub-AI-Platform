@@ -17,6 +17,7 @@ export class LoginComponent {
   // Login Form Controls
   email = 'akshat@mentorhub.com';
   password = 'password123';
+  showPassword = false;
 
   // Registration Form Controls
   regName = 'AKSHAT ARYAN';
@@ -34,11 +35,11 @@ export class LoginComponent {
 
   // Pre-assigned accounts table
   assignedAccounts = [
-    { role: 'MENTOR', name: 'AKSHAT ARYAN', email: 'akshat@mentorhub.com', pass: 'password123', icon: '👑', color: 'cyan' },
-    { role: 'MENTEE', name: 'KRITI SAGAR', email: 'kriti@mentorhub.com', pass: 'password123', icon: '⚡', color: 'purple' },
-    { role: 'MENTEE', name: 'PAVANI', email: 'pavani@mentorhub.com', pass: 'password123', icon: '🌐', color: 'purple' },
-    { role: 'MENTEE', name: 'VANAJA', email: 'vanaja@mentorhub.com', pass: 'password123', icon: '🚀', color: 'purple' },
-    { role: 'ADMIN', name: 'SYSTEM ADMIN', email: 'admin@mentorhub.com', pass: 'password123', icon: '🛡️', color: 'amber' }
+    { role: 'MENTOR', name: 'AKSHAT ARYAN', email: 'akshat@mentorhub.com', pass: 'password123', icon: '👑', color: 'cyan', avatar: 'assets/akshat-profile.jpg' },
+    { role: 'MENTEE', name: 'KRITI SAGAR', email: 'kriti@mentorhub.com', pass: 'password123', icon: '⚡', color: 'purple', avatar: 'assets/kriti-profile.jpg' },
+    { role: 'MENTEE', name: 'PAVANI', email: 'pavani@mentorhub.com', pass: 'password123', icon: '🌐', color: 'purple', avatar: 'assets/pavani-profile.jpg' },
+    { role: 'MENTEE', name: 'VANAJA', email: 'vanaja@mentorhub.com', pass: 'password123', icon: '🚀', color: 'purple', avatar: 'assets/vanaja-profile.jpg' },
+    { role: 'ADMIN', name: 'SYSTEM ADMIN', email: 'admin@mentorhub.com', pass: 'password123', icon: '🛡️', color: 'amber', avatar: 'assets/akshat-profile.jpg' }
   ];
 
   constructor(
@@ -111,7 +112,11 @@ export class LoginComponent {
 
         this.successMessage = `⚡ Role Detected: ${detectedRole}! Welcome, ${detectedName}. Redirecting to Command Dashboard...`;
         setTimeout(() => {
-          this.router.navigate(['/dashboard']);
+          if (detectedRole === 'ADMIN') {
+            this.router.navigate(['/admin-dashboard']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
         }, 500);
       }
     });

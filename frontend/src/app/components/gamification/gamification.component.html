@@ -1,48 +1,85 @@
 <div class="gamification-page">
-  <div class="page-header">
-    <div>
-      <h1 class="orbitron-font">GAMIFICATION & LEADERBOARD</h1>
-      <p class="subtitle">Level up through peer mentoring, sessions, and continuous learning</p>
+  <!-- Elevated 3D XP Mastery Hero Banner -->
+  <div class="xp-level-banner clay-panel elevated-card-3d">
+    <div class="banner-orbit-rings"></div>
+    <div class="banner-glint glint-1">✨</div>
+    <div class="banner-glint glint-2">🌟</div>
+
+    <div class="banner-content">
+      <div class="trophy-crest-wrap">
+        <div class="gold-trophy-seal gold-seal-emboss">
+          <span class="seal-glyph">🏆</span>
+        </div>
+        <div class="shine-sweep"></div>
+      </div>
+      <div class="xp-banner-info">
+        <div class="banner-top-tags">
+          <span class="hall-of-fame-tag serif-title">⚡ GLOBAL HALL OF FAME</span>
+          <span class="season-pill serif-title">SEASON 1 • AI REVOLUTION</span>
+        </div>
+        <h1 class="banner-title serif-title">GAMIFICATION & ARCHITECT MASTERY</h1>
+        <p class="banner-sub serif-title">Climb the ranks through peer mentorship, coding milestones, and real-time AI architectural reviews.</p>
+      </div>
     </div>
   </div>
 
   <div class="gamification-grid">
     <!-- Left: Community Top Mentors Rank List (#1 AKSHAT ARYAN) -->
-    <div class="leaderboard-card glass-card">
-      <h2 class="section-title orbitron-font">🏆 TOP MENTORS LEADERBOARD</h2>
+    <div class="leaderboard-card clay-panel elevated-card-3d">
+      <div class="card-header-row">
+        <div class="title-with-icon">
+          <span class="sec-icon float-icon">👑</span>
+          <h2 class="section-title serif-title">TOP MENTORS LEADERBOARD</h2>
+        </div>
+        <span class="live-rank-tag serif-title pulse-badge">● LIVE XP RANKS</span>
+      </div>
 
-      <div class="ranks-list">
-        <div *ngFor="let m of leaderboard; let i = index" class="rank-item" [class.top-3]="i < 3">
-          <div class="rank-position orbitron-font" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
-            #{{ i + 1 }}
+      <div class="ranks-list list-stagger">
+        <div *ngFor="let m of leaderboard; let i = index" class="rank-item elevated-card-3d" [class.top-3]="i < 3" [class.rank-gold]="i === 0">
+          <div class="rank-position" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
+            <span class="rank-num serif-title">#{{ i + 1 }}</span>
+            <span class="crown-icon" *ngIf="i === 0">👑</span>
           </div>
 
-          <img [src]="m.avatarUrl || 'assets/mentorhub-logo.png'" alt="Avatar" class="rank-avatar" />
+          <div class="avatar-crest-wrap" [class.gold-avatar-crest]="i === 0">
+            <img [src]="m.avatarUrl || 'assets/mentorhub-logo.png'" alt="Avatar" class="rank-avatar" />
+            <span class="rank-star" *ngIf="i === 0">★</span>
+          </div>
 
           <div class="rank-details">
-            <h4 class="rank-name orbitron-font">{{ m.name }}</h4>
-            <span class="rank-role">{{ m.title }}</span>
+            <h4 class="rank-name serif-title">{{ m.name }}</h4>
+            <span class="rank-role serif-title">{{ m.title }}</span>
           </div>
 
-          <div class="rank-xp orbitron-font">
-            {{ m.xpPoints | number }} XP
+          <div class="rank-xp-badge 3d-inset-well">
+            <span class="xp-val serif-title">{{ m.xpPoints | number }}</span>
+            <span class="xp-unit serif-title">XP</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right: Badge Wall -->
-    <div class="badge-wall-card glass-card">
-      <h2 class="section-title orbitron-font">🎖️ BADGE WALL</h2>
+    <!-- Right: Badge Wall with 3D Coin Medallions -->
+    <div class="badge-wall-card clay-panel elevated-card-3d">
+      <div class="card-header-row">
+        <div class="title-with-icon">
+          <span class="sec-icon float-icon">🎖️</span>
+          <h2 class="section-title serif-title">ACHIEVEMENT BADGE VAULT</h2>
+        </div>
+        <span class="unlocked-count serif-title">{{ badges.length }} UNLOCKED</span>
+      </div>
 
-      <div class="badges-grid">
-        <div *ngFor="let b of badges" class="badge-item glass-card">
-          <div class="badge-icon-wrapper">
+      <div class="badges-grid grid-stagger">
+        <div *ngFor="let b of badges" class="badge-item clay-badge-3d elevated-card-3d">
+          <div class="badge-medallion-ring">
             <span class="badge-icon">{{ b.iconUrl }}</span>
+            <div class="medallion-glimmer"></div>
           </div>
-          <h4 class="badge-name orbitron-font">{{ b.name }}</h4>
-          <p class="badge-desc">{{ b.description }}</p>
-          <span class="badge-xp orbitron-font">+{{ b.xpValue }} XP</span>
+          <h4 class="badge-name serif-title">{{ b.name }}</h4>
+          <p class="badge-desc serif-title">{{ b.description }}</p>
+          <div class="badge-xp-ribbon">
+            <span class="xp-plus serif-title">+{{ b.xpValue }} XP</span>
+          </div>
         </div>
       </div>
     </div>

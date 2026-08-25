@@ -1,91 +1,158 @@
 <div class="matching-page">
-  <div class="page-header">
-    <div>
-      <h1 class="orbitron-font">AI MENTOR MATCHING MATRIX</h1>
-      <p class="subtitle">Neural compatibility algorithm matched top mentors based on your skill graph</p>
+  <!-- Page Header with 3D Gold Seal -->
+  <div class="page-header-row">
+    <div class="header-branding">
+      <div class="gold-seal-emboss header-seal" title="Neural Compatibility Matrix">
+        <span class="seal-glyph">🧠</span>
+      </div>
+      <div>
+        <div class="title-with-pill">
+          <h1 class="serif-title">AI MENTOR MATCHING MATRIX</h1>
+          <span class="status-pill active-matrix-pill">⚡ NEURAL COMPATIBILITY ONLINE</span>
+        </div>
+        <p class="subtitle serif-title">Algorithmic matchmaking tailored to your tech stack, career goals, and architectural focus</p>
+      </div>
     </div>
 
     <div class="filters-bar">
-      <input type="text" [(ngModel)]="searchQuery" placeholder="Search by skill, domain, or name..." class="search-input" />
-      <select [(ngModel)]="selectedDomain" class="domain-select">
-        <option value="ALL">All Domains</option>
-        <option value="BACKEND">Spring Boot / Java</option>
-        <option value="FRONTEND">Angular 17 Standalone</option>
-        <option value="DEVOPS">Cloud DevOps</option>
-      </select>
+      <div class="search-box 3d-inset-well">
+        <span class="search-icon">🔍</span>
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search by skill, domain, or name..." class="search-input serif-title" />
+      </div>
+      <div class="select-wrapper 3d-inset-well">
+        <select [(ngModel)]="selectedDomain" class="domain-select serif-title">
+          <option value="ALL">All Engineering Domains</option>
+          <option value="BACKEND">Backend (Spring Boot / Java 21)</option>
+          <option value="FRONTEND">Frontend (Angular 17 Standalone)</option>
+          <option value="DEVOPS">Cloud & Microservices DevOps</option>
+        </select>
+      </div>
     </div>
   </div>
 
-  <div class="mentors-grid">
-    <div *ngFor="let item of matchedMentors" class="mentor-card glass-card">
+  <!-- Cyber Toast Notification -->
+  <div class="cyber-toast clay-panel elevated-card-3d serif-title" *ngIf="toastMessage">
+    <span class="toast-icon">✨</span>
+    <span>{{ toastMessage }}</span>
+  </div>
+
+  <!-- Mentors Matrix Grid -->
+  <div class="mentors-grid grid-stagger">
+    <div *ngFor="let item of filteredMentors; let i = index" class="mentor-card clay-panel elevated-card-3d" [style.animationDelay]="(i * 0.1) + 's'">
+      <!-- Top Card Header: Compatibility Gauge + Mentor Profile -->
       <div class="card-top">
-        <!-- Compatibility Ring -->
-        <div class="compatibility-ring">
-          <svg viewBox="0 0 36 36" class="circular-chart cyan">
-            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-            <path class="circle" [attr.stroke-dasharray]="item.compatibilityScore + ', 100'" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-            <text x="18" y="20.35" class="percentage orbitron-font">{{ item.compatibilityScore }}%</text>
-          </svg>
-          <span class="ring-label">AI MATCH</span>
+        <!-- 3D Compatibility Radial Gauge Sphere -->
+        <div class="compatibility-gauge-card 3d-inset-well" [title]="item.compatibilityScore + '% AI Compatibility Match'">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 42 42" class="circular-chart">
+              <path class="circle-bg" d="M21 2.5 a 18.5 18.5 0 0 1 0 37 a 18.5 18.5 0 0 1 0 -37" />
+              <path class="circle-fill" 
+                    [attr.stroke-dasharray]="item.compatibilityScore + ', 100'" 
+                    [class.ultra]="item.compatibilityScore >= 95"
+                    [class.high]="item.compatibilityScore >= 90 && item.compatibilityScore < 95"
+                    [class.good]="item.compatibilityScore < 90"
+                    d="M21 2.5 a 18.5 18.5 0 0 1 0 37 a 18.5 18.5 0 0 1 0 -37" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="gauge-score-num serif-title">{{ item.compatibilityScore }}</span>
+              <span class="gauge-percent-symbol serif-title">%</span>
+            </div>
+          </div>
+          <span class="gauge-pill-label serif-title">⚡ AI MATCH</span>
         </div>
 
+        <!-- Mentor Avatar Crest & Bio Header -->
         <div class="mentor-profile">
-          <img [src]="item.mentor.avatarUrl" alt="Avatar" class="mentor-avatar" />
-          <div>
-            <h3 class="mentor-name orbitron-font">{{ item.mentor.name }}</h3>
-            <span class="mentor-title">{{ item.mentor.title }}</span>
-            <span class="mentor-company">&#64; {{ item.mentor.company }}</span>
+          <div class="avatar-crest-container gold-seal-emboss">
+            <img [src]="item.mentor.avatarUrl" [alt]="item.mentor.name" class="mentor-avatar-img" />
+            <span class="verified-star-badge" title="Verified Master Mentor">★</span>
+            <span class="online-indicator-dot" title="Active on Network"></span>
+          </div>
+          <div class="mentor-info-block">
+            <h3 class="mentor-name serif-title">{{ item.mentor.name }}</h3>
+            <span class="mentor-title-badge serif-title">{{ item.mentor.title }}</span>
+            <span class="mentor-company-text serif-title">🏛️ {{ item.mentor.company }}</span>
           </div>
         </div>
       </div>
 
-      <p class="mentor-bio">{{ item.mentor.bio }}</p>
+      <!-- Bio Paragraph in Inset Well -->
+      <div class="bio-snippet-well debossed-track">
+        <p class="mentor-bio-text serif-title">{{ item.mentor.bio }}</p>
+      </div>
 
+      <!-- Skill Overlap Chips -->
       <div class="skills-overlap-section">
-        <span class="section-label">SKILL OVERLAP:</span>
-        <div class="tags-row">
-          <span *ngFor="let skill of item.skillOverlap" class="neon-tag">{{ skill }}</span>
+        <span class="section-heading-lbl serif-title">VERIFIED SKILL OVERLAP:</span>
+        <div class="tags-flex-row">
+          <span *ngFor="let skill of item.skillOverlap" class="skill-chip clay-badge-3d elevated-card-3d serif-title">
+            <span class="check-icon">✓</span> {{ skill }}
+          </span>
         </div>
       </div>
 
-      <div class="recommendation-reason">
-        <span class="icon">💡</span> {{ item.aiRecommendationReason }}
+      <!-- AI Neural Recommendation Insight Well -->
+      <div class="ai-insight-well 3d-inset-well">
+        <div class="insight-icon-box float-icon">💡</div>
+        <div class="insight-content-box">
+          <span class="insight-heading serif-title">AI NEURAL MATCH INSIGHT</span>
+          <p class="insight-text-desc serif-title">{{ item.aiRecommendationReason }}</p>
+        </div>
       </div>
 
-      <div class="card-footer">
-        <div class="slots-info">
-          <span class="slots-icon">🕒</span> {{ item.availableSlots[0] }}
+      <!-- Footer Action Row -->
+      <div class="card-footer-row">
+        <div class="slots-info-badge 3d-inset-well">
+          <span class="slots-clock-icon">🕒</span>
+          <span class="slot-time-text serif-title">{{ item.availableSlots ? item.availableSlots[0] : 'Today at 16:00' }}</span>
         </div>
-        <button class="btn-cyan" (click)="openBookingModal(item)">BOOK SESSION</button>
+        <button class="book-session-btn btn-primary tactile-btn-3d serif-title" (click)="openBookingModal(item)">
+          <span class="btn-cal-icon">📅</span>
+          <span>BOOK SESSION</span>
+          <span class="shine-sweep"></span>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Booking Modal -->
+  <!-- 3D Booking Modal Overlay -->
   <div class="modal-overlay" *ngIf="selectedMentorForBooking">
-    <div class="modal-content glass-card">
+    <div class="modal-content clay-panel elevated-card-3d">
       <div class="modal-header">
-        <h2 class="orbitron-font">BOOK MENTORING SESSION</h2>
-        <button class="close-modal" (click)="selectedMentorForBooking = null">✕</button>
+        <div class="modal-header-branding">
+          <div class="gold-seal-emboss modal-seal">
+            <span class="seal-glyph">📅</span>
+          </div>
+          <h2 class="serif-title">BOOK MENTORING SESSION</h2>
+        </div>
+        <button class="close-modal tactile-btn-3d" (click)="selectedMentorForBooking = null">✕</button>
       </div>
 
       <div class="modal-body" *ngIf="selectedMentorForBooking">
-        <p>Booking session with <strong>{{ selectedMentorForBooking.mentor.name }}</strong> ({{ selectedMentorForBooking.compatibilityScore }}% Match)</p>
-
-        <div class="form-group">
-          <label>Topic / Goal</label>
-          <input type="text" [(ngModel)]="bookingTopic" class="modal-input" />
+        <div class="mentor-summary-box 3d-inset-well">
+          <img [src]="selectedMentorForBooking.mentor.avatarUrl" class="mini-avatar" />
+          <div>
+            <strong class="serif-title">{{ selectedMentorForBooking.mentor.name }}</strong>
+            <span class="match-tag serif-title">⚡ {{ selectedMentorForBooking.compatibilityScore }}% Match</span>
+          </div>
         </div>
 
         <div class="form-group">
-          <label>Scheduled Date & Time</label>
-          <input type="datetime-local" [(ngModel)]="bookingDate" class="modal-input" />
+          <label class="serif-title">SESSION TOPIC & GOAL</label>
+          <input type="text" [(ngModel)]="bookingTopic" class="modal-input inset-input-3d serif-title" placeholder="e.g. System Design Architecture & Java 21 Code Review..." />
+        </div>
+
+        <div class="form-group">
+          <label class="serif-title">SCHEDULED DATE & TIME</label>
+          <input type="datetime-local" [(ngModel)]="bookingDate" class="modal-input inset-input-3d serif-title" />
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn-outline" (click)="selectedMentorForBooking = null">Cancel</button>
-        <button class="btn-purple" (click)="confirmBooking()">CONFIRM BOOKING</button>
+        <button class="btn-outline tactile-btn-3d serif-title" (click)="selectedMentorForBooking = null">✕ CANCEL</button>
+        <button class="btn-primary tactile-btn-3d serif-title" (click)="confirmBooking()" [disabled]="isBooking">
+          {{ isBooking ? '⏳ BOOKING...' : '✓ CONFIRM BOOKING' }}
+        </button>
       </div>
     </div>
   </div>

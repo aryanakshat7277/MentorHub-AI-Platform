@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/compiler")
+@RequestMapping({"/api/compiler", "/api/v1/compiler"})
 public class CompilerController {
 
     private final CompilerService compilerService;

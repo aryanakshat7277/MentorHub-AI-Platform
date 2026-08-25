@@ -1,35 +1,47 @@
 <div class="certificates-page">
-  <div class="page-header">
-    <div>
-      <h1 class="orbitron-font">VERIFIED CREDENTIALS & CERTIFICATES</h1>
-      <p class="subtitle">Official MentorHub AI Academy certificates with cryptographic verification QR codes & ultra-high resolution PDF exports</p>
+  <!-- 3D Gold Seal Header -->
+  <div class="page-header-row">
+    <div class="header-branding">
+      <div class="gold-seal-emboss header-seal" title="Cryptographic Credentials Vault">
+        <span class="seal-glyph">📜</span>
+      </div>
+      <div>
+        <div class="title-with-pill">
+          <h1 class="serif-title">VERIFIED CREDENTIALS & DIPLOMAS</h1>
+          <span class="status-pill active-cert-pill">⚡ OFFICIAL 300 DPI VAULT</span>
+        </div>
+        <p class="subtitle serif-title">Cryptographic verification QR codes & ultra-high definition PDF exports</p>
+      </div>
     </div>
     <div class="header-actions" *ngIf="!isMentor">
-      <button class="btn-cyan request-btn orbitron-font" (click)="openRequestModal()">
-        📜 REQUEST COURSE CERTIFICATE
+      <button class="btn-primary request-btn tactile-btn-3d serif-title" (click)="openRequestModal()">
+        <span>📜 REQUEST COURSE CERTIFICATE</span>
+        <span class="shine-sweep"></span>
       </button>
     </div>
   </div>
 
   <!-- MENTOR APPROVAL DASHBOARD -->
-  <div class="mentor-approval-banner glass-card" *ngIf="isMentor && pendingCertificates.length > 0">
+  <div class="mentor-approval-banner clay-panel elevated-card-3d" *ngIf="isMentor && pendingCertificates.length > 0">
     <div class="banner-header">
-      <span class="banner-icon">📋</span>
+      <div class="gold-seal-emboss banner-seal">
+        <span class="seal-glyph">📋</span>
+      </div>
       <div>
-        <h3 class="orbitron-font">PENDING MENTEE CERTIFICATE REQUESTS</h3>
-        <p>Review course completion requests. Approving generates the cryptographic QR Code and unlocks 300 DPI PDF download.</p>
+        <h3 class="serif-title">PENDING MENTEE CERTIFICATE REQUESTS</h3>
+        <p class="serif-title">Review course completion requests. Approving generates the cryptographic QR Code and unlocks 300 DPI PDF download.</p>
       </div>
     </div>
     <div class="pending-cards-row">
-      <div *ngFor="let pending of pendingCertificates" class="pending-card">
+      <div *ngFor="let pending of pendingCertificates" class="pending-card elevated-card-3d">
         <div class="pending-info">
-          <span class="student-name orbitron-font">{{ pending.studentName }}</span>
-          <span class="course-name">{{ pending.courseName }}</span>
-          <span class="date-tag">Requested: {{ pending.completionDate }}</span>
+          <span class="student-name serif-title">{{ pending.studentName }}</span>
+          <span class="course-name serif-title">{{ pending.courseName }}</span>
+          <span class="date-tag serif-title">Requested: {{ pending.completionDate }}</span>
         </div>
         <div class="pending-btn-group">
-          <button class="btn-approve orbitron-font" (click)="approveRequest(pending.id)">✅ APPROVE & ISSUE QR</button>
-          <button class="btn-reject orbitron-font" (click)="rejectRequest(pending.id)">❌ REJECT</button>
+          <button class="btn-approve tactile-btn-3d serif-title" (click)="approveRequest(pending.id)">✅ APPROVE & ISSUE QR</button>
+          <button class="btn-reject tactile-btn-3d serif-title" (click)="rejectRequest(pending.id)">❌ REJECT</button>
         </div>
       </div>
     </div>
@@ -37,8 +49,8 @@
 
   <div class="certificates-layout">
     <!-- Left Sidebar: Certificate List -->
-    <div class="certificates-list-sidebar glass-card">
-      <h3 class="sidebar-title orbitron-font">YOUR CREDENTIALS</h3>
+    <div class="certificates-list-sidebar clay-panel">
+      <h3 class="sidebar-title">YOUR CREDENTIALS</h3>
       <div class="certs-list">
         <div *ngFor="let cert of myCertificates" 
              class="cert-list-item" 
@@ -49,7 +61,7 @@
               {{ cert.status === 'APPROVED' || cert.status === 'VALID' ? '✅ APPROVED' : '⏳ PENDING' }}
             </span>
           </div>
-          <h4 class="cert-title orbitron-font">{{ cert.courseName }}</h4>
+          <h4 class="cert-title">{{ cert.courseName }}</h4>
           <span class="student-label">Recipient: <strong>{{ cert.studentName }}</strong></span>
           <span class="cert-number">{{ cert.certificateNumber }}</span>
         </div>
@@ -57,7 +69,7 @@
     </div>
 
     <!-- Main Certificate Display Area -->
-    <div class="certificate-display-area glass-card" *ngIf="selectedCert">
+    <div class="certificate-display-area clay-panel" *ngIf="selectedCert">
       
       <!-- Status Notice Bar -->
       <div class="cert-status-notice" [class.approved]="selectedCert.status === 'APPROVED' || selectedCert.status === 'VALID'">
@@ -235,7 +247,7 @@
           </span>
         </div>
         <div class="toolbar-btns" *ngIf="selectedCert.status === 'APPROVED' || selectedCert.status === 'VALID'">
-          <button class="btn-cyan download-btn orbitron-font"
+          <button class="btn-primary download-btn"
                   [disabled]="isGeneratingPdf"
                   (click)="downloadCertificate(selectedCert)">
             <span *ngIf="!isGeneratingPdf">
@@ -253,24 +265,24 @@
 
 <!-- MENTEE REQUEST CERTIFICATE MODAL -->
 <div class="modal-backdrop" *ngIf="showRequestModal" (click)="closeRequestModal()"></div>
-<div class="request-modal glass-card" *ngIf="showRequestModal">
+<div class="request-modal clay-panel" *ngIf="showRequestModal">
   <div class="modal-header">
-    <h2 class="orbitron-font">📜 REQUEST COURSE CERTIFICATE</h2>
+    <h2>📜 REQUEST COURSE CERTIFICATE</h2>
     <button class="close-modal-btn" (click)="closeRequestModal()">✕</button>
   </div>
   <div class="modal-body">
     <div class="form-row">
-      <label class="orbitron-font">RECIPIENT NAME (MENTEE)</label>
+      <label>RECIPIENT NAME (MENTEE)</label>
       <input type="text" [(ngModel)]="requestForm.studentName" readonly />
     </div>
     <div class="form-row">
-      <label class="orbitron-font">SELECT COMPLETED COURSE *</label>
+      <label>SELECT COMPLETED COURSE *</label>
       <select [(ngModel)]="requestForm.courseName">
         <option *ngFor="let c of availableCourses" [value]="c">{{ c }}</option>
       </select>
     </div>
     <div class="form-row">
-      <label class="orbitron-font">ASSIGNED MENTOR</label>
+      <label>ASSIGNED MENTOR</label>
       <input type="text" [(ngModel)]="requestForm.mentorName" readonly />
     </div>
     <div class="workflow-notice">
@@ -280,7 +292,7 @@
   </div>
   <div class="modal-footer">
     <button class="btn-cancel" (click)="closeRequestModal()">CANCEL</button>
-    <button class="btn-cyan btn-save" (click)="submitCertificateRequest()" [disabled]="isSubmittingRequest">
+    <button class="btn-primary btn-save" (click)="submitCertificateRequest()" [disabled]="isSubmittingRequest">
       <span *ngIf="!isSubmittingRequest">🚀 SUBMIT REQUEST</span>
       <span *ngIf="isSubmittingRequest">⏳ SUBMITTING...</span>
     </button>

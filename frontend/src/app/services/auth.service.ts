@@ -24,7 +24,7 @@ export interface LoginEvent {
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'http://localhost:8080/api/v1/auth';
+  private baseUrl = 'http://localhost:8080/api/auth';
   public loginSuccess$ = new Subject<LoginEvent>();
 
   constructor(private http: HttpClient) {}

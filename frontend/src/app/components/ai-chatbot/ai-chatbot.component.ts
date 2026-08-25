@@ -59,9 +59,9 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       id: 'msg-1',
       sender: 'ai',
       avatar: 'AI',
-      text: 'Greetings! I am the **MentorHub AI Copilot** (Gemini 2.5 Flash).\n\nAsk me code questions in text chat, or click **🟢 LIVE VOICE** for a continuous, real-time voice conversation with barge-in interruption support!',
+      text: 'Greetings! I am the **MentorHub AI Assistant** (Gemini 3.6 Flash).\n\nAsk me code questions in text chat, or click **🟢 LIVE VOICE** for a continuous, real-time voice conversation with barge-in interruption support!',
       provider: 'GEMINI',
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.6-flash',
       mode: 'TEXT',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }

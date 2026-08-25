@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/certificates")
+@RequestMapping({"/api/certificates", "/api/v1/certificates"})
+@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8080", "http://127.0.0.1:4200"}, allowCredentials = "true")
 public class CertificateController {
 
     private final CertificateRepository certificateRepository;

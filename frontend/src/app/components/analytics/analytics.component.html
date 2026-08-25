@@ -1,70 +1,125 @@
 <div class="analytics-page">
-  <div class="page-header">
-    <div>
-      <h1 class="orbitron-font">MENTORSHIP PERFORMANCE ANALYTICS</h1>
-      <p class="subtitle">Weekly velocity, session completion rates, and learning distribution</p>
+  <!-- Page Header with 3D Seal -->
+  <div class="page-header-row">
+    <div class="header-branding">
+      <div class="gold-seal-emboss header-seal" title="Performance & Velocity Telemetry">
+        <span class="seal-glyph">📊</span>
+      </div>
+      <div>
+        <div class="title-with-pill">
+          <h1 class="serif-title">MENTORSHIP PERFORMANCE ANALYTICS</h1>
+          <span class="status-pill active-telemetry-pill">⚡ LIVE TELEMETRY STREAM</span>
+        </div>
+        <p class="subtitle serif-title">Weekly velocity, session completion rates, and learning domain distribution</p>
+      </div>
+    </div>
+
+    <div class="header-telemetry-badge">
+      <span class="telemetry-beacon beacon-pulse"></span>
+      <span class="telemetry-text serif-title">SYSTEM CADENCE: 99.8% HIGH VELOCITY</span>
     </div>
   </div>
 
-  <!-- Key Metrics Row -->
+  <!-- Key Metrics 3D Stat Grid -->
   <div class="metrics-row">
-    <div class="metric-card glass-card">
-      <span class="metric-label">COMPLETION RATE</span>
-      <span class="metric-value orbitron-font green-glow">96.4%</span>
-      <span class="metric-sub">↑ 3.2% vs last week</span>
+    <div class="metric-card clay-panel elevated-card-3d">
+      <div class="grid-watermark"></div>
+      <div class="metric-top">
+        <span class="metric-label serif-title">COMPLETION RATE</span>
+        <div class="metric-icon-crest forest-crest">
+          <span class="metric-icon-badge">✅</span>
+        </div>
+      </div>
+      <span class="metric-value green-glow serif-title">96.4%</span>
+      <div class="metric-sparkline debossed-track">
+        <div class="fill green" style="width: 96%;"></div>
+      </div>
+      <span class="metric-sub serif-title">↑ 3.2% vs previous 7 days</span>
     </div>
-    <div class="metric-card glass-card">
-      <span class="metric-label">AVG FEEDBACK SCORE</span>
-      <span class="metric-value orbitron-font gold-glow">4.92 / 5.0</span>
-      <span class="metric-sub">⭐ 98 Positive Reviews</span>
+
+    <div class="metric-card clay-panel elevated-card-3d">
+      <div class="grid-watermark"></div>
+      <div class="metric-top">
+        <span class="metric-label serif-title">AVG FEEDBACK SCORE</span>
+        <div class="metric-icon-crest gold-crest">
+          <span class="metric-icon-badge">⭐</span>
+        </div>
+      </div>
+      <span class="metric-value gold-glow serif-title">4.92 / 5.0</span>
+      <div class="metric-sparkline debossed-track">
+        <div class="fill amber" style="width: 98%;"></div>
+      </div>
+      <span class="metric-sub serif-title">⭐ 98 Positive Mentee Reviews</span>
     </div>
-    <div class="metric-card glass-card">
-      <span class="metric-label">HOURS THIS MONTH</span>
-      <span class="metric-value orbitron-font cyan-glow">34 Hours</span>
-      <span class="metric-sub">↑ 8 Hours teaching</span>
+
+    <div class="metric-card clay-panel elevated-card-3d">
+      <div class="grid-watermark"></div>
+      <div class="metric-top">
+        <span class="metric-label serif-title">HOURS THIS MONTH</span>
+        <div class="metric-icon-crest terracotta-crest">
+          <span class="metric-icon-badge">⏱️</span>
+        </div>
+      </div>
+      <span class="metric-value terracotta-glow serif-title">34 Hours</span>
+      <div class="metric-sparkline debossed-track">
+        <div class="fill terracotta" style="width: 85%;"></div>
+      </div>
+      <span class="metric-sub serif-title">↑ 8 Hours Active 1-on-1 Guidance</span>
     </div>
   </div>
 
   <div class="charts-grid">
-    <!-- Left: Weekly Session Velocity Line Chart -->
-    <div class="chart-card glass-card">
+    <!-- Left: Weekly Session Velocity 3D Pillar Bar Chart -->
+    <div class="chart-card clay-panel elevated-card-3d">
       <div class="chart-header">
-        <h3 class="orbitron-font">📈 WEEKLY SESSION VELOCITY & XP GAIN</h3>
-        <span class="chart-badge">PAST 7 DAYS</span>
+        <div class="chart-title-wrap">
+          <span class="chart-icon float-icon">📈</span>
+          <h3 class="serif-title">WEEKLY SESSION VELOCITY & XP GAIN</h3>
+        </div>
+        <span class="chart-badge serif-title">⚡ PAST 7 DAYS CADENCE</span>
       </div>
 
       <div class="svg-bar-chart">
-        <div *ngFor="let p of weeklyPoints" class="bar-col">
-          <span class="bar-xp orbitron-font">+{{ p.xp }}</span>
-          <div class="bar-wrapper">
-            <div class="bar-fill" [style.height.%]="p.height"></div>
+        <div *ngFor="let p of weeklyPoints; let i = index" class="bar-col">
+          <span class="bar-xp serif-title">+{{ p.xp }}</span>
+          <div class="bar-wrapper" [title]="p.day + ': ' + p.sessions + ' sessions (' + p.xp + ' XP)'">
+            <div class="bar-fill" [style.height.%]="p.height" [style.animationDelay]="(i * 0.1) + 's'"></div>
           </div>
-          <span class="bar-day orbitron-font">{{ p.day }}</span>
+          <span class="bar-day serif-title">{{ p.day }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Right: Time Distribution Donut Chart -->
-    <div class="chart-card glass-card">
+    <!-- Right: Time Distribution 3D Donut Dial Chart -->
+    <div class="chart-card clay-panel elevated-card-3d">
       <div class="chart-header">
-        <h3 class="orbitron-font">🍩 TOPIC TIME DISTRIBUTION</h3>
-        <span class="chart-badge">DOMAIN SHARE</span>
+        <div class="chart-title-wrap">
+          <span class="chart-icon float-icon">🍩</span>
+          <h3 class="serif-title">TOPIC TIME DISTRIBUTION</h3>
+        </div>
+        <span class="chart-badge serif-title">DOMAIN SHARE</span>
       </div>
 
       <div class="donut-chart-wrapper">
-        <svg viewBox="0 0 36 36" class="donut-chart">
-          <circle cx="18" cy="18" r="15.9155" class="donut-ring"></circle>
-          <circle cx="18" cy="18" r="15.9155" class="donut-segment cyan" stroke-dasharray="40 60" stroke-dashoffset="25"></circle>
-          <circle cx="18" cy="18" r="15.9155" class="donut-segment purple" stroke-dasharray="25 75" stroke-dashoffset="85"></circle>
-          <circle cx="18" cy="18" r="15.9155" class="donut-segment green" stroke-dasharray="20 80" stroke-dashoffset="60"></circle>
-          <circle cx="18" cy="18" r="15.9155" class="donut-segment gold" stroke-dasharray="15 85" stroke-dashoffset="40"></circle>
-        </svg>
+        <div class="donut-svg-container 3d-skeletal-dial">
+          <svg viewBox="0 0 36 36" class="donut-chart">
+            <circle cx="18" cy="18" r="15.9155" class="donut-ring"></circle>
+            <circle cx="18" cy="18" r="15.9155" class="donut-segment terracotta" stroke-dasharray="40 60" stroke-dashoffset="25"></circle>
+            <circle cx="18" cy="18" r="15.9155" class="donut-segment amber" stroke-dasharray="25 75" stroke-dashoffset="85"></circle>
+            <circle cx="18" cy="18" r="15.9155" class="donut-segment forest" stroke-dasharray="20 80" stroke-dashoffset="60"></circle>
+            <circle cx="18" cy="18" r="15.9155" class="donut-segment ochre" stroke-dasharray="15 85" stroke-dashoffset="40"></circle>
+          </svg>
+          <div class="donut-center-readout">
+            <span class="readout-val serif-title">100%</span>
+            <span class="readout-lbl serif-title">TRACKED</span>
+          </div>
+        </div>
 
-        <div class="donut-legend">
-          <div *ngFor="let t of topicsDistribution" class="legend-item">
-            <span class="legend-color-dot" [style.background]="t.color"></span>
-            <span class="legend-name">{{ t.name }}</span>
-            <span class="legend-pct orbitron-font" [style.color]="t.color">{{ t.pct }}%</span>
+        <div class="donut-legend list-stagger">
+          <div *ngFor="let t of topicsDistribution" class="legend-item elevated-card-3d">
+            <span class="legend-color-dot" [style.background]="t.color" [style.box-shadow]="'0 0 8px ' + t.color"></span>
+            <span class="legend-name serif-title">{{ t.name }}</span>
+            <span class="legend-pct serif-title" [style.color]="t.color">{{ t.pct }}%</span>
           </div>
         </div>
       </div>

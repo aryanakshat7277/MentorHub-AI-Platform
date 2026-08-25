@@ -1,0 +1,310 @@
+<div class="admin-dashboard-page">
+  <!-- Toast Notification Overlay -->
+  <div class="admin-toast clay-panel elevated-card-3d serif-title" *ngIf="toastMessage">
+    <span>{{ toastMessage }}</span>
+  </div>
+
+  <!-- Elevated 3D God-Level Hero Banner -->
+  <div class="hero-card wood-card elevated-3d">
+    <div class="orbital-bg-container">
+      <div class="orbit-ring ring-1"></div>
+      <div class="orbit-ring ring-2"></div>
+      <div class="orbit-ring ring-3"></div>
+      <div class="floating-particle p1">✨</div>
+      <div class="floating-particle p2">✦</div>
+      <div class="floating-particle p3">🌟</div>
+    </div>
+
+    <div class="hero-user-profile">
+      <div class="avatar-glow-ring avatar-crest-3d">
+        <div class="avatar-bezel">
+          <img src="assets/akshat-profile.jpg" alt="Admin Avatar" class="hero-avatar" />
+        </div>
+        <span class="online-badge beacon-pulse"></span>
+      </div>
+
+      <div class="user-meta">
+        <div class="user-role-badge-row">
+          <span class="welcome-text serif-title">SYSTEM OVERSEER CONTROL DECK</span>
+          <span class="level-pill pill-3d admin-pill serif-title">🛡️ SYSTEM ADMIN</span>
+          <div class="gold-seal-emboss" title="Verified System Overseer Credential">
+            <div class="seal-inner">👑</div>
+          </div>
+        </div>
+        <h1 class="user-name serif-title">MENTORHUB PLATFORM ADMIN</h1>
+        <span class="user-title serif-title">Principal Architecture • AI Neural Router • Security Operations</span>
+
+        <!-- System Overseer Telemetry Well -->
+        <div class="xp-level-bar-box progress-well-3d admin-telemetry-bar">
+          <div class="bar-info">
+            <span class="bar-lbl serif-title">🛡️ SYSTEM OVERSEER PLATFORM TELEMETRY</span>
+            <span class="bar-val serif-title">UNRESTRICTED ADMIN ACCESS • {{ stats.totalUsers }} USERS • {{ stats.systemUptime }} UPTIME</span>
+          </div>
+          <div class="track debossed-track">
+            <div class="fill fill-3d admin-fill" style="width: 100%;">
+              <div class="shine-sweep"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-digital-clock">
+      <div class="clock-display serif-title">{{ currentTime }}</div>
+      <div class="date-display serif-title">{{ currentDate }}</div>
+      <div class="status-indicator">
+        <span class="online-dot beacon-pulse"></span>
+        <span class="status-lbl serif-title">⚡ PLATFORM ONLINE {{ stats.systemUptime }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 God-Level 3D KPI Metric Cards -->
+  <div class="kpi-grid">
+    <!-- Card 1: Total Users -->
+    <div class="kpi-card clay-panel elevated-card-3d tactile-btn-3d">
+      <div class="kpi-icon-box gold-seal-emboss">
+        <span>👥</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-title serif-title">REGISTERED USERS</span>
+        <h3 class="kpi-value serif-title">{{ stats.totalUsers }}</h3>
+        <span class="kpi-sub serif-title">{{ stats.activeMentors }} Mentor • {{ stats.activeMentees }} Mentees</span>
+      </div>
+      <div class="kpi-badge pulse-badge serif-title">● 100% ACTIVE</div>
+    </div>
+
+    <!-- Card 2: Session Completion -->
+    <div class="kpi-card clay-panel elevated-card-3d tactile-btn-3d">
+      <div class="kpi-icon-box gold-seal-emboss">
+        <span>🎯</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-title serif-title">COMPLETION RATE</span>
+        <h3 class="kpi-value serif-title">{{ stats.completionRate }}%</h3>
+        <span class="kpi-sub serif-title">High Velocity Track</span>
+      </div>
+      <div class="kpi-badge pulse-badge serif-title">⚡ +4.2% THIS WEEK</div>
+    </div>
+
+    <!-- Card 3: AI Engine Tokens -->
+    <div class="kpi-card clay-panel elevated-card-3d tactile-btn-3d">
+      <div class="kpi-icon-box gold-seal-emboss">
+        <span>✨</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-title serif-title">AI ENGINE TOKENS TODAY</span>
+        <h3 class="kpi-value serif-title">{{ stats.aiTokensToday | number }}</h3>
+        <span class="kpi-sub serif-title">Gemini 3.6 Flash Neural Core</span>
+      </div>
+      <div class="kpi-badge pulse-badge serif-title">🟢 LIVE VOICE ACTIVE</div>
+    </div>
+
+    <!-- Card 4: Security Score -->
+    <div class="kpi-card clay-panel elevated-card-3d tactile-btn-3d">
+      <div class="kpi-icon-box gold-seal-emboss">
+        <span>🛡️</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-title serif-title">SECURITY AUDIT SCORE</span>
+        <h3 class="kpi-value serif-title">{{ stats.securityScore }}/100</h3>
+        <span class="kpi-sub serif-title">JWT Guard & H2 Storage</span>
+      </div>
+      <div class="kpi-badge pulse-badge serif-title">✓ ALL PASSED</div>
+    </div>
+  </div>
+
+  <!-- 3D Radial Diagnostic Gauges Section -->
+  <div class="radial-gauges-section clay-panel elevated-card-3d">
+    <div class="card-header">
+      <div class="title-group">
+        <span class="chart-icon float-icon">📊</span>
+        <h2 class="serif-title">REAL-TIME SYSTEM DIAGNOSTIC GAUGES</h2>
+      </div>
+      <span class="live-tag pulse-badge serif-title"><span class="radar-ping"></span>● LIVE TELEMETRY</span>
+    </div>
+
+    <div class="gauges-grid">
+      <div *ngFor="let gauge of radialGauges" class="gauge-card clay-card-3d tactile-btn-3d">
+        <div class="gauge-circle-box">
+          <svg viewBox="0 0 120 120" class="svg-gauge-3d">
+            <circle cx="60" cy="60" r="50" class="gauge-track-3d"></circle>
+            <circle cx="60" cy="60" r="50" class="gauge-fill-3d" [style.stroke]="gauge.color" [style.stroke-dasharray]="gauge.strokeDash"></circle>
+          </svg>
+          <div class="gauge-center-content">
+            <span class="gauge-icon">{{ gauge.icon }}</span>
+            <span class="gauge-val serif-title">{{ gauge.percent }}%</span>
+          </div>
+        </div>
+        <span class="gauge-title serif-title">{{ gauge.title }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D Mechanical Quick Command Dock -->
+  <div class="quick-actions-bar clay-panel elevated-card-3d command-dock-3d">
+    <div class="dock-header">
+      <div class="dock-seal-box gold-seal-emboss">
+        <span class="dock-glyph">⚡</span>
+      </div>
+      <div class="dock-title-group">
+        <h2 class="actions-title serif-title">OVERSEER COMMAND DECK</h2>
+        <span class="dock-sub-pill pulse-badge serif-title">● 6 ACTIVE COMMAND MODULES</span>
+      </div>
+    </div>
+
+    <div class="command-deck-grid">
+      <button *ngFor="let action of adminQuickCommands" class="command-keycap-3d tactile-btn-3d" (click)="executeQuickCommand(action)" [title]="action.desc">
+        <div class="keycap-icon-box gold-seal-emboss" [style.background]="action.color + '18'" [style.border-color]="action.color + '40'">
+          <span class="act-icon">{{ action.icon }}</span>
+        </div>
+        <div class="keycap-info">
+          <span class="act-name serif-title">{{ action.title }}</span>
+          <span class="act-desc serif-title">{{ action.desc }}</span>
+        </div>
+        <span class="hotkey-badge keycap-tile serif-title">[{{ action.hotkey }}]</span>
+        <div class="keycap-shine"></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- User Directory & Role Control Matrix -->
+  <div class="directory-card clay-panel elevated-card-3d">
+    <div class="card-header">
+      <div class="title-group">
+        <span class="chart-icon float-icon">👤</span>
+        <h2 class="serif-title">USER DIRECTORY & ROLE MANAGEMENT</h2>
+      </div>
+
+      <div class="filter-controls">
+        <div class="search-box 3d-inset-well">
+          <span class="search-icon">🔍</span>
+          <input type="text" [(ngModel)]="searchTerm" placeholder="Search by user name or email..." class="search-input serif-title" />
+        </div>
+
+        <select [(ngModel)]="selectedRoleFilter" class="role-filter-select tactile-btn-3d serif-title">
+          <option value="ALL">All Roles</option>
+          <option value="MENTOR">Mentors</option>
+          <option value="MENTEE">Mentees</option>
+          <option value="ADMIN">Admins</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 3D User Directory Table -->
+    <div class="table-container 3d-inset-well">
+      <table class="user-table">
+        <thead>
+          <tr class="serif-title">
+            <th>USER PROFILE</th>
+            <th>ROLE</th>
+            <th>LEVEL & XP</th>
+            <th>STATUS</th>
+            <th>LAST ACTIVE</th>
+            <th>ADMIN ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of filteredUsers" class="user-row">
+            <td>
+              <div class="user-profile-cell">
+                <div class="user-avatar-wrap avatar-crest-3d mini gold-seal-emboss">
+                  <img [src]="u.avatarUrl" [alt]="u.name" class="table-avatar" />
+                </div>
+                <div class="user-name-box">
+                  <h4 class="name serif-title">{{ u.name }}</h4>
+                  <span class="email serif-title">{{ u.email }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span [class]="'role-pill serif-title ' + u.role.toLowerCase()">
+                {{ u.role === 'MENTOR' ? '👑 MENTOR' : (u.role === 'ADMIN' ? '🛡️ ADMIN' : '⚡ MENTEE') }}
+              </span>
+            </td>
+            <td>
+              <div class="xp-cell">
+                <span class="level-lbl serif-title">LVL {{ u.level }}</span>
+                <span class="xp-val serif-title">{{ u.xpPoints | number }} XP</span>
+              </div>
+            </td>
+            <td>
+              <span class="status-tag pulse-badge serif-title">
+                ● {{ u.status }}
+              </span>
+            </td>
+            <td>
+              <span class="last-active serif-title">🕒 {{ u.lastActive }}</span>
+            </td>
+            <td>
+              <div class="action-buttons-cell">
+                <button class="act-btn tactile-btn-3d bonus-btn serif-title" (click)="grantXpBonus(u)" title="Grant +500 Bonus XP">
+                  ✨ +500 XP
+                </button>
+                <button class="act-btn tactile-btn-3d role-btn serif-title" (click)="toggleUserRole(u)" title="Switch Role">
+                  🔄 ROLE
+                </button>
+                <button class="act-btn tactile-btn-3d reset-btn serif-title" (click)="resetPassword(u)" title="Reset Password">
+                  🔑 RESET
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Mid Section: System Infrastructure Health + Security Audit Stream -->
+  <div class="admin-mid-section">
+    <!-- System Health Nodes -->
+    <div class="health-card clay-panel elevated-card-3d">
+      <div class="card-header">
+        <div class="title-group">
+          <span class="chart-icon float-icon">⚙️</span>
+          <h2 class="serif-title">SYSTEM INFRASTRUCTURE HEALTH</h2>
+        </div>
+        <span class="health-badge pulse-badge serif-title">● ALL NODES HEALTHY</span>
+      </div>
+
+      <div class="nodes-list list-stagger">
+        <div *ngFor="let node of systemNodes" class="node-row list-pill-3d tactile-btn-3d">
+          <div class="node-icon-box gold-seal-emboss">
+            <span>{{ node.icon }}</span>
+          </div>
+          <div class="node-info">
+            <h4 class="node-name serif-title">{{ node.name }}</h4>
+            <span class="node-meta serif-title">Latency: {{ node.latency }} • Load: {{ node.load }}%</span>
+          </div>
+          <div class="node-status-box">
+            <span class="status-pill status-pill-3d confirmed serif-title">
+              ✓ {{ node.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Audit Stream -->
+    <div class="audit-card clay-panel elevated-card-3d">
+      <div class="card-header">
+        <div class="title-group">
+          <span class="chart-icon pulse-icon">🛡️</span>
+          <h2 class="serif-title">SECURITY AUDIT STREAM</h2>
+        </div>
+        <span class="live-tag pulse-badge serif-title">● REAL-TIME AUDIT</span>
+      </div>
+
+      <div class="audit-feed-list feed-stagger">
+        <div *ngFor="let log of auditLogs" class="audit-item feed-item-3d tactile-btn-3d" [class]="'audit-' + log.type.toLowerCase()">
+          <div class="audit-type-tag serif-title">{{ log.type }}</div>
+          <div class="audit-content">
+            <p class="action-text serif-title">{{ log.action }}</p>
+            <span class="actor-meta serif-title">Actor: {{ log.actor }} • {{ log.timestamp }}</span>
+          </div>
+          <span class="log-status-badge serif-title">✓ VERIFIED</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

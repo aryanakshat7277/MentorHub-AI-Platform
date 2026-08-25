@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/v1/ai/chat")
+@RequestMapping({"/api/ai/chat", "/api/v1/ai/chat"})
 public class AiChatController {
 
     private final AiChatService aiChatService;

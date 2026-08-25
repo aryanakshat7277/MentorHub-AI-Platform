@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/mentor")
+@RequestMapping({"/api/mentor", "/api/v1/mentor"})
 @CrossOrigin(origins = "*")
 public class MentorController {
 

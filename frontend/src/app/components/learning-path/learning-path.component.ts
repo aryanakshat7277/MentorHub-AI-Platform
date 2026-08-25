@@ -10,10 +10,10 @@ import { CommonModule } from '@angular/common';
 })
 export class LearningPathComponent {
   circularProgressCards = [
-    { title: 'Spring Boot 3 & Microservices', pct: 39, color: '#00D4FF', icon: '🍃', status: 'IN PROGRESS' },
-    { title: 'Angular 17 Standalone & Sci-Fi UI', pct: 21, color: '#A855F7', icon: '🅰️', status: 'IN PROGRESS' },
-    { title: 'Distributed Systems & WebSockets', pct: 63, color: '#10B981', icon: '🌐', status: 'ADVANCED' },
-    { title: 'AI Engineering & RAG Architecture', pct: 15, color: '#F59E0B', icon: '🤖', status: 'STARTING' }
+    { title: 'Spring Boot 3 & Microservices', pct: 45, color: '#DE7048', icon: '🍃', status: 'IN PROGRESS' },
+    { title: 'Angular 17 Standalone & Skeuomorphic UI', pct: 35, color: '#B35E17', icon: '🅰️', status: 'IN PROGRESS' },
+    { title: 'Distributed Systems & WebSockets', pct: 78, color: '#2A5A3D', icon: '🌐', status: 'ADVANCED' },
+    { title: 'AI Engineering & RAG Architecture', pct: 25, color: '#D4AF37', icon: '🤖', status: 'STARTING' }
   ];
 
   roadmapTree = [

@@ -7,7 +7,7 @@ import { catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:8080/api/v1';
+  private baseUrl = 'http://localhost:8080/api';
 
   constructor(private http: HttpClient) {}
 
@@ -118,9 +118,62 @@ export class ApiService {
   getSessions(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/sessions`).pipe(
       catchError(() => of([
-        { id: 1, topic: 'Spring Boot 3 WebSocket Handlers', mentor: 'AKSHAT ARYAN', mentee: 'KRITI SAGAR', date: '2026-08-15', status: 'CONFIRMED', time: '14:00' },
-        { id: 2, topic: 'Angular 17 Signal State Management', mentor: 'AKSHAT ARYAN', mentee: 'VANAJA', date: '2026-08-16', status: 'CONFIRMED', time: '16:30' },
-        { id: 3, topic: 'Distributed AI Vector Search', mentor: 'AKSHAT ARYAN', mentee: 'PAVANI', date: '2026-08-18', status: 'PENDING', time: '11:00' }
+        { 
+          id: 101, 
+          topic: 'Spring Boot 3 WebSocket Handlers & Reactive Streams', 
+          mentorName: 'AKSHAT ARYAN', 
+          mentor: 'AKSHAT ARYAN',
+          menteeName: 'KRITI SAGAR', 
+          mentee: 'KRITI SAGAR',
+          scheduledAt: '2026-08-22T14:00:00', 
+          date: '2026-08-22',
+          time: '14:00',
+          durationMinutes: 60, 
+          meetingLink: 'http://localhost:4200/workspace', 
+          status: 'CONFIRMED' 
+        },
+        { 
+          id: 102, 
+          topic: 'Angular 17 Signals & Skeuomorphic UI Design', 
+          mentorName: 'AKSHAT ARYAN', 
+          mentor: 'AKSHAT ARYAN',
+          menteeName: 'VANAJA', 
+          mentee: 'VANAJA',
+          scheduledAt: '2026-08-23T16:30:00', 
+          date: '2026-08-23',
+          time: '16:30',
+          durationMinutes: 45, 
+          meetingLink: 'http://localhost:4200/workspace', 
+          status: 'CONFIRMED' 
+        },
+        { 
+          id: 103, 
+          topic: 'Cloud Microservices Mesh & Kubernetes Ingress', 
+          mentorName: 'AKSHAT ARYAN', 
+          mentor: 'AKSHAT ARYAN',
+          menteeName: 'PAVANI', 
+          mentee: 'PAVANI',
+          scheduledAt: '2026-08-24T11:00:00', 
+          date: '2026-08-24',
+          time: '11:00',
+          durationMinutes: 90, 
+          meetingLink: 'http://localhost:4200/workspace', 
+          status: 'PENDING' 
+        },
+        { 
+          id: 104, 
+          topic: 'AI Model Deployment with Low Latency Endpoints', 
+          mentorName: 'KRITI SAGAR', 
+          mentor: 'KRITI SAGAR',
+          menteeName: 'AKSHAT ARYAN', 
+          mentee: 'AKSHAT ARYAN',
+          scheduledAt: '2026-08-19T10:00:00', 
+          date: '2026-08-19',
+          time: '10:00',
+          durationMinutes: 60, 
+          meetingLink: 'http://localhost:4200/workspace', 
+          status: 'COMPLETED' 
+        }
       ]))
     );
   }
@@ -150,9 +203,46 @@ export class ApiService {
   getGoals(userId: number = 1): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/goals/${userId}`).pipe(
       catchError(() => of([
-        { id: 1, title: 'Master Spring Boot 3 Security', mentee: 'KRITI SAGAR', progress: 85, status: 'IN_PROGRESS' },
-        { id: 2, title: 'Build Reactive Angular 17 UI', mentee: 'VANAJA', progress: 70, status: 'IN_PROGRESS' },
-        { id: 3, title: 'Deploy Distributed Microservices', mentee: 'PAVANI', progress: 90, status: 'COMPLETED' }
+        { 
+          id: 1, 
+          title: 'Master Spring Boot 3 Security & OAuth2', 
+          category: 'S', 
+          categoryName: 'Specific', 
+          description: 'Implement JWT tokens with role-based access control and method-level security', 
+          targetDate: '2026-09-15', 
+          progressPercentage: 85, 
+          status: 'IN_PROGRESS' 
+        },
+        { 
+          id: 2, 
+          title: 'Build Reactive Angular 17 UI Architecture', 
+          category: 'M', 
+          categoryName: 'Measurable', 
+          description: 'Construct Signal-driven state management with 3D claymorphic components', 
+          targetDate: '2026-09-30', 
+          progressPercentage: 70, 
+          status: 'IN_PROGRESS' 
+        },
+        { 
+          id: 3, 
+          title: 'Architect Distributed Microservices Mesh', 
+          category: 'A', 
+          categoryName: 'Achievable', 
+          description: 'Deploy Kubernetes clusters with zero-downtime rolling updates', 
+          targetDate: '2026-10-15', 
+          progressPercentage: 0, 
+          status: 'TO_DO' 
+        },
+        { 
+          id: 4, 
+          title: 'Deploy Production AI Model Pipeline', 
+          category: 'R', 
+          categoryName: 'Relevant', 
+          description: 'Configure high-throughput inference endpoints with low latency SLA', 
+          targetDate: '2026-08-10', 
+          progressPercentage: 100, 
+          status: 'ACHIEVED' 
+        }
       ]))
     );
   }
@@ -308,5 +398,34 @@ export class ApiService {
     return this.http.get(`${this.baseUrl}/certificates/verify/${certNo}`).pipe(
       catchError(() => of(null))
     );
+  }
+
+  // Admin Backend REST Services
+  getAdminStats(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/admin/stats`).pipe(catchError(() => of(null)));
+  }
+
+  getAdminUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/admin/users`).pipe(catchError(() => of([])));
+  }
+
+  grantUserXp(id: number, xp: number = 500): Observable<any> {
+    return this.http.post(`${this.baseUrl}/admin/users/${id}/grant-xp?xp=${xp}`, {});
+  }
+
+  updateUserRole(id: number, role: string): Observable<any> {
+    return this.http.put(`${this.baseUrl}/admin/users/${id}/role?role=${role}`, {});
+  }
+
+  resetUserPassword(id: number): Observable<any> {
+    return this.http.post(`${this.baseUrl}/admin/users/${id}/reset-password`, {});
+  }
+
+  getSystemHealth(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/admin/system-health`).pipe(catchError(() => of([])));
+  }
+
+  getAuditLogs(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/admin/audit-logs`).pipe(catchError(() => of([])));
   }
 }

@@ -23,10 +23,10 @@ export class AnalyticsComponent implements OnInit {
   ];
 
   topicsDistribution = [
-    { name: 'Distributed Systems & Spring Boot 3', pct: 40, color: '#00D4FF' },
-    { name: 'Angular 17 Architecture & RxJS', pct: 25, color: '#A855F7' },
-    { name: 'AI/ML Infrastructure & RAG', pct: 20, color: '#10B981' },
-    { name: 'Database Tuning & Cloud DevOps', pct: 15, color: '#F59E0B' }
+    { name: 'Distributed Systems & Spring Boot 3', pct: 40, color: '#A63B19' },
+    { name: 'Angular 17 Architecture & RxJS', pct: 25, color: '#B35E17' },
+    { name: 'AI/ML Infrastructure & RAG', pct: 20, color: '#2A5A3D' },
+    { name: 'Database Tuning & Cloud DevOps', pct: 15, color: '#663914' }
   ];
 
   constructor(private apiService: ApiService) {}

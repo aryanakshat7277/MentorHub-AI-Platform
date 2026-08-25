@@ -1,19 +1,29 @@
 <div class="resource-hub-page">
-  <div class="page-header">
-    <div>
-      <h1 class="orbitron-font">KNOWLEDGE & RESOURCE HUB</h1>
-      <p class="subtitle">Curated enterprise articles, videos, PDFs, pictures, and study guides</p>
+  <!-- Page Header with 3D Seal -->
+  <div class="page-header-row">
+    <div class="header-branding">
+      <div class="gold-seal-emboss header-seal" title="Knowledge Base & Resources Vault">
+        <span class="seal-glyph">📚</span>
+      </div>
+      <div>
+        <div class="title-with-pill">
+          <h1 class="serif-title">KNOWLEDGE & RESOURCE HUB</h1>
+          <span class="status-pill active-vault-pill">⚡ REPOSITORY SYNCHRONIZED</span>
+        </div>
+        <p class="subtitle serif-title">Curated enterprise articles, videos, PDFs, system architectures, and study guides</p>
+      </div>
     </div>
 
     <div class="header-actions">
-      <div class="search-box">
+      <div class="search-box 3d-inset-well">
         <span class="search-icon">🔍</span>
-        <input type="text" [(ngModel)]="searchQuery" placeholder="Search resources..." />
+        <input type="text" [(ngModel)]="searchQuery" class="serif-title" placeholder="Search knowledge resources..." />
       </div>
 
       <!-- Upload Resource Button (Always Available for Mentors) -->
-      <button class="btn-cyan upload-btn orbitron-font" (click)="openUploadModal()">
-        📤 UPLOAD RESOURCE
+      <button class="btn-primary upload-btn tactile-btn-3d serif-title" (click)="openUploadModal()">
+        <span>📤 UPLOAD RESOURCE</span>
+        <span class="shine-sweep"></span>
       </button>
     </div>
   </div>
@@ -21,7 +31,7 @@
   <!-- Category Filter Pills (ALL, ARTICLE, VIDEO, PDF & DOCS, PICTURES, COURSE, BOOK) -->
   <div class="filter-pills-row">
     <button *ngFor="let pill of filterPills" 
-            class="filter-pill" 
+            class="filter-pill tactile-btn-3d serif-title" 
             [class.active]="selectedCategory === pill.value" 
             (click)="selectFilter(pill.value)">
       {{ pill.label }}
@@ -29,46 +39,46 @@
   </div>
 
   <!-- Resource Cards Grid -->
-  <div class="resources-grid">
-    <div *ngFor="let res of filteredResources" class="resource-card glass-card">
+  <div class="resources-grid grid-stagger">
+    <div *ngFor="let res of filteredResources" class="resource-card clay-panel elevated-card-3d">
       <div class="card-header">
-        <span [class]="'type-badge ' + (res.type ? res.type.toLowerCase() : 'article')">{{ res.type }}</span>
+        <span [class]="'type-badge serif-title ' + (res.type ? res.type.toLowerCase() : 'article')">{{ res.type }}</span>
         
         <div class="top-card-actions">
-          <button class="bookmark-btn" (click)="toggleBookmark(res)">
+          <button class="bookmark-btn tactile-btn-3d serif-title" (click)="toggleBookmark(res)">
             {{ res.bookmarked ? '⭐ BOOKMARKED' : '☆ BOOKMARK' }}
           </button>
           
           <!-- Delete Resource Button (Mentor Permission) -->
-          <button class="delete-btn" (click)="deleteResource(res.id)" title="Delete Resource (Mentor Permission)">
+          <button class="delete-btn tactile-btn-3d" (click)="deleteResource(res.id)" title="Delete Resource (Mentor Permission)">
             🗑️
           </button>
         </div>
       </div>
 
-      <h3 class="resource-title orbitron-font">{{ res.title }}</h3>
-      <p class="resource-desc">{{ res.description }}</p>
+      <h3 class="resource-title serif-title">{{ res.title }}</h3>
+      <p class="resource-desc serif-title">{{ res.description }}</p>
 
       <!-- Uploaded File Details Pill -->
-      <div class="file-info-pill" *ngIf="res.fileName">
+      <div class="file-info-pill 3d-inset-well" *ngIf="res.fileName">
         <span class="file-icon">📎</span>
-        <span class="file-name">{{ res.fileName }}</span>
+        <span class="file-name serif-title">{{ res.fileName }}</span>
       </div>
 
       <div class="card-footer">
         <div class="author-info">
-          <span class="author-name">By {{ res.author }}</span>
-          <span class="read-time">⏱️ {{ res.readTime }}</span>
+          <span class="author-name serif-title">By {{ res.author }}</span>
+          <span class="read-time serif-title">⏱️ {{ res.readTime }}</span>
         </div>
 
         <div class="footer-btn-group">
           <!-- View / Preview Button -->
-          <button class="btn-cyan btn-sm" (click)="openPreview(res)">
-            {{ res.fileData ? '👁️ VIEW' : 'VIEW RESOURCE →' }}
+          <button class="btn-secondary btn-sm tactile-btn-3d serif-title" (click)="openPreview(res)">
+            {{ res.fileData ? '👁️ PREVIEW' : 'VIEW RESOURCE ➔' }}
           </button>
 
           <!-- Direct Download Button for Uploaded Files -->
-          <button class="btn-purple btn-sm download-btn" *ngIf="res.fileData" (click)="downloadResourceFile(res)">
+          <button class="btn-primary btn-sm download-btn tactile-btn-3d serif-title" *ngIf="res.fileData" (click)="downloadResourceFile(res)">
             📥 DOWNLOAD
           </button>
         </div>
@@ -76,35 +86,40 @@
     </div>
 
     <!-- Empty State -->
-    <div class="empty-state glass-card" *ngIf="filteredResources.length === 0">
-      <span class="empty-icon">📁</span>
-      <h3 class="orbitron-font">NO RESOURCES FOUND</h3>
-      <p>No resources found matching your current filter. Click '📤 UPLOAD RESOURCE' to add pictures, PDFs, or guides.</p>
+    <div class="empty-state clay-panel elevated-card-3d" *ngIf="filteredResources.length === 0">
+      <span class="empty-icon float-icon">📁</span>
+      <h3 class="serif-title">NO RESOURCES FOUND</h3>
+      <p class="serif-title">No resources found matching your current filter. Click '📤 UPLOAD RESOURCE' to add pictures, PDFs, or guides.</p>
     </div>
   </div>
 </div>
 
 <!-- ==========================================================================
-     SCI-FI UPLOAD RESOURCE MODAL
+     3D UPLOAD RESOURCE MODAL
      ========================================================================== -->
 <div class="modal-backdrop" *ngIf="showUploadModal" (click)="closeUploadModal()"></div>
 
-<div class="upload-modal glass-card" *ngIf="showUploadModal">
+<div class="upload-modal clay-panel elevated-card-3d" *ngIf="showUploadModal">
   <div class="modal-header">
-    <h2 class="orbitron-font">📤 UPLOAD KNOWLEDGE RESOURCE</h2>
-    <button class="close-modal-btn" (click)="closeUploadModal()">✕</button>
+    <div class="modal-header-branding">
+      <div class="gold-seal-emboss modal-seal">
+        <span class="seal-glyph">📤</span>
+      </div>
+      <h2 class="serif-title">UPLOAD KNOWLEDGE RESOURCE</h2>
+    </div>
+    <button class="close-modal-btn tactile-btn-3d" (click)="closeUploadModal()">✕</button>
   </div>
 
   <div class="modal-body">
     <div class="form-row">
-      <label class="orbitron-font">RESOURCE TITLE *</label>
-      <input type="text" [(ngModel)]="newResource.title" placeholder="e.g., Spring Boot 3 & Angular 17 Architecture Guide" />
+      <label class="serif-title">RESOURCE TITLE *</label>
+      <input type="text" [(ngModel)]="newResource.title" class="inset-input-3d serif-title" placeholder="e.g., Spring Boot 3 & Angular 17 Architecture Guide" />
     </div>
 
     <div class="form-grid-2">
       <div class="form-row">
-        <label class="orbitron-font">RESOURCE TYPE</label>
-        <select [(ngModel)]="newResource.type">
+        <label class="serif-title">RESOURCE TYPE</label>
+        <select [(ngModel)]="newResource.type" class="inset-input-3d serif-title">
           <option value="PDF">PDF DOCUMENT (.pdf)</option>
           <option value="PICTURE">PICTURE / IMAGE (.png, .jpg, .svg)</option>
           <option value="DOCUMENT">OFFICE DOC (.docx, .txt, .zip)</option>
@@ -116,8 +131,8 @@
       </div>
 
       <div class="form-row">
-        <label class="orbitron-font">CATEGORY</label>
-        <select [(ngModel)]="newResource.category">
+        <label class="serif-title">CATEGORY</label>
+        <select [(ngModel)]="newResource.category" class="inset-input-3d serif-title">
           <option value="Backend">Backend (Java / Spring)</option>
           <option value="Frontend">Frontend (Angular / TypeScript)</option>
           <option value="AI/ML">AI / Machine Learning</option>
@@ -129,30 +144,30 @@
 
     <!-- Drag & Drop File Input Zone -->
     <div class="form-row">
-      <label class="orbitron-font">ATTACH FILE (PICTURE, PDF, DOC, VIDEO)</label>
-      <div class="file-dropzone" (click)="fileInput.click()">
+      <label class="serif-title">ATTACH FILE (PICTURE, PDF, DOC, VIDEO)</label>
+      <div class="file-dropzone 3d-inset-well" (click)="fileInput.click()">
         <input #fileInput type="file" (change)="onFileSelected($event)" style="display: none;" accept="image/*,.pdf,.doc,.docx,.txt,.zip,.mp4" />
-        <span class="upload-icon">📁</span>
-        <span class="upload-text" *ngIf="!newResource.fileName">Click or drop file here (PDF, Pictures, Documents)</span>
-        <span class="upload-selected" *ngIf="newResource.fileName">Selected File: <strong>{{ newResource.fileName }}</strong></span>
+        <span class="upload-icon float-icon">📁</span>
+        <span class="upload-text serif-title" *ngIf="!newResource.fileName">Click or drop file here (PDF, Pictures, Documents)</span>
+        <span class="upload-selected serif-title" *ngIf="newResource.fileName">Selected File: <strong>{{ newResource.fileName }}</strong></span>
       </div>
     </div>
 
     <!-- Web Link URL (Optional) -->
     <div class="form-row" *ngIf="!newResource.fileName">
-      <label class="orbitron-font">RESOURCE URL (OPTIONAL)</label>
-      <input type="text" [(ngModel)]="newResource.url" placeholder="https://..." />
+      <label class="serif-title">RESOURCE URL (OPTIONAL)</label>
+      <input type="text" [(ngModel)]="newResource.url" class="inset-input-3d serif-title" placeholder="https://..." />
     </div>
 
     <div class="form-row">
-      <label class="orbitron-font">DESCRIPTION / SUMMARY</label>
-      <textarea [(ngModel)]="newResource.description" placeholder="Brief summary of what this resource covers..."></textarea>
+      <label class="serif-title">DESCRIPTION / SUMMARY</label>
+      <textarea [(ngModel)]="newResource.description" class="inset-input-3d serif-title" placeholder="Brief summary of what this resource covers..."></textarea>
     </div>
   </div>
 
   <div class="modal-footer">
-    <button class="btn-cancel" (click)="closeUploadModal()">CANCEL</button>
-    <button class="btn-cyan btn-save" (click)="submitResourceUpload()" [disabled]="isUploading">
+    <button class="btn-cancel tactile-btn-3d serif-title" (click)="closeUploadModal()">CANCEL</button>
+    <button class="btn-primary btn-save tactile-btn-3d serif-title" (click)="submitResourceUpload()" [disabled]="isUploading">
       <span *ngIf="!isUploading">💾 SAVE TO APP DATABASE</span>
       <span *ngIf="isUploading">⏳ SAVING TO H2 DATABASE...</span>
     </button>
@@ -160,41 +175,41 @@
 </div>
 
 <!-- ==========================================================================
-     FILE PREVIEW MODAL
+     3D FILE PREVIEW MODAL
      ========================================================================== -->
 <div class="modal-backdrop" *ngIf="showPreviewModal" (click)="closePreviewModal()"></div>
 
-<div class="preview-modal glass-card" *ngIf="showPreviewModal && selectedPreviewResource">
+<div class="preview-modal clay-panel elevated-card-3d" *ngIf="showPreviewModal && selectedPreviewResource">
   <div class="modal-header">
     <div class="preview-title-box">
-      <span class="type-badge">{{ selectedPreviewResource.type }}</span>
-      <h2 class="orbitron-font">{{ selectedPreviewResource.title }}</h2>
+      <span class="type-badge serif-title">{{ selectedPreviewResource.type }}</span>
+      <h2 class="serif-title">{{ selectedPreviewResource.title }}</h2>
     </div>
-    <button class="close-modal-btn" (click)="closePreviewModal()">✕</button>
+    <button class="close-modal-btn tactile-btn-3d" (click)="closePreviewModal()">✕</button>
   </div>
 
   <div class="modal-body preview-body">
     <!-- Picture Preview -->
-    <div class="image-preview-container" *ngIf="selectedPreviewResource.fileType?.includes('image') || selectedPreviewResource.type === 'PICTURE'">
+    <div class="image-preview-container debossed-track" *ngIf="selectedPreviewResource.fileType?.includes('image') || selectedPreviewResource.type === 'PICTURE'">
       <img [src]="selectedPreviewResource.fileData" [alt]="selectedPreviewResource.title" />
     </div>
 
     <!-- PDF / Document Preview -->
-    <div class="pdf-preview-container" *ngIf="selectedPreviewResource.fileType?.includes('pdf') || selectedPreviewResource.type === 'PDF'">
+    <div class="pdf-preview-container debossed-track" *ngIf="selectedPreviewResource.fileType?.includes('pdf') || selectedPreviewResource.type === 'PDF'">
       <iframe [src]="selectedPreviewResource.fileData" width="100%" height="500px" style="border: none; border-radius: 8px;"></iframe>
     </div>
 
     <!-- General File Text Preview -->
     <div class="general-file-info" *ngIf="!selectedPreviewResource.fileType?.includes('image') && !selectedPreviewResource.fileType?.includes('pdf')">
-      <span class="file-big-icon">📄</span>
-      <h3 class="orbitron-font">{{ selectedPreviewResource.fileName || selectedPreviewResource.title }}</h3>
-      <p>{{ selectedPreviewResource.description }}</p>
+      <span class="file-big-icon float-icon">📄</span>
+      <h3 class="serif-title">{{ selectedPreviewResource.fileName || selectedPreviewResource.title }}</h3>
+      <p class="serif-title">{{ selectedPreviewResource.description }}</p>
     </div>
   </div>
 
   <div class="modal-footer">
-    <button class="btn-cancel" (click)="closePreviewModal()">CLOSE</button>
-    <button class="btn-purple btn-save" (click)="downloadResourceFile(selectedPreviewResource)">
+    <button class="btn-cancel tactile-btn-3d serif-title" (click)="closePreviewModal()">CLOSE</button>
+    <button class="btn-primary btn-save tactile-btn-3d serif-title" (click)="downloadResourceFile(selectedPreviewResource)">
       📥 DOWNLOAD FILE
     </button>
   </div>

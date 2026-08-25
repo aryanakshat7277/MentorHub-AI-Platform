@@ -6,22 +6,33 @@
   </div>
 
   <div class="header-actions">
-    <div class="status-badge">
+    <!-- Graphical Live Network Status Beacon -->
+    <div class="status-badge clay-badge-3d">
+      <span class="status-pulse-ring"></span>
       <span class="status-dot"></span>
-      <span class="status-text">AI NET ONLINE</span>
+      <span class="status-text">AI NET ONLINE 99.9%</span>
     </div>
 
-    <div class="notification-btn" title="Notifications">
+    <!-- Dedicated Full Screen View Mode Button -->
+    <button class="fullscreen-toggle-btn clay-badge-3d" (click)="toggleFullScreen()" [title]="isFullScreen ? 'Exit Full Screen Mode' : 'View Application in Full Screen Mode'">
+      <span class="fs-icon">{{ isFullScreen ? '⇪' : '⛶' }}</span>
+      <span class="fs-label">{{ isFullScreen ? 'EXIT FULLSCREEN' : 'FULL SCREEN' }}</span>
+    </button>
+
+    <div class="notification-btn clay-badge-3d" title="Notifications">
       <span class="bell-icon">🔔</span>
       <span class="badge-count">3</span>
     </div>
 
-    <!-- User Profile Area with Sci-Fi Dropdown Menu -->
+    <!-- User Profile Area with 3D Avatar Crest -->
     <div class="user-profile-wrapper">
-      <div class="user-profile-btn" *ngIf="user" (click)="toggleDropdown($event)" title="Click for Profile & Logout Options">
-        <img [src]="user.avatarUrl || 'assets/mentorhub-logo.png'" alt="Avatar" class="avatar-img" />
+      <div class="user-profile-btn clay-badge-3d" *ngIf="user" (click)="toggleDropdown($event)" title="Click for Profile & Logout Options">
+        <div class="avatar-crest-wrap">
+          <img [src]="user.avatarUrl || 'assets/mentorhub-logo.png'" alt="Avatar" class="avatar-img" />
+          <span class="crest-verified-star">★</span>
+        </div>
         <div class="user-info">
-          <span class="user-name orbitron-font">{{ user.name || 'AKSHAT ARYAN' }}</span>
+          <span class="user-name">{{ user.name || 'AKSHAT ARYAN' }}</span>
           <span class="user-role">{{ user.title || 'Principal AI & Full Stack Mentor' }}</span>
         </div>
         <span class="dropdown-chevron">{{ showDropdown ? '▲' : '▼' }}</span>
@@ -31,8 +42,8 @@
       <div class="profile-dropdown-menu glass-card" *ngIf="showDropdown" (click)="$event.stopPropagation()">
         <div class="dropdown-user-header" *ngIf="user">
           <div class="dd-title-row">
-            <span class="dd-name orbitron-font">{{ user.name }}</span>
-            <span class="dd-role-pill orbitron-font" [class.mentee]="user.role === 'MENTEE'">{{ user.role || 'MENTOR' }}</span>
+            <span class="dd-name">{{ user.name }}</span>
+            <span class="dd-role-pill" [class.mentee]="user.role === 'MENTEE'">{{ user.role || 'MENTOR' }}</span>
           </div>
           <span class="dd-email">{{ user.email }}</span>
         </div>

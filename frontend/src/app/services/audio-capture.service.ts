@@ -26,7 +26,7 @@ export class AudioCaptureService {
       this.mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
-          noiseSuppression: false, // Disabling aggressive noise suppression ensures quiet speech is not cut off
+          noiseSuppression: true, // Enables browser hardware/DSP noise suppression
           autoGainControl: true,
           sampleRate: 16000,
           channelCount: 1
@@ -40,10 +40,21 @@ export class AudioCaptureService {
       this.analyser = this.audioCtx.createAnalyser();
       this.analyser.fftSize = 64;
 
+      // Vocal Bandpass Filters: High-pass (250Hz) eliminates room rumble/fans; Low-pass (3400Hz) eliminates clicks/hiss
+      const highpass = this.audioCtx.createBiquadFilter();
+      highpass.type = 'highpass';
+      highpass.frequency.setValueAtTime(250, this.audioCtx.currentTime);
+
+      const lowpass = this.audioCtx.createBiquadFilter();
+      lowpass.type = 'lowpass';
+      lowpass.frequency.setValueAtTime(3400, this.audioCtx.currentTime);
+
       // 512 samples at 16kHz = ~32ms chunks
       this.scriptNode = this.audioCtx.createScriptProcessor(512, 1, 1);
 
-      this.sourceNode.connect(this.analyser);
+      this.sourceNode.connect(highpass);
+      highpass.connect(lowpass);
+      lowpass.connect(this.analyser);
       this.analyser.connect(this.scriptNode);
       this.scriptNode.connect(this.audioCtx.destination);
 
@@ -51,7 +62,7 @@ export class AudioCaptureService {
         if (!this.isRecording$.value) return;
 
         const inputBuffer = evt.inputBuffer.getChannelData(0);
-        const pcm16 = this.float32ToInt16WithGain(inputBuffer, 2.0); // 2x digital gain boost for high mic sensitivity
+        const pcm16 = this.float32ToInt16WithGain(inputBuffer, 1.0); // 1.0x unity gain prevents amplifying background noise floor
         const base64Chunk = this.arrayBufferToBase64(pcm16.buffer);
 
         this.pcmChunk$.next(base64Chunk);
@@ -115,7 +126,9 @@ export class AudioCaptureService {
         sum += dataArray[i];
       }
       const avg = sum / dataArray.length;
-      const normalized = Math.min(1, avg / 128); // Standardized threshold
+      // Subtract background noise floor threshold (30) so ambient noise stays strictly 0.0 RMS
+      const cleanAvg = Math.max(0, avg - 30);
+      const normalized = Math.min(1, cleanAvg / 90.0);
 
       this.ngZone.runOutsideAngular(() => {
         this.volumeRms$.next(normalized);
@@ -127,7 +140,7 @@ export class AudioCaptureService {
     this.animFrameId = requestAnimationFrame(updateVolume);
   }
 
-  private float32ToInt16WithGain(buffer: Float32Array, gainMultiplier = 2.0): Int16Array {
+  private float32ToInt16WithGain(buffer: Float32Array, gainMultiplier = 1.0): Int16Array {
     const l = buffer.length;
     const output = new Int16Array(l);
     for (let i = 0; i < l; i++) {

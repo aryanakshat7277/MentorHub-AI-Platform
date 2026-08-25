@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/sessions")
+@RequestMapping({"/api/sessions", "/api/v1/sessions"})
 public class SessionController {
 
     private final MentoringSessionRepository sessionRepository;
