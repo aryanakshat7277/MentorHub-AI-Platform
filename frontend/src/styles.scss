@@ -179,6 +179,7 @@ h4 { font-size: 17px; line-height: 1.40; font-weight: 700; }
 p, span, label, div, a { color: var(--text-primary); }
 .subtitle, .text-muted, caption { color: var(--text-tertiary); font-weight: 500; }
 button, input, select, textarea, .nav-item { font-family: var(--font-sans); font-weight: 600; transition: all 0.22s var(--ease-smooth); }
+img { max-width: 100%; height: auto; }
 
 /* ==========================================================================
    PREMIUM CLAYMORPHIC CORE COMPONENTS
