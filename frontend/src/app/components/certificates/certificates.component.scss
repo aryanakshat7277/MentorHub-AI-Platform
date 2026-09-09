@@ -1,4 +1,4 @@
-﻿/* =====================================================
+/* =====================================================
    PAGE SHELL & LAYOUT (Times New Roman Standard Everywhere)
    ===================================================== */
 .certificates-page {
@@ -1015,13 +1015,13 @@
    ===================================================== */
 .modal-backdrop {
   position: fixed; inset: 0; background: rgba(21, 14, 11, 0.6);
-  backdrop-filter: blur(8px); z-index: 99980;
+  backdrop-filter: blur(8px); z-index: 100000;
   animation: modalFade 0.25s ease-out;
 }
 
 .request-modal {
   position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
-  width: 90%; max-width: 520px; z-index: 99990; padding: 28px;
+  width: 90%; max-width: 520px; z-index: 100001; padding: 28px;
   display: flex; flex-direction: column; gap: 20px;
   background-color: var(--bg-surface);
   border: 1px solid var(--border-strong);

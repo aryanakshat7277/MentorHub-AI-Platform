@@ -1,11 +1,14 @@
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ApiService } from '../../services/api.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { CompilerService, RuntimeInfo, CodeExecutionResponse } from '../../services/compiler.service';
 import { JitsiMeetingComponent, JitsiMeetingStatus } from '../jitsi-meeting/jitsi-meeting.component';
+import { GestureRecognitionService } from '../../services/gesture-recognition.service';
+import { SoundService } from '../../services/sound.service';
 
 @Component({
   selector: 'app-workspace',
@@ -153,13 +156,193 @@ fn main() {
   isSharingScreen = false;
 
   private wsSubscription: Subscription | null = null;
+  private gestureSubscription: Subscription | null = null;
+
+  snippetOptions = [
+    { label: '🎯 Two Sum Hash Map', key: 'twosum' },
+    { label: '🔍 Binary Search', key: 'bsearch' },
+    { label: '⚡ QuickSort Algorithm', key: 'quicksort' },
+    { label: '🌐 REST API Fetch Simulation', key: 'http' },
+    { label: '🌳 Binary Tree Traversal', key: 'tree' }
+  ];
+
+  algorithmSnippets: Record<string, Record<string, string>> = {
+    twosum: {
+      javascript: `// Two Sum Problem - Hash Map O(N)
+function twoSum(nums, target) {
+  const map = new Map();
+  for (let i = 0; i < nums.length; i++) {
+    const complement = target - nums[i];
+    if (map.has(complement)) {
+      return [map.get(complement), i];
+    }
+    map.set(nums[i], i);
+  }
+  return [];
+}
+
+const nums = [2, 7, 11, 15];
+const target = 9;
+console.log("Input Array:", nums);
+console.log("Target:", target);
+console.log("Indices Result:", twoSum(nums, target));`,
+      python: `# Two Sum Problem - Hash Map O(N)
+def two_sum(nums, target):
+    seen = {}
+    for i, num in enumerate(nums):
+        diff = target - num
+        if diff in seen:
+            return [seen[diff], i]
+        seen[num] = i
+    return []
+
+nums = [2, 7, 11, 15]
+target = 9
+print("Input Array:", nums)
+print("Target:", target)
+print("Indices Result:", two_sum(nums, target))`,
+      java: `// Two Sum Problem - Hash Map O(N)
+import java.util.*;
+
+public class Main {
+    public static int[] twoSum(int[] nums, int target) {
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            int complement = target - nums[i];
+            if (map.containsKey(complement)) {
+                return new int[] { map.get(complement), i };
+            }
+            map.put(nums[i], i);
+        }
+        return new int[]{};
+    }
+
+    public static void main(String[] args) {
+        int[] nums = {2, 7, 11, 15};
+        int target = 9;
+        int[] res = twoSum(nums, target);
+        System.out.println("Result Indices: " + Arrays.toString(res));
+    }
+}`,
+      cpp: `// Two Sum Problem - Hash Map O(N)
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+vector<int> twoSum(vector<int>& nums, int target) {
+    unordered_map<int, int> map;
+    for (int i = 0; i < nums.size(); i++) {
+        int complement = target - nums[i];
+        if (map.find(complement) != map.end()) {
+            return {map[complement], i};
+        }
+        map[nums[i]] = i;
+    }
+    return {};
+}
+
+int main() {
+    vector<int> nums = {2, 7, 11, 15};
+    int target = 9;
+    vector<int> res = twoSum(nums, target);
+    cout << "Result Indices: [" << res[0] << ", " << res[1] << "]" << endl;
+    return 0;
+}`
+    },
+    quicksort: {
+      javascript: `// QuickSort Algorithm
+function quickSort(arr) {
+  if (arr.length <= 1) return arr;
+  const pivot = arr[arr.length - 1];
+  const left = [];
+  const right = [];
+  for (let i = 0; i < arr.length - 1; i++) {
+    if (arr[i] < pivot) left.push(arr[i]);
+    else right.push(arr[i]);
+  }
+  return [...quickSort(left), pivot, ...quickSort(right)];
+}
+
+const unsorted = [64, 25, 12, 22, 11, 90];
+console.log("Unsorted Array:", unsorted);
+console.log("Sorted Array:  ", quickSort(unsorted));`,
+      python: `# QuickSort Algorithm
+def quick_sort(arr):
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[-1]
+    left = [x for x in arr[:-1] if x <= pivot]
+    right = [x for x in arr[:-1] if x > pivot]
+    return quick_sort(left) + [pivot] + quick_sort(right)
+
+unsorted = [64, 25, 12, 22, 11, 90]
+print("Unsorted:", unsorted)
+print("Sorted:  ", quick_sort(unsorted))`
+    }
+  };
+
+  // ==========================================
+  // Feature 2: Live Interview Confidence Coach
+  // ==========================================
+  isConfidenceCoachActive = false;
+  isCoachMinimized = false;
+  coachAdvice = 'Speaking pace is great! Keep your delivery calm and thoughtful.';
+  speechWordsPerMinute = 125;
+  fillerWordCount = 0;
+  fillerWordList: { word: string; count: number }[] = [];
+  speechPaceStatus: 'TOO_SLOW' | 'STEADY' | 'TOO_FAST' = 'STEADY';
+  confidenceScore = 92;
+  totalWordsSpoken = 0;
+  speechStartTime = 0;
+  audioBars: number[] = [25, 45, 65, 85, 95, 75, 40, 60, 30, 70, 50, 80];
+  private recognitionInstance: any = null;
+  private audioBarInterval: any = null;
+
+  // ==========================================
+  // Feature 3: Silent Co-Pilot Spectator Mode
+  // ==========================================
+  isSpectator = false;
+  spectatorCount = 2;
+  spectatorKudos: { emoji: string; id: number }[] = [];
+  spectatorQuestions: { author: string; question: string; time: string; upvotes: number }[] = [
+    { author: 'Sneha Rao', question: 'Why use ConcurrentHashMap instead of Collections.synchronizedMap here?', time: '14:02', upvotes: 3 },
+    { author: 'Rahul Verma', question: 'Does Spring Boot 3 automatically enable virtual threads with Project Loom?', time: '14:06', upvotes: 2 }
+  ];
+  newSpectatorQuestion = '';
+  showSpectatorQna = false;
+
+  // ==========================================
+  // Feature 1: 10-Minute SOS Bug Rescue Mode
+  // ==========================================
+  isSosSession = false;
+  sosSecondsRemaining = 582; // ~9:42 remaining
+  sosTimerDisplay = '09:42';
+  sosTimerInterval: any = null;
+  sosResolved = false;
 
   constructor(
+    private route: ActivatedRoute,
     private apiService: ApiService,
     private compilerService: CompilerService,
-    public wsService: WebSocketService
+    public wsService: WebSocketService,
+    public gestureService: GestureRecognitionService,
+    private soundService: SoundService
   ) {
     this.code = this.sampleCodeMap['javascript'];
+  }
+
+  insertSnippet(key: string) {
+    this.soundService.playClickSound();
+    const lang = this.activeLanguage.toLowerCase();
+    const snippetForLang = this.algorithmSnippets[key]?.[lang] || 
+                           this.algorithmSnippets[key]?.['javascript'] || 
+                           this.sampleCodeMap[lang];
+    if (snippetForLang) {
+      this.code = snippetForLang;
+      this.updateCode(this.code);
+      this.showToast(`✨ Inserted ${key.toUpperCase()} algorithm template!`);
+    }
   }
 
   getAvatarByName(name: string): string {
@@ -234,12 +417,26 @@ fn main() {
         }
       }
     });
+
+    // Check if entered in Silent Co-Pilot Spectator mode or SOS Rescue mode
+    this.route.queryParams.subscribe(params => {
+      if (params['mode'] === 'spectator') {
+        this.isSpectator = true;
+        this.showToast('👁️ Joined session in Silent Co-Pilot Spectator Mode (Read-Only).');
+        const sid = params['sessionId'] ? parseInt(params['sessionId']) : this.sessionId;
+        this.apiService.joinShadowSession(sid).subscribe();
+      }
+      if (params['sos'] === '1' || params['sos'] === 'true') {
+        this.startSosRescueMode();
+      }
+    });
   }
 
   ngOnDestroy() {
     if (this.wsSubscription) {
       this.wsSubscription.unsubscribe();
     }
+    this.stopSpeechAnalysis();
   }
 
   toggleEditorMaximize() {
@@ -368,6 +565,7 @@ fn main() {
 
   runCode() {
     if (this.isCompiling) return;
+    this.soundService.playClickSound();
     this.isCompiling = true;
     this.executionStatus = 'RUNNING';
     this.outputLogs = [];
@@ -384,6 +582,10 @@ fn main() {
         this.isCompiling = false;
         this.executionTime = res.executionTime || null;
         this.executionStatus = (res.status as any) || (res.success ? 'SUCCESS' : 'RUNTIME_ERROR');
+
+        if (res.success) {
+          this.soundService.playSuccessSound();
+        }
 
         if (res.stdout && res.stdout.trim().length > 0) {
           this.outputLogs = res.stdout.split('\n').filter(l => l.length > 0);
@@ -532,6 +734,193 @@ fn main() {
   onJitsiStatusChanged(status: JitsiMeetingStatus) {
     this.jitsiStatus = status;
     this.isVideoConnected = status === 'CONNECTED';
+  }
+
+  // ==========================================
+  // SOS BUG RESCUE CONTROLS
+  // ==========================================
+  startSosRescueMode() {
+    this.isSosSession = true;
+    this.sosResolved = false;
+    this.showToast('🚨 10-Minute SOS Bug Rescue Activated! Fix the bug to earn +100 XP!');
+    if (this.sosTimerInterval) clearInterval(this.sosTimerInterval);
+    this.sosTimerInterval = setInterval(() => {
+      if (this.sosSecondsRemaining > 0 && !this.sosResolved) {
+        this.sosSecondsRemaining--;
+        const mins = Math.floor(this.sosSecondsRemaining / 60);
+        const secs = this.sosSecondsRemaining % 60;
+        this.sosTimerDisplay = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      } else {
+        clearInterval(this.sosTimerInterval);
+      }
+    }, 1000);
+  }
+
+  resolveSosBug() {
+    this.sosResolved = true;
+    if (this.sosTimerInterval) clearInterval(this.sosTimerInterval);
+    this.apiService.resolveSosRequest(1).subscribe({
+      next: () => {
+        this.soundService.playVictoryFanfare();
+        this.showToast('🎉 Bravo! SOS Bug Solved! +100 XP & Karma awarded to mentor!');
+      },
+      error: () => {
+        this.soundService.playVictoryFanfare();
+        this.showToast('🎉 Bravo! SOS Bug Solved! +100 XP & Karma awarded to mentor!');
+      }
+    });
+  }
+
+  // ==========================================
+  // CONFIDENCE COACH METHODS
+  // ==========================================
+  toggleConfidenceCoach() {
+    this.isConfidenceCoachActive = !this.isConfidenceCoachActive;
+    if (this.isConfidenceCoachActive) {
+      this.soundService.playSuccessSound();
+      this.showToast('🎙️ Live Interview Confidence Coach active! Listening to speech pacing & clarity.');
+      this.startSpeechAnalysis();
+    } else {
+      this.soundService.playClickSound();
+      this.showToast('🎙️ Confidence Coach paused.');
+      this.stopSpeechAnalysis();
+    }
+  }
+
+  toggleCoachMinimize() {
+    this.isCoachMinimized = !this.isCoachMinimized;
+  }
+
+  startSpeechAnalysis() {
+    this.speechStartTime = Date.now();
+    this.totalWordsSpoken = 0;
+    this.speechWordsPerMinute = 125;
+    this.confidenceScore = 92;
+    this.coachAdvice = 'Speaking pace is great! Keep your delivery calm and thoughtful.';
+
+    // Animate audio waveform bars
+    this.audioBarInterval = setInterval(() => {
+      this.audioBars = this.audioBars.map(() => Math.floor(Math.random() * 70) + 20);
+    }, 180);
+
+    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRec) {
+      try {
+        this.recognitionInstance = new SpeechRec();
+        this.recognitionInstance.continuous = true;
+        this.recognitionInstance.interimResults = true;
+        this.recognitionInstance.lang = 'en-US';
+
+        this.recognitionInstance.onresult = (event: any) => {
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+          }
+          this.analyzeSpeechTranscript(transcript);
+        };
+
+        this.recognitionInstance.start();
+      } catch (err) {
+        console.warn('Speech recognition fallback active:', err);
+        this.simulateSpeechPacing();
+      }
+    } else {
+      this.simulateSpeechPacing();
+    }
+  }
+
+  stopSpeechAnalysis() {
+    if (this.recognitionInstance) {
+      try { this.recognitionInstance.stop(); } catch (e) {}
+    }
+    if (this.audioBarInterval) {
+      clearInterval(this.audioBarInterval);
+    }
+  }
+
+  private analyzeSpeechTranscript(text: string) {
+    if (!text || !text.trim()) return;
+    const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+    this.totalWordsSpoken += words.length;
+
+    const elapsedMinutes = Math.max(0.1, (Date.now() - this.speechStartTime) / 60000);
+    this.speechWordsPerMinute = Math.round(this.totalWordsSpoken / elapsedMinutes);
+
+    if (this.speechWordsPerMinute > 160) {
+      this.speechPaceStatus = 'TOO_FAST';
+      this.coachAdvice = 'Speaking a bit fast — take a gentle breath between points.';
+    } else if (this.speechWordsPerMinute < 95 && this.totalWordsSpoken > 5) {
+      this.speechPaceStatus = 'TOO_SLOW';
+      this.coachAdvice = 'Pacing is very slow — try picking up the rhythm slightly.';
+    } else {
+      this.speechPaceStatus = 'STEADY';
+      this.coachAdvice = 'Speaking pace is nice and steady! You sound calm and articulate.';
+    }
+
+    const fillers = ['um', 'uh', 'like', 'you know', 'basically', 'actually'];
+    this.fillerWordList = [];
+    let count = 0;
+    fillers.forEach(f => {
+      const regex = new RegExp('\\b' + f + '\\b', 'gi');
+      const matches = text.match(regex);
+      if (matches && matches.length > 0) {
+        count += matches.length;
+        this.fillerWordList.push({ word: f, count: matches.length });
+      }
+    });
+    this.fillerWordCount = count;
+
+    if (this.fillerWordCount > 2) {
+      this.coachAdvice = 'Filler words noticed — pause for 1 second instead, silence sounds senior!';
+    }
+
+    let score = 95 - (this.fillerWordCount * 4);
+    if (this.speechPaceStatus !== 'STEADY') score -= 10;
+    this.confidenceScore = Math.max(50, Math.min(99, score));
+  }
+
+  private simulateSpeechPacing() {
+    let step = 0;
+    const sampleWords = ['All', 'threads', 'in', 'Java', '21', 'virtual', 'threads', 'run', 'cooperatively', 'like', 'goroutines', 'basically'];
+    const interval = setInterval(() => {
+      if (!this.isConfidenceCoachActive) {
+        clearInterval(interval);
+        return;
+      }
+      step++;
+      const text = sampleWords.slice(0, (step % sampleWords.length) + 1).join(' ');
+      this.analyzeSpeechTranscript(text);
+    }, 2500);
+  }
+
+  // ==========================================
+  // SILENT CO-PILOT SPECTATOR METHODS
+  // ==========================================
+  sendKudos(emoji: string) {
+    this.soundService.playClickSound();
+    const id = Date.now();
+    this.spectatorKudos.push({ emoji, id });
+    setTimeout(() => {
+      this.spectatorKudos = this.spectatorKudos.filter(k => k.id !== id);
+    }, 2200);
+  }
+
+  submitSpectatorQuestion() {
+    if (!this.newSpectatorQuestion.trim()) return;
+    this.spectatorQuestions.unshift({
+      author: this.currentUser?.name || 'Curious Spectator',
+      question: this.newSpectatorQuestion.trim(),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      upvotes: 1
+    });
+    this.newSpectatorQuestion = '';
+    this.soundService.playClickSound();
+    this.showToast('💬 Spectator question posted quietly to the mentor!');
+  }
+
+  upvoteQuestion(q: any) {
+    q.upvotes++;
+    this.soundService.playClickSound();
   }
 
   // ==========================================

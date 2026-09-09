@@ -7,7 +7,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping({"/api/mentor", "/api/v1/mentor"})
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class MentorController {
 
     @GetMapping("/dashboard")

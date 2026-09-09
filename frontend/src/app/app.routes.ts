@@ -67,5 +67,9 @@ export const routes: Routes = [
     path: 'profile', 
     loadComponent: () => import('./components/profile/profile.component').then(m => m.ProfileComponent) 
   },
+  { 
+    path: 'portfolio/:username', 
+    loadComponent: () => import('./components/proof-portfolio/proof-portfolio.component').then(m => m.ProofPortfolioComponent) 
+  },
   { path: '**', redirectTo: 'dashboard' }
 ];

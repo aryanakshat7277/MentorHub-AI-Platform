@@ -82,4 +82,102 @@ export class SoundService {
       // Audio fallback
     }
   }
+
+  playClick() {
+    this.playClickSound();
+  }
+
+  playSuccess() {
+    this.playSuccessSound();
+  }
+
+  playVictoryFanfare() {
+    this.playQuestCompleteSound();
+  }
+
+  playQuestCompleteSound() {
+    try {
+      this.initAudio();
+      if (!this.audioCtx) return;
+      if (this.audioCtx.state === 'suspended') {
+        this.audioCtx.resume();
+      }
+
+      const now = this.audioCtx.currentTime;
+      // Arpeggio C5 -> E5 -> G5 -> C6
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      notes.forEach((freq, idx) => {
+        const osc = this.audioCtx!.createOscillator();
+        const gain = this.audioCtx!.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+        gain.gain.setValueAtTime(0.12, now + idx * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.35);
+        osc.connect(gain);
+        gain.connect(this.audioCtx!.destination);
+        osc.start(now + idx * 0.1);
+        osc.stop(now + idx * 0.1 + 0.35);
+      });
+    } catch (e) {}
+  }
+
+  playChestOpenSound() {
+    try {
+      this.initAudio();
+      if (!this.audioCtx) return;
+      if (this.audioCtx.state === 'suspended') {
+        this.audioCtx.resume();
+      }
+
+      const now = this.audioCtx.currentTime;
+      const osc = this.audioCtx.createOscillator();
+      const gain = this.audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(400, now);
+      osc.frequency.exponentialRampToValueAtTime(1600, now + 0.35);
+
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+      osc.connect(gain);
+      gain.connect(this.audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.4);
+    } catch (e) {}
+  }
+
+  playFanfareSound() {
+    try {
+      this.initAudio();
+      if (!this.audioCtx) return;
+      if (this.audioCtx.state === 'suspended') {
+        this.audioCtx.resume();
+      }
+
+      const now = this.audioCtx.currentTime;
+      // Fanfare: G4, C5, E5, G5 sustained chord
+      const chords = [
+        { f: 392.00, t: 0, d: 0.15 },
+        { f: 523.25, t: 0.15, d: 0.15 },
+        { f: 659.25, t: 0.30, d: 0.15 },
+        { f: 783.99, t: 0.45, d: 0.60 },
+        { f: 1046.50, t: 0.45, d: 0.60 }
+      ];
+
+      chords.forEach(c => {
+        const osc = this.audioCtx!.createOscillator();
+        const gain = this.audioCtx!.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(c.f, now + c.t);
+        gain.gain.setValueAtTime(0.14, now + c.t);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + c.t + c.d);
+        osc.connect(gain);
+        gain.connect(this.audioCtx!.destination);
+        osc.start(now + c.t);
+        osc.stop(now + c.t + c.d);
+      });
+    } catch (e) {}
+  }
 }

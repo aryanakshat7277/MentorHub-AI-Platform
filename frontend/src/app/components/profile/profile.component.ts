@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../services/api.service';
+import { ApiService, KnowledgeImpact } from '../../services/api.service';
 
 @Component({
   selector: 'app-profile',
@@ -14,6 +14,7 @@ export class ProfileComponent implements OnInit {
   @ViewChild('profileFileInput') profileFileInput!: ElementRef<HTMLInputElement>;
 
   user: any = null;
+  knowledgeImpact: KnowledgeImpact | null = null;
   skillsList: string[] = [];
   isEditing = false;
   isSaving = false;
@@ -49,6 +50,13 @@ export class ProfileComponent implements OnInit {
       this.user = data;
       if (this.user) {
         this.user.avatarUrl = this.getAvatarByName(this.user.name);
+        const mentorId = this.user.name?.toUpperCase().includes('PAVANI') ? 3 :
+                         this.user.name?.toUpperCase().includes('AKSHAT') ? 1 :
+                         this.user.name?.toUpperCase().includes('KRITI') ? 2 :
+                         this.user.name?.toUpperCase().includes('VANAJA') ? 4 : (this.user.id || 3);
+        this.apiService.getUserKnowledgeImpact(mentorId).subscribe(impact => {
+          this.knowledgeImpact = impact;
+        });
       }
       this.parseSkills();
     });

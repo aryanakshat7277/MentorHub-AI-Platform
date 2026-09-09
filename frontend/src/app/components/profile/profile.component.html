@@ -114,6 +114,102 @@
           </div>
         </div>
       </div>
+
+      <!-- Knowledge Impact & Sharing Chain Section -->
+      <div class="info-section knowledge-impact-profile-section" *ngIf="knowledgeImpact">
+        <div class="section-hdr">
+          <div>
+            <h3 class="section-title serif-title">KNOWLEDGE IMPACT — “HOW MANY PEOPLE HAVE I HELPED?”</h3>
+            <p class="section-subtitle serif-title">Measuring real-world learner growth, skill improvements, and peer multiplier reach</p>
+          </div>
+          <span class="score-pill-gold serif-title">🌟 {{ knowledgeImpact.impactScore }}/100 Impact Score</span>
+        </div>
+
+        <!-- 4 Impact Metric Cards -->
+        <div class="impact-metrics-grid">
+          <div class="impact-metric-card clay-panel elevated-card-3d">
+            <div class="card-head">
+              <span class="metric-icon">⭐</span>
+              <span class="metric-lbl serif-title">MENTOR RATING</span>
+            </div>
+            <span class="metric-val gold serif-title">{{ knowledgeImpact.mentorRating }} / 5.0</span>
+            <span class="metric-desc serif-title">Based on authentic mentee feedback</span>
+          </div>
+
+          <div class="impact-metric-card clay-panel elevated-card-3d">
+            <div class="card-head">
+              <span class="metric-icon">👥</span>
+              <span class="metric-lbl serif-title">STUDENTS HELPED</span>
+            </div>
+            <span class="metric-val terracotta serif-title">{{ knowledgeImpact.studentsHelped }} Students</span>
+            <span class="metric-desc serif-title">Direct 1-on-1 mentees guided</span>
+          </div>
+
+          <div class="impact-metric-card clay-panel elevated-card-3d">
+            <div class="card-head">
+              <span class="metric-icon">📚</span>
+              <span class="metric-lbl serif-title">SESSIONS COMPLETED</span>
+            </div>
+            <span class="metric-val amber serif-title">{{ knowledgeImpact.sessionsCompleted }} Sessions</span>
+            <span class="metric-desc serif-title">Collaborative problem solving hours</span>
+          </div>
+
+          <div class="impact-metric-card clay-panel elevated-card-3d highlight-card">
+            <div class="card-head">
+              <span class="metric-icon">📈</span>
+              <span class="metric-lbl serif-title">STUDENTS IMPROVED</span>
+            </div>
+            <span class="metric-val forest serif-title">{{ knowledgeImpact.studentsImproved }} Achievers</span>
+            <span class="metric-desc serif-title">Passed milestones & leveled up</span>
+          </div>
+        </div>
+
+        <!-- Knowledge Sharing Chain Banner & Stepper -->
+        <div class="profile-chain-card clay-panel elevated-card-3d">
+          <div class="chain-head-row">
+            <div class="chain-title-wrap">
+              <span class="chain-icon">🔗</span>
+              <div>
+                <h4 class="serif-title">KNOWLEDGE SHARING CHAIN</h4>
+                <span class="chain-quote serif-title">“{{ knowledgeImpact.impactSummary }}”</span>
+              </div>
+            </div>
+            <span class="reach-badge-gold serif-title">✦ REACH: {{ knowledgeImpact.totalReach }} LEARNERS</span>
+          </div>
+
+          <!-- Flow Stepper -->
+          <div class="profile-flow-stepper">
+            <ng-container *ngFor="let node of knowledgeImpact.chainNodes; let i = index; let last = last">
+              <div class="stepper-node clay-panel elevated-card-3d">
+                <div class="stepper-badge serif-title">STEP {{ node.stepNumber }}</div>
+                <img [src]="node.avatar" [alt]="node.name" class="stepper-avatar" />
+                <strong class="stepper-name serif-title">{{ node.name }}</strong>
+                <span class="stepper-role serif-title">{{ node.role.replace('_', ' ') }}</span>
+                <div class="stepper-action-box debossed-track">
+                  <p class="serif-title">{{ node.action }}</p>
+                </div>
+                <span class="stepper-topic serif-title">💡 {{ node.topic }}</span>
+              </div>
+
+              <div class="stepper-arrow-connector" *ngIf="!last">
+                <div class="arrow-dash"></div>
+                <span class="arrow-head">➔</span>
+                <span class="arrow-tag serif-title">Passes Knowledge</span>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- Impact Stories Snippet -->
+          <div class="stories-box 3d-inset-well" *ngIf="knowledgeImpact.impactStories?.length">
+            <h5 class="stories-title serif-title">✨ IMPACT HIGHLIGHTS</h5>
+            <div class="stories-grid">
+              <div *ngFor="let story of knowledgeImpact.impactStories" class="story-pill serif-title">
+                <span class="story-star">✦</span> {{ story }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

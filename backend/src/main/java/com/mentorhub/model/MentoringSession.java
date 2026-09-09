@@ -17,15 +17,27 @@ public class MentoringSession {
     private String topic;
     private LocalDateTime scheduledAt;
     private Integer durationMinutes;
-    private String status; // PENDING, CONFIRMED, COMPLETED, CANCELLED
+    private String status; // PENDING, CONFIRMED, COMPLETED, CANCELLED, TRANSFERRED
     private String meetingLink;
 
     @Column(length = 2000)
     private String notes;
 
+    private String previousMentorName;
+
+    @Column(length = 1000)
+    private String transferReason;
+
+    private LocalDateTime transferredAt;
+
+    private Boolean isReverseMentoring = false;
+    private String reverseTopic;
+    private Boolean isShadowingAllowed = true;
+    private Integer spectatorCount = 0;
+
     public MentoringSession() {}
 
-    public MentoringSession(Long id, Long mentorId, String mentorName, Long menteeId, String menteeName, String topic, LocalDateTime scheduledAt, Integer durationMinutes, String status, String meetingLink, String notes) {
+    public MentoringSession(Long id, Long mentorId, String mentorName, Long menteeId, String menteeName, String topic, LocalDateTime scheduledAt, Integer durationMinutes, String status, String meetingLink, String notes, String previousMentorName, String transferReason, LocalDateTime transferredAt) {
         this.id = id;
         this.mentorId = mentorId;
         this.mentorName = mentorName;
@@ -37,6 +49,9 @@ public class MentoringSession {
         this.status = status;
         this.meetingLink = meetingLink;
         this.notes = notes;
+        this.previousMentorName = previousMentorName;
+        this.transferReason = transferReason;
+        this.transferredAt = transferredAt;
     }
 
     public static MentoringSessionBuilder builder() {
@@ -55,6 +70,9 @@ public class MentoringSession {
         private String status;
         private String meetingLink;
         private String notes;
+        private String previousMentorName;
+        private String transferReason;
+        private LocalDateTime transferredAt;
 
         public MentoringSessionBuilder id(Long id) { this.id = id; return this; }
         public MentoringSessionBuilder mentorId(Long mentorId) { this.mentorId = mentorId; return this; }
@@ -67,9 +85,12 @@ public class MentoringSession {
         public MentoringSessionBuilder status(String status) { this.status = status; return this; }
         public MentoringSessionBuilder meetingLink(String meetingLink) { this.meetingLink = meetingLink; return this; }
         public MentoringSessionBuilder notes(String notes) { this.notes = notes; return this; }
+        public MentoringSessionBuilder previousMentorName(String previousMentorName) { this.previousMentorName = previousMentorName; return this; }
+        public MentoringSessionBuilder transferReason(String transferReason) { this.transferReason = transferReason; return this; }
+        public MentoringSessionBuilder transferredAt(LocalDateTime transferredAt) { this.transferredAt = transferredAt; return this; }
 
         public MentoringSession build() {
-            return new MentoringSession(id, mentorId, mentorName, menteeId, menteeName, topic, scheduledAt, durationMinutes, status, meetingLink, notes);
+            return new MentoringSession(id, mentorId, mentorName, menteeId, menteeName, topic, scheduledAt, durationMinutes, status, meetingLink, notes, previousMentorName, transferReason, transferredAt);
         }
     }
 
@@ -96,4 +117,19 @@ public class MentoringSession {
     public void setMeetingLink(String meetingLink) { this.meetingLink = meetingLink; }
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+    public String getPreviousMentorName() { return previousMentorName; }
+    public void setPreviousMentorName(String previousMentorName) { this.previousMentorName = previousMentorName; }
+    public String getTransferReason() { return transferReason; }
+    public void setTransferReason(String transferReason) { this.transferReason = transferReason; }
+    public LocalDateTime getTransferredAt() { return transferredAt; }
+    public void setTransferredAt(LocalDateTime transferredAt) { this.transferredAt = transferredAt; }
+
+    public Boolean getIsReverseMentoring() { return isReverseMentoring != null ? isReverseMentoring : false; }
+    public void setIsReverseMentoring(Boolean isReverseMentoring) { this.isReverseMentoring = isReverseMentoring; }
+    public String getReverseTopic() { return reverseTopic; }
+    public void setReverseTopic(String reverseTopic) { this.reverseTopic = reverseTopic; }
+    public Boolean getIsShadowingAllowed() { return isShadowingAllowed != null ? isShadowingAllowed : true; }
+    public void setIsShadowingAllowed(Boolean isShadowingAllowed) { this.isShadowingAllowed = isShadowingAllowed; }
+    public Integer getSpectatorCount() { return spectatorCount != null ? spectatorCount : 0; }
+    public void setSpectatorCount(Integer spectatorCount) { this.spectatorCount = spectatorCount; }
 }

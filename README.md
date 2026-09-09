@@ -1,134 +1,115 @@
-# 🚀 MentorHub Advanced AI Peer-Mentoring Platform
+﻿# 🚀 MentorHub Advanced AI Peer-Mentoring Platform
 
-> **Full-Stack Enterprise Mentorship Platform**  
-> Built with **Spring Boot 3 (Java 21)**, **Angular 17 Standalone Architecture**, **H2 Persistent Database**, **JWT Security**, and **Cybernetic Glassmorphic UI/UX**.
+> **Enterprise-Grade AI-Powered Peer-Mentoring & Knowledge Acceleration Ecosystem**  
+> Built with **Spring Boot 3 (Java 21)**, **Angular 17 Standalone Architecture**, **H2 Persistent Database**, **Spring Security 6 with JWT**, and **Times New Roman God-Level Academic & Corporate UX**.
 
 ---
 
-## 🛠️ Tech Stack & Architecture Overview
+## 🌟 What Sets MentorHub Apart? (6 Unique Must-Have Features)
 
-### 1. **Backend Infrastructure** (`/backend`)
-- **Language & Runtime**: Java 21 (JDK 21)
+MentorHub transcends traditional booking platforms by introducing intelligent, real-time mentorship dynamics:
+
+1. 🚨 **10-Minute SOS Bug Rescue** (`/sessions` & `/workspace?sos=1`)
+   - Instant developer triage for blockers.
+   - Live synchronized 10-minute countdown ribbon in the IDE/video workspace.
+   - Fast-turnaround mentorship awarding **+100 Karma XP** to mentors upon resolution.
+
+2. 🎙️ **Live Interview Confidence Coach** (`/workspace`)
+   - Real-time speech and confidence analytics with an animated frequency-wave visualizer.
+   - Dynamic pace tracking (Words Per Minute), filler-word detection (`"um"`, `"like"`, `"uh"`), and adaptive AI coaching tips.
+
+3. 👥 **Silent Co-Pilot / Shadow Mode** (`/workspace?mode=spectator`)
+   - Enables junior mentees to quietly observe expert 1-on-1 coding sessions without disrupting flow.
+   - Non-intrusive floating kudos reactions (🔥, 💡, 👏, 🚀) and a private off-canvas spectator Q&A drawer.
+
+4. 🔄 **Reverse Mentoring Exchange** (`/mentor-matching`)
+   - Bidirectional skill bridging: senior engineers mentor juniors in architecture, while juniors reciprocate by mentoring seniors in cutting-edge tech (GenAI, TikTok dev culture, modern tooling).
+   - Unlocks the prestigious **"Two-Way Learner"** badge and **+150 XP**.
+
+5. 🔋 **Mentor Battery Recharge Shield** (`/mentor-matching`)
+   - Protects top mentors from cognitive burnout.
+   - Automatically activates a resting badge when active session thresholds are reached, seamlessly redirecting mentees to vetted alternative peer mentors.
+
+6. 📄 **1-Click Proof of Growth Portfolio Page** (`/portfolio/:username`)
+   - Public, shareable, tamper-evident career showcase featuring Knowledge Impact Scores, session history, verified skills, and QR verification modals.
+   - Clean, print-ready CSS optimized for instant PDF resume export.
+
+---
+
+## 🌐 Knowledge Impact & Sharing Chain
+
+Instead of a standard 5-star rating, MentorHub tracks actual downstream value created:
+- **Knowledge Impact Score**: Calculated dynamically based on sessions completed, students helped, retention rate, and real learner improvements.
+- **Knowledge Sharing Chain**: Multi-hop pedigree tracking how knowledge cascades through the community (e.g., *Pavani → Rahul → Sneha → Arun*).
+
+---
+
+## 📐 System Architecture & Vector Diagrams
+
+Detailed, high-resolution vector diagrams conforming to IEEE standards are located in the [`diagrams/`](./diagrams) directory:
+
+- 📊 **[Level-1 Data Flow Diagram (DFD)](./diagrams/MentorHub_Data_Flow_Diagram.pdf)**: Visualizes end-to-end data lifecycle across WebRTC sessions, SOS queues, and authentication.
+- 🗄️ **[Entity-Relationship Diagram (ERD)](./diagrams/MentorHub_ER_Diagram.pdf)**: Complete schema mapping for Users, Sessions, Goals, SOS Requests, Knowledge Impact, and Certificates.
+- 🎭 **[Use Case Diagram (UML)](./diagrams/MentorHub_Use_Case_Diagram.pdf)**: Full actor-subsystem interactions between Mentee, Mentor, Admin, and AI Assistant.
+
+---
+
+## 🛠️ Tech Stack & Implementation Details
+
+### Backend Infrastructure (`/backend`)
+- **Runtime**: Java 21 (JDK 21 LTS)
 - **Framework**: Spring Boot 3.2+
-- **Security**: Spring Security 6 + BCrypt Password Encoder + JWT (JSON Web Token) Stateless Authentication
-- **Data Access**: Spring Data JPA + Hibernate ORM
-- **Database**: H2 File-Based Persistent Database (`backend/data/mentorhub_db`)
-- **Key API Controllers**:
-  - `AuthController`: Seeding demo accounts, BCrypt self-healing authentication (`/api/auth/login`, `/api/auth/register`)
-  - `UserController`: Profile retrieval & system avatar updates (`/api/users/profile`, `/api/users/profile/update`)
-  - `GoalController`: SMART goal Kanban board CRUD operations (`/api/goals`)
-  - `ResourceController`: Knowledge hub articles, videos, and study guides (`/api/resources`)
-  - `AnalyticsController`: Mentorship performance metrics & weekly session velocity (`/api/analytics`)
+- **Security**: Spring Security 6, BCrypt Password Encoder, Stateless JWT Authentication
+- **Data & Persistence**: Spring Data JPA, Hibernate, H2 Persistent File Database (`backend/data/`)
+- **Key Endpoints**:
+  - `POST /api/auth/login` & `/register`: Self-healing authentication with BCrypt re-hashing
+  - `GET /api/public/portfolio/{username}`: Public unauthenticated proof-of-growth portfolio
+  - `GET /api/impact/{userId}`: Knowledge Impact Score & cascading tree
+  - `GET /api/sos/active`: Active 10-Minute SOS Bug rescue queue
+  - `GET /api/goals`: SMART goal Kanban management
 
-### 2. **Frontend Architecture** (`/frontend`)
-- **Framework**: Angular 17 (Standalone Components architecture)
-- **State & Router**: Angular Router with standalone component lazy loading
-- **Styling**: SCSS + Custom Glassmorphism Token System (`styles.scss`)
-- **Graphics & PDF**: HTML5 Canvas API for live certificate generation & verification
-- **Key Views**:
-  - 🌌 **Startup Overlay**: 3-second sci-fi orbital radar & sonar laser scan entrance animation
-  - 📊 **Dashboard (`/dashboard`)**: Holographic user hero card, digital clock, velocity sparklines, radial ring gauges
-  - 🎯 **Goal Tracker (`/goals`)**: SMART 3D letter block cards, Kanban columns (To Do, In Progress, Achieved)
-  - 👤 **Cybernetic Profile (`/profile`)**: System file picker picture selector, bio modal, reputation rating, skills matrix
-  - 📈 **Performance Analytics (`/analytics`)**: Session completion rate, XP gain velocity bar chart, domain distribution donut chart
-  - 📚 **Knowledge Hub (`/resource-hub`)**: Category filter pills (ALL, ARTICLE, VIDEO, COURSE, BOOK), bookmarking, search bar
-  - 🗺️ **Learning Path (`/learning-path`)**: Active curricula progress gauges & non-overlapping vertical roadmap node tree
-  - 🏆 **Certificates (`/certificates`)**: HTML5 Canvas PDF certificate generator & public verification route (`/verify-certificate/:certId`)
-  - 💬 **AI Assistant Chatbot**: Floating sparkle button with real-time prompt drawer
+### Frontend Architecture (`/frontend`)
+- **Framework**: Angular 17 (Standalone Components & Signals)
+- **Typography & Theme**: Authentic Times New Roman serif styling with glassmorphic cards and ambient lighting
+- **Key Routes**:
+  - `/dashboard`: Holographic command center with quick actions & XP analytics
+  - `/sessions`: Active & upcoming mentoring sessions with SOS Bug Rescue launchpad
+  - `/workspace`: Interactive collaboration room (Video, Monaco Code Editor, Confidence Coach, Silent Co-Pilot)
+  - `/portfolio/:username`: Public Proof of Growth verification page (e.g., `/portfolio/pavani`)
+  - `/mentor-matching`: Smart matching with Battery Shield & Reverse Mentoring filters
+  - `/learning-path`: RPG-style career progression quest tree
+  - `/goals`: SMART 3D Kanban board
 
 ---
 
 ## 🔑 Demo Accounts & Credentials
 
-| Role | Email | Password | Full Name | Professional Title |
+| Role | Email | Password | Full Name | Highlight Feature |
 | :--- | :--- | :--- | :--- | :--- |
-| **Mentor** | `akshat@mentorhub.com` | `password123` | **Akshat Aryan** | Principal AI & Full Stack Mentor |
-| **Mentee** | `kriti@mentorhub.com` | `password123` | **Kriti Sagar** | Junior AI Engineer |
+| **Principal Mentor** | `akshat@mentorhub.com` | `password123` | **Akshat Aryan** | Full Admin & Matcher Access |
+| **Junior Mentee** | `kriti@mentorhub.com` | `password123` | **Kriti Sagar** | Learning Path & Goals |
+| **Impact Mentor** | `pavani@mentorhub.com` | `password123` | **Pavani Sharma** | Knowledge Impact Score (91/100) |
 
 ---
 
-## 📂 Project Structure for VS Code
+## 🚀 Getting Started
 
-```
-ST PROJECT/
-├── README.md                      <-- Main Project Documentation & Setup Guide
-├── PROJECT_METADATA.md            <-- Full Architecture & Feature Metadata Log
-├── .env                           <-- Environment Configuration
-│
-├── backend/                       <-- Spring Boot 3 Java 21 Backend
-│   ├── pom.xml                    <-- Maven Dependencies (Spring Boot, Security, JWT, JPA, H2)
-│   ├── data/                      <-- Persistent H2 Database Storage Files
-│   └── src/
-│       ├── main/java/com/mentorhub/
-│       │   ├── config/            <-- Security & JWT Filter Configuration
-│       │   ├── controller/        <-- REST API Controllers (Auth, User, Goal, Resource, Analytics)
-│       │   ├── model/             <-- JPA Entities (User, Goal, Resource, Session, Certificate)
-│       │   ├── repository/        <-- Spring Data Repositories
-│       │   └── service/           <-- Business Logic Services
-│       └── main/resources/
-│           └── application.properties <-- Database & Server Configuration
-│
-└── frontend/                      <-- Angular 17 Standalone Frontend
-    ├── package.json               <-- Angular & RxJS Dependencies
-    ├── angular.json               <-- Workspace Configuration
-    ├── tsconfig.json              <-- TypeScript Configuration
-    └── src/
-        ├── styles.scss            <-- Global Sci-Fi Glassmorphism Design System
-        ├── assets/
-        │   └── mentorhub-logo.png <-- Official Pre-Cropped Circular Badge Logo
-        └── app/
-            ├── app.component.ts   <-- Root Component & Startup Animation Overlay
-            ├── components/        <-- Standalone Feature Components
-            │   ├── dashboard/
-            │   ├── goals/
-            │   ├── profile/
-            │   ├── analytics/
-            │   ├── resource-hub/
-            │   ├── learning-path/
-            │   ├── certificates/
-            │   ├── sidebar/
-            │   ├── header/
-            │   └── ai-chatbot/
-            └── services/          <-- ApiService & AuthService
-```
-
----
-
-## 🚀 How to Run in VS Code
-
-### 1. Launch Spring Boot Backend:
+### 1. Run Spring Boot Backend
 ```bash
 cd backend
 mvn spring-boot:run
 ```
-*Backend runs on `http://localhost:8080`*
+*Backend API will be accessible at: `http://localhost:8080`*
 
-### 2. Launch Angular Frontend:
+### 2. Run Angular Frontend
 ```bash
 cd frontend
 npm install
-npx ng serve --port 4200 --open
+npm start
 ```
-*Frontend runs on `http://localhost:4200`*
+*Frontend application will be accessible at: `http://localhost:4200`*
 
 ---
 
-## 📋 Comprehensive Feature & Metadata Summary
-
-1. **Self-Healing Authentication**:
-   - `AuthController.java` incorporates automatic BCrypt password re-hashing logic so seeded demo users (`akshat@mentorhub.com`, `kriti@mentorhub.com`) can seamlessly log in with `password123`.
-
-2. **System File Picker Profile Avatar Integration**:
-   - Users can choose any local profile picture file directly from their computer system via the file picker input on the Profile page.
-
-3. **Official Circular MentorHub Logo**:
-   - The logo image (`assets/mentorhub-logo.png`) is formatted cleanly with `object-fit: contain` across the Startup screen, Sidebar header, Login card, and AI Chatbot drawer header.
-
-4. **Non-Overlapping Roadmap Tree**:
-   - The vertical roadmap node tree on `/learning-path` utilizes solid dark-tinted badge backgrounds (`#0B1221`) and explicit stacking (`z-index: 3`) so connecting lines never cut through node numbers.
-
-5. **Glassmorphic Filter Pills & Resource Cards**:
-   - The Resource Hub includes interactive filter pills (ALL, ARTICLE, VIDEO, COURSE, BOOK), bookmarking toggle, search query filtering, and color-coded type badges.
-
-6. **Canvas PDF Certificate Generator**:
-   - Certificates are dynamically generated using HTML5 Canvas with custom borders, seal stamps, signatures, and unique verification tokens validateable at `/verify-certificate/:certId`.
+## 📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.

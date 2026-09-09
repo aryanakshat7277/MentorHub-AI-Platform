@@ -76,4 +76,20 @@ public class MentorMatchingController {
 
         return ResponseEntity.ok(results);
     }
+
+    @PutMapping("/{id}/recharge-toggle")
+    public ResponseEntity<?> toggleRecharge(@PathVariable("id") Long id, @RequestBody(required = false) Map<String, Object> body) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    boolean current = Boolean.TRUE.equals(user.getIsRecharging());
+                    user.setIsRecharging(!current);
+                    if (!current) {
+                        user.setRechargeUntil(java.time.LocalDateTime.now().plusHours(24));
+                    } else {
+                        user.setRechargeUntil(null);
+                    }
+                    return ResponseEntity.ok(userRepository.save(user));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

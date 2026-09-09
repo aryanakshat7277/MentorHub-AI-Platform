@@ -1,0 +1,89 @@
+﻿<aside class="gesture-hud-container" *ngIf="isEnabled" [class.minimized]="isMinimized" aria-label="Hand Gesture HUD Control Deck">
+  <!-- Toast Notification Pill for Fired Gestures -->
+  <div class="gesture-toast-pill" *ngIf="recentFeedback" [class.burst-toast]="recentFeedback.gesture === 'PINCH_CLICK'">
+    <span class="toast-emoji">{{ recentFeedback.emoji }}</span>
+    <span class="toast-label">{{ recentFeedback.label }}</span>
+  </div>
+
+  <!-- Main Glassmorphic HUD Deck -->
+  <div class="hud-deck glass-card">
+    <!-- Header Bar -->
+    <div class="hud-header">
+      <div class="hud-title-group">
+        <span class="hud-status-beacon" [class.active]="isCameraReady"></span>
+        <span class="hud-title serif-title">GESTURE AI</span>
+        <span class="hud-badge" [class.scrolling]="currentGesture === 'SCROLL'" [class.clicking]="currentGesture === 'PINCH_CLICK'">
+          {{ currentGesture === 'SCROLL' ? 'SCROLL MODE' : (currentGesture === 'PINCH_CLICK' ? 'CLICK' : (currentGesture === 'NAV_DOT' ? 'DOT NAV' : 'READY')) }}
+        </span>
+      </div>
+
+      <div class="hud-actions">
+        <button class="hud-btn help-btn" (click)="toggleCheatSheet()" title="View Gestures">?</button>
+        <button class="hud-btn min-btn" (click)="toggleMinimized()" title="{{ isMinimized ? 'Expand HUD' : 'Minimize HUD' }}">
+          {{ isMinimized ? '▲' : '▼' }}
+        </button>
+        <button class="hud-btn close-btn" (click)="closeHud()" title="Disable Gesture Tracking">✕</button>
+      </div>
+    </div>
+
+    <!-- Body (Visible when not minimized) -->
+    <div class="hud-body" *ngIf="!isMinimized">
+      <!-- Live Video & Neon Skeleton Tracking Canvas -->
+      <div class="hud-viewport-wrap">
+        <canvas #skeletonCanvas width="220" height="150" class="skeleton-canvas"></canvas>
+        <div class="viewport-hud-grid"></div>
+
+        <!-- Overlay Crosshair for Anchor in Precision Scroll Mode -->
+        <div class="scroll-crosshair" *ngIf="currentGesture === 'SCROLL'" [class.moving-up]="scrollData.direction === 'UP'" [class.moving-down]="scrollData.direction === 'DOWN'">
+          <div class="crosshair-center"></div>
+          <div class="crosshair-arrow up" *ngIf="scrollData.direction === 'UP'">▲ {{ scrollData.speed }}px/s</div>
+          <div class="crosshair-arrow down" *ngIf="scrollData.direction === 'DOWN'">▼ {{ scrollData.speed }}px/s</div>
+        </div>
+
+        <div class="no-hand-overlay" *ngIf="isCameraReady && currentGesture === 'NONE' && !gestureService.handLandmarks$.value">
+          <span>🖐️ Show hand to camera</span>
+        </div>
+      </div>
+
+      <!-- Real-Time Dynamic Precision Scroll Meter -->
+      <div class="precision-scroll-meter" *ngIf="currentGesture === 'SCROLL'">
+        <div class="meter-label">
+          <span>PRECISION SCROLL</span>
+          <span class="meter-val">{{ scrollData.direction === 'NONE' ? 'NEUTRAL' : (scrollData.direction + ' (' + scrollData.speed + 'px/s)') }}</span>
+        </div>
+        <div class="meter-track">
+          <div class="meter-indicator" [class.up]="scrollData.direction === 'UP'" [class.down]="scrollData.direction === 'DOWN'"
+               [style.width]="(scrollData.speed / 40 * 100) + '%'"></div>
+        </div>
+      </div>
+
+      <!-- Active Gesture Status Row -->
+      <div class="gesture-state-row">
+        <div class="state-icon-pill">
+          <span *ngIf="currentGesture === 'SCROLL'">↕️</span>
+          <span *ngIf="currentGesture === 'PINCH_CLICK'">🤏</span>
+          <span *ngIf="currentGesture === 'NAV_DOT'">🔴</span>
+          <span *ngIf="currentGesture === 'NONE'">👁️</span>
+        </div>
+        <div class="state-text-group">
+          <span class="state-name">
+            <ng-container [ngSwitch]="currentGesture">
+              <span *ngSwitchCase="'SCROLL'">↕️ Scroll Up / Down Active</span>
+              <span *ngSwitchCase="'PINCH_CLICK'">🤏 Dot Click Executed!</span>
+              <span *ngSwitchCase="'NAV_DOT'">🔴 Single Dot Navigation</span>
+              <span *ngSwitchDefault>Tracking Laser Dot...</span>
+            </ng-container>
+          </span>
+          <span class="state-sub">Zero Latency WebGPU Vision</span>
+        </div>
+      </div>
+
+      <!-- Gesture Cheat Sheet Drawer -->
+      <div class="hud-cheatsheet" *ngIf="showCheatSheet">
+        <div class="cs-title">2 CORE GESTURES</div>
+        <div class="cs-item"><span class="cs-icon">🔴</span><span><strong>Single Dot Nav</strong>: Move index finger to guide laser dot, pinch or hover to click.</span></div>
+        <div class="cs-item"><span class="cs-icon">↕️</span><span><strong>Up/Down Scroll</strong>: Show 2 fingers or open hand to scroll up/down smoothly.</span></div>
+      </div>
+    </div>
+  </div>
+</aside>

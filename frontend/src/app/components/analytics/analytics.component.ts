@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ApiService } from '../../services/api.service';
+import { ApiService, KnowledgeImpact } from '../../services/api.service';
 
 @Component({
   selector: 'app-analytics',
@@ -11,6 +11,8 @@ import { ApiService } from '../../services/api.service';
 })
 export class AnalyticsComponent implements OnInit {
   analyticsData: any = null;
+  impactChains: KnowledgeImpact[] = [];
+  selectedChain: KnowledgeImpact | null = null;
 
   weeklyPoints = [
     { day: 'Mon', sessions: 4, height: 40, xp: 120 },
@@ -35,5 +37,16 @@ export class AnalyticsComponent implements OnInit {
     this.apiService.getAnalytics(1).subscribe(data => {
       this.analyticsData = data;
     });
+
+    this.apiService.getAllKnowledgeImpacts().subscribe(list => {
+      this.impactChains = list;
+      if (list && list.length > 0) {
+        this.selectedChain = list[0]; // Pavani by default
+      }
+    });
+  }
+
+  selectChain(impact: KnowledgeImpact) {
+    this.selectedChain = impact;
   }
 }

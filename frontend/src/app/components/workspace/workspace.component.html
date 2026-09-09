@@ -51,11 +51,152 @@
         </button>
       </div>
 
+      <button (click)="toggleConfidenceCoach()" 
+              class="coach-toggle-btn tactile-btn-3d serif-title" 
+              [class.active]="isConfidenceCoachActive"
+              [title]="isConfidenceCoachActive ? 'Pause Confidence Coach' : 'Activate Live Interview Confidence Coach'">
+        <span>{{ isConfidenceCoachActive ? '🎙️ COACH ACTIVE' : '🎙️ INTERVIEW COACH' }}</span>
+      </button>
+
       <button class="invite-btn btn-primary tactile-btn-3d serif-title" (click)="copyInviteLink()" title="Copy Session Meeting Invite Link for Mentees">
         <span class="btn-icon">🔗</span>
         <span>INVITE MENTEE</span>
         <span class="shine-sweep"></span>
       </button>
+    </div>
+  </div>
+
+  <!-- Floating Kudos Layer for Silent Co-Pilot -->
+  <div class="floating-kudos-layer" *ngIf="spectatorKudos.length > 0">
+    <div *ngFor="let k of spectatorKudos" class="floating-kudo-glyph">{{ k.emoji }}</div>
+  </div>
+
+  <!-- 10-Minute SOS Bug Rescue Active Ribbon -->
+  <div *ngIf="isSosSession" class="sos-rescue-hud-ribbon clay-panel elevated-card-3d" [class.solved]="sosResolved">
+    <div class="sos-hud-left">
+      <span class="sos-hud-pulse-dot"></span>
+      <span class="sos-hud-icon">🚨</span>
+      <div class="sos-hud-text">
+        <h3 class="sos-hud-title serif-title">{{ sosResolved ? '🎉 BUG RESCUED SUCCESSFULLY!' : '10-MINUTE SOS BUG RESCUE IN PROGRESS' }}</h3>
+        <p class="sos-hud-desc serif-title">{{ sosResolved ? 'Congratulations! +100 XP & Karma points awarded to mentor.' : 'Rapid debugging huddle: Student is stuck and needs quick guidance!' }}</p>
+      </div>
+    </div>
+
+    <div class="sos-hud-right">
+      <div class="sos-hud-timer-badge 3d-inset-well" *ngIf="!sosResolved">
+        <span class="timer-clock-icon">⏱️</span>
+        <span class="timer-countdown-val serif-title">{{ sosTimerDisplay }}</span>
+        <span class="timer-unit-lbl serif-title">REMAINING</span>
+      </div>
+
+      <button *ngIf="!sosResolved" (click)="resolveSosBug()" class="btn-resolve-sos tactile-btn-3d serif-title" title="Mark bug resolved and award +100 XP">
+        <span>✅ MARK BUG SOLVED (+100 XP)</span>
+        <span class="shine-sweep"></span>
+      </button>
+
+      <div *ngIf="sosResolved" class="sos-resolved-tag serif-title">
+        <span>⭐ +100 XP AWARDED</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Kudos Layer for Silent Co-Pilot -->
+  <div class="floating-kudos-layer" *ngIf="spectatorKudos.length > 0">
+    <div *ngFor="let k of spectatorKudos" class="floating-kudo-glyph">{{ k.emoji }}</div>
+  </div>
+
+  <!-- Silent Co-Pilot Spectator Announcement Banner -->
+  <div *ngIf="isSpectator" class="spectator-mode-banner clay-panel elevated-card-3d">
+    <div class="banner-left">
+      <span class="banner-icon">👁️</span>
+      <div>
+        <h3 class="banner-title serif-title">SILENT CO-PILOT: SHADOW DEBUGGING SESSION</h3>
+        <p class="banner-sub serif-title">You are observing senior engineering in read-only mode without call interruption.</p>
+      </div>
+    </div>
+    <div class="banner-right">
+      <span class="spectator-count-pill serif-title">👥 {{ spectatorCount }} Spectators Learning Silently</span>
+      <div class="kudos-bar">
+        <span class="kudos-lbl serif-title">Send Silent Kudos:</span>
+        <button (click)="sendKudos('👏')" class="kudos-btn" title="Send Claps">👏</button>
+        <button (click)="sendKudos('💡')" class="kudos-btn" title="Send Insight">💡</button>
+        <button (click)="sendKudos('❤️')" class="kudos-btn" title="Send Appreciation">❤️</button>
+        <button (click)="sendKudos('🔥')" class="kudos-btn" title="Send Fire">🔥</button>
+        <button (click)="showSpectatorQna = !showSpectatorQna" class="qna-toggle-btn tactile-btn-3d serif-title" title="Open Quiet Audience Q&A">
+          💬 Q&A ({{ spectatorQuestions.length }})
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spectator Quiet Q&A Drawer Overlay -->
+  <div *ngIf="isSpectator && showSpectatorQna" class="spectator-qna-drawer clay-panel elevated-card-3d">
+    <div class="qna-header">
+      <h4 class="serif-title">💬 SPECTATOR QUIET Q&A (NO CALL INTERRUPTION)</h4>
+      <button class="close-qna-btn" (click)="showSpectatorQna = false">✕</button>
+    </div>
+    <div class="qna-list">
+      <div *ngFor="let q of spectatorQuestions" class="qna-item debossed-panel">
+        <div class="qna-meta">
+          <strong class="serif-title">{{ q.author }}</strong>
+          <span class="qna-time">{{ q.time }}</span>
+        </div>
+        <p class="qna-question serif-title">{{ q.question }}</p>
+        <button class="upvote-btn serif-title" (click)="upvoteQuestion(q)">▲ Helpful ({{ q.upvotes }})</button>
+      </div>
+    </div>
+    <div class="qna-input-row">
+      <input type="text" [(ngModel)]="newSpectatorQuestion" placeholder="Ask a quiet question for the mentor..." (keyup.enter)="submitSpectatorQuestion()" class="qna-input serif-title" />
+      <button (click)="submitSpectatorQuestion()" class="qna-submit-btn tactile-btn-3d serif-title">Send</button>
+    </div>
+  </div>
+
+  <!-- Live Interview Confidence Coach HUD -->
+  <div *ngIf="isConfidenceCoachActive" class="confidence-coach-hud clay-panel elevated-card-3d" [class.minimized]="isCoachMinimized">
+    <div class="coach-hud-top-bar">
+      <div class="coach-hud-title-wrap">
+        <span class="coach-icon">🎙️</span>
+        <span class="coach-hud-heading serif-title">LIVE INTERVIEW CONFIDENCE COACH</span>
+        <span class="coach-live-pill serif-title">● LISTENING</span>
+      </div>
+
+      <div class="coach-audio-waveform" title="Live voice activity bars">
+        <span *ngFor="let h of audioBars" class="wave-bar" [style.height.px]="h * 0.28"></span>
+      </div>
+
+      <button class="coach-min-btn tactile-btn-3d serif-title" (click)="toggleCoachMinimize()">
+        {{ isCoachMinimized ? '⬆ Expand' : '⬇ Minimize' }}
+      </button>
+    </div>
+
+    <div class="coach-hud-body" *ngIf="!isCoachMinimized">
+      <div class="coach-meter-box">
+        <span class="meter-lbl serif-title">SPEAKING PACE:</span>
+        <div class="pace-badge-wrap">
+          <span class="pace-badge serif-title" [class.slow]="speechPaceStatus === 'TOO_SLOW'" [class.steady]="speechPaceStatus === 'STEADY'" [class.fast]="speechPaceStatus === 'TOO_FAST'">
+            {{ speechWordsPerMinute }} WPM • {{ speechPaceStatus === 'STEADY' ? 'Steady & Clear' : (speechPaceStatus === 'TOO_SLOW' ? 'A Bit Slow' : 'Fast Paced') }}
+          </span>
+        </div>
+      </div>
+
+      <div class="coach-meter-box">
+        <span class="meter-lbl serif-title">FILLER WORDS:</span>
+        <div class="filler-chips-row">
+          <span class="filler-count-pill serif-title">{{ fillerWordCount }} Used</span>
+          <span *ngFor="let f of fillerWordList" class="filler-pill serif-title">{{ f.word }} (x{{ f.count }})</span>
+          <span *ngIf="fillerWordList.length === 0" class="filler-clean-pill serif-title">Zero fillers! 🎯</span>
+        </div>
+      </div>
+
+      <div class="coach-meter-box">
+        <span class="meter-lbl serif-title">CONFIDENCE SCORE:</span>
+        <span class="readiness-pct serif-title">{{ confidenceScore }}/100</span>
+      </div>
+
+      <div class="coach-meter-box coach-advice-box">
+        <span class="meter-lbl serif-title">FRIENDLY COACH TIP:</span>
+        <p class="coach-tip-text serif-title">💡 {{ coachAdvice }}</p>
+      </div>
     </div>
   </div>
 
@@ -100,14 +241,23 @@
 
           <!-- Reset Code Template Button -->
           <button class="reset-code-btn tactile-btn-3d serif-title" (click)="resetCodeToTemplate()" title="Reset code to default language template">
-            🔄 RESET TEMPLATE
+            🔄 RESET
           </button>
 
-          <span class="compiler-badge serif-title">⚡ PISTON SANDBOX</span>
+          <!-- Quick Algorithm Snippets -->
+          <div class="select-wrapper 3d-inset-well hidden md:block">
+            <select #snippetSelect (change)="insertSnippet(snippetSelect.value); snippetSelect.value=''" class="lang-select serif-title text-xs">
+              <option value="">⚡ INSERT ALGORITHM...</option>
+              <option *ngFor="let snip of snippetOptions" [value]="snip.key">{{ snip.label }}</option>
+            </select>
+          </div>
+
+          <span class="compiler-badge serif-title hidden lg:inline-block">⚡ PISTON SANDBOX</span>
+          <span *ngIf="isSpectator" class="readonly-badge serif-title">🔒 READ-ONLY SPECTATOR</span>
         </div>
 
-        <button class="btn-primary btn-sm run-btn tactile-btn-3d serif-title" (click)="runCode()" [disabled]="isCompiling">
-          <span *ngIf="!isCompiling" class="run-label">▶ RUN CODE</span>
+        <button class="btn-primary btn-sm run-btn tactile-btn-3d serif-title" (click)="runCode()" [disabled]="isCompiling || isSpectator" [title]="isSpectator ? 'Read-only spectator mode' : 'Run Code'">
+          <span *ngIf="!isCompiling" class="run-label">{{ isSpectator ? '🔒 SPECTATING' : '▶ RUN CODE' }}</span>
           <span *ngIf="isCompiling" class="running-spinner">⏳ RUNNING...</span>
           <span class="shine-sweep"></span>
         </button>
@@ -127,6 +277,7 @@
 
           <!-- Top Layer: Transparent Textarea with Bright Caret -->
           <textarea [(ngModel)]="code" 
+                    [readonly]="isSpectator"
                     (ngModelChange)="updateCode($event)" 
                     (scroll)="onEditorScroll($event)"
                     (input)="onEditorScroll($event)"
@@ -134,7 +285,7 @@
                     (click)="onEditorScroll($event)"
                     class="code-textarea" 
                     spellcheck="false" 
-                    placeholder="Write code here..."></textarea>
+                    [placeholder]="isSpectator ? 'Observing code live in Silent Co-Pilot Spectator mode...' : 'Write code here...'"></textarea>
         </div>
       </div>
 

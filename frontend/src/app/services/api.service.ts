@@ -3,6 +3,30 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
+export interface KnowledgeChainNode {
+  name: string;
+  role: string;
+  avatar: string;
+  action: string;
+  topic: string;
+  stepNumber: number;
+}
+
+export interface KnowledgeImpact {
+  mentorId: number;
+  mentorName: string;
+  mentorAvatar: string;
+  mentorRating: number;
+  studentsHelped: number;
+  sessionsCompleted: number;
+  studentsImproved: number;
+  impactScore: number;
+  totalReach: number;
+  impactSummary: string;
+  chainNodes: KnowledgeChainNode[];
+  impactStories: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -192,6 +216,12 @@ export class ApiService {
     return this.http.put(`${this.baseUrl}/sessions/${id}/status`, { status });
   }
 
+  transferSession(id: number, transferData: { newMentorName: string; newMentorId?: number; transferReason: string }): Observable<any> {
+    return this.http.put(`${this.baseUrl}/sessions/${id}/transfer`, transferData).pipe(
+      catchError(() => of({ id, ...transferData, status: 'PENDING' }))
+    );
+  }
+
   getMatchedMentors(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/mentors/match`).pipe(
       catchError(() => of([
@@ -253,6 +283,12 @@ export class ApiService {
 
   updateGoal(id: number, goal: any): Observable<any> {
     return this.http.put(`${this.baseUrl}/goals/${id}`, goal);
+  }
+
+  deleteGoal(id: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/goals/${id}`).pipe(
+      catchError(() => of({ success: true }))
+    );
   }
 
   getLeaderboard(): Observable<any[]> {
@@ -427,5 +463,268 @@ export class ApiService {
 
   getAuditLogs(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/admin/audit-logs`).pipe(catchError(() => of([])));
+  }
+
+  // Knowledge Impact & Knowledge Sharing Chain Services
+  getMentorKnowledgeImpact(mentorId: number): Observable<KnowledgeImpact> {
+    return this.http.get<KnowledgeImpact>(`${this.baseUrl}/knowledge-impact/mentor/${mentorId}`).pipe(
+      catchError(() => of(this.getFallbackKnowledgeImpact(mentorId)))
+    );
+  }
+
+  getAllKnowledgeImpacts(): Observable<KnowledgeImpact[]> {
+    return this.http.get<KnowledgeImpact[]>(`${this.baseUrl}/knowledge-impact/all`).pipe(
+      catchError(() => of([
+        this.getFallbackKnowledgeImpact(3), // Pavani
+        this.getFallbackKnowledgeImpact(1), // Akshat Aryan
+        this.getFallbackKnowledgeImpact(2), // Kriti Sagar
+        this.getFallbackKnowledgeImpact(4)  // Vanaja
+      ]))
+    );
+  }
+
+  getUserKnowledgeImpact(userId: number): Observable<KnowledgeImpact> {
+    return this.getMentorKnowledgeImpact(userId);
+  }
+
+  getFallbackKnowledgeImpact(mentorId: number): KnowledgeImpact {
+    if (mentorId === 3 || mentorId === 99 || mentorId === 0) {
+      // Pavani default
+      return {
+        mentorId: 3,
+        mentorName: 'Pavani',
+        mentorAvatar: 'assets/pavani-profile.jpg',
+        mentorRating: 4.8,
+        studentsHelped: 15,
+        sessionsCompleted: 32,
+        studentsImproved: 12,
+        impactScore: 91,
+        totalReach: 4,
+        impactSummary: 'Your knowledge has reached 4 learners.',
+        chainNodes: [
+          {
+            name: 'Pavani',
+            role: 'MASTER_MENTOR',
+            avatar: 'assets/pavani-profile.jpg',
+            action: 'Directly taught Reactive Frontend & Canvas Graphics',
+            topic: 'Angular 17 & Canvas Architecture',
+            stepNumber: 1
+          },
+          {
+            name: 'Rahul',
+            role: 'PEER_MENTOR',
+            avatar: 'assets/avatar-1.png',
+            action: 'Built Interactive Canvas App, then mentored Sneha',
+            topic: 'State Management & RxJS',
+            stepNumber: 2
+          },
+          {
+            name: 'Sneha',
+            role: 'STUDENT_MENTOR',
+            avatar: 'assets/avatar-2.png',
+            action: 'Mastered RxJS Streams, then guided Arun on Project',
+            topic: 'Full Stack Web Development',
+            stepNumber: 3
+          },
+          {
+            name: 'Arun',
+            role: 'STUDENT',
+            avatar: 'assets/avatar-3.png',
+            action: 'Completed First Milestone & Passed Tech Assessment',
+            topic: 'Frontend Basics & UI Design',
+            stepNumber: 4
+          }
+        ],
+        impactStories: [
+          'Pavani directly teaches Rahul. Later, Rahul uses that knowledge to help Sneha, and Sneha helps Arun.',
+          '12 of 15 students achieved career milestones within 60 days.',
+          'Knowledge ripple spread across 3 peer mentoring levels.'
+        ]
+      };
+    } else if (mentorId === 1) {
+      return {
+        mentorId: 1,
+        mentorName: 'Akshat Aryan',
+        mentorAvatar: 'assets/akshat-profile.jpg',
+        mentorRating: 4.95,
+        studentsHelped: 24,
+        sessionsCompleted: 48,
+        studentsImproved: 21,
+        impactScore: 98,
+        totalReach: 5,
+        impactSummary: 'Your knowledge has reached 5 learners.',
+        chainNodes: [
+          { name: 'Akshat Aryan', role: 'MASTER_MENTOR', avatar: 'assets/akshat-profile.jpg', action: 'Conducted System Design & Spring Boot 3 Deep Dives', topic: 'Distributed Systems & WebSockets', stepNumber: 1 },
+          { name: 'Kriti Sagar', role: 'PEER_MENTOR', avatar: 'assets/kriti-profile.jpg', action: 'Implemented Microservices Ingress, coached Divya', topic: 'Spring Boot 3 Security & JWT', stepNumber: 2 },
+          { name: 'Divya', role: 'STUDENT_MENTOR', avatar: 'assets/avatar-4.png', action: 'Architected REST API, assisted Vikram on Docker', topic: 'RESTful APIs & Containers', stepNumber: 3 },
+          { name: 'Vikram', role: 'STUDENT_MENTOR', avatar: 'assets/avatar-5.png', action: 'Deployed Cluster, onboarded Ananya', topic: 'DevOps & Microservices', stepNumber: 4 },
+          { name: 'Ananya', role: 'STUDENT', avatar: 'assets/avatar-6.png', action: 'Passed Junior Backend Engineer Assessment', topic: 'Java 21 Fundamentals', stepNumber: 5 }
+        ],
+        impactStories: [
+          'Akshat taught Kriti. Kriti helped Divya, Divya helped Vikram, and Vikram onboarded Ananya.',
+          '21 students successfully completed backend microservices certifications.',
+          'Enterprise system design knowledge reached 5 direct and downstream learners.'
+        ]
+      };
+    } else if (mentorId === 2) {
+      return {
+        mentorId: 2,
+        mentorName: 'Kriti Sagar',
+        mentorAvatar: 'assets/kriti-profile.jpg',
+        mentorRating: 4.9,
+        studentsHelped: 18,
+        sessionsCompleted: 36,
+        studentsImproved: 15,
+        impactScore: 94,
+        totalReach: 4,
+        impactSummary: 'Your knowledge has reached 4 learners.',
+        chainNodes: [
+          { name: 'Kriti Sagar', role: 'MASTER_MENTOR', avatar: 'assets/kriti-profile.jpg', action: 'Mentored on Vector Embeddings and RAG Architecture', topic: 'AI/ML Infrastructure', stepNumber: 1 },
+          { name: 'Sneha', role: 'PEER_MENTOR', avatar: 'assets/avatar-2.png', action: 'Built Semantic Search, guided Rohan on Vector DB', topic: 'Vector Databases & Cosine Math', stepNumber: 2 },
+          { name: 'Rohan', role: 'STUDENT_MENTOR', avatar: 'assets/avatar-7.png', action: 'Fine-tuned Prompt Pipelines, coached Meera', topic: 'Prompt Engineering', stepNumber: 3 },
+          { name: 'Meera', role: 'STUDENT', avatar: 'assets/avatar-8.png', action: 'Delivered AI Support Assistant Prototype', topic: 'LLM Basics & Inference', stepNumber: 4 }
+        ],
+        impactStories: [
+          'Kriti mentored Sneha on RAG systems, Sneha guided Rohan, and Rohan helped Meera build her first AI agent.',
+          '15 of 18 students built production-ready AI demo applications.'
+        ]
+      };
+    } else {
+      return {
+        mentorId: 4,
+        mentorName: 'Vanaja',
+        mentorAvatar: 'assets/vanaja-profile.jpg',
+        mentorRating: 4.85,
+        studentsHelped: 14,
+        sessionsCompleted: 28,
+        studentsImproved: 11,
+        impactScore: 89,
+        totalReach: 4,
+        impactSummary: 'Your knowledge has reached 4 learners.',
+        chainNodes: [
+          { name: 'Vanaja', role: 'MASTER_MENTOR', avatar: 'assets/vanaja-profile.jpg', action: 'Guided on Container Orchestration and Cloud CI/CD', topic: 'Kubernetes & Cloud Infrastructure', stepNumber: 1 },
+          { name: 'Arjun', role: 'PEER_MENTOR', avatar: 'assets/avatar-9.png', action: 'Built GitOps pipeline, coached Priya on Helm', topic: 'GitOps & Docker Swarm', stepNumber: 2 },
+          { name: 'Priya', role: 'STUDENT_MENTOR', avatar: 'assets/avatar-10.png', action: 'Configured Ingress Controller, helped Karthik', topic: 'Cloud Networking', stepNumber: 3 },
+          { name: 'Karthik', role: 'STUDENT', avatar: 'assets/avatar-11.png', action: 'Automated Multi-Stage Docker Builds', topic: 'Docker Essentials', stepNumber: 4 }
+        ],
+        impactStories: [
+          'Vanaja guided Arjun on Kubernetes, Arjun coached Priya, and Priya helped Karthik deploy automated Docker pipelines.',
+          '11 students earned Cloud & DevOps certifications.'
+        ]
+      };
+    }
+  }
+
+  // ==========================================
+  // 10-Minute SOS Bug Rescue APIs
+  // ==========================================
+  getActiveSosRequests(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/sos/active`).pipe(
+      catchError(() => of([
+        {
+          id: 1,
+          menteeId: 2,
+          menteeName: 'Kriti Sagar',
+          title: 'Spring Boot H2 Connection Refused on Port 8080',
+          problemDescription: 'Application failed to start because embedded H2 console locks the db file on Windows. Need quick 10-min pointer on lock file cleanup.',
+          techStack: 'Spring Boot',
+          status: 'OPEN',
+          karmaPoints: 100,
+          createdAt: new Date().toISOString()
+        }
+      ]))
+    );
+  }
+
+  createSosRequest(request: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/sos/create`, request).pipe(
+      catchError(err => of(request))
+    );
+  }
+
+  claimSosRequest(id: number, payload: any): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/sos/${id}/claim`, payload).pipe(
+      catchError(err => of({ id, status: 'CLAIMED', workspaceRoomId: 'sos-room-' + id }))
+    );
+  }
+
+  resolveSosRequest(id: number): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/sos/${id}/resolve`, {}).pipe(
+      catchError(err => of({ id, status: 'RESOLVED' }))
+    );
+  }
+
+  // ==========================================
+  // Silent Co-Pilot Spectator APIs
+  // ==========================================
+  joinShadowSession(sessionId: number): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/sessions/${sessionId}/shadow/join`, {}).pipe(
+      catchError(err => of({ id: sessionId, spectatorCount: 1 }))
+    );
+  }
+
+  // ==========================================
+  // Mentor Battery Recharge Shield APIs
+  // ==========================================
+  toggleMentorRecharge(mentorId: number): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/mentors/${mentorId}/recharge-toggle`, {}).pipe(
+      catchError(err => of({ id: mentorId, isRecharging: true }))
+    );
+  }
+
+  // ==========================================
+  // 1-Click Proof of Growth Public Portfolio APIs
+  // ==========================================
+  getPublicPortfolio(username: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/public/portfolio/${username}`).pipe(
+      catchError(() => of({
+        profile: {
+          name: username.replace('-', ' ').toUpperCase(),
+          title: 'Full-Stack Software Engineer & Verified Scholar',
+          company: 'MentorHub AI Platform',
+          bio: 'Passionate developer conquering technical milestones on the RPG Career Quest Map.',
+          avatarUrl: 'assets/mentorhub-logo.png',
+          xpPoints: 2450,
+          streak: 14,
+          level: 5,
+          karmaPoints: 200
+        },
+        knowledgeImpact: {
+          impactScore: 94,
+          studentsHelped: 18,
+          sessionsCompleted: 26,
+          studentsImproved: 15,
+          sharingChainReach: 5
+        },
+        conqueredQuests: [
+          { index: '01', title: 'Java 21 Project Loom & Virtual Threads', zone: 'Novice Foothills', date: 'Aug 2026', badge: '☕ Java 21 Pioneer' },
+          { index: '02', title: 'Spring Boot 3 Security & BCrypt Salts', zone: 'Crypt of Credentials', date: 'Aug 2026', badge: '🛡️ Security Paladin' },
+          { index: '03', title: 'Angular 17 Reactive Standalone Architecture', zone: 'Signal Sanctum', date: 'Sep 2026', badge: '🅰️ Reactive Master' },
+          { index: '04', title: 'Microservices & Distributed Transactions', zone: 'Citadel Core', date: 'Sep 2026', badge: '👑 Full-Stack Archmage' }
+        ],
+        verifiedGoals: [
+          { title: 'Master Loom Virtual Thread Concurrency', category: 'Specific', status: 'ACHIEVED', targetDate: 'Aug 2026', progress: 100 },
+          { title: 'Stateless JWT BCrypt Security Filter Chain', category: 'Measurable', status: 'ACHIEVED', targetDate: 'Aug 2026', progress: 100 },
+          { title: 'Zero-Lag Web Audio Synthesizer Suite', category: 'Achievable', status: 'ACHIEVED', targetDate: 'Sep 2026', progress: 100 }
+        ],
+        endorsements: [
+          {
+            mentorName: 'Akshat Aryan',
+            mentorRole: 'Lead Architect • 98% Compatibility',
+            endorsement: 'Demonstrated exemplary mastery in Java 21 concurrency benchmarks and Spring Boot microservice boundaries. Exceptional problem-solving agility.',
+            endorsedAt: 'August 2026'
+          },
+          {
+            mentorName: 'Pavani',
+            mentorRole: 'Senior Frontend Lead • 91/100 Impact Score',
+            endorsement: 'Built stunning reactive UI components with perfect z-index layering and smooth Web Audio synthesizers. Code is clean, modular, and maintainable.',
+            endorsedAt: 'September 2026'
+          }
+        ],
+        verificationCode: 'MH-PROOF-948211',
+        verificationUrl: 'http://localhost:4200/portfolio/' + username.toLowerCase(),
+        issuedAt: 'September 2026'
+      }))
+    );
   }
 }

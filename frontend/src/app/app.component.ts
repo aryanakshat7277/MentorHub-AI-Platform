@@ -5,13 +5,25 @@ import { filter, Subscription } from 'rxjs';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { HeaderComponent } from './components/header/header.component';
 import { AiChatbotComponent } from './components/ai-chatbot/ai-chatbot.component';
+import { GestureHudComponent } from './components/gesture-hud/gesture-hud.component';
+import { GestureCursorComponent } from './components/gesture-cursor/gesture-cursor.component';
+import { GestureRecognitionService } from './services/gesture-recognition.service';
 import { SoundService } from './services/sound.service';
 import { AuthService, LoginEvent } from './services/auth.service';
+import { ThemeService } from './services/theme.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule, SidebarComponent, HeaderComponent, AiChatbotComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    SidebarComponent,
+    HeaderComponent,
+    AiChatbotComponent,
+    GestureHudComponent,
+    GestureCursorComponent
+  ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
@@ -30,10 +42,13 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private routerSub: Subscription | null = null;
   private loginSub: Subscription | null = null;
+  private gestureSub: Subscription | null = null;
 
   constructor(
     private soundService: SoundService,
     public authService: AuthService,
+    public gestureService: GestureRecognitionService,
+    public themeService: ThemeService,
     private router: Router
   ) {}
 
@@ -61,6 +76,7 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.routerSub) this.routerSub.unsubscribe();
     if (this.loginSub) this.loginSub.unsubscribe();
+    if (this.gestureSub) this.gestureSub.unsubscribe();
   }
 
   checkAuthRoute(url: string) {

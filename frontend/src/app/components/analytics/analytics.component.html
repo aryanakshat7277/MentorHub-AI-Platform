@@ -125,4 +125,96 @@
       </div>
     </div>
   </div>
+
+  <!-- Community Knowledge Sharing Ripple & Multiplier Section -->
+  <div class="knowledge-ripple-analytics-card clay-panel elevated-card-3d" *ngIf="selectedChain">
+    <div class="ripple-header-row">
+      <div class="ripple-title-wrap">
+        <div class="gold-seal-emboss ripple-seal">
+          <span class="seal-glyph">🌐</span>
+        </div>
+        <div>
+          <h2 class="serif-title">COMMUNITY KNOWLEDGE SHARING RIPPLE</h2>
+          <p class="subtitle serif-title">“How Many People Have I Helped?” — Measuring peer-to-peer knowledge propagation</p>
+        </div>
+      </div>
+
+      <!-- Mentor Selector Pill Row -->
+      <div class="mentor-tabs-row">
+        <button *ngFor="let impact of impactChains" 
+                class="mentor-tab-pill tactile-btn-3d serif-title"
+                [class.active]="selectedChain.mentorId === impact.mentorId"
+                (click)="selectChain(impact)">
+          <img [src]="impact.mentorAvatar" class="tab-avatar" />
+          <span>{{ impact.mentorName }}</span>
+          <span class="tab-score">🌟 {{ impact.impactScore }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Impact Stats Bar -->
+    <div class="ripple-stats-bar">
+      <div class="stat-box clay-panel elevated-card-3d">
+        <span class="lbl serif-title">KNOWLEDGE IMPACT SCORE</span>
+        <span class="val gold serif-title">🌟 {{ selectedChain.impactScore }}/100</span>
+        <span class="sub serif-title">Comprehensive Impact Metric</span>
+      </div>
+
+      <div class="stat-box clay-panel elevated-card-3d">
+        <span class="lbl serif-title">MENTOR RATING</span>
+        <span class="val amber serif-title">⭐ {{ selectedChain.mentorRating }} / 5.0</span>
+        <span class="sub serif-title">Authentic Mentee Score</span>
+      </div>
+
+      <div class="stat-box clay-panel elevated-card-3d">
+        <span class="lbl serif-title">STUDENTS HELPED</span>
+        <span class="val terracotta serif-title">👥 {{ selectedChain.studentsHelped }} Guided</span>
+        <span class="sub serif-title">Direct 1-on-1 Mentees</span>
+      </div>
+
+      <div class="stat-box clay-panel elevated-card-3d">
+        <span class="lbl serif-title">SESSIONS COMPLETED</span>
+        <span class="val ochre serif-title">📚 {{ selectedChain.sessionsCompleted }} Sessions</span>
+        <span class="sub serif-title">Total Active Discussions</span>
+      </div>
+
+      <div class="stat-box clay-panel elevated-card-3d highlight-box">
+        <span class="lbl serif-title">STUDENTS IMPROVED</span>
+        <span class="val forest serif-title">📈 {{ selectedChain.studentsImproved }} Achievers</span>
+        <span class="sub serif-title">Milestones & Assessments</span>
+      </div>
+    </div>
+
+    <!-- Active Sharing Chain Stepper -->
+    <div class="active-chain-section">
+      <div class="chain-quote-banner 3d-inset-well">
+        <span class="quote-star">✨</span>
+        <strong class="serif-title">{{ selectedChain.impactSummary }}</strong>
+        <span class="quote-tag serif-title">Cascade Multiplier: {{ selectedChain.totalReach }}x Reach</span>
+      </div>
+
+      <div class="horizontal-chain-flow">
+        <ng-container *ngFor="let node of selectedChain.chainNodes; let i = index; let last = last">
+          <div class="flow-card clay-panel elevated-card-3d">
+            <div class="step-lbl serif-title">STEP {{ node.stepNumber }}</div>
+            <img [src]="node.avatar" [alt]="node.name" class="avatar-round" />
+            <h4 class="name serif-title">{{ node.name }}</h4>
+            <span class="role-lbl serif-title">{{ node.role.replace('_', ' ') }}</span>
+            <div class="action-well debossed-track">
+              <p class="serif-title">{{ node.action }}</p>
+            </div>
+            <span class="topic-tag serif-title">💡 {{ node.topic }}</span>
+          </div>
+
+          <div class="flow-connector" *ngIf="!last">
+            <div class="line">
+              <span class="pulsing-beacon"></span>
+            </div>
+            <span class="arrow-glyph">➔</span>
+            <span class="arrow-text serif-title">Mentors Forward</span>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
 </div>

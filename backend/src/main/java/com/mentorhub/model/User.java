@@ -46,6 +46,10 @@ public class User implements UserDetails {
     private Integer totalSessions = 0;
     private Integer badgesCount = 0;
 
+    private Boolean isRecharging = false;
+    private java.time.LocalDateTime rechargeUntil;
+    private Integer karmaPoints = 0;
+
     public User() {}
 
     public User(Long id, String name, String email, String password, String role, String bio, Integer xpPoints, Integer currentStreak, Double rating, String avatarUrl, String title, String company, String skills, Integer hoursMentored, Integer totalSessions, Integer badgesCount) {
@@ -175,4 +179,11 @@ public class User implements UserDetails {
     public void setTotalSessions(Integer totalSessions) { this.totalSessions = totalSessions; }
     public Integer getBadgesCount() { return badgesCount; }
     public void setBadgesCount(Integer badgesCount) { this.badgesCount = badgesCount; }
+
+    public Boolean getIsRecharging() { return isRecharging != null ? isRecharging : false; }
+    public void setIsRecharging(Boolean isRecharging) { this.isRecharging = isRecharging; }
+    public java.time.LocalDateTime getRechargeUntil() { return rechargeUntil; }
+    public void setRechargeUntil(java.time.LocalDateTime rechargeUntil) { this.rechargeUntil = rechargeUntil; }
+    public Integer getKarmaPoints() { return karmaPoints != null ? karmaPoints : 0; }
+    public void setKarmaPoints(Integer karmaPoints) { this.karmaPoints = karmaPoints; }
 }

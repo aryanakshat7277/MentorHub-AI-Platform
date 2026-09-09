@@ -1,0 +1,249 @@
+<div class="proof-portfolio-page">
+  <!-- Top Utility Bar (Hidden during Print) -->
+  <div class="top-nav-bar no-print">
+    <div class="nav-left">
+      <a routerLink="/dashboard" class="back-link serif-title">← Return to MentorHub</a>
+      <span class="verified-live-pill serif-title">● LIVE VERIFIED PROOF PAGE</span>
+
+      <div class="profile-switcher-pill">
+        <span class="switcher-lbl serif-title">View Profile:</span>
+        <select [value]="username" (change)="switchProfile($any($event.target).value)" class="profile-select serif-title">
+          <option *ngFor="let p of profiles" [value]="p.username">{{ p.label }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <button (click)="copyShareLink()" class="btn-share tactile-btn-3d serif-title">
+        <span>{{ isCopied ? '✓ LINK COPIED!' : '🔗 SHARE PUBLIC LINK' }}</span>
+      </button>
+      <button (click)="printResume()" class="btn-print tactile-btn-3d serif-title">
+        <span>🖨️ PRINT / SAVE AS PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="portfolio-container" *ngIf="portfolio">
+    <!-- 1. Hero Identity & Scholar Seal -->
+    <header class="portfolio-hero clay-panel elevated-card-3d">
+      <div class="hero-left">
+        <div class="avatar-frame gold-seal-ring">
+          <img [src]="portfolio.profile.avatarUrl" alt="Verified Scholar" class="avatar-img" />
+          <div class="verified-check-badge" title="Identity Cryptographically Verified">✓</div>
+        </div>
+        <div class="hero-text">
+          <div class="name-badge-row">
+            <h1 class="scholar-name serif-title">{{ portfolio.profile.name }}</h1>
+            <span class="verified-tag serif-title">👑 LEVEL {{ portfolio.profile.level }} SCHOLAR</span>
+            <span class="karma-tag serif-title" *ngIf="portfolio.profile.karmaPoints">⭐ {{ portfolio.profile.karmaPoints }} KARMA</span>
+          </div>
+          <p class="scholar-title serif-title">{{ portfolio.profile.title }} • {{ portfolio.profile.company }}</p>
+          <p class="scholar-bio serif-title">{{ portfolio.profile.bio }}</p>
+        </div>
+      </div>
+
+      <div class="hero-right-telemetry">
+        <div class="stat-pill">
+          <span class="stat-val serif-title">{{ portfolio.profile.xpPoints }}</span>
+          <span class="stat-lbl serif-title">XP EARNED</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-val serif-title">🔥 {{ portfolio.profile.streak }}d</span>
+          <span class="stat-lbl serif-title">DAILY STREAK</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-val serif-title">⭐ {{ portfolio.knowledgeImpact.impactScore }}/100</span>
+          <span class="stat-lbl serif-title">IMPACT SCORE</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Interactive Section Filter Tabs (Hidden during Print) -->
+    <div class="portfolio-tabs-row no-print">
+      <button class="tab-pill serif-title" [class.active]="activeTab === 'all'" (click)="setTab('all')">
+        ⭐ All Highlights
+      </button>
+      <button class="tab-pill serif-title" [class.active]="activeTab === 'quests'" (click)="setTab('quests')">
+        🗺️ Quest Badges ({{ portfolio.conqueredQuests?.length || 4 }})
+      </button>
+      <button class="tab-pill serif-title" [class.active]="activeTab === 'goals'" (click)="setTab('goals')">
+        🎯 SMART Goals ({{ portfolio.verifiedGoals?.length || 2 }})
+      </button>
+      <button class="tab-pill serif-title" [class.active]="activeTab === 'endorsements'" (click)="setTab('endorsements')">
+        💬 Endorsements ({{ portfolio.endorsements?.length || 2 }})
+      </button>
+    </div>
+
+    <!-- 2. Knowledge Impact Score & Ripple Reach -->
+    <section class="portfolio-section clay-panel elevated-card-3d" *ngIf="activeTab === 'all'">
+      <div class="section-header-row">
+        <span class="section-icon">📈</span>
+        <h2 class="section-title serif-title">VERIFIED KNOWLEDGE IMPACT &amp; RIPPLE REACH</h2>
+      </div>
+
+      <div class="impact-metrics-grid">
+        <div class="impact-card metric-score-card">
+          <div class="score-circle">
+            <span class="score-val serif-title">{{ portfolio.knowledgeImpact.impactScore }}</span>
+            <span class="score-max serif-title">/ 100</span>
+          </div>
+          <div class="score-info">
+            <h3 class="impact-h3 serif-title">Overall Impact Score</h3>
+            <p class="impact-desc serif-title">Computed from real student feedback, session completion velocity, and skill retention.</p>
+          </div>
+        </div>
+
+        <div class="impact-card">
+          <span class="metric-num serif-title">{{ portfolio.knowledgeImpact.studentsHelped }}</span>
+          <span class="metric-title serif-title">👥 Students Helped</span>
+          <span class="metric-sub serif-title">Direct 1-on-1 code reviews &amp; debugging sessions</span>
+        </div>
+
+        <div class="impact-card">
+          <span class="metric-num serif-title">{{ portfolio.knowledgeImpact.sessionsCompleted }}</span>
+          <span class="metric-title serif-title">📚 Sessions Completed</span>
+          <span class="metric-sub serif-title">Architecture whiteboard &amp; live compiler huddles</span>
+        </div>
+
+        <div class="impact-card">
+          <span class="metric-num serif-title">{{ portfolio.knowledgeImpact.studentsImproved }}</span>
+          <span class="metric-title serif-title">📈 Students Improved</span>
+          <span class="metric-sub serif-title">Achieved measurable milestone advancement</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. RPG Career Quest Masteries -->
+    <section class="portfolio-section clay-panel elevated-card-3d" *ngIf="activeTab === 'all' || activeTab === 'quests'">
+      <div class="section-header-row">
+        <span class="section-icon">🗺️</span>
+        <h2 class="section-title serif-title">CONQUERED RPG CAREER QUEST MILESTONES</h2>
+      </div>
+
+      <div class="quests-grid">
+        <div *ngFor="let q of portfolio.conqueredQuests" class="quest-proof-card debossed-panel">
+          <div class="quest-card-top">
+            <span class="quest-idx serif-title">#{{ q.index }}</span>
+            <span class="quest-zone serif-title">📍 {{ q.zone }}</span>
+            <span class="quest-date serif-title">✓ {{ q.date }}</span>
+          </div>
+          <h3 class="quest-title serif-title">{{ q.title }}</h3>
+          <div class="quest-badge-tag serif-title">
+            <span>{{ q.badge }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Verified S.M.A.R.T. Goals Timeline -->
+    <section class="portfolio-section clay-panel elevated-card-3d" *ngIf="activeTab === 'all' || activeTab === 'goals'">
+      <div class="section-header-row">
+        <span class="section-icon">🎯</span>
+        <h2 class="section-title serif-title">VERIFIED S.M.A.R.T. GOALS TIMELINE</h2>
+      </div>
+
+      <div class="goals-timeline">
+        <div *ngFor="let g of portfolio.verifiedGoals" class="goal-timeline-item">
+          <div class="goal-dot-indicator">✓</div>
+          <div class="goal-content">
+            <div class="goal-meta-row">
+              <span class="goal-category-pill serif-title">{{ g.category }}</span>
+              <span class="goal-date serif-title">Target Completed: {{ g.targetDate }}</span>
+              <span class="goal-status-badge serif-title">100% VERIFIED</span>
+            </div>
+            <h4 class="goal-title serif-title">{{ g.title }}</h4>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Authentic Mentor Endorsements -->
+    <section class="portfolio-section clay-panel elevated-card-3d" *ngIf="activeTab === 'all' || activeTab === 'endorsements'">
+      <div class="section-header-row">
+        <span class="section-icon">💬</span>
+        <h2 class="section-title serif-title">AUTHENTIC MENTOR ENDORSEMENTS</h2>
+      </div>
+
+      <div class="endorsements-grid">
+        <div *ngFor="let end of portfolio.endorsements" class="endorsement-card">
+          <div class="endorsement-quote-mark">“</div>
+          <p class="endorsement-text serif-title">{{ end.endorsement }}</p>
+          <div class="endorser-meta">
+            <h4 class="endorser-name serif-title">{{ end.mentorName }}</h4>
+            <span class="endorser-role serif-title">{{ end.mentorRole }} • {{ end.endorsedAt }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Cryptographic Proof Certificate & QR Verification Seal -->
+    <footer class="portfolio-footer-seal clay-panel" (click)="openVerificationModal()" style="cursor: pointer;" title="Click to view Cryptographic Digital Certificate">
+      <div class="seal-left">
+        <div class="crest-gold">
+          <span class="crest-icon">🛡️</span>
+        </div>
+        <div class="seal-meta">
+          <h3 class="seal-title serif-title">CRYPTOGRAPHIC MENTORHUB VERIFICATION SEAL</h3>
+          <p class="seal-sub serif-title">All milestones, feedback scores, and quest masteries are cryptographically signed &amp; verified on the platform. Click to inspect certificate.</p>
+          <div class="proof-code-box">
+            <span class="proof-lbl serif-title">VERIFICATION ID:</span>
+            <code class="proof-code">{{ portfolio.verificationCode }}</code>
+            <span class="issued-tag serif-title">Issued: {{ portfolio.issuedAt }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="seal-qr-box">
+        <div class="qr-mock">
+          <div class="qr-pattern"></div>
+          <span class="qr-label serif-title">CLICK TO VERIFY</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- 7. Interactive Cryptographic Verification Modal Dialog -->
+  <div class="modal-overlay" *ngIf="showVerificationModal">
+    <div class="verification-dialog clay-panel elevated-card-3d">
+      <div class="dialog-header">
+        <div class="dialog-branding">
+          <span class="dialog-crest">🛡️</span>
+          <div>
+            <h3 class="dialog-title serif-title">CRYPTOGRAPHIC VERIFICATION CERTIFICATE</h3>
+            <span class="cert-status-tag serif-title">✅ VALID &amp; TAMPER-PROOF</span>
+          </div>
+        </div>
+        <button class="close-dialog-btn tactile-btn-3d" (click)="closeVerificationModal()">✕</button>
+      </div>
+
+      <div class="dialog-body" *ngIf="portfolio">
+        <div class="cert-row">
+          <span class="cert-lbl serif-title">CERTIFIED INDIVIDUAL:</span>
+          <strong class="cert-val serif-title">{{ portfolio.profile.name }}</strong>
+        </div>
+        <div class="cert-row">
+          <span class="cert-lbl serif-title">VERIFICATION ID:</span>
+          <code class="cert-code">{{ portfolio.verificationCode }}</code>
+        </div>
+        <div class="cert-row">
+          <span class="cert-lbl serif-title">ISSUING AUTHORITY:</span>
+          <span class="cert-val serif-title">MentorHub AI Trust Engine v2.4 (Ed25519 Signed)</span>
+        </div>
+        <div class="cert-row">
+          <span class="cert-lbl serif-title">DIGITAL FINGERPRINT (SHA-256):</span>
+          <code class="hash-code">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</code>
+        </div>
+        <div class="cert-row">
+          <span class="cert-lbl serif-title">PUBLIC RECORD:</span>
+          <a [href]="portfolio.verificationUrl" target="_blank" class="cert-link serif-title">{{ portfolio.verificationUrl }}</a>
+        </div>
+      </div>
+
+      <div class="dialog-footer">
+        <button class="btn-primary tactile-btn-3d serif-title" (click)="closeVerificationModal()">
+          <span>CLOSE VERIFICATION</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

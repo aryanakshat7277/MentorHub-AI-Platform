@@ -1,8 +1,9 @@
 <header class="header-container" [class.sidebar-collapsed]="isCollapsed">
-  <div class="header-search">
+  <!-- Interactive Quick Search Trigger -->
+  <div class="header-search" (click)="toggleSpotlight()" title="Press Ctrl+K or Click to Search Platform">
     <span class="search-icon">🔍</span>
-    <input type="text" placeholder="Search mentors, skills, sessions, SMART goals..." />
-    <span class="shortcut-tag">⌘K</span>
+    <input type="text" placeholder="Search mentors, skills, sessions, SMART goals..." readonly />
+    <span class="shortcut-tag">Ctrl + K</span>
   </div>
 
   <div class="header-actions">
@@ -14,14 +15,58 @@
     </div>
 
     <!-- Dedicated Full Screen View Mode Button -->
-    <button class="fullscreen-toggle-btn clay-badge-3d" (click)="toggleFullScreen()" [title]="isFullScreen ? 'Exit Full Screen Mode' : 'View Application in Full Screen Mode'">
+    <button class="fullscreen-toggle-btn clay-badge-3d" (click)="toggleFullScreen()" [title]="isFullScreen ? 'Exit Full Screen' : 'Full Screen View'">
       <span class="fs-icon">{{ isFullScreen ? '⇪' : '⛶' }}</span>
       <span class="fs-label">{{ isFullScreen ? 'EXIT FULLSCREEN' : 'FULL SCREEN' }}</span>
     </button>
 
-    <div class="notification-btn clay-badge-3d" title="Notifications">
-      <span class="bell-icon">🔔</span>
-      <span class="badge-count">3</span>
+    <!-- Dark / Light Theme Toggle Button -->
+    <button class="theme-toggle-btn clay-badge-3d" (click)="toggleTheme()" [title]="themeService.isDarkMode ? 'Switch to Warm Biscuit Theme' : 'Switch to Cyber Obsidian Theme'">
+      <span class="theme-icon">{{ themeService.isDarkMode ? '☀️' : '🌙' }}</span>
+      <span class="theme-label">{{ themeService.isDarkMode ? 'LIGHT MODE' : 'DARK MODE' }}</span>
+    </button>
+
+    <!-- Real-Time Hand Gesture Control Toggle Button -->
+    <button class="gesture-toggle-btn clay-badge-3d" [class.active]="(gestureService.isEnabled$ | async)" (click)="toggleGestures()" title="Toggle Real-Time Hand Gesture Control">
+      <span class="gesture-pulse-ring" *ngIf="(gestureService.isEnabled$ | async)"></span>
+      <span class="gesture-icon">🖐️</span>
+      <span class="gesture-label">{{ (gestureService.isEnabled$ | async) ? 'GESTURES ON' : 'GESTURES' }}</span>
+    </button>
+
+    <!-- What's New / Feature Spotlight Modal Button -->
+    <button class="features-spotlight-btn clay-badge-3d" (click)="openFeaturesModal()" title="Explore 6 Unique New Features">
+      <span class="spotlight-sparkle">✨</span>
+      <span class="spotlight-label serif-title">WHAT'S NEW</span>
+    </button>
+
+    <!-- Interactive Notifications Bell & Dropdown Tray -->
+    <div class="notification-wrapper">
+      <div class="notification-btn clay-badge-3d" (click)="toggleNotifications($event)" title="Notifications">
+        <span class="bell-icon">🔔</span>
+        <span class="badge-count" *ngIf="unreadNotificationCount > 0">{{ unreadNotificationCount }}</span>
+      </div>
+
+      <!-- Notifications Dropdown Tray -->
+      <div class="notifications-dropdown-menu glass-card" *ngIf="showNotifications" (click)="$event.stopPropagation()">
+        <div class="notifications-header">
+          <div class="notif-title-group">
+            <span class="notif-title serif-title">NOTIFICATIONS</span>
+            <span class="notif-pill">{{ unreadNotificationCount }} NEW</span>
+          </div>
+          <button class="mark-read-btn" (click)="markAllNotificationsRead()" title="Mark all as read">Mark all read</button>
+        </div>
+
+        <div class="notifications-list">
+          <div class="notif-item" *ngFor="let n of notifications" [class.unread]="!n.read">
+            <span class="notif-icon-circle">{{ n.icon }}</span>
+            <div class="notif-content">
+              <span class="notif-text">{{ n.title }}</span>
+              <span class="notif-time">{{ n.time }}</span>
+            </div>
+            <span class="unread-dot" *ngIf="!n.read"></span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- User Profile Area with 3D Avatar Crest -->
@@ -38,7 +83,7 @@
         <span class="dropdown-chevron">{{ showDropdown ? '▲' : '▼' }}</span>
       </div>
 
-      <!-- Futuristic Profile & Logout Dropdown Menu -->
+      <!-- Profile & Logout Dropdown Menu -->
       <div class="profile-dropdown-menu glass-card" *ngIf="showDropdown" (click)="$event.stopPropagation()">
         <div class="dropdown-user-header" *ngIf="user">
           <div class="dd-title-row">
@@ -51,22 +96,142 @@
         <div class="dropdown-divider"></div>
 
         <a routerLink="/profile" (click)="showDropdown = false" class="dropdown-item">
-          <span class="item-icon">👤</span> My Cybernetic Profile
+          <span class="dd-icon">👤</span>
+          <div class="dd-item-text">
+            <span class="dd-item-title">My Profile</span>
+            <span class="dd-item-sub">View bio, credentials & skills</span>
+          </div>
         </a>
-        <a routerLink="/certificates" (click)="showDropdown = false" class="dropdown-item">
-          <span class="item-icon">🎓</span> My Certificates
+
+        <a routerLink="/analytics" (click)="showDropdown = false" class="dropdown-item">
+          <span class="dd-icon">📊</span>
+          <div class="dd-item-text">
+            <span class="dd-item-title">Analytics & Activity</span>
+            <span class="dd-item-sub">Study hours & progress stats</span>
+          </div>
         </a>
-        <a routerLink="/login" (click)="showDropdown = false" class="dropdown-item">
-          <span class="item-icon">🔄</span> Switch Account / Role
+
+        <a routerLink="/gamification" (click)="showDropdown = false" class="dropdown-item">
+          <span class="dd-icon">🏆</span>
+          <div class="dd-item-text">
+            <span class="dd-item-title">XP & Badges</span>
+            <span class="dd-item-sub">View achievements & rank</span>
+          </div>
         </a>
 
         <div class="dropdown-divider"></div>
 
-        <!-- LOG OUT BUTTON -->
-        <button class="dropdown-item logout-item" (click)="logout()">
-          <span class="item-icon">🚪</span> LOG OUT
+        <button (click)="logout()" class="dropdown-item logout-item">
+          <span class="dd-icon">🚪</span>
+          <div class="dd-item-text">
+            <span class="dd-item-title">Sign Out</span>
+            <span class="dd-item-sub">Safely exit MentorHub</span>
+          </div>
         </button>
       </div>
     </div>
   </div>
 </header>
+
+<!-- Global Spotlight Quick Search Modal (Ctrl + K) -->
+<div class="spotlight-modal-overlay" *ngIf="showSpotlightSearch" (click)="showSpotlightSearch = false">
+  <div class="spotlight-dialog glass-card" (click)="$event.stopPropagation()">
+    <div class="spotlight-search-header">
+      <span class="spot-search-icon">🔍</span>
+      <input type="text" [(ngModel)]="searchQuery" placeholder="Search pages, mentors, roadmaps, sessions..." autofocus />
+      <span class="spot-esc-badge" (click)="showSpotlightSearch = false">ESC</span>
+    </div>
+
+    <div class="spotlight-results-list">
+      <div class="spotlight-item" *ngFor="let item of filteredSpotlightItems" (click)="selectSpotlightItem(item)">
+        <span class="spot-item-icon">{{ item.icon }}</span>
+        <div class="spot-item-info">
+          <span class="spot-item-title">{{ item.title }}</span>
+          <span class="spot-item-cat">{{ item.category }}</span>
+        </div>
+        <span class="spot-item-arrow">➔</span>
+      </div>
+      <div class="spotlight-empty" *ngIf="filteredSpotlightItems.length === 0">
+        <span>No matching results for "{{ searchQuery }}"</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3D What's New Feature Spotlight Modal -->
+<div class="features-modal-overlay" *ngIf="showFeaturesModal" (click)="closeFeaturesModal()">
+  <div class="features-spotlight-dialog clay-panel elevated-card-3d" (click)="$event.stopPropagation()">
+    <div class="features-header">
+      <div class="features-title-row">
+        <span class="features-crest">✨</span>
+        <div>
+          <h2 class="serif-title">WHAT'S NEW IN MENTORHUB AI</h2>
+          <p class="features-subtitle serif-title">6 unique features designed to make peer mentoring delightful and verified</p>
+        </div>
+      </div>
+      <button class="close-features-btn tactile-btn-3d" (click)="closeFeaturesModal()">✕</button>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card" (click)="navigateToFeature('/sessions')">
+        <div class="feature-icon">🚨</div>
+        <div class="feature-info">
+          <h4 class="serif-title">10-Minute SOS Bug Rescue</h4>
+          <p class="serif-title">Fast help queue for stuck students. Mentors claim and earn +100 Karma XP upon solving.</p>
+          <span class="feature-link serif-title">Open SOS Queue ➔</span>
+        </div>
+      </div>
+
+      <div class="feature-card" (click)="navigateToFeature('/workspace')">
+        <div class="feature-icon">🎙️</div>
+        <div class="feature-info">
+          <h4 class="serif-title">Live Interview Confidence Coach</h4>
+          <p class="serif-title">Real-time speech pacing (WPM), filler word detector ('um', 'like'), and live voice activity meter.</p>
+          <span class="feature-link serif-title">Launch Workspace ➔</span>
+        </div>
+      </div>
+
+      <div class="feature-card" (click)="navigateToFeature('/sessions')">
+        <div class="feature-icon">👥</div>
+        <div class="feature-info">
+          <h4 class="serif-title">Silent Co-Pilot (Shadow Mode)</h4>
+          <p class="serif-title">Observe senior engineers coding live in read-only mode with floating kudos and quiet Q&amp;A.</p>
+          <span class="feature-link serif-title">Join Live Session ➔</span>
+        </div>
+      </div>
+
+      <div class="feature-card" (click)="navigateToFeature('/sessions')">
+        <div class="feature-icon">🔄</div>
+        <div class="feature-info">
+          <h4 class="serif-title">Reverse Mentoring Exchange</h4>
+          <p class="serif-title">Students teach mentors modern tools, earn +150 XP, and unlock the "Two-Way Learner" badge.</p>
+          <span class="feature-link serif-title">Schedule Exchange ➔</span>
+        </div>
+      </div>
+
+      <div class="feature-card" (click)="navigateToFeature('/mentor-matching')">
+        <div class="feature-icon">🔋</div>
+        <div class="feature-info">
+          <h4 class="serif-title">Mentor Battery Recharge Shield</h4>
+          <p class="serif-title">Burnout prevention shield that shows resting status and kindly refers students to peers.</p>
+          <span class="feature-link serif-title">View Mentors ➔</span>
+        </div>
+      </div>
+
+      <div class="feature-card" (click)="navigateToFeature('/portfolio/pavani')">
+        <div class="feature-icon">📄</div>
+        <div class="feature-info">
+          <h4 class="serif-title">1-Click Proof of Growth Portfolio</h4>
+          <p class="serif-title">Public verified profile with QR validation, Knowledge Impact score, and print resume view.</p>
+          <span class="feature-link serif-title">View Public Profile ➔</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="features-footer">
+      <button class="btn-primary tactile-btn-3d serif-title" (click)="closeFeaturesModal()">
+        <span>AWESOME, LET'S EXPLORE!</span>
+      </button>
+    </div>
+  </div>
+</div>

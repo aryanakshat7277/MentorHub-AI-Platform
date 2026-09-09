@@ -1,0 +1,43 @@
+﻿<!-- Ultra-Precision Single Laser Dot Cyber Navigation Cursor -->
+<div class="cyber-air-cursor-root" *ngIf="isEnabled && cursor.isVisible">
+  <!-- Glowing Single Dot Cursor Node -->
+  <div class="air-nav-dot"
+       [class.pinching]="cursor.isPinching"
+       [class.dwelling]="cursor.dwellProgress > 0"
+       [class.scroll-mode]="cursor.isScrollMode"
+       [style.left.px]="cursor.x"
+       [style.top.px]="cursor.y">
+    
+    <!-- Outer Radiant Halo / Scroll Anchor Ring -->
+    <div class="dot-halo"></div>
+
+    <!-- Central Glowing Laser Core -->
+    <div class="dot-core"></div>
+
+    <!-- Scroll Mode Vertical Indicator -->
+    <div class="scroll-mode-indicator" *ngIf="cursor.isScrollMode">
+      <span class="scroll-arrow up">▲</span>
+      <span class="scroll-arrow down">▼</span>
+    </div>
+
+    <!-- Dwell Progress Circular Ring -->
+    <svg class="dwell-svg" *ngIf="cursor.dwellProgress > 0 && !cursor.isScrollMode" width="38" height="38" viewBox="0 0 38 38">
+      <circle class="dwell-bg" cx="19" cy="19" r="16"></circle>
+      <circle class="dwell-fill" cx="19" cy="19" r="16"
+              [style.strokeDashoffset]="100.5 * (1 - cursor.dwellProgress)">
+      </circle>
+    </svg>
+
+    <!-- Pinch Click Badge -->
+    <div class="click-badge" *ngIf="cursor.isPinching">
+      <span>CLICK</span>
+    </div>
+  </div>
+
+  <!-- Click Blast Wave Ripple -->
+  <div class="air-click-ripple"
+       *ngFor="let r of clickRipples"
+       [style.left.px]="r.x"
+       [style.top.px]="r.y">
+  </div>
+</div>

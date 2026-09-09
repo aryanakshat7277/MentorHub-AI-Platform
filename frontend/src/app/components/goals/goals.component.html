@@ -1,4 +1,20 @@
 <div class="goals-page">
+  <!-- Celebration Toast Floating Banner -->
+  <div *ngIf="celebrationToast" class="fixed top-8 right-8 z-50 animate-bounce-in bg-white dark:bg-slate-900 border-2 border-amber-500/50 shadow-2xl rounded-2xl p-4 flex items-center gap-4 max-w-md">
+    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-2xl shadow-lg shadow-orange-500/30 flex-shrink-0">
+      🏆
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center justify-between gap-2">
+        <h4 class="font-serif font-black text-slate-900 dark:text-white text-sm uppercase tracking-wider truncate">{{ celebrationToast.title }}</h4>
+        <span *ngIf="celebrationToast.xp > 0" class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">
+          +{{ celebrationToast.xp }} XP
+        </span>
+      </div>
+      <p class="text-xs text-slate-600 dark:text-slate-300 truncate mt-0.5">{{ celebrationToast.message }}</p>
+    </div>
+  </div>
+
   <!-- Page Header with 3D Seal and Action Button -->
   <div class="page-header-row">
     <div class="header-branding">
@@ -68,9 +84,48 @@
     </div>
   </div>
 
+  <!-- Interactive SMART Filter & Search Toolbar -->
+  <div class="flex flex-wrap items-center justify-between gap-4 my-6 p-4 rounded-2xl bg-[#FAF4EE]/80 dark:bg-slate-900/60 border border-[#E0D5C7] dark:border-slate-800 shadow-sm backdrop-blur-md">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="text-xs font-serif font-black tracking-wider text-slate-500 uppercase mr-2">Filter Framework:</span>
+      <button (click)="setCategoryFilter('ALL')"
+              class="px-3.5 py-1.5 rounded-xl text-xs font-serif font-bold transition-all border"
+              [class.bg-[#1A5276]]="selectedCategory === 'ALL'"
+              [class.text-white]="selectedCategory === 'ALL'"
+              [class.shadow-md]="selectedCategory === 'ALL'"
+              [class.bg-white]="selectedCategory !== 'ALL'"
+              [class.dark:bg-slate-800]="selectedCategory !== 'ALL'"
+              [class.text-slate-700]="selectedCategory !== 'ALL'"
+              [class.dark:text-slate-300]="selectedCategory !== 'ALL'"
+              [class.border-[#D1C7BD]]="selectedCategory !== 'ALL'">
+        🌟 ALL ({{ goals.length }})
+      </button>
+      <button *ngFor="let block of smartBlocks"
+              (click)="setCategoryFilter(block.letter)"
+              class="px-3.5 py-1.5 rounded-xl text-xs font-serif font-bold transition-all border flex items-center gap-1.5"
+              [style.background]="selectedCategory === block.letter ? block.color : ''"
+              [class.text-white]="selectedCategory === block.letter"
+              [class.shadow-md]="selectedCategory === block.letter"
+              [class.bg-white]="selectedCategory !== block.letter"
+              [class.dark:bg-slate-800]="selectedCategory !== block.letter"
+              [class.text-slate-700]="selectedCategory !== block.letter"
+              [class.dark:text-slate-300]="selectedCategory !== block.letter"
+              [class.border-[#D1C7BD]]="selectedCategory !== block.letter">
+        <span>{{ block.icon }}</span>
+        <span>{{ block.letter }} - {{ block.name }}</span>
+      </button>
+    </div>
+
+    <div class="relative min-w-[240px]">
+      <input type="text" [(ngModel)]="searchQuery" placeholder="Search milestone objectives..."
+             class="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-white dark:bg-slate-800 border border-[#D1C7BD] dark:border-slate-700 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+      <span class="absolute left-3 top-2.5 text-xs text-slate-400">🔍</span>
+    </div>
+  </div>
+
   <!-- 3D SMART Principle Letter Block Cards Row -->
   <div class="smart-blocks-row grid-stagger">
-    <div *ngFor="let block of smartBlocks" class="smart-block-card clay-panel 3d-cube-tile" [style.border-top-color]="block.color">
+    <div *ngFor="let block of smartBlocks" class="smart-block-card clay-panel 3d-cube-tile cursor-pointer transition-transform hover:-translate-y-1" [style.border-top-color]="block.color" (click)="setCategoryFilter(block.letter)">
       <div class="block-3d-letter" [style.background]="block.color">
         <div class="letter-specular-sheen"></div>
         <span class="letter serif-title">{{ block.letter }}</span>
@@ -78,7 +133,7 @@
       </div>
       <div class="block-info">
         <span class="block-name serif-title" [style.color]="block.color">{{ block.name }}</span>
-        <span class="block-desc serif-title">Framework Principle</span>
+        <span class="block-desc serif-title">{{ block.desc }}</span>
       </div>
       <div class="cube-bottom-edge" [style.background]="block.color"></div>
     </div>
@@ -96,13 +151,18 @@
         <span class="count-pill count-amber">{{ getGoalsByStatus('TO_DO').length }}</span>
       </div>
       <div class="column-cards list-stagger">
-        <div *ngFor="let g of getGoalsByStatus('TO_DO')" class="kanban-card elevated-card-3d">
+        <div *ngFor="let g of getGoalsByStatus('TO_DO')" class="kanban-card elevated-card-3d group relative">
+          <button (click)="deleteGoal(g.id, $event)" title="Delete goal"
+                  class="absolute top-3 right-3 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-xs">
+            🗑️
+          </button>
+          
           <div class="card-top-bar">
             <div class="card-category-badge cat-pill" [class]="'cat-' + g.category">
               <span class="cat-dot"></span>
               <span class="cat-text serif-title">{{ g.category }} - {{ g.categoryName }}</span>
             </div>
-            <span class="card-time-badge">⏱️ ACTIVE</span>
+            <span class="card-time-badge">⏱️ QUEUED</span>
           </div>
           
           <h4 class="card-title serif-title">{{ g.title }}</h4>
@@ -110,14 +170,14 @@
 
           <div class="card-footer">
             <span class="target-date serif-title">📅 {{ g.targetDate }}</span>
-            <button class="btn-outline btn-xs tactile-btn-3d serif-title" (click)="updateGoalStatus(g, 'IN_PROGRESS')">
+            <button class="btn-outline btn-xs tactile-btn-3d serif-title" (click)="advanceGoal(g)">
               <span>START GOAL →</span>
             </button>
           </div>
         </div>
 
         <div *ngIf="getGoalsByStatus('TO_DO').length === 0" class="empty-column-card">
-          <span>✨ No pending goals in queue</span>
+          <span>✨ No pending goals in this view</span>
         </div>
       </div>
     </div>
@@ -132,7 +192,12 @@
         <span class="count-pill count-terracotta">{{ getGoalsByStatus('IN_PROGRESS').length }}</span>
       </div>
       <div class="column-cards list-stagger">
-        <div *ngFor="let g of getGoalsByStatus('IN_PROGRESS')" class="kanban-card elevated-card-3d in-progress-glow">
+        <div *ngFor="let g of getGoalsByStatus('IN_PROGRESS')" class="kanban-card elevated-card-3d in-progress-glow group relative">
+          <button (click)="deleteGoal(g.id, $event)" title="Delete goal"
+                  class="absolute top-3 right-3 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-xs">
+            🗑️
+          </button>
+
           <div class="card-top-bar">
             <div class="card-category-badge cat-pill" [class]="'cat-' + g.category">
               <span class="cat-dot"></span>
@@ -147,10 +212,10 @@
           <div class="card-progress debossed-well">
             <div class="prog-info">
               <span class="prog-lbl serif-title">Milestone Velocity</span>
-              <span class="pct serif-title">{{ g.progressPercentage }}%</span>
+              <span class="pct serif-title">{{ g.progressPercentage || 50 }}%</span>
             </div>
             <div class="prog-bar">
-              <div class="fill" [style.width.%]="g.progressPercentage">
+              <div class="fill" [style.width.%]="g.progressPercentage || 50">
                 <div class="shine-sweep-bar"></div>
               </div>
             </div>
@@ -158,8 +223,8 @@
 
           <div class="card-footer">
             <span class="target-date serif-title">📅 {{ g.targetDate }}</span>
-            <button class="btn-primary btn-xs tactile-btn-3d serif-title" (click)="updateGoalStatus(g, 'ACHIEVED')">
-              <span>COMPLETE ✓</span>
+            <button class="btn-primary btn-xs tactile-btn-3d serif-title" (click)="advanceGoal(g)">
+              <span>COMPLETE ✓ (+50 XP)</span>
             </button>
           </div>
         </div>
@@ -180,7 +245,12 @@
         <span class="count-pill count-forest">{{ getGoalsByStatus('ACHIEVED').length }}</span>
       </div>
       <div class="column-cards list-stagger">
-        <div *ngFor="let g of getGoalsByStatus('ACHIEVED')" class="kanban-card achieved elevated-card-3d">
+        <div *ngFor="let g of getGoalsByStatus('ACHIEVED')" class="kanban-card achieved elevated-card-3d group relative">
+          <button (click)="deleteGoal(g.id, $event)" title="Delete goal"
+                  class="absolute top-3 right-3 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-xs">
+            🗑️
+          </button>
+
           <div class="card-top-bar">
             <div class="card-category-badge cat-achieved cat-pill">
               <span class="cat-dot green-dot"></span>

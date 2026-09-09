@@ -1,4 +1,4 @@
-﻿.goals-page {
+.goals-page {
   animation: smoothFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   display: flex;
   flex-direction: column;
@@ -704,7 +704,7 @@ h1, h2, h3, h4, .banner-title, .block-name, .column-title, .card-title {
   background: rgba(21, 14, 11, 0.68);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  z-index: 9999;
+  z-index: 100000;
   display: flex;
   align-items: center;
   justify-content: center;

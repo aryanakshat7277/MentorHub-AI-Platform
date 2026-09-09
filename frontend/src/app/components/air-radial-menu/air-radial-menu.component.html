@@ -1,0 +1,33 @@
+﻿<!-- 3D Cybernetic Radial Air Menu -->
+<div class="radial-air-menu-backdrop" *ngIf="isOpen" (click)="close()">
+  <div class="radial-wheel-container" (click)="$event.stopPropagation()">
+    <!-- Center Orb Indicator -->
+    <div class="radial-center-orb gold-seal-emboss" (click)="close()">
+      <div class="orb-core">
+        <span class="orb-icon">🖐️</span>
+        <span class="orb-text">AIR NAV</span>
+      </div>
+      <div class="orbital-ring"></div>
+    </div>
+
+    <!-- 8 Navigation Slices Around The Wheel -->
+    <div class="radial-node"
+         *ngFor="let r of routes; let i = index"
+         [class.active]="selectedSector === i"
+         [style.--angle]="(i * 45) + 'deg'"
+         (click)="selectRoute(i)">
+      
+      <div class="node-content glass-card">
+        <span class="node-icon">{{ r.icon }}</span>
+        <span class="node-label serif-title">{{ r.label }}</span>
+      </div>
+
+      <!-- Connector Laser Beam to Center -->
+      <div class="node-beam" [class.active-beam]="selectedSector === i"></div>
+    </div>
+  </div>
+
+  <div class="radial-instruction-pill">
+    <span>🖐️ Point finger towards any destination to navigate</span>
+  </div>
+</div>

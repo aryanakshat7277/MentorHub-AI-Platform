@@ -69,7 +69,12 @@
             <span class="online-indicator-dot" title="Active on Network"></span>
           </div>
           <div class="mentor-info-block">
-            <h3 class="mentor-name serif-title">{{ item.mentor.name }}</h3>
+            <div class="mentor-name-heading-row">
+              <h3 class="mentor-name serif-title">{{ item.mentor.name }}</h3>
+              <span *ngIf="item.isRecharging" class="recharge-badge-pill serif-title" title="Mentor is taking a well-deserved break to recharge">
+                🔋 Resting & Recharging
+              </span>
+            </div>
             <span class="mentor-title-badge serif-title">{{ item.mentor.title }}</span>
             <span class="mentor-company-text serif-title">🏛️ {{ item.mentor.company }}</span>
           </div>
@@ -100,15 +105,68 @@
         </div>
       </div>
 
+      <!-- Knowledge Impact Score Plate -->
+      <div class="knowledge-impact-banner clay-panel elevated-card-3d" *ngIf="item.knowledgeImpact">
+        <div class="impact-top-bar">
+          <div class="impact-score-badge">
+            <span class="impact-star-icon">🌟</span>
+            <div class="impact-score-values">
+              <span class="impact-score-num serif-title">{{ item.knowledgeImpact.impactScore }}/100</span>
+              <span class="impact-score-lbl serif-title">Knowledge Impact Score</span>
+            </div>
+          </div>
+          <div class="impact-rating-pill 3d-inset-well">
+            <span class="gold-star">⭐</span>
+            <span class="rating-val serif-title">{{ item.knowledgeImpact.mentorRating }}/5.0</span>
+          </div>
+        </div>
+
+        <div class="impact-stats-row">
+          <div class="impact-stat-chip">
+            <span class="chip-icon">👥</span>
+            <span class="chip-val serif-title">{{ item.knowledgeImpact.studentsHelped }}</span>
+            <span class="chip-label serif-title">Students Helped</span>
+          </div>
+          <div class="impact-stat-chip">
+            <span class="chip-icon">📚</span>
+            <span class="chip-val serif-title">{{ item.knowledgeImpact.sessionsCompleted }}</span>
+            <span class="chip-label serif-title">Sessions</span>
+          </div>
+          <div class="impact-stat-chip highlight-chip">
+            <span class="chip-icon">📈</span>
+            <span class="chip-val serif-title">{{ item.knowledgeImpact.studentsImproved }}</span>
+            <span class="chip-label serif-title">Students Improved</span>
+          </div>
+        </div>
+
+        <div class="impact-reach-preview">
+          <span class="reach-badge serif-title">🔗 Knowledge Reach: {{ item.knowledgeImpact.totalReach }} Learners</span>
+          <button type="button" class="chain-btn tactile-btn-3d serif-title" (click)="openKnowledgeChainModal(item)">
+            <span>🔗 View Knowledge Chain</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Footer Action Row -->
       <div class="card-footer-row">
-        <div class="slots-info-badge 3d-inset-well">
+        <div class="slots-info-badge 3d-inset-well" *ngIf="!item.isRecharging">
           <span class="slots-clock-icon">🕒</span>
           <span class="slot-time-text serif-title">{{ item.availableSlots ? item.availableSlots[0] : 'Today at 16:00' }}</span>
         </div>
-        <button class="book-session-btn btn-primary tactile-btn-3d serif-title" (click)="openBookingModal(item)">
+        <div class="recharge-rest-info 3d-inset-well" *ngIf="item.isRecharging">
+          <span class="slots-clock-icon">⏳</span>
+          <span class="slot-time-text serif-title">Available in {{ item.rechargeRemaining || '24 Hours' }}</span>
+        </div>
+
+        <button *ngIf="!item.isRecharging" class="book-session-btn btn-primary tactile-btn-3d serif-title" (click)="openBookingModal(item)">
           <span class="btn-cal-icon">📅</span>
           <span>BOOK SESSION</span>
+          <span class="shine-sweep"></span>
+        </button>
+
+        <button *ngIf="item.isRecharging" class="recharge-handover-btn tactile-btn-3d serif-title" (click)="handoverToPeer(item)">
+          <span class="btn-cal-icon">🤝</span>
+          <span>CONNECT WITH PEER ➔</span>
           <span class="shine-sweep"></span>
         </button>
       </div>
@@ -152,6 +210,103 @@
         <button class="btn-outline tactile-btn-3d serif-title" (click)="selectedMentorForBooking = null">✕ CANCEL</button>
         <button class="btn-primary tactile-btn-3d serif-title" (click)="confirmBooking()" [disabled]="isBooking">
           {{ isBooking ? '⏳ BOOKING...' : '✓ CONFIRM BOOKING' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Knowledge Sharing Chain Modal Dialog -->
+  <div class="modal-overlay" *ngIf="selectedImpactMentor">
+    <div class="modal-content knowledge-chain-modal clay-panel elevated-card-3d">
+      <div class="modal-header">
+        <div class="modal-header-branding">
+          <div class="gold-seal-emboss modal-seal">
+            <span class="seal-glyph">🔗</span>
+          </div>
+          <div>
+            <h2 class="serif-title">KNOWLEDGE SHARING CHAIN</h2>
+            <span class="modal-sub-badge serif-title">“How Many People Have I Helped?”</span>
+          </div>
+        </div>
+        <button class="close-modal tactile-btn-3d" (click)="closeKnowledgeChainModal()">✕</button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedImpactMentor">
+        <!-- Mentor Impact Header Banner -->
+        <div class="mentor-impact-summary-card clay-panel elevated-card-3d">
+          <div class="mentor-summary-avatar-wrap">
+            <img [src]="selectedImpactMentor.mentorAvatar" [alt]="selectedImpactMentor.mentorName" class="avatar-large" />
+            <span class="verified-crest">★</span>
+          </div>
+          <div class="mentor-summary-details">
+            <div class="name-row">
+              <h3 class="serif-title">{{ selectedImpactMentor.mentorName }}</h3>
+              <span class="score-pill-gold serif-title">🌟 {{ selectedImpactMentor.impactScore }}/100 Impact Score</span>
+            </div>
+            <div class="metric-tags-row">
+              <span class="metric-pill gold serif-title">⭐ Rating: {{ selectedImpactMentor.mentorRating }}/5.0</span>
+              <span class="metric-pill terracotta serif-title">👥 Students Helped: {{ selectedImpactMentor.studentsHelped }}</span>
+              <span class="metric-pill forest serif-title">📈 Students Improved: {{ selectedImpactMentor.studentsImproved }}</span>
+              <span class="metric-pill amber serif-title">📚 Sessions: {{ selectedImpactMentor.sessionsCompleted }}</span>
+            </div>
+            <div class="highlight-reach-banner 3d-inset-well">
+              <span class="reach-star">✨</span>
+              <strong class="serif-title">{{ selectedImpactMentor.impactSummary }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Visual Knowledge Sharing Chain (Horizontal Flow) -->
+        <div class="chain-flow-container">
+          <div class="chain-flow-header">
+            <h4 class="chain-title serif-title">KNOWLEDGE PROPAGATION JOURNEY</h4>
+            <span class="chain-badge serif-title">MULTIPLIER EFFECT</span>
+          </div>
+          <p class="chain-subtitle serif-title">Notice how knowledge passes from the mentor to the first learner, who then shares it forward:</p>
+
+          <div class="flow-nodes-wrapper">
+            <ng-container *ngFor="let node of selectedImpactMentor.chainNodes; let i = index; let last = last">
+              <div class="flow-node-card clay-panel elevated-card-3d">
+                <div class="node-step-badge serif-title">STEP {{ node.stepNumber }}</div>
+                <div class="node-avatar-box">
+                  <img [src]="node.avatar" [alt]="node.name" class="node-avatar-img" />
+                  <span class="node-role-dot" [class.mentor-dot]="node.role.includes('MENTOR')"></span>
+                </div>
+                <h5 class="node-name serif-title">{{ node.name }}</h5>
+                <span class="node-role-lbl serif-title">{{ node.role.replace('_', ' ') }}</span>
+                <div class="node-action-well debossed-track">
+                  <p class="node-action-text serif-title">{{ node.action }}</p>
+                </div>
+                <span class="node-topic-chip serif-title">💡 {{ node.topic }}</span>
+              </div>
+
+              <!-- Connecting Ripple Arrow -->
+              <div class="flow-arrow-connector" *ngIf="!last">
+                <div class="arrow-line">
+                  <span class="arrow-pulse-dot"></span>
+                </div>
+                <span class="arrow-symbol">➔</span>
+                <span class="arrow-caption serif-title">Helps &amp; Teaches</span>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Real-world Impact Stories -->
+        <div class="impact-stories-section 3d-inset-well" *ngIf="selectedImpactMentor.impactStories?.length">
+          <h4 class="stories-heading serif-title">✨ REAL-WORLD IMPACT STORIES</h4>
+          <ul class="stories-list">
+            <li *ngFor="let story of selectedImpactMentor.impactStories" class="story-item serif-title">
+              <span class="story-bullet">✦</span>
+              <span>{{ story }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-primary tactile-btn-3d serif-title" (click)="closeKnowledgeChainModal()">
+          <span>✓ CLOSE WINDOW</span>
         </button>
       </div>
     </div>

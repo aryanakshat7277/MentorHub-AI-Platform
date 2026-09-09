@@ -41,7 +41,7 @@
 
 @keyframes pageReveal {
   from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: none; }
 }
 
 /* ==========================================================================
@@ -53,7 +53,7 @@
   width: 100vw;
   height: 100vh;
   background: radial-gradient(circle at center, #1E120A 0%, #100905 60%, #080402 100%);
-  z-index: 99999;
+  z-index: 150000;
   display: flex;
   align-items: center;
   justify-content: center;

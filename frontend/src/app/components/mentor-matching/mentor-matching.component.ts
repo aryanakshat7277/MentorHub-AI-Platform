@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../services/api.service';
+import { ApiService, KnowledgeImpact } from '../../services/api.service';
 
 @Component({
   selector: 'app-mentor-matching',
@@ -19,6 +19,7 @@ export class MentorMatchingComponent implements OnInit {
   bookingDate = '';
   isBooking = false;
   toastMessage: string | null = null;
+  selectedImpactMentor: KnowledgeImpact | null = null;
 
   constructor(private apiService: ApiService) {}
 
@@ -68,7 +69,8 @@ export class MentorMatchingComponent implements OnInit {
           compatibilityScore: 95,
           skillOverlap: ['Spring Boot 3', 'Angular 17', 'Java 21', 'WebSockets', 'Python', 'C++'],
           aiRecommendationReason: 'Exceptional match in Full Stack Microservices & Reactive State Management.',
-          availableSlots: ['Today at 17:30', 'Wednesday at 11:00']
+          availableSlots: ['Today at 17:30', 'Wednesday at 11:00'],
+          isRecharging: false
         },
         {
           mentor: {
@@ -83,7 +85,10 @@ export class MentorMatchingComponent implements OnInit {
           compatibilityScore: 92,
           skillOverlap: ['Cloud DevOps', 'Docker', 'Kubernetes', 'Java 21', 'WebSockets'],
           aiRecommendationReason: 'Top match for Cloud Deployment, Containerization, and Resilient Microservices.',
-          availableSlots: ['Tomorrow at 10:00', 'Friday at 15:00']
+          availableSlots: ['Tomorrow at 10:00', 'Friday at 15:00'],
+          isRecharging: true,
+          rechargeRemaining: '18 Hours',
+          recommendedPeer: 'AKSHAT ARYAN'
         },
         {
           mentor: {
@@ -98,22 +103,53 @@ export class MentorMatchingComponent implements OnInit {
           compatibilityScore: 89,
           skillOverlap: ['AI Systems', 'Spring Boot 3', 'Angular 17', 'PostgreSQL'],
           aiRecommendationReason: 'Strong synergy in Asynchronous Data Streaming and AI Pipeline Orchestration.',
-          availableSlots: ['Tomorrow at 18:00', 'Saturday at 12:00']
+          availableSlots: ['Tomorrow at 18:00', 'Saturday at 12:00'],
+          isRecharging: false
         }
       ];
 
       if (data && data.length > 1) {
         this.matchedMentors = data.map((m: any) => ({
           ...m,
+          isRecharging: m.mentor?.name?.toUpperCase().includes('PAVANI') || m.mentor?.isRecharging || false,
+          recommendedPeer: 'AKSHAT ARYAN',
           mentor: {
             ...m.mentor,
             avatarUrl: this.getAvatarByName(m.mentor?.name)
-          }
+          },
+          knowledgeImpact: this.apiService.getFallbackKnowledgeImpact(m.mentor?.id || 3)
         }));
       } else {
-        this.matchedMentors = defaultList;
+        this.matchedMentors = defaultList.map(m => ({
+          ...m,
+          knowledgeImpact: this.apiService.getFallbackKnowledgeImpact(m.mentor.id)
+        }));
       }
     });
+  }
+
+  handoverToPeer(rechargingMentor: any) {
+    const peerName = rechargingMentor.recommendedPeer || 'AKSHAT ARYAN';
+    const peerItem = this.matchedMentors.find(m => m.mentor?.name?.toUpperCase().includes(peerName.toUpperCase())) || this.matchedMentors[0];
+    this.toastMessage = `🔋 ${rechargingMentor.mentor.name} is resting! Intelligently redirecting you to recommended peer ${peerItem.mentor.name}.`;
+    setTimeout(() => {
+      this.openBookingModal(peerItem);
+      this.toastMessage = null;
+    }, 1200);
+  }
+
+  openKnowledgeChainModal(mentorItem: any) {
+    if (mentorItem?.knowledgeImpact) {
+      this.selectedImpactMentor = mentorItem.knowledgeImpact;
+    } else {
+      this.apiService.getMentorKnowledgeImpact(mentorItem?.mentor?.id || 3).subscribe(impact => {
+        this.selectedImpactMentor = impact;
+      });
+    }
+  }
+
+  closeKnowledgeChainModal() {
+    this.selectedImpactMentor = null;
   }
 
   get filteredMentors(): any[] {

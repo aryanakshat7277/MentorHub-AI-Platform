@@ -1,0 +1,186 @@
+﻿.cyber-air-cursor-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99999;
+  overflow: hidden;
+}
+
+.air-nav-dot {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.03s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+
+  .dot-halo {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid #D4AF37;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.4) 0%, transparent 75%);
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.85), inset 0 0 8px rgba(212, 175, 55, 0.5);
+    animation: dotPulse 1.8s infinite ease-in-out;
+  }
+
+  .dot-core {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #FAF4EE;
+    box-shadow: 0 0 10px #FAF4EE, 0 0 18px #D4AF37;
+  }
+
+  &.pinching {
+    transform: translate(-50%, -50%) scale(0.85);
+
+    .dot-halo {
+      border-color: #34D399;
+      background: radial-gradient(circle, rgba(52, 211, 153, 0.7) 0%, transparent 80%);
+      box-shadow: 0 0 24px #34D399, 0 0 42px rgba(52, 211, 153, 0.9);
+    }
+
+    .dot-core {
+      background: #34D399;
+      box-shadow: 0 0 14px #34D399;
+    }
+  }
+
+  &.dwelling {
+    .dot-halo {
+      border-color: #F59E0B;
+      box-shadow: 0 0 22px #F59E0B;
+    }
+  }
+
+  &.scroll-mode {
+    .dot-halo {
+      border-color: #34D399;
+      border-style: dashed;
+      width: 34px;
+      height: 34px;
+      box-shadow: 0 0 20px rgba(52, 211, 153, 0.7);
+      animation: rotateRing 4s linear infinite;
+    }
+
+    .dot-core {
+      background: #34D399;
+      box-shadow: 0 0 12px #34D399;
+    }
+  }
+}
+
+.scroll-mode-indicator {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  pointer-events: none;
+
+  .scroll-arrow {
+    font-size: 11px;
+    font-weight: 900;
+    color: #34D399;
+    text-shadow: 0 0 8px rgba(52, 211, 153, 0.9);
+
+    &.up {
+      animation: nudgeUp 0.7s infinite alternate ease-in-out;
+    }
+    &.down {
+      animation: nudgeDown 0.7s infinite alternate ease-in-out;
+    }
+  }
+}
+
+@keyframes nudgeUp {
+  from { transform: translateY(0); }
+  to { transform: translateY(-4px); }
+}
+
+@keyframes nudgeDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(4px); }
+}
+
+@keyframes rotateRing {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes dotPulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50%      { transform: scale(1.18); opacity: 1; }
+}
+
+.dwell-svg {
+  position: absolute;
+  transform: rotate(-90deg);
+
+  .dwell-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.2);
+    stroke-width: 2.5;
+  }
+
+  .dwell-fill {
+    fill: none;
+    stroke: #34D399;
+    stroke-width: 2.5;
+    stroke-dasharray: 100.5;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.05s linear;
+  }
+}
+
+.click-badge {
+  position: absolute;
+  top: -24px;
+  background: #34D399;
+  color: #062816;
+  font-family: "Times New Roman", Times, Georgia, serif;
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  animation: badgePop 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes badgePop {
+  from { opacity: 0; transform: scale(0.5); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.air-click-ripple {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2.5px solid #34D399;
+  transform: translate(-50%, -50%);
+  animation: rippleOut 0.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes rippleOut {
+  0% {
+    width: 14px;
+    height: 14px;
+    opacity: 1;
+    box-shadow: 0 0 14px #34D399;
+  }
+  100% {
+    width: 84px;
+    height: 84px;
+    opacity: 0;
+    box-shadow: 0 0 28px rgba(52, 211, 153, 0);
+  }
+}

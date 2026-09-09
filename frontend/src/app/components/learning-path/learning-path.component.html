@@ -1,115 +1,464 @@
 <div class="learning-path-page">
-  <!-- Page Header with 3D Seal -->
+  <!-- Fullscreen Particle Confetti Canvas -->
+  <canvas #confettiCanvas class="confetti-canvas" [class.active]="isCelebrationActive"></canvas>
+
+  <!-- Page Header & View Mode Switcher -->
   <div class="page-header-row">
     <div class="header-branding">
-      <div class="gold-seal-emboss header-seal" title="AI Learning Path & Skill Vector Matrix">
+      <div class="gold-seal-emboss header-seal" title="Gamified Career Quest Engine">
         <span class="seal-glyph">🗺️</span>
       </div>
       <div>
         <div class="title-with-pill">
-          <h1 class="serif-title">AI LEARNING PATH & ROADMAP TREE</h1>
-          <span class="status-pill active-path-pill">⚡ NEURAL GRAPH ACTIVE</span>
+          <h1 class="serif-title">CAREER QUEST MAP & ADVENTURE ROADMAP</h1>
+          <span class="status-pill active-path-pill">⚡ RPG LEVELING ACTIVE</span>
         </div>
-        <p class="subtitle serif-title">Personalized technical progression powered by skill vectors & real-time milestones</p>
+        <p class="subtitle serif-title">Conquer technical trials, level up your engineering hero, and unlock verified milestones</p>
       </div>
     </div>
 
-    <div class="header-telemetry-badge">
-      <span class="telemetry-beacon beacon-pulse"></span>
-      <span class="telemetry-text serif-title">4 ACTIVE CURRICULA • 6 ROADMAP NODES</span>
+    <!-- View Mode Switcher -->
+    <div class="view-mode-tabs">
+      <button 
+        (click)="switchView('quest_map')"
+        [class.active]="activeView === 'quest_map'"
+        class="view-tab-btn">
+        <span>🗺️</span> RPG Quest Map
+      </button>
+      <button 
+        (click)="switchView('curricula_matrix')"
+        [class.active]="activeView === 'curricula_matrix'"
+        class="view-tab-btn">
+        <span>📊</span> Curricula Matrix & Tree
+      </button>
     </div>
   </div>
 
-  <div class="path-container">
-    <!-- Left Side: 4 Stacked 3D Circular Progress Dial Cards -->
-    <div class="left-cards-column">
-      <div class="section-title-row">
-        <span class="sec-icon float-icon">📚</span>
-        <h2 class="column-title serif-title">ACTIVE CURRICULA MATRIX</h2>
+  <!-- HERO CHARACTER SHEET HUD (Always Visible) -->
+  <div class="hero-character-hud clay-panel elevated-card-3d">
+    <div class="hud-left-profile">
+      <div class="hero-avatar-frame" [class.aura-glow]="(user?.currentStreak || 0) > 5">
+        <img [src]="user?.avatarUrl || 'assets/mentorhub-logo.png'" alt="Hero Avatar" class="hero-avatar-img" />
+        <div class="hero-level-badge">
+          <span>Lv.{{ heroLevel }}</span>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-name-row">
+          <h2 class="hero-name serif-title">{{ user?.name || 'KRITI SAGAR' }}</h2>
+          <span class="hero-rank-tag serif-title">👑 {{ heroClass }}</span>
+        </div>
+        <p class="hero-tagline serif-title">{{ user?.title || 'Junior AI Engineer & Full Stack Mentee' }}</p>
+      </div>
+    </div>
+
+    <div class="hud-middle-xp">
+      <div class="xp-bar-header">
+        <span class="xp-label serif-title">⭐ EXPERIENCE POINTS (XP)</span>
+        <span class="xp-numbers serif-title">{{ currentXp }} / {{ nextLevelXp }} XP ({{ levelProgressPct }}%)</span>
+      </div>
+      <div class="xp-track-wrapper">
+        <div class="xp-track-fill" [style.width.%]="levelProgressPct">
+          <span class="xp-glow-shine"></span>
+        </div>
+      </div>
+      <div class="xp-sub-stats">
+        <span class="streak-boost-tag serif-title" title="Daily Activity Streak Multiplier">
+          🔥 {{ user?.currentStreak || 14 }}d Streak • <strong>{{ streakMultiplier.toFixed(1) }}x XP Boost</strong>
+        </span>
+        <span class="quests-count-tag serif-title">
+          🛡️ {{ completedNodesCount }} / {{ totalNodesCount }} Quests Conquered in Realm
+        </span>
+      </div>
+    </div>
+
+    <div class="hud-right-bounty">
+      <button 
+        (click)="toggleSoundMute()" 
+        class="sound-toggle-btn tactile-btn-3d serif-title" 
+        [title]="isSoundMuted ? 'Unmute Audio Synthesizers' : 'Mute Audio Synthesizers'">
+        <span>{{ isSoundMuted ? '🔇 MUTED' : '🔊 SOUND ON' }}</span>
+      </button>
+
+      <button 
+        (click)="rollDailyBounty()" 
+        [disabled]="dailyBountyClaimed"
+        [class.claimed]="dailyBountyClaimed"
+        class="bounty-dice-btn tactile-btn-3d">
+        <span class="bounty-icon">🎲</span>
+        <div class="bounty-text">
+          <span class="bounty-title serif-title">{{ dailyBountyClaimed ? '✓ BOUNTY CLAIMED' : 'ROLL DAILY BOUNTY' }}</span>
+          <span class="bounty-reward serif-title">{{ dailyBountyClaimed ? 'Come back tomorrow!' : '+150 XP Daily Roll' }}</span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- VIEW 1: RPG QUEST MAP -->
+  <div *ngIf="activeView === 'quest_map'" class="quest-map-view-wrapper">
+    <!-- Realm Switcher Tabs -->
+    <div class="realms-switcher-row">
+      <div class="realm-tabs-container">
+        <button 
+          *ngFor="let r of [realms.fullstack, realms.ai, realms.cloud]"
+          (click)="switchRealm(r.id)"
+          [class.active]="activeRealmId === r.id"
+          class="realm-tab-card clay-panel">
+          <div class="realm-tab-icon">{{ r.icon }}</div>
+          <div class="realm-tab-info">
+            <h3 class="realm-name serif-title">{{ r.name }}</h3>
+            <span class="realm-stats serif-title">{{ r.heroRank }}</span>
+          </div>
+          <div class="realm-badge-progress">
+            <span class="progress-pill serif-title">{{ r.nodes.length }} Nodes</span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Interactive RPG Quest Map Viewport -->
+    <div class="quest-map-canvas-container clay-panel elevated-card-3d">
+      <div class="map-top-bar">
+        <div class="map-realm-indicator">
+          <span class="realm-emblem">{{ activeRealm.icon }}</span>
+          <div>
+            <h2 class="active-realm-title serif-title">{{ activeRealm.name.toUpperCase() }}</h2>
+            <p class="active-realm-subtitle serif-title">{{ activeRealm.tagline }}</p>
+          </div>
+        </div>
+
+        <div class="map-center-filters">
+          <div class="filter-pill-group 3d-inset-well">
+            <button class="filter-chip-btn serif-title" [class.active]="filterMode === 'ALL'" (click)="setFilterMode('ALL')">
+              All Stations ({{ activeRealm.nodes.length }})
+            </button>
+            <button class="filter-chip-btn serif-title" [class.active]="filterMode === 'ACTIVE'" (click)="setFilterMode('ACTIVE')">
+              ⚡ Active &amp; Available
+            </button>
+            <button class="filter-chip-btn serif-title" [class.active]="filterMode === 'CHESTS'" (click)="setFilterMode('CHESTS')">
+              🎁 Chests &amp; Bosses
+            </button>
+          </div>
+        </div>
+
+        <div class="map-progress-meter">
+          <span class="meter-label serif-title">REALM MASTERY:</span>
+          <div class="meter-bar">
+            <div class="meter-fill" [style.width.%]="realmProgressPercentage"></div>
+          </div>
+          <span class="meter-pct serif-title">{{ realmProgressPercentage }}%</span>
+        </div>
       </div>
 
-      <div class="curricula-list list-stagger">
-        <div *ngFor="let card of circularProgressCards" class="circular-progress-card clay-panel elevated-card-3d">
-          <div class="grid-watermark"></div>
+      <!-- Vector RPG Map Landscape -->
+      <div class="rpg-map-viewport">
+        <!-- SVG Connecting Energy Conduit -->
+        <svg class="map-svg-conduit" viewBox="0 0 1000 500" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#117A65" stop-opacity="0.9" />
+              <stop offset="50%" stop-color="#D4AF37" stop-opacity="0.9" />
+              <stop offset="100%" stop-color="#C0392B" stop-opacity="0.9" />
+            </linearGradient>
+            <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="5" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+
+          <!-- Conduit Pathway Shadow -->
+          <path [attr.d]="generateMapSvgPath()" class="path-shadow" />
+          <!-- Flowing Glowing Base Conduit -->
+          <path [attr.d]="generateMapSvgPath()" class="path-glowing-line" />
+          <!-- High-Energy Pulsing Particle Stream -->
+          <path [attr.d]="generateMapSvgPath()" class="path-energy-flow" />
+          <path [attr.d]="generateMapSvgPath()" class="path-spark-pulse" />
+        </svg>
+
+        <!-- Ambient Terrain Zone Labels -->
+        <div class="terrain-zones-layer">
+          <div *ngFor="let node of getFilteredNodes()" 
+               class="terrain-zone-marker"
+               [style.left.%]="node.mapX" 
+               [style.top.%]="node.mapY + 14">
+            <span class="zone-name serif-title">{{ node.zone }}</span>
+          </div>
+        </div>
+
+        <!-- Interactive Quest Nodes -->
+        <div *ngFor="let node of getFilteredNodes()" 
+             (click)="openNodeModal(node)"
+             [class]="'map-quest-node ' + node.status.toLowerCase() + ' ' + node.type.toLowerCase()"
+             [style.left.%]="node.mapX"
+             [style.top.%]="node.mapY"
+             title="{{ node.title }} (Click to inspect quest)">
           
-          <div class="card-circle-wrapper 3d-skeletal-dial">
-            <svg viewBox="0 0 36 36" class="circular-chart">
-              <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <path class="circle glow-arc" [attr.stroke-dasharray]="card.pct + ', 100'" [style.stroke]="card.color" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-            </svg>
-            <div class="dial-center-val">
-              <span class="percentage serif-title">{{ card.pct }}%</span>
+          <!-- Node Medallion -->
+          <div class="node-medallion 3d-node-medallion" [class.mastered]="node.status === 'COMPLETED'">
+            <span class="node-icon">{{ node.icon }}</span>
+            <div class="node-level-tag serif-title">#0{{ node.nodeIndex }}</div>
+            <!-- Objectives mini indicator badge -->
+            <div class="node-obj-mini-badge serif-title" *ngIf="node.objectives?.length">
+              <span>{{ getCompletedObjectivesCount(node) }}/{{ node.objectives.length }}</span>
             </div>
           </div>
 
-          <div class="card-details">
-            <div class="title-row">
-              <div class="tech-icon-crest" [style.border-color]="card.color">
-                <span class="tech-icon">{{ card.icon }}</span>
+          <!-- Pulsing Target Aura for Active Quest -->
+          <div *ngIf="node.status === 'ACTIVE_QUEST'" class="active-node-rings">
+            <span class="ring-pulse pulse-1"></span>
+            <span class="ring-pulse pulse-2"></span>
+          </div>
+
+          <!-- Node Floating Status Tag -->
+          <div class="node-floating-badge serif-title">
+            <span *ngIf="node.status === 'COMPLETED'">✓ MASTERED</span>
+            <span *ngIf="node.status === 'ACTIVE_QUEST'">⚡ ACTIVE QUEST</span>
+            <span *ngIf="node.status === 'AVAILABLE'">⏳ AVAILABLE</span>
+            <span *ngIf="node.status === 'LOCKED'">🔒 LOCKED</span>
+          </div>
+
+          <!-- Node Title Tooltip Preview -->
+          <div class="node-hover-card elevated-card-3d">
+            <div class="hover-top">
+              <span class="hover-type serif-title">{{ node.type }} • {{ node.difficulty }}</span>
+              <span class="hover-xp serif-title">+{{ node.xpReward }} XP</span>
+            </div>
+            <h4 class="hover-title serif-title">{{ node.title }}</h4>
+            <p class="hover-desc serif-title">{{ node.subtitle }}</p>
+            <div class="hover-progress-meta" *ngIf="node.objectives?.length">
+              <div class="mini-progress-track debossed-track">
+                <div class="mini-fill" [style.width.%]="getObjectiveProgressPct(node)"></div>
               </div>
-              <div>
-                <h3 class="card-title serif-title">{{ card.title }}</h3>
-                <span class="track-cadence serif-title">Target: Master Level Certification</span>
+              <span class="mini-progress-txt serif-title">{{ getCompletedObjectivesCount(node) }} of {{ node.objectives.length }} Objectives Ready ({{ getObjectiveProgressPct(node) }}%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Hero Avatar Map Pin -->
+        <div class="hero-avatar-pin" [style.left.%]="activeAvatarX" [style.top.%]="activeAvatarY - 10">
+          <div class="hero-pin-beacon">
+            <div class="hero-pin-avatar-frame">
+              <img [src]="user?.avatarUrl || 'assets/mentorhub-logo.png'" alt="You" class="hero-pin-img" />
+            </div>
+            <div class="hero-pin-tag serif-title">
+              <span>📍 YOU ARE HERE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map Legend & Controls -->
+      <div class="map-footer-legend">
+        <div class="legend-items-list">
+          <div class="legend-item"><span class="legend-dot dot-completed"></span><span class="serif-title">Completed (+XP Earned)</span></div>
+          <div class="legend-item"><span class="legend-dot dot-active"></span><span class="serif-title">Active Quest</span></div>
+          <div class="legend-item"><span class="legend-dot dot-available"></span><span class="serif-title">Available</span></div>
+          <div class="legend-item"><span class="legend-dot dot-chest"></span><span class="serif-title">Loot Chest</span></div>
+          <div class="legend-item"><span class="legend-dot dot-boss"></span><span class="serif-title">Boss Capstone Trial</span></div>
+        </div>
+        <div class="legend-tip serif-title">
+          <span>💡 Click any quest checkpoint to view objectives, review study lore & claim rewards!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 2: CLASSIC CURRICULA MATRIX & VERTICAL TREE -->
+  <div *ngIf="activeView === 'curricula_matrix'" class="classic-view-wrapper">
+    <div class="path-container">
+      <!-- Left Side: 4 Stacked 3D Circular Progress Dial Cards -->
+      <div class="left-cards-column">
+        <div class="section-title-row">
+          <span class="sec-icon float-icon">📚</span>
+          <h2 class="column-title serif-title">ACTIVE CURRICULA MATRIX</h2>
+        </div>
+
+        <div class="curricula-list list-stagger">
+          <div *ngFor="let card of circularProgressCards" class="circular-progress-card clay-panel elevated-card-3d">
+            <div class="grid-watermark"></div>
+            
+            <div class="card-circle-wrapper 3d-skeletal-dial">
+              <svg viewBox="0 0 36 36" class="circular-chart">
+                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path class="circle glow-arc" [attr.stroke-dasharray]="card.pct + ', 100'" [style.stroke]="card.color" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              </svg>
+              <div class="dial-center-val">
+                <span class="percentage serif-title">{{ card.pct }}%</span>
               </div>
             </div>
 
-            <div class="card-bottom-row">
-              <span [class]="'status-tag serif-title ' + (card.status === 'ADVANCED' ? 'tag-forest' : (card.status === 'STARTING' ? 'tag-amber' : 'tag-terracotta'))">
-                {{ card.status === 'ADVANCED' ? '🏆 ADVANCED MASTERY' : (card.status === 'STARTING' ? '⏳ STARTING MODULE' : '⚡ IN PROGRESS') }}
-              </span>
-              <div class="mini-spark-track">
-                <div class="mini-spark-fill" [style.width.%]="card.pct" [style.background]="card.color"></div>
+            <div class="card-details">
+              <div class="title-row">
+                <div class="tech-icon-crest" [style.border-color]="card.color">
+                  <span class="tech-icon">{{ card.icon }}</span>
+                </div>
+                <div>
+                  <h3 class="card-title serif-title">{{ card.title }}</h3>
+                  <span class="track-cadence serif-title">Target: Master Level Certification</span>
+                </div>
+              </div>
+
+              <div class="card-bottom-row">
+                <span [class]="'status-tag serif-title ' + (card.status === 'ADVANCED' ? 'tag-forest' : (card.status === 'STARTING' ? 'tag-amber' : 'tag-terracotta'))">
+                  {{ card.status === 'ADVANCED' ? '🏆 ADVANCED MASTERY' : (card.status === 'STARTING' ? '⏳ STARTING MODULE' : '⚡ IN PROGRESS') }}
+                </span>
+                <div class="mini-spark-track">
+                  <div class="mini-spark-fill" [style.width.%]="card.pct" [style.background]="card.color"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Side: 3D Vertical Roadmap Tree -->
+      <div class="right-roadmap-column clay-panel elevated-card-3d">
+        <div class="section-title-row">
+          <span class="sec-icon float-icon">🌿</span>
+          <h2 class="column-title serif-title">VERTICAL ROADMAP TREE</h2>
+          <span class="live-branch-pill pulse-badge">● LIVE BRANCH</span>
+        </div>
+
+        <div class="roadmap-tree">
+          <div class="vertical-conduit-glow"></div>
+
+          <div *ngFor="let step of roadmapTree" [class]="'tree-step ' + step.status.toLowerCase()">
+            <div class="node-badge-container">
+              <div class="node-badge 3d-node-medallion">
+                <span class="node-glyph" *ngIf="step.status === 'COMPLETED'">✓</span>
+                <span class="node-glyph" *ngIf="step.status === 'IN_PROGRESS'">⚡</span>
+                <span class="node-glyph" *ngIf="step.status === 'UPCOMING'">⏳</span>
+                <span class="node-glyph" *ngIf="step.status === 'LOCKED'">🔒</span>
+              </div>
+              <span class="node-pulse-beacon" *ngIf="step.status === 'IN_PROGRESS'"></span>
+            </div>
+
+            <div class="step-card elevated-card-3d">
+              <div class="step-header">
+                <div class="step-title-wrap">
+                  <span class="step-index-lbl serif-title">NODE #0{{ step.node }}</span>
+                  <h4 class="step-title serif-title">{{ step.title }}</h4>
+                </div>
+                <span [class]="'step-status-tag serif-title ' + (step.status === 'COMPLETED' ? 'completed-tag' : (step.status === 'IN_PROGRESS' ? 'progress-tag' : (step.status === 'UPCOMING' ? 'upcoming-tag' : 'locked-tag')))">
+                  {{ step.status === 'COMPLETED' ? '✓ MASTERED' : (step.status === 'IN_PROGRESS' ? '⚡ ACTIVE NOW' : (step.status === 'UPCOMING' ? '⏳ NEXT STEP' : '🔒 LOCKED')) }}
+                </span>
+              </div>
+              
+              <div class="step-meta-row">
+                <span class="step-date serif-title">📅 {{ step.date }}</span>
+                <span class="step-action-hint serif-title" *ngIf="step.status === 'IN_PROGRESS'">🎯 Continue Learning →</span>
+                <span class="step-action-hint serif-title green-hint" *ngIf="step.status === 'COMPLETED'">⭐ Certificate Earned</span>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Right Side: 3D Vertical Roadmap Tree -->
-    <div class="right-roadmap-column clay-panel elevated-card-3d">
-      <div class="section-title-row">
-        <span class="sec-icon float-icon">🌿</span>
-        <h2 class="column-title serif-title">VERTICAL ROADMAP TREE</h2>
-        <span class="live-branch-pill pulse-badge">● LIVE BRANCH</span>
+  <!-- QUEST INSPECTION MODAL / DRAWER -->
+  <div *ngIf="isModalOpen && selectedNode" class="quest-modal-backdrop" (click)="closeModal()">
+    <div class="quest-modal-card clay-panel elevated-card-3d" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-badge-crest">
+          <span class="modal-icon">{{ selectedNode.icon }}</span>
+        </div>
+        <div class="modal-title-box">
+          <div class="modal-pills-row">
+            <span class="difficulty-pill serif-title">{{ selectedNode.difficulty }} TRIAL</span>
+            <span class="zone-pill serif-title">📍 {{ selectedNode.zone }}</span>
+            <span class="time-pill serif-title">⏱️ {{ selectedNode.estimatedTime }}</span>
+          </div>
+          <h2 class="modal-quest-title serif-title">{{ selectedNode.title }}</h2>
+          <p class="modal-quest-subtitle serif-title">{{ selectedNode.subtitle }}</p>
+        </div>
+        <button (click)="closeModal()" class="modal-close-btn" title="Close Quest">✕</button>
       </div>
 
-      <div class="roadmap-tree">
-        <div class="vertical-conduit-glow"></div>
+      <div class="modal-body">
+        <!-- Quest Lore Box -->
+        <div class="quest-lore-card">
+          <div class="lore-header">
+            <span class="lore-icon">📜</span>
+            <span class="lore-title serif-title">QUEST LORE & ARCHITECTURAL BRIEFING</span>
+          </div>
+          <p class="lore-text serif-title">{{ selectedNode.lore }}</p>
+        </div>
 
-        <div *ngFor="let step of roadmapTree" [class]="'tree-step ' + step.status.toLowerCase()">
-          <!-- 3D Node Medallion -->
-          <div class="node-badge-container">
-            <div class="node-badge 3d-node-medallion">
-              <span class="node-glyph" *ngIf="step.status === 'COMPLETED'">✓</span>
-              <span class="node-glyph" *ngIf="step.status === 'IN_PROGRESS'">⚡</span>
-              <span class="node-glyph" *ngIf="step.status === 'UPCOMING'">⏳</span>
-              <span class="node-glyph" *ngIf="step.status === 'LOCKED'">🔒</span>
-              <span class="node-number serif-title" *ngIf="step.status !== 'COMPLETED' && step.status !== 'IN_PROGRESS' && step.status !== 'UPCOMING' && step.status !== 'LOCKED'">{{ step.node }}</span>
-            </div>
-            <span class="node-pulse-beacon" *ngIf="step.status === 'IN_PROGRESS'"></span>
+        <!-- Objectives Checklist -->
+        <div class="quest-objectives-section">
+          <div class="objectives-header-row">
+            <h3 class="section-heading serif-title">⚔️ QUEST OBJECTIVES &amp; MILESTONES</h3>
+            <span class="objectives-progress-tag serif-title">
+              {{ getCompletedObjectivesCount(selectedNode) }} of {{ selectedNode.objectives.length }} Done ({{ getObjectiveProgressPct(selectedNode) }}%)
+            </span>
           </div>
 
-          <!-- Step Info Card -->
-          <div class="step-card elevated-card-3d">
-            <div class="step-header">
-              <div class="step-title-wrap">
-                <span class="step-index-lbl serif-title">NODE #0{{ step.node }}</span>
-                <h4 class="step-title serif-title">{{ step.title }}</h4>
-              </div>
-              <span [class]="'step-status-tag serif-title ' + (step.status === 'COMPLETED' ? 'completed-tag' : (step.status === 'IN_PROGRESS' ? 'progress-tag' : (step.status === 'UPCOMING' ? 'upcoming-tag' : 'locked-tag')))">
-                {{ step.status === 'COMPLETED' ? '✓ MASTERED' : (step.status === 'IN_PROGRESS' ? '⚡ ACTIVE NOW' : (step.status === 'UPCOMING' ? '⏳ NEXT STEP' : '🔒 LOCKED')) }}
-              </span>
-            </div>
-            
-            <div class="step-meta-row">
-              <span class="step-date serif-title">📅 {{ step.date }}</span>
-              <span class="step-action-hint serif-title" *ngIf="step.status === 'IN_PROGRESS'">🎯 Continue Learning →</span>
-              <span class="step-action-hint serif-title green-hint" *ngIf="step.status === 'COMPLETED'">⭐ Certificate Earned</span>
+          <div class="objectives-progress-bar debossed-track">
+            <div class="objectives-fill" [style.width.%]="getObjectiveProgressPct(selectedNode)"></div>
+          </div>
+
+          <div class="objectives-list">
+            <div *ngFor="let obj of selectedNode.objectives" class="objective-row" [class.done-row]="obj.done">
+              <input type="checkbox" [checked]="obj.done" (change)="toggleObjective(obj)" class="obj-checkbox" id="chk-{{ obj.title }}" />
+              <label for="chk-{{ obj.title }}" [class.done]="obj.done" class="obj-label serif-title">
+                <span class="obj-bullet">{{ obj.done ? '✓' : '○' }}</span>
+                {{ obj.title }}
+              </label>
+              <button *ngIf="obj.actionUrl" (click)="navigateToObjective(obj.actionUrl)" class="obj-jump-btn tactile-btn-3d serif-title">
+                {{ obj.actionLabel || 'Launch' }} ➔
+              </button>
             </div>
           </div>
         </div>
+
+        <!-- Rewards Box -->
+        <div class="quest-rewards-bar">
+          <div class="reward-item">
+            <span class="reward-lbl serif-title">EXPERIENCE REWARD</span>
+            <span class="reward-val serif-title">+{{ selectedNode.xpReward }} XP</span>
+          </div>
+          <div class="reward-item" *ngIf="selectedNode.badgeReward">
+            <span class="reward-lbl serif-title">EXCLUSIVE BADGE</span>
+            <span class="reward-badge-val serif-title">{{ selectedNode.badgeReward }}</span>
+          </div>
+          <div class="reward-item">
+            <span class="reward-lbl serif-title">STREAK MULTIPLIER</span>
+            <span class="reward-mult-val serif-title">🔥 {{ streakMultiplier.toFixed(1) }}x Active</span>
+          </div>
+        </div>
       </div>
+
+      <div class="modal-footer">
+        <button (click)="closeModal()" class="btn-cancel tactile-btn-3d serif-title">Close</button>
+        <button 
+          (click)="claimNodeReward(selectedNode)" 
+          [disabled]="selectedNode.claimed || selectedNode.status === 'LOCKED'"
+          [class.claimed]="selectedNode.claimed"
+          class="btn-claim-reward tactile-btn-3d serif-title">
+          <span *ngIf="!selectedNode.claimed && selectedNode.status !== 'LOCKED'">👑 COMPLETE QUEST &amp; CLAIM +{{ (selectedNode.xpReward * streakMultiplier) | number:'1.0-0' }} XP</span>
+          <span *ngIf="selectedNode.claimed">✓ QUEST MASTERED &amp; REWARDS CLAIMED</span>
+          <span *ngIf="selectedNode.status === 'LOCKED'">🔒 PREREQUISITE QUESTS REQUIRED</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CELEBRATION & VICTORY OVERLAY -->
+  <div *ngIf="isCelebrationActive" class="celebration-overlay" (click)="closeCelebration()">
+    <div class="celebration-card clay-panel elevated-card-3d" (click)="$event.stopPropagation()">
+      <div class="celebration-star-crown">⭐</div>
+      <h2 class="celebration-title serif-title">{{ celebrationTitle }}</h2>
+      <p class="celebration-sub serif-title">{{ celebrationSubtitle }}</p>
+      
+      <div class="celebration-badge-pill" *ngIf="celebrationBadge">
+        <span class="badge-glyph">🏆</span>
+        <span class="badge-text serif-title">{{ celebrationBadge }}</span>
+      </div>
+
+      <button (click)="closeCelebration()" class="btn-continue-adventure serif-title">
+        CONTINUE ADVENTURE ➔
+      </button>
     </div>
   </div>
 </div>

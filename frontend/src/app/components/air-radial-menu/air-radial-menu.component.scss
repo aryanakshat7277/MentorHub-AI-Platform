@@ -1,0 +1,176 @@
+/* ==========================================================================
+   MENTORHUB 3D CYBERNETIC RADIAL AIR NAVIGATION WHEEL
+   ========================================================================== */
+
+.radial-air-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(12, 6, 2, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: radialFadeIn 0.3s ease;
+}
+
+@keyframes radialFadeIn {
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to   { opacity: 1; backdrop-filter: blur(16px); }
+}
+
+.radial-wheel-container {
+  position: relative;
+  width: 440px;
+  height: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: wheelPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes wheelPop {
+  from { opacity: 0; transform: scale(0.65) rotate(-20deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+/* Center Orb */
+.radial-center-orb {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #F5D770, #D4AF37, #8B6508, #D4AF37, #F5D770);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 0 0 3px rgba(212, 175, 55, 0.4),
+    0 0 36px rgba(212, 175, 55, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:hover {
+    transform: scale(1.08);
+  }
+
+  .orb-core {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .orb-icon { font-size: 24px; }
+    .orb-text {
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      color: #3D1C0B;
+      font-family: "Times New Roman", Times, Georgia, serif;
+    }
+  }
+
+  .orbital-ring {
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 1.5px dashed rgba(212, 175, 55, 0.7);
+    animation: spinRing 12s linear infinite;
+  }
+}
+
+@keyframes spinRing {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Radial Destination Nodes */
+.radial-node {
+  position: absolute;
+  width: 110px;
+  height: 48px;
+  transform: rotate(var(--angle)) translate(175px) rotate(calc(var(--angle) * -1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 5;
+
+  .node-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, rgba(44, 22, 8, 0.92) 0%, rgba(26, 12, 4, 0.95) 100%);
+    border: 1.5px solid rgba(212, 175, 55, 0.35);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    white-space: nowrap;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+    .node-icon { font-size: 16px; }
+    .node-label {
+      font-size: 12.5px;
+      font-weight: 900;
+      color: #FAF4EE;
+      letter-spacing: 0.4px;
+    }
+  }
+
+  /* Active Hovered/Pointed State */
+  &.active {
+    transform: rotate(var(--angle)) translate(195px) rotate(calc(var(--angle) * -1)) scale(1.18);
+    z-index: 20;
+
+    .node-content {
+      background: linear-gradient(135deg, #DE7048 0%, #BA4F27 100%);
+      border-color: #F5D770;
+      box-shadow: 0 10px 36px rgba(222, 112, 72, 0.7), 0 0 30px rgba(245, 215, 112, 0.5);
+
+      .node-label {
+        color: #FAF4EE;
+      }
+    }
+  }
+
+  .node-beam {
+    position: absolute;
+    top: 50%;
+    left: -120px;
+    width: 120px;
+    height: 1.5px;
+    background: linear-gradient(90deg, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0.5) 100%);
+    pointer-events: none;
+    opacity: 0.3;
+    transition: opacity 0.2s ease;
+
+    &.active-beam {
+      opacity: 1;
+      height: 2.5px;
+      background: linear-gradient(90deg, #F5D770 0%, #DE7048 100%);
+      box-shadow: 0 0 10px #F5D770;
+    }
+  }
+}
+
+.radial-instruction-pill {
+  margin-top: 30px;
+  padding: 8px 20px;
+  background: rgba(44, 22, 8, 0.9);
+  border: 1.5px solid rgba(212, 175, 55, 0.4);
+  border-radius: 9999px;
+  color: #F5D770;
+  font-family: "Times New Roman", Times, Georgia, serif;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.4px;
+}
