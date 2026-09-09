@@ -1,0 +1,33 @@
+﻿{
+  "name": "MentorHub AI Platform (Java 21 + Angular 17)",
+  "image": "mcr.microsoft.com/devcontainers/universal:2-linux",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "installMaven": "true"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+  "forwardPorts": [4200, 8080],
+  "portsAttributes": {
+    "4200": {
+      "label": "Angular Frontend",
+      "onAutoForward": "openBrowser"
+    },
+    "8080": {
+      "label": "Spring Boot API",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": "cd frontend && npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "angular.ng-template"
+      ]
+    }
+  }
+}

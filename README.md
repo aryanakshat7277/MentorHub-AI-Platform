@@ -5,6 +5,25 @@
 
 ---
 
+## 🌐 Live Public Launch & 1-Click Cloud Launch
+
+Experience MentorHub immediately in your browser or launch the full-stack environment with 1 click:
+
+[![GitHub Pages Deployment](https://img.shields.io/badge/Live_Website-GitHub_Pages-2ea44f?style=for-the-badge&logo=github&logoColor=white)](https://aryanakshat7277.github.io/MentorHub-AI-Platform/)
+[![Open in GitHub Codespaces](https://img.shields.io/badge/1--Click_Launch-GitHub_Codespaces-blue?style=for-the-badge&logo=github&logoColor=white)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=aryanakshat7277/MentorHub-AI-Platform)
+[![Open in Gitpod](https://img.shields.io/badge/1--Click_Launch-Gitpod-orange?style=for-the-badge&logo=gitpod&logoColor=white)](https://gitpod.io/#https://github.com/aryanakshat7277/MentorHub-AI-Platform)
+
+### 🔗 Public Live Website URL
+👉 **[https://aryanakshat7277.github.io/MentorHub-AI-Platform/](https://aryanakshat7277.github.io/MentorHub-AI-Platform/)**
+
+> 💡 **Enabling GitHub Pages (1-time step in GitHub Repository)**:
+> 1. In your GitHub repository, navigate to **Settings** ➔ **Pages** (in the left sidebar).
+> 2. Under **Build and deployment** ➔ **Source**, select **"Deploy from a branch"**.
+> 3. Under **Branch**, select `gh-pages` and `/ (root)`, then click **Save**.
+> *(The compiled production build is already pre-built, committed, and pushed to the `gh-pages` branch!)*
+
+---
+
 ## 🌟 What Sets MentorHub Apart? (6 Unique Must-Have Features)
 
 MentorHub transcends traditional booking platforms by introducing intelligent, real-time mentorship dynamics:
@@ -23,7 +42,7 @@ MentorHub transcends traditional booking platforms by introducing intelligent, r
    - Non-intrusive floating kudos reactions (🔥, 💡, 👏, 🚀) and a private off-canvas spectator Q&A drawer.
 
 4. 🔄 **Reverse Mentoring Exchange** (`/mentor-matching`)
-   - Bidirectional skill bridging: senior engineers mentor juniors in architecture, while juniors reciprocate by mentoring seniors in cutting-edge tech (GenAI, TikTok dev culture, modern tooling).
+   - Bidirectional skill bridging: senior engineers mentor juniors in architecture, while juniors reciprocate by mentoring seniors in cutting-edge tech (GenAI, modern tooling).
    - Unlocks the prestigious **"Two-Way Learner"** badge and **+150 XP**.
 
 5. 🔋 **Mentor Battery Recharge Shield** (`/mentor-matching`)
@@ -61,24 +80,10 @@ Detailed, high-resolution vector diagrams conforming to IEEE standards are locat
 - **Framework**: Spring Boot 3.2+
 - **Security**: Spring Security 6, BCrypt Password Encoder, Stateless JWT Authentication
 - **Data & Persistence**: Spring Data JPA, Hibernate, H2 Persistent File Database (`backend/data/`)
-- **Key Endpoints**:
-  - `POST /api/auth/login` & `/register`: Self-healing authentication with BCrypt re-hashing
-  - `GET /api/public/portfolio/{username}`: Public unauthenticated proof-of-growth portfolio
-  - `GET /api/impact/{userId}`: Knowledge Impact Score & cascading tree
-  - `GET /api/sos/active`: Active 10-Minute SOS Bug rescue queue
-  - `GET /api/goals`: SMART goal Kanban management
 
 ### Frontend Architecture (`/frontend`)
 - **Framework**: Angular 17 (Standalone Components & Signals)
 - **Typography & Theme**: Authentic Times New Roman serif styling with glassmorphic cards and ambient lighting
-- **Key Routes**:
-  - `/dashboard`: Holographic command center with quick actions & XP analytics
-  - `/sessions`: Active & upcoming mentoring sessions with SOS Bug Rescue launchpad
-  - `/workspace`: Interactive collaboration room (Video, Monaco Code Editor, Confidence Coach, Silent Co-Pilot)
-  - `/portfolio/:username`: Public Proof of Growth verification page (e.g., `/portfolio/pavani`)
-  - `/mentor-matching`: Smart matching with Battery Shield & Reverse Mentoring filters
-  - `/learning-path`: RPG-style career progression quest tree
-  - `/goals`: SMART 3D Kanban board
 
 ---
 
@@ -92,14 +97,14 @@ Detailed, high-resolution vector diagrams conforming to IEEE standards are locat
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Local Development Setup
 
 ### 1. Run Spring Boot Backend
 ```bash
 cd backend
 mvn spring-boot:run
 ```
-*Backend API will be accessible at: `http://localhost:8080`*
+*Backend API will run at `http://localhost:8080`*
 
 ### 2. Run Angular Frontend
 ```bash
@@ -107,7 +112,7 @@ cd frontend
 npm install
 npm start
 ```
-*Frontend application will be accessible at: `http://localhost:4200`*
+*Frontend application will run at `http://localhost:4200`*
 
 ---
 
