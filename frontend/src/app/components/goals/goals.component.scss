@@ -935,3 +935,92 @@ h1, h2, h3, h4, .banner-title, .block-name, .column-title, .card-title {
   0%,100% { transform: scale(1); opacity: 1; }
   50%      { transform: scale(1.35); opacity: 0.72; }
 }
+
+/* ==========================================================================
+   RESPONSIVE DESIGN SYSTEM (Mobile / Tablet / Narrow Viewports)
+   ========================================================================== */
+@media (max-width: 992px) {
+  .page-header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+
+    .header-branding {
+      justify-content: flex-start;
+    }
+
+    .create-goal-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .overall-progress-banner {
+    padding: 24px 20px;
+
+    .progress-info-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+
+      .completion-gauge-box {
+        align-self: center;
+      }
+    }
+  }
+
+  .smart-blocks-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .kanban-board {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+    gap: 16px;
+
+    .kanban-column {
+      min-width: 290px;
+      max-width: 82vw;
+      scroll-snap-align: start;
+      flex: 0 0 auto;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .smart-blocks-row {
+    grid-template-columns: 1fr;
+  }
+
+  .kanban-board {
+    .kanban-column {
+      min-width: calc(100vw - 44px);
+      max-width: calc(100vw - 44px);
+      padding: 18px 14px;
+    }
+  }
+
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .modal-content {
+    padding: 22px 16px;
+    gap: 16px;
+
+    .modal-footer {
+      flex-direction: column-reverse;
+      gap: 10px;
+
+      .btn-outline, .create-confirm-btn {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+      }
+    }
+  }
+}

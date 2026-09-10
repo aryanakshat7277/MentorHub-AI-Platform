@@ -1,4 +1,9 @@
 <header class="header-container" [class.sidebar-collapsed]="isCollapsed">
+  <!-- Mobile Hamburger Menu Button -->
+  <button class="mobile-hamburger-btn clay-badge-3d" (click)="onHamburgerClick()" title="Toggle Navigation Drawer">
+    <span class="hamburger-icon">☰</span>
+  </button>
+
   <!-- Interactive Quick Search Trigger -->
   <div class="header-search" (click)="toggleSpotlight()" title="Press Ctrl+K or Click to Search Platform">
     <span class="search-icon">🔍</span>
@@ -24,6 +29,12 @@
     <button class="theme-toggle-btn clay-badge-3d" (click)="toggleTheme()" [title]="themeService.isDarkMode ? 'Switch to Warm Biscuit Theme' : 'Switch to Cyber Obsidian Theme'">
       <span class="theme-icon">{{ themeService.isDarkMode ? '☀️' : '🌙' }}</span>
       <span class="theme-label">{{ themeService.isDarkMode ? 'LIGHT MODE' : 'DARK MODE' }}</span>
+    </button>
+
+    <!-- Audio Sound Effects Toggle Button -->
+    <button class="sound-toggle-btn clay-badge-3d" (click)="toggleSound()" [title]="soundService.isMuted ? 'Unmute Sound Effects' : 'Mute Sound Effects'">
+      <span class="sound-icon">{{ soundService.isMuted ? '🔇' : '🔊' }}</span>
+      <span class="sound-label">{{ soundService.isMuted ? 'MUTED' : 'SOUND' }}</span>
     </button>
 
     <!-- Real-Time Hand Gesture Control Toggle Button -->

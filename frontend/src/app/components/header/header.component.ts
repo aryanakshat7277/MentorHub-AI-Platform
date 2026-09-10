@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -33,12 +33,22 @@ export interface NotificationItem {
 })
 export class HeaderComponent implements OnInit {
   @Input() isCollapsed = false;
+  @Output() toggleMobileSidebar = new EventEmitter<void>();
   user: any = null;
   showDropdown = false;
   showNotifications = false;
   showSpotlightSearch = false;
   searchQuery = '';
   isFullScreen = false;
+
+  toggleSound() {
+    this.soundService.toggleMute();
+  }
+
+  onHamburgerClick() {
+    this.soundService.playClickSound();
+    this.toggleMobileSidebar.emit();
+  }
 
   notifications: NotificationItem[] = [
     { id: 1, title: 'Upcoming 1-on-1 Session with Kriti in 30 mins', time: 'Just now', read: false, type: 'SESSION', icon: '📅' },

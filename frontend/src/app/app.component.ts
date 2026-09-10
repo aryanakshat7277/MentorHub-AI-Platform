@@ -29,7 +29,16 @@ import { ThemeService } from './services/theme.service';
 })
 export class AppComponent implements OnInit, OnDestroy {
   isSidebarCollapsed = false;
+  isMobileSidebarOpen = false;
   isAiChatbotOpen = false;
+
+  toggleMobileSidebar() {
+    this.isMobileSidebarOpen = !this.isMobileSidebarOpen;
+  }
+
+  closeMobileSidebar() {
+    this.isMobileSidebarOpen = false;
+  }
 
   // 3-Second Graphical App Startup Animation State
   isBooting = false;
@@ -58,6 +67,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.routerSub = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
+      this.closeMobileSidebar();
       this.checkAuthRoute(event.urlAfterRedirects || event.url);
     });
 

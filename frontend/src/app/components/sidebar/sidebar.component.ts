@@ -21,15 +21,17 @@ export class SidebarComponent implements OnInit {
   isCollapsed = false;
   userRole = '';
   @Output() toggleCollapse = new EventEmitter<boolean>();
+  @Output() closeMobile = new EventEmitter<void>();
 
   allMenuItems: MenuItem[] = [
     { label: 'Dashboard', route: '/dashboard', icon: '📊' },
     { label: 'Admin Deck', route: '/admin-dashboard', icon: '🛡️' },
     { label: 'AI Matching', route: '/mentor-matching', icon: '⚡' },
     { label: 'Sessions', route: '/sessions', icon: '📅' },
-    { label: 'Goal Tracker', route: '/goals', icon: '🎯' },
-    { label: 'Learning Paths', route: '/learning-path', icon: '🗺️' },
     { label: 'Live Workspace', route: '/workspace', icon: '💻' },
+    { label: 'Learning Paths', route: '/learning-path', icon: '🗺️' },
+    { label: 'Goal Tracker', route: '/goals', icon: '🎯' },
+    { label: 'Verified Portfolio', route: '/portfolio/pavani', icon: '📄' },
     { label: 'Resource Hub', route: '/resource-hub', icon: '📚' },
     { label: 'Leaderboard', route: '/gamification', icon: '🏆' },
     { label: 'Analytics', route: '/analytics', icon: '📈' },
@@ -61,5 +63,9 @@ export class SidebarComponent implements OnInit {
   toggleSidebar() {
     this.isCollapsed = !this.isCollapsed;
     this.toggleCollapse.emit(this.isCollapsed);
+  }
+
+  onNavClick() {
+    this.closeMobile.emit();
   }
 }

@@ -202,3 +202,55 @@
     .arrow-icon { font-size: 14px; font-weight: 800; }
   }
 }
+
+.mobile-close-btn {
+  display: none;
+}
+
+/* Mobile & Tablet Off-Canvas Drawer */
+@media (max-width: 992px) {
+  .sidebar-container {
+    width: 280px !important;
+    transform: translateX(-100%);
+    box-shadow: none;
+    z-index: 100000;
+
+    &.mobile-open {
+      transform: translateX(0);
+      box-shadow: 14px 0 45px rgba(0, 0, 0, 0.45);
+    }
+  }
+
+  :host(.mobile-open) .sidebar-container {
+    transform: translateX(0);
+    box-shadow: 14px 0 45px rgba(0, 0, 0, 0.45);
+  }
+
+  .mobile-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-surface-sunken);
+    border: 1.5px solid rgba(212, 175, 55, 0.45);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-left: auto;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: var(--accent-terracotta);
+      color: #FFF;
+      transform: scale(1.08);
+    }
+  }
+
+  .sidebar-footer {
+    display: none;
+  }
+}
+

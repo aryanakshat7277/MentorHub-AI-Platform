@@ -19,6 +19,21 @@
   overflow: auto;
 }
 
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 8, 6, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 99999;
+  animation: backdropFade 0.25s ease;
+}
+
+@keyframes backdropFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 .main-wrapper {
   flex: 1;
   margin-left: 248px;
@@ -37,6 +52,25 @@
   padding: 34px 38px 64px 38px;
   flex: 1;
   animation: pageReveal 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (max-width: 992px) {
+  .main-wrapper {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  .page-content {
+    margin-top: 66px;
+    padding: 20px 16px 48px 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .page-content {
+    margin-top: 60px;
+    padding: 14px 10px 40px 10px;
+  }
 }
 
 @keyframes pageReveal {

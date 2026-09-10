@@ -1,4 +1,4 @@
-﻿.gamification-page {
+.gamification-page {
   animation: smoothFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   display: flex;
   flex-direction: column;
@@ -464,4 +464,49 @@ h1, h2, h4, .banner-title, .section-title {
 @keyframes beaconPulse {
   0%,100% { transform: scale(1); opacity: 1; }
   50%      { transform: scale(1.35); opacity: 0.72; }
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN SYSTEM (Mobile / Tablet / Narrow Viewports)
+   ========================================================================== */
+@media (max-width: 992px) {
+  .xp-level-banner {
+    padding: 24px 20px;
+
+    .banner-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+  }
+
+  .gamification-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .leaderboard-card, .badge-wall-card {
+    padding: 20px 16px;
+  }
+
+  .rank-item {
+    padding: 12px 14px;
+    gap: 12px;
+
+    .user-avatar-wrap {
+      width: 40px;
+      height: 40px;
+    }
+
+    .user-meta-col .rank-name {
+      font-size: 13.5px;
+    }
+  }
+
+  .badges-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
 }

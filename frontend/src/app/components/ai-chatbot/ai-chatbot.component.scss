@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    MENTORHUB AI ASSISTANT — GOD-LEVEL PREMIUM CHATBOT UI
    Dark Studio Header · Glass Chat Bubbles · Cinematic Animations
    ========================================================================== */
@@ -739,3 +739,39 @@
 @keyframes statusGlow       { 0%,100% { box-shadow: 0 2px 8px rgba(166,59,25,0.08); } 50% { box-shadow: 0 4px 18px rgba(166,59,25,0.20); } }
 @keyframes sweepShine       { 0% { left: -100%; } 100% { left: 200%; } }
 @keyframes smoothFadeInUp   { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ==========================================================================
+   RESPONSIVE DESIGN SYSTEM (Mobile / Tablet / Narrow Viewports)
+   ========================================================================== */
+@media (max-width: 650px) {
+  .chatbot-drawer {
+    width: 100vw !important;
+    right: -100vw !important;
+
+    &.open {
+      right: 0 !important;
+    }
+
+    &.maximized {
+      width: 100vw !important;
+      height: 100vh !important;
+      top: 0 !important;
+      right: 0 !important;
+      border-radius: 0 !important;
+    }
+  }
+
+  .chatbot-header {
+    padding: 14px 16px;
+  }
+
+  .chat-input-area {
+    padding: 12px 14px;
+    gap: 8px;
+
+    .send-btn {
+      padding: 0 16px;
+      font-size: 12px;
+    }
+  }
+}

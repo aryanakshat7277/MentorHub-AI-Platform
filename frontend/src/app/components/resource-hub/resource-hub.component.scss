@@ -616,3 +616,65 @@ h1, h2, h3, .resource-title, .type-badge, .upload-btn {
   0%,100% { transform: scale(1); opacity: 1; }
   50%      { transform: scale(1.35); opacity: 0.72; }
 }
+
+/* ==========================================================================
+   RESPONSIVE DESIGN SYSTEM (Mobile / Tablet / Narrow Viewports)
+   ========================================================================== */
+@media (max-width: 992px) {
+  .page-header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+
+    .header-branding {
+      justify-content: flex-start;
+    }
+
+    .header-actions {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+
+      .search-box {
+        width: 100%;
+        input {
+          width: 100%;
+        }
+      }
+
+      .upload-btn {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+      }
+    }
+  }
+
+  .resources-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .resources-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-pills-row {
+    gap: 8px;
+    .filter-pill {
+      padding: 6px 14px;
+      font-size: 11px;
+    }
+  }
+
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .modal-card {
+    padding: 22px 16px;
+  }
+}

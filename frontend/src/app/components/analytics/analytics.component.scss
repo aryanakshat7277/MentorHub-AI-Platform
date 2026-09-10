@@ -823,3 +823,58 @@ h1, h2, h3, h4, .metric-value, .chart-badge {
   }
 }
 
+/* ==========================================================================
+   RESPONSIVE DESIGN SYSTEM (Mobile / Tablet / Narrow Viewports)
+   ========================================================================== */
+@media (max-width: 992px) {
+  .page-header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+
+    .header-branding {
+      justify-content: flex-start;
+    }
+
+    .header-telemetry-badge {
+      align-self: flex-start;
+    }
+  }
+
+  .metrics-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .impact-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .metrics-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .chart-card {
+    padding: 20px 16px;
+  }
+
+  .impact-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chain-quote-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+

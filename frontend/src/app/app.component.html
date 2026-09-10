@@ -65,13 +65,19 @@
 
 <!-- Main Application Layout (Only Rendered When Authenticated) -->
 <div class="app-layout" *ngIf="!isAuthPage">
-  <!-- Fixed Left Sidebar -->
-  <app-sidebar (toggleCollapse)="onSidebarToggle($event)"></app-sidebar>
+  <!-- Mobile Sidebar Backdrop Overlay -->
+  <div class="sidebar-backdrop" *ngIf="isMobileSidebarOpen" (click)="closeMobileSidebar()"></div>
+
+  <!-- Left Sidebar (Desktop + Mobile Off-Canvas Drawer) -->
+  <app-sidebar 
+    [class.mobile-open]="isMobileSidebarOpen" 
+    (toggleCollapse)="onSidebarToggle($event)"
+    (closeMobile)="closeMobileSidebar()"></app-sidebar>
 
   <!-- Main View Container -->
   <div class="main-wrapper" [class.sidebar-collapsed]="isSidebarCollapsed">
     <!-- Top Header Bar -->
-    <app-header [isCollapsed]="isSidebarCollapsed"></app-header>
+    <app-header [isCollapsed]="isSidebarCollapsed" (toggleMobileSidebar)="toggleMobileSidebar()"></app-header>
 
     <!-- Router View Content -->
     <main class="page-content">

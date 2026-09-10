@@ -1465,3 +1465,100 @@
   50% { transform: scale(1.04); box-shadow: 0 0 10px rgba(42, 90, 61, 0.3); }
 }
 
+/* ==========================================================================
+   RESPONSIVE DESIGN SYSTEM (Mobile / Tablet / Narrow Viewports)
+   ========================================================================== */
+@media (max-width: 992px) {
+  .collaboration-toolbar {
+    white-space: normal;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 16px;
+
+    .toolbar-left, .toolbar-center, .toolbar-actions {
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 10px;
+    }
+
+    .toolbar-actions {
+      .invite-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+
+  .dual-pane-workspace {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: auto !important;
+    gap: 16px;
+
+    .horizontal-split-handle {
+      display: none !important;
+    }
+
+    .left-pane, .right-pane {
+      width: 100% !important;
+      min-height: 520px;
+      height: auto;
+    }
+  }
+
+  .spectator-mode-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    .banner-right {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  .sos-rescue-hud-ribbon {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    .sos-hud-right {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .collaboration-toolbar {
+    padding: 12px;
+
+    .toolbar-center {
+      display: none;
+    }
+
+    .layout-presets {
+      overflow-x: auto;
+      width: 100%;
+    }
+  }
+
+  .pane-tabs {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+
+    .tab-selectors {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .run-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+

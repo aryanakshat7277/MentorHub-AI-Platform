@@ -1571,3 +1571,78 @@ h1, h2, h3, h4, .tracker-title, .badge-label, .badge-value, .session-topic, .use
     }
   }
 }
+
+/* ==========================================================================
+   SESSIONS RESPONSIVE GOD-LEVEL MEDIA QUERIES
+   ========================================================================== */
+@media (max-width: 992px) {
+  .page-header-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+
+    .header-action-group {
+      width: 100% !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+
+      .btn-sos, .schedule-session-btn {
+        flex: 1 !important;
+        justify-content: center !important;
+        min-width: 160px !important;
+      }
+    }
+  }
+
+  .sos-rescue-banner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+
+    .sos-banner-actions {
+      width: 100% !important;
+
+      .btn-claim-sos {
+        width: 100% !important;
+        justify-content: center !important;
+      }
+    }
+  }
+
+  .top-stat-badges {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .sessions-page {
+    gap: 20px !important;
+  }
+
+  .page-header-row .header-branding {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+
+    .header-seal {
+      width: 44px !important;
+      height: 44px !important;
+      min-width: 44px !important;
+      min-height: 44px !important;
+    }
+  }
+
+  .header-action-group {
+    flex-direction: column !important;
+
+    .btn-sos, .schedule-session-btn {
+      width: 100% !important;
+    }
+  }
+
+  .top-stat-badges {
+    grid-template-columns: 1fr !important;
+  }
+}
+

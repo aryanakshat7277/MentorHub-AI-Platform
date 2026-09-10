@@ -5,10 +5,27 @@ import { Injectable } from '@angular/core';
 })
 export class SoundService {
   private audioCtx: AudioContext | null = null;
+  isMuted = false;
 
-  constructor() {}
+  constructor() {
+    if (typeof localStorage !== 'undefined') {
+      this.isMuted = localStorage.getItem('sound_muted') === 'true';
+    }
+  }
+
+  toggleMute(): boolean {
+    this.isMuted = !this.isMuted;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('sound_muted', String(this.isMuted));
+    }
+    if (!this.isMuted) {
+      this.playClickSound();
+    }
+    return this.isMuted;
+  }
 
   private initAudio() {
+    if (this.isMuted) return;
     if (!this.audioCtx) {
       const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioCtxClass) {
@@ -18,6 +35,7 @@ export class SoundService {
   }
 
   playClickSound() {
+    if (this.isMuted) return;
     try {
       this.initAudio();
       if (!this.audioCtx) return;
@@ -46,6 +64,7 @@ export class SoundService {
   }
 
   playSuccessSound() {
+    if (this.isMuted) return;
     try {
       this.initAudio();
       if (!this.audioCtx) return;
@@ -96,6 +115,7 @@ export class SoundService {
   }
 
   playQuestCompleteSound() {
+    if (this.isMuted) return;
     try {
       this.initAudio();
       if (!this.audioCtx) return;
@@ -122,6 +142,7 @@ export class SoundService {
   }
 
   playChestOpenSound() {
+    if (this.isMuted) return;
     try {
       this.initAudio();
       if (!this.audioCtx) return;
@@ -149,6 +170,7 @@ export class SoundService {
   }
 
   playFanfareSound() {
+    if (this.isMuted) return;
     try {
       this.initAudio();
       if (!this.audioCtx) return;

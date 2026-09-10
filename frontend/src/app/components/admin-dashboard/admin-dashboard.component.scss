@@ -1137,3 +1137,47 @@
   0%,100% { transform: scale(1); opacity: 1; }
   50%      { transform: scale(1.35); opacity: 0.72; }
 }
+
+/* ==========================================================================
+   RESPONSIVE DESIGN SYSTEM (Mobile / Tablet / Narrow Viewports)
+   ========================================================================== */
+@media (max-width: 992px) {
+  .hero-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px 20px;
+    gap: 20px;
+
+    .hero-user-profile {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .hero-digital-clock {
+      text-align: left;
+      width: 100%;
+    }
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .activity-ticker-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .modal-backdrop .modal-card {
+    width: calc(100vw - 28px);
+    padding: 20px 16px;
+  }
+}

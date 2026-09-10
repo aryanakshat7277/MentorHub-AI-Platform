@@ -967,3 +967,78 @@ h1, h2, h3, .user-name, .section-title, .rep-value {
   }
 }
 
+/* ==========================================================================
+   RESPONSIVE DESIGN SYSTEM (Mobile / Tablet / Narrow Viewports)
+   ========================================================================== */
+@media (max-width: 992px) {
+  .page-header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+
+    .header-branding {
+      justify-content: flex-start;
+    }
+
+    .edit-trigger-btn {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+    }
+  }
+
+  .profile-card {
+    padding: 24px 20px;
+    gap: 24px;
+  }
+
+  .profile-hero {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+
+    .user-identity {
+      align-items: center;
+
+      .name-row {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+    }
+
+    .rep-badge {
+      width: 100%;
+      max-width: 280px;
+    }
+  }
+
+  .stats-mini-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-hero .avatar-box {
+    width: 120px;
+    height: 120px;
+  }
+
+  .profile-hero .user-identity .name-row .user-name {
+    font-size: 24px !important;
+  }
+
+  .stats-mini-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .skills-tags .skill-chip {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .edit-modal-content {
+    padding: 20px 16px;
+  }
+}
+
