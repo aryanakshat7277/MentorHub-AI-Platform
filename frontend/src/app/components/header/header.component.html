@@ -7,34 +7,32 @@
   <!-- Interactive Quick Search Trigger -->
   <div class="header-search" (click)="toggleSpotlight()" title="Press Ctrl+K or Click to Search Platform">
     <span class="search-icon">🔍</span>
-    <input type="text" placeholder="Search mentors, skills, sessions, SMART goals..." readonly />
+    <input type="text" placeholder="Search platform..." readonly />
     <span class="shortcut-tag">Ctrl + K</span>
   </div>
 
   <div class="header-actions">
     <!-- Graphical Live Network Status Beacon -->
-    <div class="status-badge clay-badge-3d">
+    <div class="status-badge clay-badge-3d" title="AI Network Core Engine: 99.9% Online">
       <span class="status-pulse-ring"></span>
       <span class="status-dot"></span>
-      <span class="status-text">AI NET ONLINE 99.9%</span>
+      <span class="status-text">ONLINE</span>
     </div>
 
     <!-- Dedicated Full Screen View Mode Button -->
     <button class="fullscreen-toggle-btn clay-badge-3d" (click)="toggleFullScreen()" [title]="isFullScreen ? 'Exit Full Screen' : 'Full Screen View'">
       <span class="fs-icon">{{ isFullScreen ? '⇪' : '⛶' }}</span>
-      <span class="fs-label">{{ isFullScreen ? 'EXIT FULLSCREEN' : 'FULL SCREEN' }}</span>
+      <span class="fs-label">{{ isFullScreen ? 'EXIT' : 'FULLSCREEN' }}</span>
     </button>
 
     <!-- Dark / Light Theme Toggle Button -->
-    <button class="theme-toggle-btn clay-badge-3d" (click)="toggleTheme()" [title]="themeService.isDarkMode ? 'Switch to Warm Biscuit Theme' : 'Switch to Cyber Obsidian Theme'">
+    <button class="theme-toggle-btn clay-badge-3d icon-action-btn" (click)="toggleTheme()" [title]="themeService.isDarkMode ? 'Switch to Warm Biscuit Theme' : 'Switch to Cyber Obsidian Theme'">
       <span class="theme-icon">{{ themeService.isDarkMode ? '☀️' : '🌙' }}</span>
-      <span class="theme-label">{{ themeService.isDarkMode ? 'LIGHT MODE' : 'DARK MODE' }}</span>
     </button>
 
     <!-- Audio Sound Effects Toggle Button -->
-    <button class="sound-toggle-btn clay-badge-3d" (click)="toggleSound()" [title]="soundService.isMuted ? 'Unmute Sound Effects' : 'Mute Sound Effects'">
+    <button class="sound-toggle-btn clay-badge-3d icon-action-btn" (click)="toggleSound()" [title]="soundService.isMuted ? 'Unmute Sound Effects' : 'Mute Sound Effects'">
       <span class="sound-icon">{{ soundService.isMuted ? '🔇' : '🔊' }}</span>
-      <span class="sound-label">{{ soundService.isMuted ? 'MUTED' : 'SOUND' }}</span>
     </button>
 
     <!-- Real-Time Hand Gesture Control Toggle Button -->
