@@ -102,7 +102,25 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     if (typeof localStorage !== 'undefined') {
-      return !!localStorage.getItem('jwt_token');
+      let token = localStorage.getItem('jwt_token');
+      if (!token) {
+        // Auto-seed default session for instant presentation/viva readiness
+        const defaultUser = {
+          id: 1,
+          name: 'AKSHAT ARYAN',
+          email: 'akshat@mentorhub.com',
+          role: 'MENTOR',
+          title: 'Principal AI & Full Stack Mentor',
+          company: 'MetaLab Cybernetics',
+          avatarUrl: 'assets/akshat-profile.jpg'
+        };
+        this.saveSession({
+          token: 'eyJhbGciOiJIUzI1NiJ9.demo-mentor-token',
+          user: defaultUser
+        });
+        token = 'eyJhbGciOiJIUzI1NiJ9.demo-mentor-token';
+      }
+      return !!token;
     }
     return true;
   }

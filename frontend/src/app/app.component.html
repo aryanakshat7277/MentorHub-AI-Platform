@@ -58,35 +58,31 @@
   </button>
 </div>
 
-<!-- Standalone Fullscreen Login View (When Logged Out or on /login Route) -->
-<div class="auth-fullscreen-container" *ngIf="isAuthPage && !isBooting">
-  <router-outlet></router-outlet>
-</div>
-
-<!-- Main Application Layout (Only Rendered When Authenticated) -->
-<div class="app-layout" *ngIf="!isAuthPage">
+<!-- Main Application Layout -->
+<div class="app-layout" [class.auth-mode]="isAuthPage">
   <!-- Mobile Sidebar Backdrop Overlay -->
-  <div class="sidebar-backdrop" *ngIf="isMobileSidebarOpen" (click)="closeMobileSidebar()"></div>
+  <div class="sidebar-backdrop" *ngIf="!isAuthPage && isMobileSidebarOpen" (click)="closeMobileSidebar()"></div>
 
   <!-- Left Sidebar (Desktop + Mobile Off-Canvas Drawer) -->
   <app-sidebar 
+    *ngIf="!isAuthPage"
     [class.mobile-open]="isMobileSidebarOpen" 
     (toggleCollapse)="onSidebarToggle($event)"
     (closeMobile)="closeMobileSidebar()"></app-sidebar>
 
   <!-- Main View Container -->
-  <div class="main-wrapper" [class.sidebar-collapsed]="isSidebarCollapsed">
+  <div class="main-wrapper" [class.auth-full-width]="isAuthPage" [class.sidebar-collapsed]="isSidebarCollapsed">
     <!-- Top Header Bar -->
-    <app-header [isCollapsed]="isSidebarCollapsed" (toggleMobileSidebar)="toggleMobileSidebar()"></app-header>
+    <app-header *ngIf="!isAuthPage" [isCollapsed]="isSidebarCollapsed" (toggleMobileSidebar)="toggleMobileSidebar()"></app-header>
 
-    <!-- Router View Content -->
-    <main class="page-content">
+    <!-- Unified Router View Content -->
+    <main [class.page-content]="!isAuthPage" [class.auth-page-container]="isAuthPage">
       <router-outlet></router-outlet>
     </main>
   </div>
 
   <!-- 3D Luxury Floating AI Sparkle Orb -->
-  <button class="floating-sparkle-btn ai-orb-3d" *ngIf="!isAiChatbotOpen" (click)="toggleAiChatbot()" title="Open MentorHub AI Assistant">
+  <button class="floating-sparkle-btn ai-orb-3d" *ngIf="!isAuthPage && !isAiChatbotOpen" (click)="toggleAiChatbot()" title="Open MentorHub AI Assistant">
     <div class="ai-orb-ring-orbit"></div>
     <div class="ai-orb-core gold-seal-emboss">
       <span class="sparkle-icon">✨</span>
@@ -95,11 +91,11 @@
   </button>
 
   <!-- Multi-Provider AI Chatbot Drawer -->
-  <app-ai-chatbot [isOpen]="isAiChatbotOpen" (closeChatbot)="isAiChatbotOpen = false"></app-ai-chatbot>
+  <app-ai-chatbot *ngIf="!isAuthPage" [isOpen]="isAiChatbotOpen" (closeChatbot)="isAiChatbotOpen = false"></app-ai-chatbot>
 
   <!-- Real-Time Vision Hand Gesture HUD -->
-  <app-gesture-hud></app-gesture-hud>
+  <app-gesture-hud *ngIf="!isAuthPage"></app-gesture-hud>
 
   <!-- Global Single Laser Dot Cyber Navigation Cursor -->
-  <app-gesture-cursor></app-gesture-cursor>
+  <app-gesture-cursor *ngIf="!isAuthPage"></app-gesture-cursor>
 </div>
