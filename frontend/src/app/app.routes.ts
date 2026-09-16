@@ -71,5 +71,10 @@ export const routes: Routes = [
     path: 'portfolio/:username', 
     loadComponent: () => import('./components/proof-portfolio/proof-portfolio.component').then(m => m.ProofPortfolioComponent) 
   },
+  { 
+    path: 'mock-viva', 
+    loadComponent: () => import('./components/mock-viva/mock-viva.component').then(m => m.MockVivaComponent),
+    canActivate: [RoleGuard(['MENTOR', 'MENTEE', 'ADMIN'])]
+  },
   { path: '**', redirectTo: 'dashboard' }
 ];

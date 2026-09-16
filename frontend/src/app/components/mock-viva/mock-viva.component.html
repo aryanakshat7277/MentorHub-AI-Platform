@@ -1,0 +1,482 @@
+<div class="mock-viva-page">
+
+  <!-- ========================================================================
+       PHASE 1: VIVA SETUP & TRACK SELECTION
+       ======================================================================== -->
+  <div class="setup-container" *ngIf="currentStep === 'SETUP'">
+    <!-- 3D Luxury Hero Banner -->
+    <div class="viva-hero-card wood-card elevated-card-3d">
+      <div class="hero-crest-row">
+        <div class="avatar-glow-ring gold-seal-emboss" title="Autonomous Viva Examiner">
+          <div class="avatar-bezel">
+            <span class="crest-mic-icon">🎙️</span>
+          </div>
+          <span class="online-badge beacon-pulse"></span>
+        </div>
+        <div class="hero-text-box">
+          <div class="tag-row">
+            <span class="defense-pill serif-title">⚡ REAL-TIME AI ORAL DEFENSE</span>
+            <span class="telemetry-pill serif-title">VOICE SPEECH-TO-TEXT & LIVE WPM TELEMETRY</span>
+          </div>
+          <h1 class="hero-title serif-title">AUTONOMOUS AI MOCK VIVA & TECHNICAL INTERVIEWER</h1>
+          <p class="hero-desc serif-title">
+            Test your project defense and core architecture knowledge under live examination conditions.
+            Speaks questions audibly, tracks verbal filler words in real-time, scores semantic concept depth, and produces instant remedial flashcards.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 1: Select Examination Track -->
+    <div class="section-card clay-panel elevated-card-3d">
+      <div class="section-header">
+        <div class="header-left">
+          <span class="step-num gold-seal-emboss">1</span>
+          <h2 class="serif-title">SELECT EXAMINATION DOMAIN & TRACK</h2>
+        </div>
+        <span class="badge-accent serif-title">3 SPECIALIZED TRACKS</span>
+      </div>
+
+      <div class="tracks-grid">
+        <div 
+          *ngFor="let track of tracks" 
+          class="track-card tactile-btn-3d" 
+          [class.selected]="selectedTrack?.id === track.id"
+          (click)="selectTrack(track)">
+          <div class="track-icon-box gold-seal-emboss">{{ track.icon }}</div>
+          <div class="track-content">
+            <div class="track-header-row">
+              <h3 class="track-title serif-title">{{ track.title }}</h3>
+              <span class="track-time serif-title">⏱️ ~{{ track.estimatedMinutes }} Mins</span>
+            </div>
+            <p class="track-sub serif-title">{{ track.subtitle }}</p>
+            <p class="track-desc serif-title">{{ track.description }}</p>
+            <div class="track-tags">
+              <span class="tag-pill serif-title" *ngFor="let tag of track.tags">{{ tag }}</span>
+              <span class="count-pill serif-title">{{ track.totalQuestions }} Questions</span>
+            </div>
+          </div>
+          <div class="select-indicator" *ngIf="selectedTrack?.id === track.id">✓ SELECTED</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Select Chief Examiner Persona -->
+    <div class="section-card clay-panel elevated-card-3d">
+      <div class="section-header">
+        <div class="header-left">
+          <span class="step-num gold-seal-emboss">2</span>
+          <h2 class="serif-title">CHOOSE YOUR VIVA EXAMINER</h2>
+        </div>
+        <span class="badge-accent serif-title">VOICE SYNTHESIS ACTIVE</span>
+      </div>
+
+      <div class="examiners-grid">
+        <div 
+          *ngFor="let examiner of examiners" 
+          class="examiner-card tactile-btn-3d"
+          [class.selected]="selectedExaminer.id === examiner.id"
+          (click)="selectExaminer(examiner)">
+          <div class="avatar-wrap avatar-crest-3d">
+            <img [src]="examiner.avatar" [alt]="examiner.name" class="examiner-img" />
+            <span class="status-dot"></span>
+          </div>
+          <div class="examiner-info">
+            <span class="badge-role serif-title">{{ examiner.badge }}</span>
+            <h4 class="examiner-name serif-title">{{ examiner.name }}</h4>
+            <span class="examiner-title serif-title">{{ examiner.title }}</span>
+            <span class="examiner-inst serif-title">{{ examiner.institution }}</span>
+          </div>
+          <div class="select-indicator" *ngIf="selectedExaminer.id === examiner.id">✓ ACTIVE</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start Action Deck -->
+    <div class="action-footer-deck">
+      <button class="btn-start-viva tactile-btn-3d serif-title" (click)="startVivaSession()">
+        <span>🎙️ INITIALIZE ORAL EXAMINATION</span>
+        <span class="sub-btn-text">{{ selectedTrack?.title }} ({{ selectedTrack?.totalQuestions }} Questions)</span>
+        <span class="shine-sweep"></span>
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================
+       PHASE 2: LIVE VIVA ARENA
+       ======================================================================== -->
+  <div class="arena-container" *ngIf="currentStep === 'ARENA'">
+    <!-- Top Examination Telemetry Bar -->
+    <div class="arena-top-bar clay-panel elevated-card-3d">
+      <div class="bar-left">
+        <span class="session-badge gold-seal-emboss">🎙️ LIVE DEFENSE</span>
+        <div class="track-meta">
+          <span class="bar-track-title serif-title">{{ selectedTrack?.title }}</span>
+          <span class="bar-examiner serif-title">Examiner: {{ selectedExaminer.name }}</span>
+        </div>
+      </div>
+
+      <div class="bar-center">
+        <div class="progress-pill debossed-track">
+          <span class="progress-txt serif-title">QUESTION {{ currentQuestionIndex + 1 }} OF {{ selectedTrack?.questions?.length }}</span>
+          <div class="mini-track">
+            <div class="mini-fill" [style.width.%]="((currentQuestionIndex + 1) / (selectedTrack?.questions?.length || 1)) * 100"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bar-right">
+        <div class="timer-pill debossed-track">
+          <span class="timer-icon">⏳</span>
+          <span class="timer-val serif-title">{{ formatTime(questionTimerSeconds) }}</span>
+        </div>
+        <button class="audio-toggle-btn tactile-btn-3d" (click)="toggleVoiceMute()" [title]="isVoiceMuted ? 'Unmute Examiner' : 'Mute Examiner'">
+          {{ isVoiceMuted ? '🔇 MUTED' : '🔊 VOICE ON' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Central Question & Examiner Podium -->
+    <div class="question-podium wood-card elevated-card-3d">
+      <div class="examiner-podium-header">
+        <div class="examiner-podium-avatar avatar-crest-3d gold-seal-emboss">
+          <img [src]="selectedExaminer.avatar" [alt]="selectedExaminer.name" class="podium-img" />
+          <div class="sound-wave-rings" *ngIf="isExaminerSpeaking">
+            <span class="wave w1"></span>
+            <span class="wave w2"></span>
+            <span class="wave w3"></span>
+          </div>
+        </div>
+        <div class="podium-text">
+          <div class="podium-tag-row">
+            <span class="topic-tag serif-title">{{ currentQuestion?.topic }}</span>
+            <span class="diff-tag serif-title" [class.grill]="currentQuestion?.difficulty === 'Defense Grill'">
+              {{ currentQuestion?.difficulty }}
+            </span>
+          </div>
+          <span class="speaking-indicator serif-title" *ngIf="isExaminerSpeaking">
+            <span class="beacon-pulse red-dot"></span> EXAMINER ASKING QUESTION AUDIBLY...
+          </span>
+        </div>
+        <button class="repeat-audio-btn tactile-btn-3d" (click)="speakExaminerQuestion(currentQuestion?.question || '')" title="Repeat Question Audio">
+          🔊 REPLAY QUESTION
+        </button>
+      </div>
+
+      <div class="question-prompt-box">
+        <p class="question-text serif-title">“{{ currentQuestion?.question }}”</p>
+      </div>
+    </div>
+
+    <!-- Mentee Live Speech & Answer Dock -->
+    <div class="answer-station clay-panel elevated-card-3d">
+      <div class="station-header">
+        <div class="station-title-group">
+          <span class="station-icon float-icon">🎙️</span>
+          <div>
+            <h3 class="serif-title">YOUR VIVA RESPONSE DOCK</h3>
+            <span class="station-sub serif-title">Speak clearly using your microphone, or type your answer in technical detail.</span>
+          </div>
+        </div>
+
+        <!-- Real-Time Telemetry Bar -->
+        <div class="live-telemetry-cluster">
+          <!-- WPM Cadence Meter -->
+          <div class="telemetry-gauge debossed-track" title="Words Per Minute (Pacing)">
+            <span class="gauge-lbl serif-title">PACING:</span>
+            <span class="gauge-val serif-title">{{ liveWpm }} WPM</span>
+            <span class="gauge-status" [class.optimal]="liveWpm >= 95 && liveWpm <= 175" [class.slow]="liveWpm < 95" [class.fast]="liveWpm > 175">
+              {{ liveWpm >= 95 && liveWpm <= 175 ? '● Optimal' : (liveWpm < 95 ? '● Hesitant' : '● Rapid') }}
+            </span>
+          </div>
+
+          <!-- Filler Words Detector -->
+          <div class="telemetry-gauge debossed-track" [class.has-fillers]="liveFillerCount > 0" title="Verbal Fillers (um, ah, basically, like)">
+            <span class="gauge-lbl serif-title">FILLERS:</span>
+            <span class="gauge-val serif-title">{{ liveFillerCount }}</span>
+            <span class="filler-tag" *ngFor="let f of liveDetectedFillers.slice(0, 2)">"{{ f }}"</span>
+          </div>
+
+          <!-- Word Count -->
+          <div class="telemetry-gauge debossed-track">
+            <span class="gauge-lbl serif-title">WORDS:</span>
+            <span class="gauge-val serif-title">{{ liveWordCount }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Microphone Activation Center -->
+      <div class="mic-action-banner" [class.recording]="isListening">
+        <button class="mic-sphere-btn tactile-btn-3d gold-seal-emboss" (click)="toggleListening()">
+          <span class="mic-symbol">{{ isListening ? '⏹️' : '🎙️' }}</span>
+          <span class="mic-pulse-ring" *ngIf="isListening"></span>
+        </button>
+        <div class="mic-info">
+          <span class="mic-status-title serif-title">
+            {{ isListening ? 'MICROPHONE ACTIVE — LISTENING & TRANSCRIBING...' : 'CLICK MICROPHONE TO SPEAK YOUR ANSWER' }}
+          </span>
+          <span class="mic-status-desc serif-title" *ngIf="speechSupported">
+            Web Speech Engine is capturing audio. You can also edit and refine text directly in the box below.
+          </span>
+          <span class="mic-status-desc error-txt serif-title" *ngIf="!speechSupported">
+            Speech recognition not available in this browser. Please type your response directly.
+          </span>
+        </div>
+      </div>
+
+      <!-- Transcript & Textarea Input Well -->
+      <div class="answer-well-box debossed-track">
+        <textarea 
+          class="viva-textarea serif-title" 
+          rows="6"
+          placeholder="Your speech transcript will stream here live as you speak... You can also type, paste code, or refine your verbal answer before submitting."
+          [(ngModel)]="userAnswerText"
+          (input)="onTextareaInput()"></textarea>
+      </div>
+
+      <!-- Answer Actions -->
+      <div class="station-actions-row">
+        <button class="btn-clear tactile-btn-3d serif-title" (click)="userAnswerText = ''; onTextareaInput()" [disabled]="!userAnswerText">
+          ✕ CLEAR
+        </button>
+        <button class="btn-submit-answer tactile-btn-3d serif-title" (click)="submitAnswer()" [disabled]="!userAnswerText.trim()">
+          <span>✓ SUBMIT VIVA ANSWER FOR AI TELEMETRY</span>
+          <span class="shine-sweep"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================
+       PHASE 3: QUESTION-BY-QUESTION TELEMETRY FEEDBACK MODAL
+       ======================================================================== -->
+  <div class="feedback-modal-backdrop" *ngIf="currentStep === 'FEEDBACK_MODAL' && lastEvaluation">
+    <div class="feedback-card clay-panel elevated-card-3d">
+      <div class="feedback-header">
+        <div class="score-badge-circle gold-seal-emboss">
+          <span class="score-num">{{ lastEvaluation.overallScore }}</span>
+          <span class="score-lbl serif-title">/ 100</span>
+        </div>
+        <div class="feedback-title-box">
+          <div class="question-meta-pill serif-title">QUESTION {{ currentQuestionIndex + 1 }} CRITIQUE</div>
+          <h2 class="serif-title">{{ currentQuestion?.topic }}</h2>
+          <span class="pacing-feedback serif-title">
+            Pacing: <strong>{{ lastEvaluation.wpm }} WPM ({{ lastEvaluation.pacingRating }})</strong> • 
+            Fillers: <strong>{{ lastEvaluation.fillerWordCount }} detected</strong>
+          </span>
+        </div>
+      </div>
+
+      <!-- Telemetry Gauges Grid -->
+      <div class="telemetry-summary-row">
+        <div class="summary-metric debossed-track">
+          <span class="m-lbl serif-title">CONCEPT ACCURACY</span>
+          <span class="m-val serif-title">{{ lastEvaluation.conceptAccuracyScore }}%</span>
+          <div class="m-bar"><div class="m-fill" [style.width.%]="lastEvaluation.conceptAccuracyScore"></div></div>
+        </div>
+        <div class="summary-metric debossed-track">
+          <span class="m-lbl serif-title">TECHNICAL DEPTH</span>
+          <span class="m-val serif-title">{{ lastEvaluation.depthScore }}%</span>
+          <div class="m-bar"><div class="m-fill" [style.width.%]="lastEvaluation.depthScore"></div></div>
+        </div>
+        <div class="summary-metric debossed-track">
+          <span class="m-lbl serif-title">VERBAL FLUENCY</span>
+          <span class="m-val serif-title">{{ lastEvaluation.fluencyScore }}%</span>
+          <div class="m-bar"><div class="m-fill" [style.width.%]="lastEvaluation.fluencyScore"></div></div>
+        </div>
+      </div>
+
+      <!-- Analysis Columns -->
+      <div class="critique-columns">
+        <div class="critique-col strengths debossed-track">
+          <h4 class="col-title serif-title">✓ WHAT YOU ARTICULATED WELL</h4>
+          <ul>
+            <li *ngFor="let s of lastEvaluation.strengths" class="serif-title">{{ s }}</li>
+          </ul>
+        </div>
+        <div class="critique-col weaknesses debossed-track">
+          <h4 class="col-title serif-title">⚠️ AREAS FOR REVISION & CRITIQUES</h4>
+          <ul>
+            <li *ngFor="let w of lastEvaluation.weaknesses" class="serif-title">{{ w }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Gold Standard Model Answer Box -->
+      <div class="model-answer-well debossed-track">
+        <h4 class="model-title serif-title">👑 EXAMINER GOLD STANDARD ANSWER:</h4>
+        <p class="model-text serif-title">{{ lastEvaluation.goldStandardRecommendation }}</p>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button class="btn-proceed tactile-btn-3d serif-title" (click)="proceedToNextQuestion()">
+          <span>
+            {{ currentQuestionIndex + 1 < (selectedTrack?.questions?.length || 0) ? 'CONTINUE TO NEXT QUESTION ➔' : 'VIEW FINAL VIVA DIAGNOSTIC REPORT ➔' }}
+          </span>
+          <span class="shine-sweep"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================
+       PHASE 4: FINAL VIVA DIAGNOSTIC REPORT & REMEDIAL FLASHCARDS
+       ======================================================================== -->
+  <div class="report-container" *ngIf="currentStep === 'REPORT' && finalResult">
+    <!-- Printable Diagnostic Certificate Card -->
+    <div class="diagnostic-sheet wood-card elevated-card-3d" id="viva-printable-report">
+      <!-- Certificate Header -->
+      <div class="cert-header">
+        <div class="cert-logo-box gold-seal-emboss">
+          <img src="assets/mentorhub-official-banner-logo.jpg" alt="MentorHub Seal" class="cert-logo-img" />
+        </div>
+        <div class="cert-title-group">
+          <span class="cert-kicker serif-title">OFFICIAL ORAL EXAMINATION READINESS RECORD</span>
+          <h1 class="cert-main-title serif-title">ACADEMIC VIVA DIAGNOSTIC CARD</h1>
+          <span class="cert-track serif-title">Domain: {{ finalResult.trackTitle }}</span>
+        </div>
+        <div class="grade-crest gold-seal-emboss">
+          <span class="crest-grade serif-title">{{ finalResult.grade }}</span>
+          <span class="crest-score serif-title">{{ finalResult.overallScore }}/100</span>
+        </div>
+      </div>
+
+      <div class="cert-divider"></div>
+
+      <!-- Candidate & Session Telemetry Summary -->
+      <div class="cert-meta-grid">
+        <div class="meta-item">
+          <span class="meta-lbl serif-title">CHIEF EXAMINER:</span>
+          <span class="meta-val serif-title">{{ finalResult.examinerName }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-lbl serif-title">DEFENSE RATING:</span>
+          <span class="meta-val highlight serif-title">{{ finalResult.honorific }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-lbl serif-title">TOTAL DURATION:</span>
+          <span class="meta-val serif-title">{{ formatTime(finalResult.totalTimeSeconds) }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-lbl serif-title">AVERAGE PACING:</span>
+          <span class="meta-val serif-title">{{ finalResult.averageWpm }} WPM</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-lbl serif-title">TOTAL FILLER WORDS:</span>
+          <span class="meta-val serif-title">{{ finalResult.totalFillerWords }} Detected</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-lbl serif-title">XP AWARDED:</span>
+          <span class="meta-val xp-tag serif-title">+{{ finalResult.xpAwarded }} XP</span>
+        </div>
+      </div>
+
+      <!-- 4-Axis Telemetry Bars -->
+      <div class="rubric-bars-card debossed-track">
+        <h3 class="rubric-title serif-title">4-AXIS VIVA PERFORMANCE MATRIX</h3>
+        <div class="bars-grid">
+          <div class="rubric-bar-item">
+            <div class="bar-lbl-row">
+              <span class="b-name serif-title">Technical Concept Accuracy</span>
+              <span class="b-pct serif-title">{{ finalResult.accuracyAverage }}%</span>
+            </div>
+            <div class="track"><div class="fill gold" [style.width.%]="finalResult.accuracyAverage"></div></div>
+          </div>
+          <div class="rubric-bar-item">
+            <div class="bar-lbl-row">
+              <span class="b-name serif-title">Architectural Depth & Nuance</span>
+              <span class="b-pct serif-title">{{ finalResult.depthAverage }}%</span>
+            </div>
+            <div class="track"><div class="fill terracotta" [style.width.%]="finalResult.depthAverage"></div></div>
+          </div>
+          <div class="rubric-bar-item">
+            <div class="bar-lbl-row">
+              <span class="b-name serif-title">Verbal Fluency & Delivery</span>
+              <span class="b-pct serif-title">{{ finalResult.fluencyAverage }}%</span>
+            </div>
+            <div class="track"><div class="fill forest" [style.width.%]="finalResult.fluencyAverage"></div></div>
+          </div>
+          <div class="rubric-bar-item">
+            <div class="bar-lbl-row">
+              <span class="b-name serif-title">Overall Viva Preparedness</span>
+              <span class="b-pct serif-title">{{ finalResult.overallScore }}%</span>
+            </div>
+            <div class="track"><div class="fill amber" [style.width.%]="finalResult.overallScore"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remedial Revision 3D Flashcards Deck -->
+      <div class="flashcards-section">
+        <div class="flashcards-header">
+          <div>
+            <h3 class="serif-title">🧠 PERSONALIZED REMEDIAL REVISION FLASHCARDS</h3>
+            <span class="sub-fl-text serif-title">Click any card to flip between your defense question and the examiner's Gold Standard Model Answer.</span>
+          </div>
+          <span class="cards-count-badge gold-seal-emboss">{{ finalResult.flashcards.length }} CARDS GENERATED</span>
+        </div>
+
+        <div class="flashcards-deck-grid">
+          <div 
+            *ngFor="let card of finalResult.flashcards" 
+            class="flashcard-3d-wrap"
+            [class.flipped]="isFlashcardFlipped(card.id)"
+            (click)="toggleFlashcardFlip(card.id)">
+            
+            <div class="flashcard-inner">
+              <!-- Card Front: Question & Topic -->
+              <div class="card-face card-front clay-panel tactile-btn-3d">
+                <div class="card-header-bar">
+                  <span class="card-topic serif-title">{{ card.topic }}</span>
+                  <span class="accuracy-badge serif-title">Accuracy: {{ card.userAccuracy }}%</span>
+                </div>
+                <div class="card-body-content">
+                  <h4 class="card-question serif-title">“{{ card.question }}”</h4>
+                </div>
+                <div class="card-footer-bar">
+                  <span class="flip-hint serif-title">🔄 Click to Flip for Gold Standard Answer</span>
+                </div>
+              </div>
+
+              <!-- Card Back: Model Answer & Examiner Advice -->
+              <div class="card-face card-back wood-card tactile-btn-3d">
+                <div class="card-header-bar">
+                  <span class="card-topic serif-title">👑 EXAMINER GOLD STANDARD</span>
+                  <span class="tip-badge serif-title">PRO TIP</span>
+                </div>
+                <div class="card-body-content">
+                  <p class="card-answer serif-title">{{ card.conceptSummary }}</p>
+                  <div class="key-terms-row">
+                    <span class="term-pill serif-title" *ngFor="let term of card.keyTerminology.slice(0, 4)">{{ term }}</span>
+                  </div>
+                </div>
+                <div class="card-footer-bar">
+                  <span class="examiner-advice serif-title">💡 {{ card.examinerTip }}</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Actions -->
+      <div class="report-actions-row">
+        <button class="btn-print tactile-btn-3d serif-title" (click)="printDiagnosticReport()">
+          <span>🖨️ PRINT DIAGNOSTIC REPORT</span>
+        </button>
+        <button class="btn-retake tactile-btn-3d serif-title" (click)="resetViva()">
+          <span>🔄 SELECT ANOTHER VIVA TRACK</span>
+        </button>
+        <a routerLink="/dashboard" class="btn-dashboard tactile-btn-3d serif-title">
+          <span>➔ RETURN TO DASHBOARD</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
