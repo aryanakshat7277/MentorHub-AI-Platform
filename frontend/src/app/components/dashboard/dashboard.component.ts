@@ -42,6 +42,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   quickActions = [
     { title: 'Goal Tracker', route: '/goals', icon: '🎯', hotkey: 'G', color: '#DE7048', desc: 'S.M.A.R.T Tracking' },
+    { title: 'AI Mock Viva', route: '/mock-viva', icon: '🎙️', hotkey: 'V', color: '#DE7048', desc: 'Oral Defense Arena' },
     { title: 'Book Session', route: '/sessions', icon: '📅', hotkey: 'S', color: '#B35E17', desc: 'Schedule 1-on-1' },
     { title: 'Analytics', route: '/analytics', icon: '📈', hotkey: 'A', color: '#2A5A3D', desc: 'Velocity Metrics' },
     { title: 'Leaderboard', route: '/gamification', icon: '🏆', hotkey: 'L', color: '#D4AF37', desc: 'XP & Badges' },

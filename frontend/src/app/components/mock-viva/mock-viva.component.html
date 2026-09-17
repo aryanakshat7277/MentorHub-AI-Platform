@@ -16,7 +16,7 @@
         <div class="hero-text-box">
           <div class="tag-row">
             <span class="defense-pill serif-title">⚡ REAL-TIME AI ORAL DEFENSE</span>
-            <span class="telemetry-pill serif-title">VOICE SPEECH-TO-TEXT & LIVE WPM TELEMETRY</span>
+            <span class="telemetry-pill serif-title">VOICE SPEECH-TO-TEXT • LIVE CODE SCRATCHPAD • WPM TELEMETRY</span>
           </div>
           <h1 class="hero-title serif-title">AUTONOMOUS AI MOCK VIVA & TECHNICAL INTERVIEWER</h1>
           <p class="hero-desc serif-title">
@@ -173,10 +173,20 @@
     <div class="answer-station clay-panel elevated-card-3d">
       <div class="station-header">
         <div class="station-title-group">
-          <span class="station-icon float-icon">🎙️</span>
-          <div>
-            <h3 class="serif-title">YOUR VIVA RESPONSE DOCK</h3>
-            <span class="station-sub serif-title">Speak clearly using your microphone, or type your answer in technical detail.</span>
+          <!-- Station Navigation Tabs -->
+          <div class="station-tabs-nav">
+            <button 
+              class="tab-btn tactile-btn-3d serif-title" 
+              [class.active]="activeStationTab === 'SPEECH'"
+              (click)="activeStationTab = 'SPEECH'">
+              <span>🎙️ VERBAL & TEXT DEFENSE</span>
+            </button>
+            <button 
+              class="tab-btn tactile-btn-3d serif-title" 
+              [class.active]="activeStationTab === 'SCRATCHPAD'"
+              (click)="activeStationTab = 'SCRATCHPAD'">
+              <span>💻 CODE & ARCHITECTURE SCRATCHPAD</span>
+            </button>
           </div>
         </div>
 
@@ -200,47 +210,82 @@
 
           <!-- Word Count -->
           <div class="telemetry-gauge debossed-track">
-            <span class="gauge-lbl serif-title">WORDS:</span>
+            <span class="gauge-lbl serif-title">TOTAL WORDS:</span>
             <span class="gauge-val serif-title">{{ liveWordCount }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Microphone Activation Center -->
-      <div class="mic-action-banner" [class.recording]="isListening">
-        <button class="mic-sphere-btn tactile-btn-3d gold-seal-emboss" (click)="toggleListening()">
-          <span class="mic-symbol">{{ isListening ? '⏹️' : '🎙️' }}</span>
-          <span class="mic-pulse-ring" *ngIf="isListening"></span>
-        </button>
-        <div class="mic-info">
-          <span class="mic-status-title serif-title">
-            {{ isListening ? 'MICROPHONE ACTIVE — LISTENING & TRANSCRIBING...' : 'CLICK MICROPHONE TO SPEAK YOUR ANSWER' }}
-          </span>
-          <span class="mic-status-desc serif-title" *ngIf="speechSupported">
-            Web Speech Engine is capturing audio. You can also edit and refine text directly in the box below.
-          </span>
-          <span class="mic-status-desc error-txt serif-title" *ngIf="!speechSupported">
-            Speech recognition not available in this browser. Please type your response directly.
-          </span>
+      <!-- TAB 1: Verbal Speech & Textarea Area -->
+      <div class="speech-view-content" *ngIf="activeStationTab === 'SPEECH'">
+        <!-- Microphone Activation Banner with Live Reactive Waveform -->
+        <div class="mic-action-banner" [class.recording]="isListening">
+          <button class="mic-sphere-btn tactile-btn-3d gold-seal-emboss" (click)="toggleListening()">
+            <span class="mic-symbol">{{ isListening ? '⏹️' : '🎙️' }}</span>
+            <span class="mic-pulse-ring" *ngIf="isListening"></span>
+          </button>
+          <div class="mic-info">
+            <span class="mic-status-title serif-title">
+              {{ isListening ? 'MICROPHONE ACTIVE — CAPTURING FREQUENCY SPECTRUM...' : 'CLICK MICROPHONE TO SPEAK YOUR VIVA DEFENSE' }}
+            </span>
+            <span class="mic-status-desc serif-title" *ngIf="speechSupported">
+              Web Speech Engine is live. Speak your thoughts naturally or type below.
+            </span>
+            <span class="mic-status-desc error-txt serif-title" *ngIf="!speechSupported">
+              Speech recognition not supported in this browser. Please type your response directly.
+            </span>
+          </div>
+
+          <!-- Audio-Reactive Equalizer Bars -->
+          <div class="audio-equalizer-container debossed-track" *ngIf="isListening">
+            <span class="equalizer-bar" *ngFor="let bar of equalizerBars" [style.height.px]="bar"></span>
+          </div>
+        </div>
+
+        <!-- Transcript & Textarea Input Well -->
+        <div class="answer-well-box debossed-track">
+          <textarea 
+            class="viva-textarea serif-title" 
+            rows="6"
+            placeholder="Your verbal transcript will stream here live as you speak... You can also edit text, insert code snippets from the scratchpad tab, and refine your explanation before submitting."
+            [(ngModel)]="userAnswerText"
+            (input)="onTextareaInput()"></textarea>
         </div>
       </div>
 
-      <!-- Transcript & Textarea Input Well -->
-      <div class="answer-well-box debossed-track">
-        <textarea 
-          class="viva-textarea serif-title" 
-          rows="6"
-          placeholder="Your speech transcript will stream here live as you speak... You can also type, paste code, or refine your verbal answer before submitting."
-          [(ngModel)]="userAnswerText"
-          (input)="onTextareaInput()"></textarea>
+      <!-- TAB 2: Interactive Code & Architecture Scratchpad -->
+      <div class="scratchpad-view-content" *ngIf="activeStationTab === 'SCRATCHPAD'">
+        <div class="scratchpad-toolbar debossed-track">
+          <div class="lang-selector-group">
+            <span class="tool-lbl serif-title">LANGUAGE & SYNTAX:</span>
+            <select class="lang-select serif-title" [(ngModel)]="scratchpadLang">
+              <option value="Java 21">Java 21 (Backend)</option>
+              <option value="TypeScript">TypeScript (Angular 17)</option>
+              <option value="SQL">SQL (Database & JPA)</option>
+              <option value="Architecture">ASCII Architecture Diagram</option>
+            </select>
+          </div>
+          <button class="btn-template tactile-btn-3d serif-title" (click)="loadScratchpadTemplate()">
+            ✨ INSERT CODE TEMPLATE FOR THIS QUESTION
+          </button>
+        </div>
+
+        <div class="scratchpad-editor-well debossed-track">
+          <textarea 
+            class="code-textarea"
+            rows="10"
+            placeholder="// Write code, class definitions, SQL queries, or ASCII system diagrams to support your oral defense..."
+            [(ngModel)]="scratchpadCode"
+            (input)="onTextareaInput()"></textarea>
+        </div>
       </div>
 
       <!-- Answer Actions -->
       <div class="station-actions-row">
-        <button class="btn-clear tactile-btn-3d serif-title" (click)="userAnswerText = ''; onTextareaInput()" [disabled]="!userAnswerText">
-          ✕ CLEAR
+        <button class="btn-clear tactile-btn-3d serif-title" (click)="userAnswerText = ''; scratchpadCode = ''; onTextareaInput()" [disabled]="!userAnswerText && !scratchpadCode">
+          ✕ CLEAR ALL
         </button>
-        <button class="btn-submit-answer tactile-btn-3d serif-title" (click)="submitAnswer()" [disabled]="!userAnswerText.trim()">
+        <button class="btn-submit-answer tactile-btn-3d serif-title" (click)="submitAnswer()" [disabled]="!userAnswerText.trim() && !scratchpadCode.trim()">
           <span>✓ SUBMIT VIVA ANSWER FOR AI TELEMETRY</span>
           <span class="shine-sweep"></span>
         </button>
@@ -308,6 +353,31 @@
       <div class="model-answer-well debossed-track">
         <h4 class="model-title serif-title">👑 EXAMINER GOLD STANDARD ANSWER:</h4>
         <p class="model-text serif-title">{{ lastEvaluation.goldStandardRecommendation }}</p>
+      </div>
+
+      <!-- Socratic Adaptive Defense Grill Box -->
+      <div class="socratic-grill-box wood-card" *ngIf="currentQuestion?.followUpPrompt">
+        <div class="grill-header">
+          <span class="grill-badge gold-seal-emboss">🔥 ADAPTIVE SOCRATIC GRILL PROBE</span>
+          <span class="grill-bonus serif-title">+15% BONUS ACCURACY AVAILABLE</span>
+        </div>
+        <p class="grill-prompt serif-title">“{{ currentQuestion?.followUpPrompt }}”</p>
+        
+        <div class="grill-input-row" *ngIf="!isGrillSubmitted">
+          <input 
+            type="text" 
+            class="grill-input serif-title" 
+            placeholder="Type your brief follow-up response to answer the examiner's probe..."
+            [(ngModel)]="grillAnswerText"
+            (keyup.enter)="submitGrillAnswer()" />
+          <button class="btn-grill-submit tactile-btn-3d serif-title" (click)="submitGrillAnswer()" [disabled]="!grillAnswerText.trim()">
+            ANSWER PROBE ➔
+          </button>
+        </div>
+
+        <div class="grill-success-banner" *ngIf="isGrillSubmitted">
+          <span>✓ Follow-up probe answered successfully! +12 Points & Bonus XP awarded to your scorecard.</span>
+        </div>
       </div>
 
       <!-- Modal Footer -->
@@ -466,8 +536,12 @@
 
       <!-- Report Actions -->
       <div class="report-actions-row">
-        <button class="btn-print tactile-btn-3d serif-title" (click)="printDiagnosticReport()">
-          <span>🖨️ PRINT DIAGNOSTIC REPORT</span>
+        <button class="btn-pdf-download tactile-btn-3d serif-title" (click)="downloadPdfReport()" [disabled]="isExportingPdf">
+          <span>{{ isExportingPdf ? '⏳ GENERATING HIGH-DEF PDF...' : '📥 DOWNLOAD OFFICIAL VIVA CERTIFICATE (PDF)' }}</span>
+          <span class="shine-sweep"></span>
+        </button>
+        <button class="btn-print tactile-btn-3d serif-title" (click)="downloadPdfReport()">
+          <span>🖨️ PRINT REPORT</span>
         </button>
         <button class="btn-retake tactile-btn-3d serif-title" (click)="resetViva()">
           <span>🔄 SELECT ANOTHER VIVA TRACK</span>
