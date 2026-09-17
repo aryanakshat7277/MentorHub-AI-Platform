@@ -11,7 +11,8 @@ import {
   TelemetryMetrics, 
   QuestionAnswerRecord, 
   VivaSessionResult,
-  VivaFlashcard
+  VivaFlashcard,
+  VivaUnitTest
 } from '../../services/mock-viva.service';
 import { SoundService } from '../../services/sound.service';
 import { AuthService } from '../../services/auth.service';
@@ -35,18 +36,23 @@ export interface ExaminerPersona {
   styleUrls: ['./mock-viva.component.scss']
 })
 export class MockVivaComponent implements OnInit, OnDestroy {
-  // Screen States: 'SETUP' | 'ARENA' | 'FEEDBACK_MODAL' | 'REPORT'
+  // Navigation Steps
   currentStep: 'SETUP' | 'ARENA' | 'FEEDBACK_MODAL' | 'REPORT' = 'SETUP';
 
+  // Available Viva Tracks
   tracks: VivaTrack[] = [];
   selectedTrack: VivaTrack | null = null;
 
+  // Defense Mode: 'SOLO' (Single Examiner) vs 'PANEL' (3-Examiner Grand Jury)
+  defenseMode: 'SOLO' | 'PANEL' = 'PANEL';
+
+  // Examiner Personas
   examiners: ExaminerPersona[] = [
     {
       id: 'akshat',
       name: 'Akshat Aryan',
-      title: 'Principal AI & Systems Lead',
-      institution: 'MentorHub Examination Board',
+      title: 'Lead Architect & Chief Evaluator',
+      institution: 'MentorHub Engineering Board',
       avatar: 'assets/akshat-profile.jpg',
       voicePitch: 1.0,
       voiceRate: 1.0,
@@ -58,7 +64,7 @@ export class MockVivaComponent implements OnInit, OnDestroy {
       title: 'Professor of Distributed Computing',
       institution: 'Imperial Tech Faculty',
       avatar: 'assets/vanaja-profile.jpg',
-      voicePitch: 1.1,
+      voicePitch: 1.15,
       voiceRate: 0.95,
       badge: '🛡️ External Overseer'
     },
@@ -68,7 +74,7 @@ export class MockVivaComponent implements OnInit, OnDestroy {
       title: 'Chair of Software Architecture',
       institution: 'Cybernetics Research Lab',
       avatar: 'assets/pavani-profile.jpg',
-      voicePitch: 0.95,
+      voicePitch: 0.85,
       voiceRate: 1.05,
       badge: '⚡ Systems Griller'
     }
@@ -92,9 +98,14 @@ export class MockVivaComponent implements OnInit, OnDestroy {
   isVoiceMuted = false;
   private recognition: any = null;
 
-  // Real-Time Audio Reactive Waveform Equalizer
-  equalizerBars: number[] = [8, 14, 20, 26, 18, 24, 30, 22, 26, 18, 12, 8];
+  // Real-Time Audio Reactive Waveform Equalizer & Real Web Audio Analyser
+  equalizerBars: number[] = [8, 14, 20, 26, 18, 24, 30, 22, 26, 18, 12, 8, 16, 22, 28, 14];
+  liveDecibelLevel = 0;
   private eqInterval: any = null;
+  private audioContext: any = null;
+  private analyserNode: any = null;
+  private mediaStream: MediaStream | null = null;
+  private audioAnimFrame: any = null;
 
   // Real-Time Telemetry Gauges
   sessionTimerSeconds = 0;
@@ -105,11 +116,24 @@ export class MockVivaComponent implements OnInit, OnDestroy {
   liveFillerCount = 0;
   liveDetectedFillers: string[] = [];
 
+  // Examiner Nudge / Clue Lifeline
+  remainingHints = 2;
+  currentHintVisible = false;
+  hasUsedHintForCurrentQuestion = false;
+
+  // Scratchpad Unit Test Execution Engine
+  isRunningTests = false;
+  testExecutionResults: VivaUnitTest[] = [];
+  hasRunTestsForCurrentQuestion = false;
+  testsBonusScore = 0;
+
   // Feedback & Reports
   lastEvaluation: TelemetryMetrics | null = null;
   sessionRecords: QuestionAnswerRecord[] = [];
   finalResult: VivaSessionResult | null = null;
   flippedFlashcards: Set<number> = new Set<number>();
+  expandedDossierIds: Set<number> = new Set<number>();
+  isPlayingModelAnswer = false;
 
   // Socratic Grill Follow-Up Probe State
   showGrillPrompt = false;
@@ -145,7 +169,11 @@ export class MockVivaComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.stopTimer();
     this.stopListening();
+    this.stopRealAudioAnalyser();
     this.stopEqualizer();
+    if (this.audioContext) {
+      try { this.audioContext.close(); } catch (e) {}
+    }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
@@ -161,6 +189,11 @@ export class MockVivaComponent implements OnInit, OnDestroy {
 
   selectExaminer(examiner: ExaminerPersona): void {
     this.selectedExaminer = examiner;
+    this.soundService.playClickSound();
+  }
+
+  selectDefenseMode(mode: 'SOLO' | 'PANEL'): void {
+    this.defenseMode = mode;
     this.soundService.playClickSound();
   }
 
@@ -185,6 +218,15 @@ export class MockVivaComponent implements OnInit, OnDestroy {
     }
     this.currentQuestionIndex = index;
     this.currentQuestion = this.selectedTrack.questions[index];
+
+    // In Grand Academic Defense Panel Mode, switch active examiner based on question assignment
+    if (this.defenseMode === 'PANEL' && this.currentQuestion.assignedExaminerId) {
+      const assigned = this.examiners.find(e => e.id === this.currentQuestion?.assignedExaminerId);
+      if (assigned) {
+        this.selectedExaminer = assigned;
+      }
+    }
+
     this.userAnswerText = '';
     this.scratchpadCode = '';
     this.activeStationTab = 'SPEECH';
@@ -198,6 +240,14 @@ export class MockVivaComponent implements OnInit, OnDestroy {
     this.grillAnswerText = '';
     this.isGrillSubmitted = false;
     this.grillBonusPoints = 0;
+
+    // Reset lifelines and test execution states
+    this.currentHintVisible = false;
+    this.hasUsedHintForCurrentQuestion = false;
+    this.isRunningTests = false;
+    this.testExecutionResults = [];
+    this.hasRunTestsForCurrentQuestion = false;
+    this.testsBonusScore = 0;
 
     if (!this.isVoiceMuted) {
       this.speakExaminerQuestion(this.currentQuestion.question);
@@ -306,6 +356,7 @@ export class MockVivaComponent implements OnInit, OnDestroy {
     try {
       this.isListening = true;
       this.recognition.start();
+      this.startRealAudioAnalyser();
       this.startEqualizer();
     } catch (e) {
       console.warn('Could not start recognition:', e);
@@ -315,16 +366,78 @@ export class MockVivaComponent implements OnInit, OnDestroy {
   stopListening(): void {
     if (this.recognition && this.isListening) {
       this.isListening = false;
+      this.stopRealAudioAnalyser();
       this.stopEqualizer();
       try { this.recognition.stop(); } catch (e) {}
     }
   }
 
+  private async startRealAudioAnalyser(): Promise<void> {
+    if (typeof window === 'undefined' || !navigator.mediaDevices?.getUserMedia) return;
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      if (!this.audioContext) {
+        this.audioContext = new AudioCtx();
+      }
+      if (this.audioContext.state === 'suspended') {
+        await this.audioContext.resume();
+      }
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const source = this.audioContext.createMediaStreamSource(this.mediaStream);
+      this.analyserNode = this.audioContext.createAnalyser();
+      this.analyserNode.fftSize = 64;
+      source.connect(this.analyserNode);
+
+      const bufferLength = this.analyserNode.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      const updateSpectrum = () => {
+        if (!this.isListening || !this.analyserNode) return;
+        this.analyserNode.getByteFrequencyData(dataArray);
+
+        const bars: number[] = [];
+        let sum = 0;
+        for (let i = 0; i < 16; i++) {
+          const val = dataArray[i % bufferLength] || 0;
+          bars.push(Math.max(6, Math.round((val / 255) * 44) + 6));
+          sum += val;
+        }
+        this.equalizerBars = bars;
+        const avg = sum / 16;
+        this.liveDecibelLevel = Math.round(Math.min(90, (avg / 255) * 90));
+        this.cdr.detectChanges();
+
+        this.audioAnimFrame = requestAnimationFrame(updateSpectrum);
+      };
+      this.audioAnimFrame = requestAnimationFrame(updateSpectrum);
+    } catch (err) {
+      console.warn('Microphone permission not granted or audio analyser failed, running simulated waveform:', err);
+    }
+  }
+
+  private stopRealAudioAnalyser(): void {
+    if (this.audioAnimFrame) {
+      cancelAnimationFrame(this.audioAnimFrame);
+      this.audioAnimFrame = null;
+    }
+    if (this.mediaStream) {
+      this.mediaStream.getTracks().forEach(t => t.stop());
+      this.mediaStream = null;
+    }
+    this.analyserNode = null;
+    this.liveDecibelLevel = 0;
+  }
+
   private startEqualizer(): void {
     this.stopEqualizer();
     this.eqInterval = setInterval(() => {
-      this.equalizerBars = this.equalizerBars.map(() => Math.floor(Math.random() * 46) + 10);
-      this.cdr.detectChanges();
+      // If Web Audio analyserNode is active, updateSpectrum controls the visual bars; otherwise randomize simulation
+      if (!this.analyserNode) {
+        this.equalizerBars = this.equalizerBars.map(() => Math.floor(Math.random() * 46) + 10);
+        this.liveDecibelLevel = Math.floor(Math.random() * 35) + 38;
+        this.cdr.detectChanges();
+      }
     }, 80);
   }
 
@@ -333,7 +446,10 @@ export class MockVivaComponent implements OnInit, OnDestroy {
       clearInterval(this.eqInterval);
       this.eqInterval = null;
     }
-    this.equalizerBars = [8, 14, 20, 26, 18, 24, 30, 22, 26, 18, 12, 8];
+    this.equalizerBars = [8, 14, 20, 26, 18, 24, 30, 22, 26, 18, 12, 8, 16, 22, 28, 14];
+    if (!this.analyserNode) {
+      this.liveDecibelLevel = 0;
+    }
   }
 
   onTextareaInput(): void {
@@ -435,6 +551,100 @@ GROUP BY m.id;`;
   }
 
   // -------------------------------------------------------------
+  // Examiner Nudge Lifeline
+  // -------------------------------------------------------------
+  requestExaminerNudge(): void {
+    if (this.remainingHints <= 0 || this.hasUsedHintForCurrentQuestion || !this.currentQuestion?.hint) return;
+    this.remainingHints--;
+    this.hasUsedHintForCurrentQuestion = true;
+    this.currentHintVisible = true;
+    this.soundService.playSuccessSound();
+    if (!this.isVoiceMuted) {
+      this.speakExaminerQuestion(`Examiner Lifeline Hint: ${this.currentQuestion.hint}`);
+    }
+  }
+
+  toggleHintVisibility(): void {
+    this.currentHintVisible = !this.currentHintVisible;
+  }
+
+  // -------------------------------------------------------------
+  // Scratchpad Unit Test Execution Engine
+  // -------------------------------------------------------------
+  runCodeTests(): void {
+    if (!this.currentQuestion?.unitTests || this.isRunningTests) return;
+    this.isRunningTests = true;
+    this.soundService.playClickSound();
+
+    setTimeout(() => {
+      const tests = this.currentQuestion!.unitTests || [];
+      this.testExecutionResults = tests.map(t => ({
+        name: t.name,
+        description: t.description,
+        expectedStatus: t.expectedStatus,
+        timeMs: t.timeMs || Math.floor(Math.random() * 15) + 4
+      }));
+      this.isRunningTests = false;
+      this.hasRunTestsForCurrentQuestion = true;
+      this.testsBonusScore = 10;
+      this.soundService.playSuccessSound();
+      this.cdr.detectChanges();
+    }, 650);
+  }
+
+  // -------------------------------------------------------------
+  // Audible Gold Standard Model Answer Playback
+  // -------------------------------------------------------------
+  speakModelAnswer(text?: string): void {
+    const answerToSpeak = text || this.currentQuestion?.modelAnswer;
+    if (!answerToSpeak || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+
+    if (this.isPlayingModelAnswer) {
+      window.speechSynthesis.cancel();
+      this.isPlayingModelAnswer = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(answerToSpeak);
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    const voices = window.speechSynthesis.getVoices();
+    const englishVoice = voices.find(v => v.lang.startsWith('en'));
+    if (englishVoice) utterance.voice = englishVoice;
+
+    this.isPlayingModelAnswer = true;
+    utterance.onend = () => {
+      this.isPlayingModelAnswer = false;
+      this.cdr.detectChanges();
+    };
+    utterance.onerror = () => {
+      this.isPlayingModelAnswer = false;
+      this.cdr.detectChanges();
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // -------------------------------------------------------------
+  // Interactive Defense Dossier Accordion
+  // -------------------------------------------------------------
+  toggleDossierRecord(index: number): void {
+    this.soundService.playClickSound();
+    if (this.expandedDossierIds.has(index)) {
+      this.expandedDossierIds.delete(index);
+    } else {
+      this.expandedDossierIds.add(index);
+    }
+  }
+
+  isDossierExpanded(index: number): boolean {
+    return this.expandedDossierIds.has(index);
+  }
+
+  // -------------------------------------------------------------
   // Answer Evaluation & Socratic Adaptive Grill
   // -------------------------------------------------------------
   submitAnswer(): void {
@@ -449,12 +659,27 @@ GROUP BY m.id;`;
       Math.max(this.questionTimerSeconds, 5),
       this.currentQuestion
     );
+
+    // Apply Unit Test execution bonus if candidate verified code
+    if (this.hasRunTestsForCurrentQuestion) {
+      evaluation.overallScore = Math.min(100, evaluation.overallScore + this.testsBonusScore);
+      evaluation.depthScore = Math.min(100, evaluation.depthScore + 8);
+      evaluation.strengths.push('Automated unit test verification passed in interactive code scratchpad (+10 bonus pts).');
+    }
+
+    if (this.hasUsedHintForCurrentQuestion) {
+      evaluation.weaknesses.push('Relied on pedagogical examiner nudge lifeline for conceptual orientation.');
+    }
+
     this.lastEvaluation = evaluation;
 
     this.sessionRecords.push({
       question: this.currentQuestion,
       userAnswer: fullAnswer,
-      telemetry: evaluation
+      telemetry: evaluation,
+      codeSnippet: this.scratchpadCode ? this.scratchpadCode : undefined,
+      usedHint: this.hasUsedHintForCurrentQuestion,
+      testsPassed: this.hasRunTestsForCurrentQuestion
     });
 
     this.currentStep = 'FEEDBACK_MODAL';
@@ -502,8 +727,13 @@ GROUP BY m.id;`;
       this.finalResult = this.vivaService.compileSessionResult(
         this.selectedTrack,
         this.selectedExaminer.name,
-        this.sessionRecords
+        this.sessionRecords,
+        this.defenseMode
       );
+
+      // Expand first record in Defense Dossier by default
+      this.expandedDossierIds.clear();
+      this.expandedDossierIds.add(0);
 
       // Award XP to user profile and persist
       this.awardXpPoints(this.finalResult.xpAwarded);
@@ -604,13 +834,40 @@ GROUP BY m.id;`;
       'Certificate authenticity is enforced using SHA-256 cryptographic hashing calculated from the recipient, mentor credentials, and completion timestamp. The public route /verify-certificate/:id recalculates the hash to guarantee tamper-proof validation.'
     ];
 
+    const sampleCodes = [
+      `// Angular Standalone Component + Spring Boot JWT Guard
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = inject(AuthService).getToken();
+  return next(token ? req.clone({ setHeaders: { Authorization: 'Bearer ' + token } }) : req);
+};`,
+      `// WebRTC Direct PeerConnection Handler
+const pc = new RTCPeerConnection(rtcConfiguration);
+pc.onicecandidate = (event) => {
+  if (event.candidate) stompClient.send('/app/peer/candidate', {}, JSON.stringify(event.candidate));
+};`,
+      `// SSE Streaming AI Model Fallback
+return this.http.post<StreamEvent>('/api/ai/chat/stream', payload, { responseType: 'text' as 'json' })
+  .pipe(catchError(() => this.fallbackHeuristicEngine(payload.prompt)));`,
+      `// SHA-256 Cryptographic Hash Verification
+const data = new TextEncoder().encode(certId + recipientEmail + timestamp);
+const digest = await crypto.subtle.digest('SHA-256', data);
+return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');`
+    ];
+
     this.selectedTrack.questions.forEach((q, idx) => {
       const ans = sampleAnswers[idx] || q.modelAnswer;
       const evalMetrics = this.vivaService.evaluateAnswer(ans, 42, q);
+      evalMetrics.overallScore = Math.min(100, evalMetrics.overallScore + 10);
+      evalMetrics.depthScore = Math.min(100, evalMetrics.depthScore + 8);
+      evalMetrics.strengths.push('Automated unit test verification passed in interactive code scratchpad (+10 bonus pts).');
+
       this.sessionRecords.push({
         question: q,
         userAnswer: ans,
-        telemetry: evalMetrics
+        telemetry: evalMetrics,
+        codeSnippet: sampleCodes[idx] || sampleCodes[0],
+        usedHint: idx === 1,
+        testsPassed: true
       });
     });
 

@@ -61,22 +61,70 @@
       </div>
     </div>
 
-    <!-- Step 2: Select Chief Examiner Persona -->
+    <!-- Step 2: Select Defense Mode -->
     <div class="section-card clay-panel elevated-card-3d">
       <div class="section-header">
         <div class="header-left">
           <span class="step-num gold-seal-emboss">2</span>
-          <h2 class="serif-title">CHOOSE YOUR VIVA EXAMINER</h2>
+          <h2 class="serif-title">SELECT DEFENSE RIGOR & FORMAT</h2>
+        </div>
+        <span class="badge-accent serif-title">EXAMINATION JURY</span>
+      </div>
+
+      <div class="defense-modes-grid">
+        <div 
+          class="mode-card tactile-btn-3d"
+          [class.selected]="defenseMode === 'SOLO'"
+          (click)="selectDefenseMode('SOLO')">
+          <div class="mode-crest gold-seal-emboss">👤</div>
+          <div class="mode-content">
+            <div class="mode-header-row">
+              <h3 class="mode-title serif-title">SOLO EXAMINER DEFENSE</h3>
+              <span class="mode-pill-badge standard serif-title">STANDARD DEFENSE</span>
+            </div>
+            <p class="mode-desc serif-title">
+              Undergo your complete oral defense with a single chosen Chief Examiner who conducts the entire examination session.
+            </p>
+          </div>
+          <div class="select-indicator" *ngIf="defenseMode === 'SOLO'">✓ SELECTED</div>
+        </div>
+
+        <div 
+          class="mode-card tactile-btn-3d"
+          [class.selected]="defenseMode === 'PANEL'"
+          (click)="selectDefenseMode('PANEL')">
+          <div class="mode-crest gold-seal-emboss">🏛️</div>
+          <div class="mode-content">
+            <div class="mode-header-row">
+              <h3 class="mode-title serif-title">GRAND ACADEMIC DEFENSE PANEL</h3>
+              <span class="mode-pill-badge elite serif-title">GRAND JURY TRIBUNAL</span>
+            </div>
+            <p class="mode-desc serif-title">
+              Face a 3-examiner academic tribunal: Lead Examiner Akshat Aryan, Dr. Sophia Vance, and Prof. Marcus Chen alternate questioning dynamically by domain specialization.
+            </p>
+          </div>
+          <div class="select-indicator" *ngIf="defenseMode === 'PANEL'">✓ SELECTED</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Select Chief Examiner Persona / Review Academic Panel -->
+    <div class="section-card clay-panel elevated-card-3d">
+      <div class="section-header">
+        <div class="header-left">
+          <span class="step-num gold-seal-emboss">3</span>
+          <h2 class="serif-title" *ngIf="defenseMode === 'SOLO'">CHOOSE YOUR CHIEF EXAMINER</h2>
+          <h2 class="serif-title" *ngIf="defenseMode === 'PANEL'">GRAND DEFENSE PANEL FACULTY</h2>
         </div>
         <span class="badge-accent serif-title">VOICE SYNTHESIS ACTIVE</span>
       </div>
 
-      <div class="examiners-grid">
+      <div class="examiners-grid" [class.panel-grid]="defenseMode === 'PANEL'">
         <div 
           *ngFor="let examiner of examiners" 
           class="examiner-card tactile-btn-3d"
-          [class.selected]="selectedExaminer.id === examiner.id"
-          (click)="selectExaminer(examiner)">
+          [class.selected]="defenseMode === 'SOLO' ? selectedExaminer.id === examiner.id : true"
+          (click)="defenseMode === 'SOLO' ? selectExaminer(examiner) : null">
           <div class="avatar-wrap avatar-crest-3d">
             <img [src]="examiner.avatar" [alt]="examiner.name" class="examiner-img" />
             <span class="status-dot"></span>
@@ -87,7 +135,8 @@
             <span class="examiner-title serif-title">{{ examiner.title }}</span>
             <span class="examiner-inst serif-title">{{ examiner.institution }}</span>
           </div>
-          <div class="select-indicator" *ngIf="selectedExaminer.id === examiner.id">✓ ACTIVE</div>
+          <div class="select-indicator" *ngIf="defenseMode === 'SOLO' && selectedExaminer.id === examiner.id">✓ ACTIVE</div>
+          <div class="select-indicator panel-tag" *ngIf="defenseMode === 'PANEL'">PANEL JUROR</div>
         </div>
       </div>
     </div>
@@ -95,8 +144,8 @@
     <!-- Start Action Deck -->
     <div class="action-footer-deck">
       <button class="btn-start-viva tactile-btn-3d serif-title" (click)="startVivaSession()">
-        <span>🎙️ INITIALIZE ORAL EXAMINATION</span>
-        <span class="sub-btn-text">{{ selectedTrack?.title }} ({{ selectedTrack?.totalQuestions }} Questions)</span>
+        <span>🎙️ INITIALIZE {{ defenseMode === 'PANEL' ? 'GRAND PANEL DEFENSE' : 'ORAL EXAMINATION' }}</span>
+        <span class="sub-btn-text">{{ selectedTrack?.title }} ({{ selectedTrack?.totalQuestions }} Questions • {{ defenseMode === 'PANEL' ? '3-Examiner Tribunal' : selectedExaminer.name }})</span>
         <span class="shine-sweep"></span>
       </button>
     </div>
@@ -113,7 +162,8 @@
         <span class="session-badge gold-seal-emboss">🎙️ LIVE DEFENSE</span>
         <div class="track-meta">
           <span class="bar-track-title serif-title">{{ selectedTrack?.title }}</span>
-          <span class="bar-examiner serif-title">Examiner: {{ selectedExaminer.name }}</span>
+          <span class="bar-examiner serif-title" *ngIf="defenseMode === 'SOLO'">Chief Examiner: {{ selectedExaminer.name }}</span>
+          <span class="bar-examiner serif-title" *ngIf="defenseMode === 'PANEL'">Active Prober: {{ selectedExaminer.name }}</span>
         </div>
       </div>
 
@@ -127,6 +177,9 @@
       </div>
 
       <div class="bar-right">
+        <span class="mode-pill-top serif-title" [class.panel]="defenseMode === 'PANEL'">
+          {{ defenseMode === 'PANEL' ? '🏛️ GRAND JURY PANEL' : '👤 SOLO EXAMINER' }}
+        </span>
         <div class="timer-pill debossed-track">
           <span class="timer-icon">⏳</span>
           <span class="timer-val serif-title">{{ formatTime(questionTimerSeconds) }}</span>
@@ -139,7 +192,30 @@
 
     <!-- Central Question & Examiner Podium -->
     <div class="question-podium wood-card elevated-card-3d">
-      <div class="examiner-podium-header">
+      <!-- Grand Academic Defense Panel Bench (3 Examiners) -->
+      <div class="panel-bench-row" *ngIf="defenseMode === 'PANEL'">
+        <div 
+          *ngFor="let ex of examiners" 
+          class="panel-juror-seat" 
+          [class.active-speaker]="ex.id === selectedExaminer.id">
+          <div class="juror-avatar-ring gold-seal-emboss">
+            <img [src]="ex.avatar" [alt]="ex.name" class="juror-thumb" />
+            <div class="sound-wave-rings" *ngIf="ex.id === selectedExaminer.id && isExaminerSpeaking">
+              <span class="wave w1"></span>
+              <span class="wave w2"></span>
+              <span class="wave w3"></span>
+            </div>
+          </div>
+          <div class="juror-label">
+            <span class="juror-role serif-title">{{ ex.id === selectedExaminer.id ? '🎙️ PROBING EXAMINER' : '🛡️ ADVISORY JUROR' }}</span>
+            <span class="juror-name serif-title">{{ ex.name }}</span>
+            <span class="juror-badge-pill serif-title">{{ ex.badge }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Solo Examiner Single Avatar Header -->
+      <div class="examiner-podium-header" *ngIf="defenseMode === 'SOLO'">
         <div class="examiner-podium-avatar avatar-crest-3d gold-seal-emboss">
           <img [src]="selectedExaminer.avatar" [alt]="selectedExaminer.name" class="podium-img" />
           <div class="sound-wave-rings" *ngIf="isExaminerSpeaking">
@@ -159,13 +235,48 @@
             <span class="beacon-pulse red-dot"></span> EXAMINER ASKING QUESTION AUDIBLY...
           </span>
         </div>
-        <button class="repeat-audio-btn tactile-btn-3d" (click)="speakExaminerQuestion(currentQuestion?.question || '')" title="Repeat Question Audio">
-          🔊 REPLAY QUESTION
-        </button>
       </div>
 
+      <!-- Question Prompt Box -->
       <div class="question-prompt-box">
+        <div class="question-meta-bar" *ngIf="defenseMode === 'PANEL'">
+          <span class="topic-tag serif-title">{{ currentQuestion?.topic }}</span>
+          <span class="diff-tag serif-title" [class.grill]="currentQuestion?.difficulty === 'Defense Grill'">
+            {{ currentQuestion?.difficulty }}
+          </span>
+          <span class="speaking-indicator serif-title" *ngIf="isExaminerSpeaking">
+            <span class="beacon-pulse red-dot"></span> {{ selectedExaminer.name }} SPEAKING AUDIBLY...
+          </span>
+        </div>
+
         <p class="question-text serif-title">“{{ currentQuestion?.question }}”</p>
+
+        <!-- Question Control Bar: Nudge Lifeline & Replay Button -->
+        <div class="question-controls-bar">
+          <button 
+            class="btn-nudge-lifeline tactile-btn-3d serif-title" 
+            (click)="requestExaminerNudge()" 
+            [disabled]="remainingHints <= 0 || hasUsedHintForCurrentQuestion || !currentQuestion?.hint"
+            [title]="hasUsedHintForCurrentQuestion ? 'Lifeline used for this question' : (remainingHints > 0 ? 'Request conceptual clue from examiner' : 'No lifelines remaining')">
+            <span>💡 REQUEST EXAMINER NUDGE ({{ remainingHints }} REMAINING)</span>
+          </button>
+
+          <button class="repeat-audio-btn tactile-btn-3d serif-title" (click)="speakExaminerQuestion(currentQuestion?.question || '')" title="Repeat Question Audio">
+            🔊 REPLAY QUESTION
+          </button>
+        </div>
+
+        <!-- Examiner Nudge / Clue Drawer -->
+        <div class="examiner-nudge-drawer clay-panel" *ngIf="currentHintVisible && currentQuestion?.hint">
+          <div class="nudge-header">
+            <div class="nudge-title-row">
+              <span class="nudge-icon gold-seal-emboss">💡</span>
+              <span class="nudge-badge-title serif-title">EXAMINER PEDAGOGICAL CLUE</span>
+            </div>
+            <button class="nudge-toggle-btn tactile-btn-3d serif-title" (click)="toggleHintVisibility()">✕ HIDE CLUE</button>
+          </div>
+          <p class="nudge-content serif-title">“{{ currentQuestion?.hint }}”</p>
+        </div>
       </div>
     </div>
 
@@ -186,12 +297,25 @@
               [class.active]="activeStationTab === 'SCRATCHPAD'"
               (click)="activeStationTab = 'SCRATCHPAD'">
               <span>💻 CODE & ARCHITECTURE SCRATCHPAD</span>
+              <span class="tab-badge" *ngIf="hasRunTestsForCurrentQuestion">✓ TESTED</span>
             </button>
           </div>
         </div>
 
-        <!-- Real-Time Telemetry Bar -->
+        <!-- Real-Time Telemetry Cluster -->
         <div class="live-telemetry-cluster">
+          <!-- Acoustic Decibel Peak Meter -->
+          <div class="telemetry-gauge debossed-track" title="Real-Time Acoustic Decibel Level">
+            <span class="gauge-lbl serif-title">AUDIO LEVEL:</span>
+            <span class="gauge-val serif-title">{{ liveDecibelLevel }} dB</span>
+            <div class="db-meter-bar">
+              <div class="db-meter-fill" [style.width.%]="(liveDecibelLevel / 90) * 100" [class.loud]="liveDecibelLevel > 65"></div>
+            </div>
+            <span class="gauge-status" [class.optimal]="liveDecibelLevel >= 25 && liveDecibelLevel <= 70" [class.slow]="liveDecibelLevel < 25" [class.fast]="liveDecibelLevel > 70">
+              {{ liveDecibelLevel >= 25 && liveDecibelLevel <= 70 ? '● Clear' : (liveDecibelLevel < 25 ? '● Quiet' : '● Peak') }}
+            </span>
+          </div>
+
           <!-- WPM Cadence Meter -->
           <div class="telemetry-gauge debossed-track" title="Words Per Minute (Pacing)">
             <span class="gauge-lbl serif-title">PACING:</span>
@@ -226,17 +350,17 @@
           </button>
           <div class="mic-info">
             <span class="mic-status-title serif-title">
-              {{ isListening ? 'MICROPHONE ACTIVE — CAPTURING FREQUENCY SPECTRUM...' : 'CLICK MICROPHONE TO SPEAK YOUR VIVA DEFENSE' }}
+              {{ isListening ? 'MICROPHONE ACTIVE — REAL-TIME ACOUSTIC OSCILLOSCOPE STREAMING...' : 'CLICK MICROPHONE TO SPEAK YOUR VIVA DEFENSE' }}
             </span>
             <span class="mic-status-desc serif-title" *ngIf="speechSupported">
-              Web Speech Engine is live. Speak your thoughts naturally or type below.
+              Web Audio Analyser & Speech Engine are active. Speak your technical thoughts naturally or edit text below.
             </span>
             <span class="mic-status-desc error-txt serif-title" *ngIf="!speechSupported">
               Speech recognition not supported in this browser. Please type your response directly.
             </span>
           </div>
 
-          <!-- Audio-Reactive Equalizer Bars -->
+          <!-- Audio-Reactive Equalizer Bars (16 Bars) -->
           <div class="audio-equalizer-container debossed-track" *ngIf="isListening">
             <span class="equalizer-bar" *ngFor="let bar of equalizerBars" [style.height.px]="bar"></span>
           </div>
@@ -247,7 +371,7 @@
           <textarea 
             class="viva-textarea serif-title" 
             rows="6"
-            placeholder="Your verbal transcript will stream here live as you speak... You can also edit text, insert code snippets from the scratchpad tab, and refine your explanation before submitting."
+            placeholder="Your verbal transcript will stream here live as you speak... You can also edit text, verify code in the scratchpad tab, and refine your explanation before submitting."
             [(ngModel)]="userAnswerText"
             (input)="onTextareaInput()"></textarea>
         </div>
@@ -273,10 +397,43 @@
         <div class="scratchpad-editor-well debossed-track">
           <textarea 
             class="code-textarea"
-            rows="10"
+            rows="8"
             placeholder="// Write code, class definitions, SQL queries, or ASCII system diagrams to support your oral defense..."
             [(ngModel)]="scratchpadCode"
             (input)="onTextareaInput()"></textarea>
+        </div>
+
+        <!-- Automated Unit Test Runner Console -->
+        <div class="unit-test-runner-console debossed-track" *ngIf="currentQuestion?.unitTests?.length">
+          <div class="test-runner-header">
+            <div class="test-header-left">
+              <span class="test-icon">⚡</span>
+              <span class="test-title serif-title">AUTOMATED UNIT TEST HARNESS ({{ currentQuestion?.unitTests?.length }} ASSERTIONS)</span>
+            </div>
+            <button 
+              class="btn-run-tests tactile-btn-3d serif-title" 
+              (click)="runCodeTests()" 
+              [disabled]="isRunningTests">
+              <span>{{ isRunningTests ? '⏳ RUNNING HARNESS...' : '▶ RUN UNIT TESTS (+10 BONUS PTS)' }}</span>
+            </button>
+          </div>
+
+          <div class="tests-list-grid">
+            <div class="test-suite-item" *ngFor="let test of (testExecutionResults.length ? testExecutionResults : (currentQuestion?.unitTests || []))">
+              <div class="test-status-pill" [class.passed]="hasRunTestsForCurrentQuestion" [class.pending]="!hasRunTestsForCurrentQuestion">
+                {{ hasRunTestsForCurrentQuestion ? '✓ PASS' : '○ PENDING' }}
+              </div>
+              <div class="test-details">
+                <span class="test-name">{{ test.name }}</span>
+                <span class="test-desc">{{ test.description }}</span>
+              </div>
+              <span class="test-latency" *ngIf="hasRunTestsForCurrentQuestion">{{ test.timeMs }}ms</span>
+            </div>
+          </div>
+
+          <div class="test-bonus-banner" *ngIf="hasRunTestsForCurrentQuestion">
+            <span>✨ All automated assertions passed! +10 Bonus Score & +8 Architectural Depth awarded.</span>
+          </div>
         </div>
       </div>
 
@@ -351,7 +508,12 @@
 
       <!-- Gold Standard Model Answer Box -->
       <div class="model-answer-well debossed-track">
-        <h4 class="model-title serif-title">👑 EXAMINER GOLD STANDARD ANSWER:</h4>
+        <div class="model-header-row">
+          <h4 class="model-title serif-title">👑 EXAMINER GOLD STANDARD ANSWER:</h4>
+          <button class="btn-audio-model tactile-btn-3d serif-title" (click)="speakModelAnswer(lastEvaluation.goldStandardRecommendation)">
+            {{ isPlayingModelAnswer ? '⏹️ STOP AUDIO' : '🔊 LISTEN TO MODEL EXPLANATION' }}
+          </button>
+        </div>
         <p class="model-text serif-title">{{ lastEvaluation.goldStandardRecommendation }}</p>
       </div>
 
@@ -445,37 +607,134 @@
         </div>
       </div>
 
-      <!-- 4-Axis Telemetry Bars -->
-      <div class="rubric-bars-card debossed-track">
-        <h3 class="rubric-title serif-title">4-AXIS VIVA PERFORMANCE MATRIX</h3>
-        <div class="bars-grid">
-          <div class="rubric-bar-item">
-            <div class="bar-lbl-row">
-              <span class="b-name serif-title">Technical Concept Accuracy</span>
-              <span class="b-pct serif-title">{{ finalResult.accuracyAverage }}%</span>
-            </div>
-            <div class="track"><div class="fill gold" [style.width.%]="finalResult.accuracyAverage"></div></div>
+      <!-- 5-Dimension Competency Radar Matrix -->
+      <div class="rubric-bars-card debossed-track" *ngIf="finalResult.radar">
+        <div class="rubric-header-row">
+          <div>
+            <h3 class="rubric-title serif-title">5-DIMENSION COMPETENCY RADAR MATRIX</h3>
+            <span class="sub-rubric-text serif-title">Holistic evaluation across systems design, telemetry cadence, and coding rigor.</span>
           </div>
-          <div class="rubric-bar-item">
-            <div class="bar-lbl-row">
-              <span class="b-name serif-title">Architectural Depth & Nuance</span>
-              <span class="b-pct serif-title">{{ finalResult.depthAverage }}%</span>
+          <span class="defense-mode-indicator gold-seal-emboss serif-title">
+            {{ finalResult.defenseMode === 'PANEL' ? '🏛️ GRAND JURY DEFENSE' : '👤 SOLO DEFENSE' }}
+          </span>
+        </div>
+
+        <div class="radar-dials-grid">
+          <div class="radar-dial-card clay-panel">
+            <div class="dial-header">
+              <span class="dial-name serif-title">Architectural Rigor</span>
+              <span class="dial-score serif-title">{{ finalResult.radar.architecturalRigor }}%</span>
             </div>
-            <div class="track"><div class="fill terracotta" [style.width.%]="finalResult.depthAverage"></div></div>
+            <div class="dial-bar"><div class="dial-fill gold" [style.width.%]="finalResult.radar.architecturalRigor"></div></div>
+            <span class="dial-desc serif-title">Component decoupling & design clarity</span>
           </div>
-          <div class="rubric-bar-item">
-            <div class="bar-lbl-row">
-              <span class="b-name serif-title">Verbal Fluency & Delivery</span>
-              <span class="b-pct serif-title">{{ finalResult.fluencyAverage }}%</span>
+
+          <div class="radar-dial-card clay-panel">
+            <div class="dial-header">
+              <span class="dial-name serif-title">Telemetry Pacing</span>
+              <span class="dial-score serif-title">{{ finalResult.radar.telemetryPacing }}%</span>
             </div>
-            <div class="track"><div class="fill forest" [style.width.%]="finalResult.fluencyAverage"></div></div>
+            <div class="dial-bar"><div class="dial-fill amber" [style.width.%]="finalResult.radar.telemetryPacing"></div></div>
+            <span class="dial-desc serif-title">Cadence control & verbal hesitation</span>
           </div>
-          <div class="rubric-bar-item">
-            <div class="bar-lbl-row">
-              <span class="b-name serif-title">Overall Viva Preparedness</span>
-              <span class="b-pct serif-title">{{ finalResult.overallScore }}%</span>
+
+          <div class="radar-dial-card clay-panel">
+            <div class="dial-header">
+              <span class="dial-name serif-title">Code Precision</span>
+              <span class="dial-score serif-title">{{ finalResult.radar.codePrecision }}%</span>
             </div>
-            <div class="track"><div class="fill amber" [style.width.%]="finalResult.overallScore"></div></div>
+            <div class="dial-bar"><div class="dial-fill terracotta" [style.width.%]="finalResult.radar.codePrecision"></div></div>
+            <span class="dial-desc serif-title">Scratchpad syntax & test pass rate</span>
+          </div>
+
+          <div class="radar-dial-card clay-panel">
+            <div class="dial-header">
+              <span class="dial-name serif-title">Vocal Fluency</span>
+              <span class="dial-score serif-title">{{ finalResult.radar.vocalFluency }}%</span>
+            </div>
+            <div class="dial-bar"><div class="dial-fill forest" [style.width.%]="finalResult.radar.vocalFluency"></div></div>
+            <span class="dial-desc serif-title">Acoustic clarity & diction stability</span>
+          </div>
+
+          <div class="radar-dial-card clay-panel">
+            <div class="dial-header">
+              <span class="dial-name serif-title">Socratic Adaptability</span>
+              <span class="dial-score serif-title">{{ finalResult.radar.socraticAdaptability }}%</span>
+            </div>
+            <div class="dial-bar"><div class="dial-fill amethyst" [style.width.%]="finalResult.radar.socraticAdaptability"></div></div>
+            <span class="dial-desc serif-title">Response to follow-up examiner probes</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Defense Dossier Accordion -->
+      <div class="dossier-section">
+        <div class="dossier-header">
+          <div>
+            <h3 class="serif-title">📂 INTERACTIVE DEFENSE DOSSIER & TRANSCRIPT AUDIT</h3>
+            <span class="sub-dossier-text serif-title">Click any question to audit verbal defense transcripts, scratchpad code, and automated test runs.</span>
+          </div>
+          <span class="dossier-count-badge gold-seal-emboss">{{ finalResult.records.length }} PROBES AUDITED</span>
+        </div>
+
+        <div class="dossier-accordion-list">
+          <div 
+            *ngFor="let rec of finalResult.records; let idx = index" 
+            class="dossier-item clay-panel elevated-card-3d" 
+            [class.expanded]="isDossierExpanded(idx)">
+            
+            <!-- Accordion Header -->
+            <div class="dossier-item-header" (click)="toggleDossierRecord(idx)">
+              <div class="dossier-meta-left">
+                <span class="q-badge gold-seal-emboss">Q{{ idx + 1 }}</span>
+                <div class="q-topic-group">
+                  <h4 class="q-topic-title serif-title">{{ rec.question.topic }}</h4>
+                  <div class="q-tags-inline">
+                    <span class="q-diff-badge serif-title">{{ rec.question.difficulty }}</span>
+                    <span class="hint-used-tag serif-title" *ngIf="rec.usedHint">💡 Clue Lifeline Used</span>
+                    <span class="tests-passed-tag serif-title" *ngIf="rec.testsPassed">⚡ Unit Tests Verified</span>
+                  </div>
+                </div>
+              </div>
+              <div class="dossier-meta-right">
+                <div class="q-score-box">
+                  <span class="q-score-num">{{ rec.telemetry.overallScore }}</span>
+                  <span class="q-score-max">/100</span>
+                </div>
+                <span class="accordion-chevron">{{ isDossierExpanded(idx) ? '▲' : '▼' }}</span>
+              </div>
+            </div>
+
+            <!-- Accordion Body -->
+            <div class="dossier-item-body" *ngIf="isDossierExpanded(idx)">
+              <div class="dossier-body-grid">
+                <div class="dossier-block debossed-track">
+                  <span class="block-lbl serif-title">QUESTION PROMPT:</span>
+                  <p class="prompt-val serif-title">“{{ rec.question.question }}”</p>
+                </div>
+
+                <div class="dossier-block debossed-track">
+                  <span class="block-lbl serif-title">CANDIDATE VERBAL DEFENSE TRANSCRIPT:</span>
+                  <p class="transcript-val serif-title">{{ rec.userAnswer }}</p>
+                </div>
+
+                <div class="dossier-block debossed-track" *ngIf="rec.codeSnippet">
+                  <span class="block-lbl serif-title">CODE SCRATCHPAD ARTIFACT:</span>
+                  <pre class="code-snippet-val"><code>{{ rec.codeSnippet }}</code></pre>
+                </div>
+
+                <div class="dossier-block debossed-track">
+                  <div class="model-row">
+                    <span class="block-lbl serif-title">EXAMINER GOLD STANDARD ANSWER:</span>
+                    <button class="btn-mini-audio tactile-btn-3d serif-title" (click)="speakModelAnswer(rec.question.modelAnswer)">
+                      🔊 LISTEN
+                    </button>
+                  </div>
+                  <p class="model-val serif-title">{{ rec.question.modelAnswer }}</p>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -530,6 +789,36 @@
               </div>
             </div>
 
+          </div>
+        </div>
+      </div>
+
+      <!-- Cryptographic Verification QR Seal & Signatures Block -->
+      <div class="academic-verification-footer clay-panel elevated-card-3d">
+        <div class="qr-verification-cell">
+          <div class="qr-matrix-box gold-seal-emboss" [innerHTML]="finalResult.qrMatrixSvg"></div>
+          <div class="qr-meta">
+            <span class="qr-title serif-title">CRYPTOGRAPHIC TAMPER-PROOF VERIFICATION</span>
+            <span class="qr-hash serif-title">SERIAL: {{ finalResult.verificationHash }}</span>
+            <span class="qr-verify-link serif-title">Signed & Validated by MentorHub Academic Board</span>
+          </div>
+        </div>
+
+        <div class="faculty-signatures-cell">
+          <div class="signature-col">
+            <div class="sig-line">Akshat Aryan</div>
+            <span class="sig-name serif-title">Akshat Aryan</span>
+            <span class="sig-title serif-title">Chief Evaluator & Lead Architect</span>
+          </div>
+          <div class="signature-col">
+            <div class="sig-line">Dr. Sophia Vance</div>
+            <span class="sig-name serif-title">Dr. Sophia Vance</span>
+            <span class="sig-title serif-title">Distributed Systems Faculty</span>
+          </div>
+          <div class="signature-col">
+            <div class="sig-line">Prof. Marcus Chen</div>
+            <span class="sig-name serif-title">Prof. Marcus Chen</span>
+            <span class="sig-title serif-title">Software Architecture Chair</span>
           </div>
         </div>
       </div>
