@@ -14,7 +14,10 @@
     <ul>
       <li *ngFor="let item of visibleMenuItems">
         <a [routerLink]="item.route" routerLinkActive="active" class="nav-link" [title]="item.label" (click)="onNavClick()">
-          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-icon">
+            <img *ngIf="item.imgIcon; else textIcon" [src]="item.imgIcon" [alt]="item.label" class="nav-seal-img" />
+            <ng-template #textIcon>{{ item.icon }}</ng-template>
+          </span>
           <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
           <span class="active-indicator" *ngIf="!isCollapsed"></span>
         </a>

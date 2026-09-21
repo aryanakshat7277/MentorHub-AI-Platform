@@ -10,11 +10,14 @@
     <div class="hero-inner-content">
       <div class="seal-and-titles">
         <div class="university-crest-seal gold-seal-emboss">
-          <span class="crest-glyph">🏛️</span>
+          <img src="assets/cutm-seal.svg" alt="Official CUTM Seal" class="official-cutm-seal-img" />
           <div class="seal-ring-glint"></div>
         </div>
         <div class="curriculum-titles">
           <div class="tag-row">
+            <div class="official-logo-container">
+              <img src="assets/cutm-logo.png" alt="Centurion University Logo" class="official-cutm-brand-img" />
+            </div>
             <span class="university-tag serif-title">CENTURION UNIVERSITY OF TECHNOLOGY & MANAGEMENT</span>
             <span class="cbcs-badge serif-title">CBCS CURRICULUM FRAMEWORK</span>
             <span class="cloud-sync-pill" [class.synced]="isCloudSynced">
@@ -214,6 +217,7 @@
             (click)="copyCourseCode(course.courseCode, $event)"
             title="Click to copy Course Code"
           >
+            <img src="assets/cutm-seal.svg" alt="CUTM" class="cutm-pill-seal" />
             <span class="code-text">{{ course.courseCode }}</span>
             <span class="copy-icon">{{ copiedCode === course.courseCode ? '✓ Copied' : '📋' }}</span>
           </button>
@@ -361,6 +365,7 @@
         <tr *ngFor="let course of filteredCourses" class="table-course-row">
           <td>
             <span class="table-code-pill serif-title" (click)="copyCourseCode(course.courseCode)">
+              <img src="assets/cutm-seal.svg" alt="CUTM" class="cutm-table-seal" />
               {{ course.courseCode }}
             </span>
           </td>
@@ -442,7 +447,9 @@
     <div class="dossier-modal-window elevated-3d clay-panel" (click)="$event.stopPropagation()">
       <div class="modal-top-bar">
         <div class="modal-crest-row">
-          <span class="modal-crest-icon">🏛️</span>
+          <div class="modal-cutm-seal-box gold-seal-emboss">
+            <img src="assets/cutm-seal.svg" alt="Official CUTM Seal" class="modal-cutm-seal-img" />
+          </div>
           <div>
             <span class="modal-basket-tag serif-title">
               {{ activeCourseModal.basketName }} ({{ activeCourseModal.courseCode }})

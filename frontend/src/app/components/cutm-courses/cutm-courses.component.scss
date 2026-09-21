@@ -95,10 +95,13 @@
       inset 0 2px 4px rgba(255, 255, 255, 0.8),
       inset 0 -3px 6px rgba(0, 0, 0, 0.4);
     position: relative;
+    overflow: hidden;
 
-    .crest-glyph {
-      font-size: 32px;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+    .official-cutm-seal-img {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45));
     }
 
     .seal-ring-glint {
@@ -121,6 +124,22 @@
       align-items: center;
       gap: 10px;
       flex-wrap: wrap;
+
+      .official-logo-container {
+        display: inline-flex;
+        align-items: center;
+        background: #FFFFFF;
+        padding: 4px 10px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(212, 175, 55, 0.4);
+
+        .official-cutm-brand-img {
+          height: 24px;
+          width: auto;
+          object-fit: contain;
+        }
+      }
 
       .university-tag {
         font-size: 11px;
@@ -657,6 +676,12 @@
         color: #F7EFE8;
         cursor: pointer;
 
+        .cutm-pill-seal {
+          width: 16px;
+          height: 16px;
+          object-fit: contain;
+        }
+
         .code-text {
           font-size: 12px;
           font-weight: 900;
@@ -1064,6 +1089,15 @@
       border-radius: 6px;
       border: 1px solid rgba(222, 112, 72, 0.3);
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+
+      .cutm-table-seal {
+        width: 14px;
+        height: 14px;
+        object-fit: contain;
+      }
 
       &:hover {
         background: rgba(222, 112, 72, 0.2);
@@ -1249,8 +1283,24 @@
       align-items: center;
       gap: 16px;
 
-      .modal-crest-icon {
-        font-size: 34px;
+      .modal-cutm-seal-box {
+        width: 58px;
+        height: 58px;
+        min-width: 58px;
+        min-height: 58px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #F9E7B3 0%, #D4AF37 45%, #AA7A1E 75%, #F9E7B3 100%);
+        box-shadow: 0 8px 20px rgba(212, 175, 55, 0.35);
+
+        .modal-cutm-seal-img {
+          width: 44px;
+          height: 44px;
+          object-fit: contain;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+        }
       }
 
       .modal-basket-tag {

@@ -8,6 +8,7 @@ export interface MenuItem {
   label: string;
   route: string;
   icon: string;
+  imgIcon?: string;
 }
 
 @Component({
@@ -30,7 +31,7 @@ export class SidebarComponent implements OnInit {
     { label: 'Sessions', route: '/sessions', icon: '📅' },
     { label: 'Live Workspace', route: '/workspace', icon: '💻' },
     { label: 'AI Mock Viva', route: '/mock-viva', icon: '🎙️' },
-    { label: 'CUTM Courses', route: '/cutm-courses', icon: '🏛️' },
+    { label: 'CUTM Courses', route: '/cutm-courses', icon: '🏛️', imgIcon: 'assets/cutm-seal.svg' },
     { label: 'Learning Paths', route: '/learning-path', icon: '🗺️' },
     { label: 'Goal Tracker', route: '/goals', icon: '🎯' },
     { label: 'Verified Portfolio', route: '/portfolio/pavani', icon: '📄' },
