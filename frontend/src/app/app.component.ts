@@ -7,6 +7,7 @@ import { HeaderComponent } from './components/header/header.component';
 import { AiChatbotComponent } from './components/ai-chatbot/ai-chatbot.component';
 import { GestureHudComponent } from './components/gesture-hud/gesture-hud.component';
 import { GestureCursorComponent } from './components/gesture-cursor/gesture-cursor.component';
+import { FacialNavHudComponent } from './components/facial-nav-hud/facial-nav-hud.component';
 import { GestureRecognitionService } from './services/gesture-recognition.service';
 import { SoundService } from './services/sound.service';
 import { AuthService, LoginEvent } from './services/auth.service';
@@ -22,7 +23,8 @@ import { ThemeService } from './services/theme.service';
     HeaderComponent,
     AiChatbotComponent,
     GestureHudComponent,
-    GestureCursorComponent
+    GestureCursorComponent,
+    FacialNavHudComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']

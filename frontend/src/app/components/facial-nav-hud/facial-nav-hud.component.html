@@ -1,0 +1,170 @@
+<!-- Global Floating Cybernetic AirNav HUD -->
+<aside class="air-nav-hud-container" [class.minimized]="isCollapsed" aria-label="Facial and Arrow Navigation HUD">
+  
+  <!-- Minimized Floating Cybernetic Pill -->
+  <div class="hud-pill" *ngIf="isCollapsed" (click)="toggleCollapse()" title="Expand Facial AirNav">
+    <span class="pill-dot" [class.live]="isCameraActive"></span>
+    <span class="pill-icon">👁️</span>
+    <span class="pill-label">AIR-NAV: {{ activeMode }}</span>
+    <span class="pill-expand">▲</span>
+  </div>
+
+  <!-- Expanded Cybernetic Claymorphic Glass Panel -->
+  <div class="hud-panel" *ngIf="!isCollapsed">
+    <!-- Header Bar -->
+    <div class="panel-header">
+      <div class="header-left">
+        <span class="live-beacon" [class.active]="isCameraActive"></span>
+        <div class="header-titles">
+          <span class="hud-title">CYBERNETIC AIR-NAV</span>
+          <span class="hud-subtitle">Facial Gestures & Arrow Navigation</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-tool-btn" (click)="toggleSound()" [title]="isSoundOn ? 'Mute Audio Cues' : 'Unmute Audio'">
+          {{ isSoundOn ? '🔊' : '🔇' }}
+        </button>
+        <button class="icon-tool-btn" (click)="calibrate()" title="Calibrate Resting Baseline EAR">
+          🎯
+        </button>
+        <button class="icon-tool-btn" (click)="toggleCollapse()" title="Minimize HUD">
+          ▼
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Action Announcement Banner -->
+    <div class="action-banner" [class.flashing]="isBlinkFlashing">
+      <span class="banner-pulse"></span>
+      <span class="banner-text">{{ recentActionText || ('ACTIVE: ' + activeMode) }}</span>
+    </div>
+
+    <!-- Telemetry Deck (Face Mesh & EAR Openness Meters) -->
+    <div class="telemetry-deck">
+      <!-- Left Eye Aspect Ratio Meter -->
+      <div class="ear-column">
+        <span class="ear-label">L-EYE</span>
+        <div class="ear-gauge-well">
+          <div class="ear-gauge-fill" [style.height.%]="(telemetry.leftEar * 280)" [class.blink-active]="telemetry.isLeftBlinking"></div>
+          <div class="threshold-line" title="Blink Threshold (0.20)"></div>
+        </div>
+        <span class="ear-state" [class.blinking]="telemetry.isLeftBlinking">
+          {{ telemetry.isLeftBlinking ? 'CLOSED' : ((telemetry.leftEar * 100) | number:'1.0-0') + '%' }}
+        </span>
+      </div>
+
+      <!-- Holographic Face Mesh Canvas with Live Pupils -->
+      <div class="mesh-canvas-deck">
+        <canvas #faceCanvas width="140" height="100" class="face-wireframe-canvas"></canvas>
+        <div class="crosshair-center"></div>
+        <div class="yaw-pitch-overlay">
+          <span>Y: {{ telemetry.headYaw > 0 ? '+' : '' }}{{ telemetry.headYaw }}</span>
+          <span>P: {{ telemetry.headPitch > 0 ? '+' : '' }}{{ telemetry.headPitch }}</span>
+        </div>
+      </div>
+
+      <!-- Right Eye Aspect Ratio Meter -->
+      <div class="ear-column">
+        <span class="ear-label">R-EYE</span>
+        <div class="ear-gauge-well">
+          <div class="ear-gauge-fill" [style.height.%]="(telemetry.rightEar * 280)" [class.blink-active]="telemetry.isRightBlinking"></div>
+          <div class="threshold-line" title="Blink Threshold (0.20)"></div>
+        </div>
+        <span class="ear-state" [class.blinking]="telemetry.isRightBlinking">
+          {{ telemetry.isRightBlinking ? 'CLOSED' : ((telemetry.rightEar * 100) | number:'1.0-0') + '%' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- 4-Way Spatial Directional Arrow Compass -->
+    <div class="compass-section">
+      <div class="compass-diamond">
+        <!-- UP Arrow -->
+        <button 
+          class="compass-arrow arrow-up" 
+          [class.active-nod]="activeDirection === 'UP'"
+          (click)="onArrowClick('UP')" 
+          title="Navigate Up (Head Nod Up or ArrowUp)">
+          ▲
+        </button>
+
+        <div class="compass-middle-row">
+          <!-- LEFT Arrow -->
+          <button 
+            class="compass-arrow arrow-left" 
+            [class.active-nod]="activeDirection === 'LEFT'"
+            (click)="onArrowClick('LEFT')" 
+            title="Navigate Left (Head Tilt Left or ArrowLeft)">
+            ◀
+          </button>
+
+          <!-- Central Blink / Click Trigger Medallion -->
+          <button 
+            class="center-trigger-medallion" 
+            [class.blink-glow]="telemetry.isBothBlinking || isBlinkFlashing"
+            (click)="onCenterClick()" 
+            title="Trigger Click (Deliberate Blink or Ctrl+Enter)">
+            <div class="medallion-ring"></div>
+            <div class="medallion-core">
+              <span class="medallion-icon">👁️</span>
+              <span class="medallion-text">CLICK</span>
+            </div>
+          </button>
+
+          <!-- RIGHT Arrow -->
+          <button 
+            class="compass-arrow arrow-right" 
+            [class.active-nod]="activeDirection === 'RIGHT'"
+            (click)="onArrowClick('RIGHT')" 
+            title="Navigate Right (Head Tilt Right or ArrowRight)">
+            ▶
+          </button>
+        </div>
+
+        <!-- DOWN Arrow -->
+        <button 
+          class="compass-arrow arrow-down" 
+          [class.active-nod]="activeDirection === 'DOWN'"
+          (click)="onArrowClick('DOWN')" 
+          title="Navigate Down (Head Nod Down or ArrowDown)">
+          ▼
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Navigation Target Readout -->
+    <div class="target-readout-deck">
+      <div class="target-badge">
+        <span class="target-pin">🎯</span>
+        <span class="target-name" [title]="currentTarget.name">{{ currentTarget.name }}</span>
+      </div>
+    </div>
+
+    <!-- Mode & Camera Switcher Footer -->
+    <div class="panel-footer">
+      <button class="footer-btn mode-btn" (click)="cycleMode()" title="Cycle Control Modes">
+        <span>MODE:</span>
+        <strong>{{ activeMode }}</strong>
+      </button>
+
+      <button class="footer-btn cam-btn" [class.cam-active]="isCameraActive" (click)="toggleTracking()" title="Toggle Facial Tracking Camera">
+        <span class="cam-dot"></span>
+        <span>{{ isCameraActive ? 'CAM: ON' : 'CAM: OFF' }}</span>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- Floating Laser Reticle Overlay (Screen Pointer) -->
+<div 
+  class="air-laser-reticle" 
+  *ngIf="isLaserEnabled && isCameraActive && !isCollapsed"
+  [style.left.%]="telemetry.cursorX"
+  [style.top.%]="telemetry.cursorY"
+  [class.blink-active]="telemetry.isBothBlinking">
+  <div class="reticle-ring"></div>
+  <div class="reticle-core"></div>
+  <div class="reticle-crosshair ch-x"></div>
+  <div class="reticle-crosshair ch-y"></div>
+  <div class="dwell-shockwave" *ngIf="isBlinkFlashing"></div>
+</div>
