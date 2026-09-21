@@ -44,9 +44,11 @@ export class SpatialNavigationService {
   }
 
   /**
-   * Magnetic Target Snapping driven strictly by Eye Gaze screen coordinates
+   * Magnetic Target Snapping driven strictly by Nose Pointer screen coordinates.
+   * Focuses and locks onto interactive elements within 85px radius.
+   * Click execution is reserved strictly for intentional DOUBLE BLINK of the eyes.
    */
-  public updateEyeGazePointer(screenXPercent: number, screenYPercent: number): void {
+  public updatePointer(screenXPercent: number, screenYPercent: number): void {
     if (typeof window === 'undefined') return;
 
     const px = (screenXPercent / 100) * window.innerWidth;
@@ -68,31 +70,21 @@ export class SpatialNavigationService {
       }
     }
 
-    const now = performance.now();
-
     if (closestTarget) {
       if (this.currentDwellTarget !== closestTarget) {
         this.currentDwellTarget = closestTarget;
-        this.dwellStartTime = now;
         this.setFocus(closestTarget);
-      } else {
-        // Increment Dwell Progress
-        const elapsed = now - this.dwellStartTime;
-        const progress = Math.min(1.0, elapsed / this.DWELL_THRESHOLD_MS);
-        this.ngZone.run(() => this.dwellProgress$.next(progress));
-
-        if (progress >= 1.0) {
-          this.triggerCurrentTarget();
-          this.dwellStartTime = now + 400; // brief reset cooldown
-          this.ngZone.run(() => this.dwellProgress$.next(0));
-        }
       }
     } else {
       this.currentDwellTarget = null;
-      if (this.dwellProgress$.value > 0) {
-        this.ngZone.run(() => this.dwellProgress$.next(0));
-      }
     }
+  }
+
+  /**
+   * Backward-compatible alias for updatePointer
+   */
+  public updateEyeGazePointer(screenXPercent: number, screenYPercent: number): void {
+    this.updatePointer(screenXPercent, screenYPercent);
   }
 
   /**

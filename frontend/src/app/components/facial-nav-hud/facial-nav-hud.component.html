@@ -1,11 +1,11 @@
 <!-- Global Floating Cybernetic AirNav HUD -->
-<aside class="air-nav-hud-container" [class.minimized]="isCollapsed" aria-label="Facial and Arrow Navigation HUD">
+<aside class="air-nav-hud-container" [class.minimized]="isCollapsed" aria-label="Nose Pointer and Double-Blink Navigation HUD">
   
   <!-- Minimized Floating Cybernetic Pill -->
-  <div class="hud-pill" *ngIf="isCollapsed" (click)="toggleCollapse()" title="Expand Facial AirNav">
+  <div class="hud-pill" *ngIf="isCollapsed" (click)="toggleCollapse()" title="Expand Nose AirNav">
     <span class="pill-dot" [class.live]="isCameraActive"></span>
-    <span class="pill-icon">👁️</span>
-    <span class="pill-label">AIR-NAV: {{ activeMode }}</span>
+    <span class="pill-icon">👃</span>
+    <span class="pill-label">NOSE-NAV: {{ activeMode }}</span>
     <span class="pill-expand">▲</span>
   </div>
 
@@ -16,21 +16,21 @@
       <div class="header-left">
         <span class="live-beacon" [class.active]="isCameraActive"></span>
         <div class="header-titles">
-          <span class="hud-title">OCULAR AIR-NAV</span>
-          <span class="hud-subtitle">Strict Eye Movement & Blink Control</span>
+          <span class="hud-title">NOSE AIR-NAV</span>
+          <span class="hud-subtitle">Precision Nose Cursor & Double-Blink Click</span>
         </div>
       </div>
       <div class="header-actions">
-        <span class="accuracy-pill" [title]="'Sub-Pixel Accuracy: ' + telemetry.accuracyPercentage + '%'">
+        <span class="accuracy-pill" [title]="'Sub-Pixel Nose Precision: ' + telemetry.accuracyPercentage + '%'">
           🎯 {{ telemetry.accuracyPercentage }}%
         </span>
         <button class="icon-tool-btn" (click)="toggleSound()" [title]="isSoundOn ? 'Mute Audio Cues' : 'Unmute Audio'">
           {{ isSoundOn ? '🔊' : '🔇' }}
         </button>
-        <button class="icon-tool-btn" (click)="start5PointCalibration()" title="Launch 5-Point Ocular Precision Calibration">
+        <button class="icon-tool-btn" (click)="start5PointCalibration()" title="Launch 5-Point Nose Precision Calibration">
           📐
         </button>
-        <button class="icon-tool-btn" (click)="calibrate()" title="Quick Calibrate Resting Baseline EAR">
+        <button class="icon-tool-btn" (click)="calibrate()" title="Quick Recenter Nose Baseline">
           🎯
         </button>
         <button class="icon-tool-btn" (click)="toggleCollapse()" title="Minimize HUD">
@@ -42,30 +42,30 @@
     <!-- Active Action Announcement Banner -->
     <div class="action-banner" [class.flashing]="isBlinkFlashing">
       <span class="banner-pulse"></span>
-      <span class="banner-text">{{ recentActionText || ('EYE GAZE: ' + telemetry.gazeDirection) }}</span>
+      <span class="banner-text">{{ recentActionText || ('NOSE POINTER: ' + telemetry.noseDirection) }}</span>
     </div>
 
-    <!-- Telemetry Deck (Face Mesh & EAR Openness Meters) -->
+    <!-- Telemetry Deck (Radar Canvas & Dual EAR Openness Meters) -->
     <div class="telemetry-deck">
       <!-- Left Eye Aspect Ratio Meter -->
       <div class="ear-column">
         <span class="ear-label">L-EYE</span>
         <div class="ear-gauge-well">
           <div class="ear-gauge-fill" [style.height.%]="(telemetry.leftEar * 280)" [class.blink-active]="telemetry.isLeftBlinking"></div>
-          <div class="threshold-line" title="Blink Threshold (0.20)"></div>
+          <div class="threshold-line" title="Blink Threshold"></div>
         </div>
         <span class="ear-state" [class.blinking]="telemetry.isLeftBlinking">
           {{ telemetry.isLeftBlinking ? 'CLOSED' : ((telemetry.leftEar * 100) | number:'1.0-0') + '%' }}
         </span>
       </div>
 
-      <!-- Holographic Face Mesh Canvas with Live Pupils -->
+      <!-- Holographic Tactical Radar Canvas with Nose Reticle -->
       <div class="mesh-canvas-deck">
         <canvas #faceCanvas width="140" height="100" class="face-wireframe-canvas"></canvas>
         <div class="crosshair-center"></div>
         <div class="yaw-pitch-overlay">
-          <span>GX: {{ telemetry.gazeX > 0 ? '+' : '' }}{{ telemetry.gazeX }}</span>
-          <span>GY: {{ telemetry.gazeY > 0 ? '+' : '' }}{{ telemetry.gazeY }}</span>
+          <span>NX: {{ telemetry.noseX > 0 ? '+' : '' }}{{ telemetry.noseX }}</span>
+          <span>NY: {{ telemetry.noseY > 0 ? '+' : '' }}{{ telemetry.noseY }}</span>
         </div>
       </div>
 
@@ -74,7 +74,7 @@
         <span class="ear-label">R-EYE</span>
         <div class="ear-gauge-well">
           <div class="ear-gauge-fill" [style.height.%]="(telemetry.rightEar * 280)" [class.blink-active]="telemetry.isRightBlinking"></div>
-          <div class="threshold-line" title="Blink Threshold (0.20)"></div>
+          <div class="threshold-line" title="Blink Threshold"></div>
         </div>
         <span class="ear-state" [class.blinking]="telemetry.isRightBlinking">
           {{ telemetry.isRightBlinking ? 'CLOSED' : ((telemetry.rightEar * 100) | number:'1.0-0') + '%' }}
@@ -88,9 +88,9 @@
         <!-- UP Arrow -->
         <button 
           class="compass-arrow arrow-up" 
-          [class.active-nod]="activeDirection === 'UP' || telemetry.gazeDirection === 'UP'"
+          [class.active-nod]="activeDirection === 'UP' || telemetry.noseDirection === 'UP'"
           (click)="onArrowClick('UP')" 
-          title="Navigate Up (Look Up or ArrowUp)">
+          title="Navigate Up (Tilt Nose Up or ArrowUp)">
           ▲
         </button>
 
@@ -98,31 +98,31 @@
           <!-- LEFT Arrow -->
           <button 
             class="compass-arrow arrow-left" 
-            [class.active-nod]="activeDirection === 'LEFT' || telemetry.gazeDirection === 'LEFT'"
+            [class.active-nod]="activeDirection === 'LEFT' || telemetry.noseDirection === 'LEFT'"
             (click)="onArrowClick('LEFT')" 
-            title="Navigate Left (Look Left or ArrowLeft)">
+            title="Navigate Left (Turn Nose Left or ArrowLeft)">
             ◀
           </button>
 
-          <!-- Central Blink / Click Trigger Medallion -->
+          <!-- Central Double-Blink / Click Trigger Medallion -->
           <button 
             class="center-trigger-medallion" 
-            [class.blink-glow]="telemetry.isBothBlinking || isBlinkFlashing"
+            [class.blink-glow]="telemetry.isBothBlinking || isBlinkFlashing || telemetry.isFirstBlinkPending"
             (click)="onCenterClick()" 
-            title="Trigger Click (Deliberate Eye Blink or Ctrl+Enter)">
+            title="Trigger Click (Double Eye Blink or Ctrl+Enter)">
             <div class="medallion-ring"></div>
             <div class="medallion-core">
-              <span class="medallion-icon">👁️</span>
-              <span class="medallion-text">CLICK</span>
+              <span class="medallion-icon">👃</span>
+              <span class="medallion-text">DBL BLINK</span>
             </div>
           </button>
 
           <!-- RIGHT Arrow -->
           <button 
             class="compass-arrow arrow-right" 
-            [class.active-nod]="activeDirection === 'RIGHT' || telemetry.gazeDirection === 'RIGHT'"
+            [class.active-nod]="activeDirection === 'RIGHT' || telemetry.noseDirection === 'RIGHT'"
             (click)="onArrowClick('RIGHT')" 
-            title="Navigate Right (Look Right or ArrowRight)">
+            title="Navigate Right (Turn Nose Right or ArrowRight)">
             ▶
           </button>
         </div>
@@ -130,9 +130,9 @@
         <!-- DOWN Arrow -->
         <button 
           class="compass-arrow arrow-down" 
-          [class.active-nod]="activeDirection === 'DOWN' || telemetry.gazeDirection === 'DOWN'"
+          [class.active-nod]="activeDirection === 'DOWN' || telemetry.noseDirection === 'DOWN'"
           (click)="onArrowClick('DOWN')" 
-          title="Navigate Down (Look Down or ArrowDown)">
+          title="Navigate Down (Tilt Nose Down or ArrowDown)">
           ▼
         </button>
       </div>
@@ -161,13 +161,13 @@
   </div>
 </aside>
 
-<!-- 5-Point Precision Ocular Calibration Wizard Overlay -->
+<!-- 5-Point Precision Nose Calibration Wizard Overlay -->
 <div class="ocular-calibration-overlay" *ngIf="isCalibratingWizard">
   <div class="calibration-backdrop"></div>
   <div class="calibration-card">
     <div class="calib-header">
       <span class="calib-badge">STEP {{ calibrationStep }} OF 5</span>
-      <h3 class="calib-title">High-Precision Eye-Gaze Calibration</h3>
+      <h3 class="calib-title">High-Precision Nose Cursor Calibration</h3>
     </div>
     
     <p class="calib-instructions">{{ calibrationPrompt }}</p>
@@ -183,9 +183,9 @@
       <div class="calib-target target-down" [class.active-target]="calibrationStep === 5">▼</div>
     </div>
 
-    <!-- Live Gaze Feedback -->
+    <!-- Live Nose Telemetry Feedback -->
     <div class="calib-telemetry-feedback">
-      <span>CURRENT GAZE: X={{ telemetry.gazeX }} | Y={{ telemetry.gazeY }}</span>
+      <span>CURRENT NOSE: X={{ telemetry.noseX }} | Y={{ telemetry.noseY }}</span>
     </div>
 
     <div class="calib-actions">
@@ -197,22 +197,16 @@
   </div>
 </div>
 
-<!-- Floating Laser Reticle Overlay (Screen Pointer) with Live Dwell Ring -->
+<!-- Floating Laser Reticle Overlay (Screen Pointer Driven Strictly by Nose) -->
 <div 
   class="air-laser-reticle" 
   *ngIf="isLaserEnabled && isCameraActive && !isCollapsed"
   [style.left.%]="telemetry.cursorX"
   [style.top.%]="telemetry.cursorY"
-  [class.blink-active]="telemetry.isBothBlinking">
+  [class.blink-active]="telemetry.isBothBlinking || isBlinkFlashing">
   <div class="reticle-ring"></div>
   <div class="reticle-core"></div>
   <div class="reticle-crosshair ch-x"></div>
   <div class="reticle-crosshair ch-y"></div>
   <div class="dwell-shockwave" *ngIf="isBlinkFlashing"></div>
-
-  <!-- Real-Time Gaze Dwell Ring Charging SVG -->
-  <svg class="dwell-progress-ring" viewBox="0 0 36 36" *ngIf="dwellProgress > 0">
-    <path class="dwell-track" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-    <path class="dwell-fill" [attr.stroke-dasharray]="(dwellProgress * 100) + ', 100'" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-  </svg>
 </div>

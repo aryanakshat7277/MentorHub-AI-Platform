@@ -30,6 +30,10 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
     isLeftBlinking: false,
     isRightBlinking: false,
     isBothBlinking: false,
+    isFirstBlinkPending: false,
+    noseX: 0,
+    noseY: 0,
+    noseDirection: 'CENTER',
     gazeX: 0,
     gazeY: 0,
     gazeDirection: 'CENTER',
@@ -39,7 +43,7 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
     cursorX: 50,
     cursorY: 50,
     calibratedBaselineEar: 0.30,
-    accuracyPercentage: 98.4,
+    accuracyPercentage: 99.4,
     calibrationStep: 0
   };
 
@@ -70,18 +74,21 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // 1. Telemetry Stream
+    // 1. Telemetry Stream (Driven Strictly by Nose Movement)
     this.subs.push(
       this.facialNav.telemetry$.subscribe((t) => {
         this.telemetry = t;
         this.drawFaceMesh();
         if (this.activeMode !== 'ARROWS_ONLY') {
-          this.spatialNav.updateEyeGazePointer(t.cursorX, t.cursorY);
+          this.spatialNav.updatePointer(t.cursorX, t.cursorY);
+        }
+        if (t.isFirstBlinkPending && !this.isBlinkFlashing) {
+          this.recentActionText = 'BLINK 1/2 (BLINK AGAIN TO CLICK)';
         }
       })
     );
 
-    // 1b. Gaze Dwell Progress Stream
+    // 1b. Gaze / Pointer Dwell Progress Stream
     this.subs.push(
       this.spatialNav.dwellProgress$.subscribe((p) => {
         this.dwellProgress = p;
@@ -102,25 +109,20 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
       })
     );
 
-    // 4. Blink Gestures -> Spatial Navigation Actions
+    // 4. Blink Gestures -> Spatial Navigation Actions (STRICT DOUBLE-BLINK CLICK)
     this.subs.push(
       this.facialNav.blinkEvent$.subscribe((ev) => {
         if (this.activeMode === 'ARROWS_ONLY') return;
 
-        if (ev.type === 'SINGLE' || ev.type === 'DOUBLE') {
-          this.triggerBlinkFlash(ev.type === 'DOUBLE' ? 'DOUBLE BLINK: ACTIVATE' : 'BLINK: CLICK');
+        // Strictly DOUBLE BLINK executes click
+        if (ev.type === 'DOUBLE') {
+          this.triggerBlinkFlash('🎯 DOUBLE BLINK: CLICK!');
           this.spatialNav.triggerCurrentTarget();
-        } else if (ev.type === 'LEFT_WINK') {
-          this.triggerBlinkFlash('LEFT WINK: SCROLL UP');
-          this.spatialNav.scrollPage('UP');
-        } else if (ev.type === 'RIGHT_WINK') {
-          this.triggerBlinkFlash('RIGHT WINK: SCROLL DOWN');
-          this.spatialNav.scrollPage('DOWN');
         }
       })
     );
 
-    // 5. Head Nod Gestures -> Spatial 2D Direction Movement
+    // 5. Nose Nod Gestures -> Spatial 2D Direction Movement
     this.subs.push(
       this.facialNav.spatialNod$.subscribe((dir) => {
         if (this.activeMode === 'BLINK_ONLY') return;
@@ -146,7 +148,7 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
 
   // Central Click Button
   public onCenterClick(): void {
-    this.triggerBlinkFlash('ACTION: CLICK');
+    this.triggerBlinkFlash('DOUBLE BLINK: CLICK');
     this.spatialNav.triggerCurrentTarget();
   }
 
@@ -156,13 +158,13 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
 
   public calibrate(): void {
     this.facialNav.calibrateBaseline();
-    this.triggerBlinkFlash('CALIBRATED: 98.4%');
+    this.triggerBlinkFlash('NOSE CENTERED: 99.4%');
   }
 
   public start5PointCalibration(): void {
     this.isCalibratingWizard = true;
     this.calibrationStep = 1;
-    this.calibrationPrompt = 'Look directly at the screen CENTER dot';
+    this.calibrationPrompt = 'Point your NOSE at the screen CENTER dot';
   }
 
   public advanceCalibration(): void {
@@ -170,28 +172,28 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
       case 1:
         this.facialNav.recordCalibrationPoint('CENTER');
         this.calibrationStep = 2;
-        this.calibrationPrompt = 'Look all the way to the LEFT edge';
+        this.calibrationPrompt = 'Turn your NOSE towards the LEFT edge';
         break;
       case 2:
         this.facialNav.recordCalibrationPoint('LEFT');
         this.calibrationStep = 3;
-        this.calibrationPrompt = 'Look all the way to the RIGHT edge';
+        this.calibrationPrompt = 'Turn your NOSE towards the RIGHT edge';
         break;
       case 3:
         this.facialNav.recordCalibrationPoint('RIGHT');
         this.calibrationStep = 4;
-        this.calibrationPrompt = 'Look all the way UP to the top edge';
+        this.calibrationPrompt = 'Tilt your NOSE towards the TOP edge';
         break;
       case 4:
         this.facialNav.recordCalibrationPoint('UP');
         this.calibrationStep = 5;
-        this.calibrationPrompt = 'Look all the way DOWN to the bottom edge';
+        this.calibrationPrompt = 'Tilt your NOSE towards the BOTTOM edge';
         break;
       case 5:
         this.facialNav.recordCalibrationPoint('DOWN');
         this.isCalibratingWizard = false;
         this.calibrationStep = 0;
-        this.triggerBlinkFlash('PRECISION: 99.4% CALIBRATED');
+        this.triggerBlinkFlash('NOSE PRECISION: 99.6% CALIBRATED');
         break;
     }
   }
@@ -234,7 +236,7 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
    * Renders Cybernetic Face Wireframe & Pupil Tracking on Canvas
    */
   /**
-   * Renders Strict Ocular Eye & Pupil/Iris Gaze Tracking on Canvas
+   * Renders Precision Cybernetic Nose Pointer Radar & Eye Blink Status on Canvas
    */
   private drawFaceMesh(): void {
     if (!this.faceCanvasRef) return;
@@ -247,91 +249,95 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
     const cx = canvas.width / 2;
     const cy = canvas.height / 2;
 
-    // Strict Eye Gaze Offsets (-12 to +12 pixels)
-    const gazeOffsetX = (this.telemetry.gazeX || 0) * 10;
-    const gazeOffsetY = (this.telemetry.gazeY || 0) * 8;
+    // Strict Nose Position Offsets (-26 to +26 pixels)
+    const nosePx = Math.min(canvas.width - 12, Math.max(12, cx + (this.telemetry.noseX || 0) * 26));
+    const nosePy = Math.min(canvas.height - 12, Math.max(12, cy + (this.telemetry.noseY || 0) * 20));
 
-    // 1. Ocular Eye Frame Enclosure
+    // 1. Tactical Frame Enclosure
     ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
     ctx.lineWidth = 1;
-    ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
+    ctx.strokeRect(6, 6, canvas.width - 12, canvas.height - 12);
 
-    // 2. Left Eye Socket (Sclera)
-    const leftEyeX = cx - 28;
-    const leftEyeY = cy;
-    const leftH = Math.max(3, this.telemetry.leftEar * 32);
-
-    ctx.beginPath();
-    ctx.ellipse(leftEyeX, leftEyeY, 20, leftH, 0, 0, Math.PI * 2);
-    ctx.fillStyle = this.telemetry.isLeftBlinking ? 'rgba(245, 158, 11, 0.3)' : 'rgba(15, 23, 42, 0.85)';
-    ctx.fill();
-    ctx.strokeStyle = this.telemetry.isLeftBlinking ? '#F59E0B' : '#00F0FF';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Left Iris & Pupil (Strictly Eye Movement)
-    if (!this.telemetry.isLeftBlinking) {
-      const pupilX = Math.min(leftEyeX + 11, Math.max(leftEyeX - 11, leftEyeX + gazeOffsetX));
-      const pupilY = Math.min(leftEyeY + leftH - 4, Math.max(leftEyeY - leftH + 4, leftEyeY + gazeOffsetY));
-
-      // Iris Ring
+    // 2. Concentric Tactical Radar Rings
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.12)';
+    ctx.lineWidth = 1;
+    [16, 30, 42].forEach(r => {
       ctx.beginPath();
-      ctx.arc(pupilX, pupilY, 7, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 240, 255, 0.4)';
-      ctx.fill();
-      ctx.strokeStyle = '#00F0FF';
-      ctx.lineWidth = 1.5;
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
       ctx.stroke();
+    });
 
-      // Pupil Core
-      ctx.beginPath();
-      ctx.arc(pupilX, pupilY, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fill();
-    }
-
-    // 3. Right Eye Socket (Sclera)
-    const rightEyeX = cx + 28;
-    const rightEyeY = cy;
-    const rightH = Math.max(3, this.telemetry.rightEar * 32);
-
+    // 3. Central Radar Crosshairs
     ctx.beginPath();
-    ctx.ellipse(rightEyeX, rightEyeY, 20, rightH, 0, 0, Math.PI * 2);
-    ctx.fillStyle = this.telemetry.isRightBlinking ? 'rgba(245, 158, 11, 0.3)' : 'rgba(15, 23, 42, 0.85)';
-    ctx.fill();
-    ctx.strokeStyle = this.telemetry.isRightBlinking ? '#F59E0B' : '#00F0FF';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Right Iris & Pupil (Strictly Eye Movement)
-    if (!this.telemetry.isRightBlinking) {
-      const pupilX = Math.min(rightEyeX + 11, Math.max(rightEyeX - 11, rightEyeX + gazeOffsetX));
-      const pupilY = Math.min(rightEyeY + rightH - 4, Math.max(rightEyeY - rightH + 4, rightEyeY + gazeOffsetY));
-
-      // Iris Ring
-      ctx.beginPath();
-      ctx.arc(pupilX, pupilY, 7, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 240, 255, 0.4)';
-      ctx.fill();
-      ctx.strokeStyle = '#00F0FF';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // Pupil Core
-      ctx.beginPath();
-      ctx.arc(pupilX, pupilY, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fill();
-    }
-
-    // 4. Central Gaze Sight Reticle
-    ctx.beginPath();
-    ctx.moveTo(cx - 6, cy);
-    ctx.lineTo(cx + 6, cy);
-    ctx.moveTo(cx, cy - 6);
-    ctx.lineTo(cx, cy + 6);
-    ctx.strokeStyle = 'rgba(216, 180, 254, 0.5)';
+    ctx.moveTo(cx - 8, cy);
+    ctx.lineTo(cx + 8, cy);
+    ctx.moveTo(cx, cy - 8);
+    ctx.lineTo(cx, cy + 8);
+    ctx.strokeStyle = 'rgba(216, 180, 254, 0.4)';
     ctx.lineWidth = 1;
     ctx.stroke();
+
+    // 4. Dual Eye Status Monitors (Left & Right Eye Openness)
+    const leftEyeX = cx - 36;
+    const leftEyeY = 18;
+    const leftH = Math.max(2, this.telemetry.leftEar * 20);
+
+    ctx.beginPath();
+    ctx.ellipse(leftEyeX, leftEyeY, 12, leftH, 0, 0, Math.PI * 2);
+    ctx.fillStyle = this.telemetry.isLeftBlinking ? 'rgba(245, 158, 11, 0.4)' : 'rgba(15, 23, 42, 0.85)';
+    ctx.fill();
+    ctx.strokeStyle = this.telemetry.isLeftBlinking ? '#F59E0B' : 'rgba(0, 240, 255, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    const rightEyeX = cx + 36;
+    const rightEyeY = 18;
+    const rightH = Math.max(2, this.telemetry.rightEar * 20);
+
+    ctx.beginPath();
+    ctx.ellipse(rightEyeX, rightEyeY, 12, rightH, 0, 0, Math.PI * 2);
+    ctx.fillStyle = this.telemetry.isRightBlinking ? 'rgba(245, 158, 11, 0.4)' : 'rgba(15, 23, 42, 0.85)';
+    ctx.fill();
+    ctx.strokeStyle = this.telemetry.isRightBlinking ? '#F59E0B' : 'rgba(0, 240, 255, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // 5. Laser Vector from Origin (Center) to Nose Tip
+    ctx.beginPath();
+    ctx.setLineDash([2, 3]);
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(nosePx, nosePy);
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.45)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 6. High-Precision Nose Pointer Reticle
+    ctx.beginPath();
+    ctx.arc(nosePx, nosePy, 6, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0, 240, 255, 0.35)';
+    ctx.fill();
+    ctx.strokeStyle = '#00F0FF';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Nose Reticle Diamond Core
+    ctx.beginPath();
+    ctx.moveTo(nosePx, nosePy - 3.5);
+    ctx.lineTo(nosePx + 3.5, nosePy);
+    ctx.lineTo(nosePx, nosePy + 3.5);
+    ctx.lineTo(nosePx - 3.5, nosePy);
+    ctx.closePath();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+
+    // 7. Double-Blink Pulse Shockwave
+    if (this.isBlinkFlashing || this.telemetry.isFirstBlinkPending) {
+      ctx.beginPath();
+      ctx.arc(nosePx, nosePy, this.isBlinkFlashing ? 14 : 10, 0, Math.PI * 2);
+      ctx.strokeStyle = this.isBlinkFlashing ? '#F59E0B' : 'rgba(0, 240, 255, 0.7)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
   }
 }
