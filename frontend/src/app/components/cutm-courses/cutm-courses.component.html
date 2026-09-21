@@ -1,0 +1,540 @@
+<div class="cutm-courses-page">
+  <!-- 1. Hero Academic Banner -->
+  <div class="hero-curriculum-card elevated-3d clay-panel">
+    <div class="curriculum-ambient-bg">
+      <div class="ambient-circle c1"></div>
+      <div class="ambient-circle c2"></div>
+      <div class="ambient-line l1"></div>
+    </div>
+
+    <div class="hero-inner-content">
+      <div class="seal-and-titles">
+        <div class="university-crest-seal gold-seal-emboss">
+          <span class="crest-glyph">🏛️</span>
+          <div class="seal-ring-glint"></div>
+        </div>
+        <div class="curriculum-titles">
+          <div class="tag-row">
+            <span class="university-tag serif-title">CENTURION UNIVERSITY OF TECHNOLOGY & MANAGEMENT</span>
+            <span class="cbcs-badge serif-title">CBCS CURRICULUM FRAMEWORK</span>
+            <span class="cloud-sync-pill" [class.synced]="isCloudSynced">
+              <span class="sync-dot"></span>
+              {{ isCloudSynced ? '● LIVE CLOUD DB CONNECTED (Spring Boot JPA)' : '● CACHED EDGE SYNC (Autonomous Engine)' }}
+            </span>
+          </div>
+          <h1 class="page-main-heading serif-title">CUTM CBCS Academic Course Repository</h1>
+          <p class="curriculum-subtitle serif-title">
+            Comprehensive multi-disciplinary curriculum spanning all 5 Baskets (AECC, PCC, PEC, OE, SEC) with 92 syllabus modules, laboratory assignments, and integrated AI oral defense viva examination.
+          </p>
+        </div>
+      </div>
+
+      <!-- Live Academic Metrics Panel -->
+      <div class="academic-telemetry-deck">
+        <div class="telemetry-stat-tile">
+          <span class="tile-label serif-title">TOTAL COURSES</span>
+          <span class="tile-val serif-title">{{ courses.length }}</span>
+          <span class="tile-sub serif-title">All 5 Baskets</span>
+        </div>
+        <div class="telemetry-stat-tile">
+          <span class="tile-label serif-title">TOTAL CREDITS</span>
+          <span class="tile-val serif-title gold-text">{{ getTotalCreditsCount() }}</span>
+          <span class="tile-sub serif-title">Degree Requirement</span>
+        </div>
+        <div class="telemetry-stat-tile">
+          <span class="tile-label serif-title">SYLLABUS MODULES</span>
+          <span class="tile-val serif-title">{{ getTotalModulesCount() }}</span>
+          <span class="tile-sub serif-title">With Lab Practicals</span>
+        </div>
+        <div class="telemetry-stat-tile progress-tile">
+          <div class="tile-progress-header">
+            <span class="tile-label serif-title">CURRICULUM MASTERY</span>
+            <span class="tile-percent serif-title">{{ getOverallDegreeProgress() }}%</span>
+          </div>
+          <div class="debossed-progress-track">
+            <div class="progress-fill-bar" [style.width.%]="getOverallDegreeProgress()">
+              <div class="fill-shine"></div>
+            </div>
+          </div>
+          <span class="tile-sub serif-title">{{ getCompletedModulesTotal() }} of {{ getTotalModulesCount() }} Modules Mastered</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Basket Navigation Ribbon (Baskets I to V + ALL) -->
+  <div class="basket-navigator-strip clay-panel">
+    <div class="basket-nav-scroll">
+      <button 
+        *ngFor="let b of basketSummaries"
+        type="button"
+        class="basket-nav-pill tactile-btn-3d"
+        [class.active]="selectedBasket === b.category"
+        (click)="selectBasket(b.category)"
+      >
+        <span class="b-icon">{{ b.icon }}</span>
+        <div class="b-text-group">
+          <div class="b-top">
+            <span class="b-label serif-title">{{ b.shortLabel }}</span>
+            <span class="b-code-badge">{{ b.code }}</span>
+          </div>
+          <span class="b-meta serif-title">{{ b.courseCount }} Courses • {{ b.totalCredits }} Cr</span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- 3. Search, Filter & View Controls -->
+  <div class="controls-toolbar clay-panel elevated-card-3d">
+    <div class="search-input-box">
+      <span class="search-lens">🔍</span>
+      <input 
+        type="text" 
+        class="search-text-field serif-title" 
+        placeholder="Search courses, modules, codes (e.g. CUTM1011, Java, Kafka, Deep Learning, Cloud)..."
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearchChange()"
+      />
+      <button 
+        *ngIf="searchQuery" 
+        class="clear-search-btn" 
+        (click)="searchQuery = ''; onSearchChange()"
+        title="Clear search"
+      >✕</button>
+    </div>
+
+    <div class="filter-actions-group">
+      <!-- Semester Filter Dropdown -->
+      <div class="dropdown-wrapper">
+        <label class="dropdown-label serif-title">Semester:</label>
+        <select 
+          class="filter-select serif-title" 
+          [(ngModel)]="selectedSemester" 
+          (change)="onSemesterChange()"
+        >
+          <option value="ALL">All Semesters</option>
+          <option value="Semester 1">Semester 1</option>
+          <option value="Semester 2">Semester 2</option>
+          <option value="Semester 3">Semester 3</option>
+          <option value="Semester 4">Semester 4</option>
+          <option value="Semester 5">Semester 5</option>
+          <option value="Semester 6">Semester 6</option>
+          <option value="Semester 7">Semester 7</option>
+          <option value="Semester 8">Semester 8</option>
+        </select>
+      </div>
+
+      <!-- Bookmarked Only Filter Button -->
+      <button 
+        type="button" 
+        class="toggle-pill-btn tactile-btn-3d" 
+        [class.active]="bookmarkedOnly"
+        (click)="toggleBookmarkedFilter()"
+        title="Show only bookmarked courses"
+      >
+        <span class="pill-star">{{ bookmarkedOnly ? '★' : '☆' }}</span>
+        <span class="serif-title">Bookmarked</span>
+      </button>
+
+      <!-- View Mode Buttons -->
+      <div class="view-mode-toggle">
+        <button 
+          type="button" 
+          class="view-btn" 
+          [class.active]="viewMode === 'grid'"
+          (click)="setViewMode('grid')"
+          title="Grid View"
+        >
+          ⊞
+        </button>
+        <button 
+          type="button" 
+          class="view-btn" 
+          [class.active]="viewMode === 'detailed'"
+          (click)="setViewMode('detailed')"
+          title="Detailed Syllabus View"
+        >
+          ☰
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Summary Bar -->
+  <div class="filter-feedback-row" *ngIf="selectedBasket !== 'ALL' || searchQuery || selectedSemester !== 'ALL' || bookmarkedOnly">
+    <span class="feedback-text serif-title">
+      Showing <strong>{{ filteredCourses.length }}</strong> of {{ courses.length }} courses matching criteria
+    </span>
+    <button 
+      class="reset-filters-btn serif-title" 
+      (click)="selectedBasket = 'ALL'; searchQuery = ''; selectedSemester = 'ALL'; bookmarkedOnly = false; applyFilters()"
+    >
+      Reset All Filters ✕
+    </button>
+  </div>
+
+  <!-- 4. Course Catalog Content (Grid Mode) -->
+  <div *ngIf="viewMode === 'grid' && filteredCourses.length > 0" class="courses-grid-layout">
+    <div 
+      *ngFor="let course of filteredCourses" 
+      class="course-card clay-panel elevated-card-3d"
+      [class.bookmarked-card]="course.isBookmarked"
+    >
+      <!-- Card Header -->
+      <div class="card-top-bar">
+        <div class="basket-and-credits">
+          <span 
+            class="basket-badge" 
+            [style.background]="getBasketColor(course.basketCategory) + '22'"
+            [style.color]="getBasketColor(course.basketCategory)"
+            [style.borderColor]="getBasketColor(course.basketCategory) + '55'"
+          >
+            {{ getBasketShortLabel(course.basketCategory) }} • {{ course.basketCategory.replace('_', ' ') }}
+          </span>
+          <span class="credits-pill serif-title">⭐ {{ course.credits }} Credits</span>
+        </div>
+
+        <button 
+          type="button" 
+          class="bookmark-icon-btn" 
+          [class.active]="course.isBookmarked"
+          (click)="toggleBookmark(course, $event)"
+          [title]="course.isBookmarked ? 'Remove Bookmark' : 'Bookmark this course'"
+        >
+          {{ course.isBookmarked ? '★' : '☆' }}
+        </button>
+      </div>
+
+      <!-- Course Identifier & Code -->
+      <div class="code-and-title">
+        <div class="code-pill-row">
+          <button 
+            type="button" 
+            class="course-code-pill tactile-btn-3d" 
+            (click)="copyCourseCode(course.courseCode, $event)"
+            title="Click to copy Course Code"
+          >
+            <span class="code-text">{{ course.courseCode }}</span>
+            <span class="copy-icon">{{ copiedCode === course.courseCode ? '✓ Copied' : '📋' }}</span>
+          </button>
+          <span class="ltp-pill serif-title">L-T-P: {{ course.ltp }}</span>
+          <span class="sem-pill serif-title">{{ course.semester }}</span>
+        </div>
+
+        <h3 class="course-heading serif-title" (click)="openCourseModal(course, $event)">
+          {{ course.courseTitle }}
+        </h3>
+      </div>
+
+      <!-- Description & Prerequisites -->
+      <p class="course-desc serif-title">{{ course.description }}</p>
+
+      <div class="prereq-box" *ngIf="course.prerequisites && course.prerequisites !== 'None'">
+        <span class="prereq-label serif-title">Prerequisites:</span>
+        <span class="prereq-val serif-title">{{ course.prerequisites }}</span>
+      </div>
+
+      <!-- Progress Tracking Bar -->
+      <div class="card-progress-zone">
+        <div class="progress-info-row">
+          <span class="p-label serif-title">MODULE COMPLETION</span>
+          <span class="p-value serif-title">
+            {{ (course.completedModules?.length || 0) }} / {{ course.modules?.length || 5 }} Modules ({{ getCourseCompletionPercentage(course) }}%)
+          </span>
+        </div>
+        <div class="debossed-track-mini">
+          <div 
+            class="track-fill" 
+            [style.width.%]="getCourseCompletionPercentage(course)"
+            [style.background]="getBasketColor(course.basketCategory)"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Card Action Buttons -->
+      <div class="card-footer-actions">
+        <button 
+          type="button" 
+          class="accordion-toggle-btn tactile-btn-3d serif-title"
+          (click)="toggleExpandCourse(course.id)"
+        >
+          <span>{{ isCourseExpanded(course.id) ? '▲ Hide Modules' : '▼ Syllabus Modules (' + (course.modules?.length || 5) + ')' }}</span>
+        </button>
+
+        <div class="action-btn-cluster">
+          <button 
+            type="button" 
+            class="dossier-btn tactile-btn-3d serif-title"
+            (click)="openCourseModal(course, $event)"
+            title="Inspect full university syllabus dossier"
+          >
+            📜 Dossier
+          </button>
+
+          <button 
+            type="button" 
+            class="viva-launch-btn tactile-btn-3d serif-title"
+            (click)="launchVivaDefense(course, undefined, $event)"
+            title="Launch AI Mock Viva Defense examination for this course"
+          >
+            🎙️ AI Viva
+          </button>
+        </div>
+      </div>
+
+      <!-- 5. Expandable Modules Accordion -->
+      <div *ngIf="isCourseExpanded(course.id)" class="modules-accordion-drawer">
+        <div class="drawer-header">
+          <span class="drawer-title serif-title">📖 Formal CUTM Module Syllabus & Practical Labs</span>
+          <span class="drawer-sub serif-title">Click checkbox to record your progress</span>
+        </div>
+
+        <div class="modules-list">
+          <div 
+            *ngFor="let mod of course.modules" 
+            class="module-item-card"
+            [class.completed-module]="isModuleCompleted(course, mod.moduleNumber)"
+          >
+            <div class="mod-top-line">
+              <label class="custom-checkbox-container" (click)="$event.stopPropagation()">
+                <input 
+                  type="checkbox" 
+                  [checked]="isModuleCompleted(course, mod.moduleNumber)"
+                  (change)="toggleModuleComplete(course.id, mod.moduleNumber, $event)"
+                />
+                <span class="checkmark-box"></span>
+              </label>
+
+              <div class="mod-heading-group">
+                <span class="mod-num serif-title">MODULE {{ mod.moduleNumber }}</span>
+                <h4 class="mod-title serif-title">{{ mod.moduleTitle }}</h4>
+              </div>
+
+              <button 
+                type="button" 
+                class="mod-viva-pill tactile-btn-3d serif-title"
+                (click)="launchVivaDefense(course, mod, $event)"
+                title="Practice AI Viva questions for this module"
+              >
+                🎙️ Viva Test
+              </button>
+            </div>
+
+            <div class="mod-details-grid">
+              <div class="mod-topics-col">
+                <span class="section-tag serif-title">📚 Theoretical Topics:</span>
+                <p class="topics-text serif-title">{{ mod.topics }}</p>
+              </div>
+
+              <div class="mod-lab-col" *ngIf="mod.practicalLabWork">
+                <span class="section-tag serif-title">🔬 Practical / Lab Assignment:</span>
+                <p class="lab-text serif-title">{{ mod.practicalLabWork }}</p>
+              </div>
+
+              <div class="mod-viva-col" *ngIf="mod.vivaQuestions">
+                <span class="section-tag serif-title">🎙️ Sample Viva Examination Queries:</span>
+                <p class="viva-questions-text serif-title">{{ mod.vivaQuestions }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4b. Course Catalog Content (Detailed Table Mode) -->
+  <div *ngIf="viewMode === 'detailed' && filteredCourses.length > 0" class="detailed-table-container clay-panel elevated-card-3d">
+    <table class="cutm-syllabus-table">
+      <thead>
+        <tr>
+          <th class="serif-title">Code</th>
+          <th class="serif-title">Course Title</th>
+          <th class="serif-title">Basket</th>
+          <th class="serif-title">Credits</th>
+          <th class="serif-title">L-T-P</th>
+          <th class="serif-title">Semester</th>
+          <th class="serif-title">Progress</th>
+          <th class="serif-title">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let course of filteredCourses" class="table-course-row">
+          <td>
+            <span class="table-code-pill serif-title" (click)="copyCourseCode(course.courseCode)">
+              {{ course.courseCode }}
+            </span>
+          </td>
+          <td>
+            <div class="table-title-cell">
+              <strong class="course-name-link serif-title" (click)="openCourseModal(course)">
+                {{ course.courseTitle }}
+              </strong>
+              <span class="table-dept serif-title">{{ course.department }}</span>
+            </div>
+          </td>
+          <td>
+            <span 
+              class="table-basket-tag"
+              [style.color]="getBasketColor(course.basketCategory)"
+            >
+              {{ getBasketShortLabel(course.basketCategory) }}
+            </span>
+          </td>
+          <td class="serif-title"><strong>{{ course.credits }}</strong></td>
+          <td class="serif-title">{{ course.ltp }}</td>
+          <td class="serif-title">{{ course.semester }}</td>
+          <td>
+            <div class="table-progress-cell">
+              <span class="prog-digits serif-title">{{ getCourseCompletionPercentage(course) }}%</span>
+              <div class="mini-bar">
+                <div class="mini-fill" [style.width.%]="getCourseCompletionPercentage(course)"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="table-btn-row">
+              <button 
+                class="table-act-btn icon-only" 
+                [class.active]="course.isBookmarked"
+                (click)="toggleBookmark(course, $event)"
+                title="Bookmark"
+              >
+                {{ course.isBookmarked ? '★' : '☆' }}
+              </button>
+              <button 
+                class="table-act-btn dossier-style serif-title" 
+                (click)="openCourseModal(course, $event)"
+                title="Inspect Syllabus Dossier"
+              >
+                📜
+              </button>
+              <button 
+                class="table-act-btn viva-style serif-title" 
+                (click)="launchVivaDefense(course, undefined, $event)"
+                title="Launch AI Viva Defense"
+              >
+                🎙️ Viva
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="filteredCourses.length === 0" class="empty-state-card clay-panel elevated-card-3d">
+    <div class="empty-icon gold-seal-emboss">🔍</div>
+    <h3 class="serif-title">No CUTM Courses Found</h3>
+    <p class="serif-title">
+      No courses matched your current filter criteria "{{ searchQuery || selectedBasket }}".
+    </p>
+    <button 
+      class="reset-action-btn tactile-btn-3d serif-title"
+      (click)="selectedBasket = 'ALL'; searchQuery = ''; selectedSemester = 'ALL'; bookmarkedOnly = false; applyFilters()"
+    >
+      Reset Filters & View All 20 Courses
+    </button>
+  </div>
+
+  <!-- 6. Detailed Course Syllabus Dossier Modal -->
+  <div *ngIf="activeCourseModal" class="dossier-modal-backdrop" (click)="closeCourseModal()">
+    <div class="dossier-modal-window elevated-3d clay-panel" (click)="$event.stopPropagation()">
+      <div class="modal-top-bar">
+        <div class="modal-crest-row">
+          <span class="modal-crest-icon">🏛️</span>
+          <div>
+            <span class="modal-basket-tag serif-title">
+              {{ activeCourseModal.basketName }} ({{ activeCourseModal.courseCode }})
+            </span>
+            <h2 class="modal-course-title serif-title">{{ activeCourseModal.courseTitle }}</h2>
+          </div>
+        </div>
+        <button class="modal-close-btn" (click)="closeCourseModal()">✕</button>
+      </div>
+
+      <div class="modal-body-content">
+        <!-- Specs Bar -->
+        <div class="specs-ribbon">
+          <div class="spec-cell">
+            <span class="sc-lbl serif-title">Department</span>
+            <span class="sc-val serif-title">{{ activeCourseModal.department }}</span>
+          </div>
+          <div class="spec-cell">
+            <span class="sc-lbl serif-title">Academic Semester</span>
+            <span class="sc-val serif-title">{{ activeCourseModal.semester }}</span>
+          </div>
+          <div class="spec-cell">
+            <span class="sc-lbl serif-title">Credits</span>
+            <span class="sc-val serif-title gold-text">{{ activeCourseModal.credits }} Credits</span>
+          </div>
+          <div class="spec-cell">
+            <span class="sc-lbl serif-title">Structure (L-T-P)</span>
+            <span class="sc-val serif-title">{{ activeCourseModal.ltp }}</span>
+          </div>
+          <div class="spec-cell">
+            <span class="sc-lbl serif-title">Prerequisites</span>
+            <span class="sc-val serif-title">{{ activeCourseModal.prerequisites }}</span>
+          </div>
+        </div>
+
+        <div class="course-statement-box">
+          <h4 class="serif-title">Academic Description & Learning Objectives</h4>
+          <p class="serif-title">{{ activeCourseModal.description }}</p>
+        </div>
+
+        <!-- Full Modules Detailed Breakdown -->
+        <div class="modal-modules-section">
+          <h4 class="serif-title section-headline">Curriculum Modules ({{ activeCourseModal.modules?.length || 5 }} Units)</h4>
+
+          <div class="modal-modules-stack">
+            <div *ngFor="let mod of activeCourseModal.modules" class="modal-mod-card">
+              <div class="mod-card-top">
+                <span class="mod-pill serif-title">Module {{ mod.moduleNumber }}</span>
+                <h5 class="mod-name serif-title">{{ mod.moduleTitle }}</h5>
+                <button 
+                  class="mod-viva-quick-btn tactile-btn-3d serif-title"
+                  (click)="launchVivaDefense(activeCourseModal, mod)"
+                >
+                  🎙️ AI Viva Defense
+                </button>
+              </div>
+
+              <div class="mod-split-details">
+                <div class="split-block">
+                  <span class="split-title serif-title">Theoretical Concepts:</span>
+                  <p class="serif-title">{{ mod.topics }}</p>
+                </div>
+
+                <div class="split-block" *ngIf="mod.practicalLabWork">
+                  <span class="split-title serif-title">Laboratory Experiments & Code:</span>
+                  <p class="serif-title">{{ mod.practicalLabWork }}</p>
+                </div>
+
+                <div class="split-block" *ngIf="mod.vivaQuestions">
+                  <span class="split-title serif-title">Examiner Viva Assessment Queries:</span>
+                  <p class="serif-title">{{ mod.vivaQuestions }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer-bar">
+        <button 
+          class="modal-secondary-btn tactile-btn-3d serif-title"
+          (click)="copyCourseCode(activeCourseModal.courseCode)"
+        >
+          📋 Copy Course Code
+        </button>
+        <button 
+          class="modal-primary-btn tactile-btn-3d serif-title"
+          (click)="launchVivaDefense(activeCourseModal)"
+        >
+          🎓 Launch Full Course Oral Defense
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

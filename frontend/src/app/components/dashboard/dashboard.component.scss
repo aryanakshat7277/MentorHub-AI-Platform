@@ -1688,4 +1688,155 @@
   }
 }
 
+/* ── CUTM CBCS CURRICULUM DASHBOARD BANNER ── */
+.cutm-dash-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  padding: 24px 32px;
+  background: linear-gradient(135deg, rgba(32, 25, 22, 0.95) 0%, rgba(20, 16, 14, 0.98) 100%);
+  border: 1.5px solid rgba(222, 112, 72, 0.35);
+  box-shadow: 
+    0 14px 34px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+
+  .cutm-banner-glow {
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    right: 5%;
+    top: -50px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(222, 112, 72, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cutm-banner-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+    min-width: 280px;
+
+    .cutm-seal-icon {
+      width: 58px;
+      height: 58px;
+      min-width: 58px;
+      min-height: 58px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #F9E7B3 0%, #D4AF37 45%, #AA7A1E 75%, #F9E7B3 100%);
+      box-shadow: 0 8px 20px rgba(212, 175, 55, 0.35);
+      font-size: 26px;
+    }
+
+    .cutm-banner-text {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      .banner-top-badges {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+
+        .univ-pill {
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 1px;
+          color: #D4AF37;
+        }
+
+        .basket-counter-pill {
+          font-size: 10px;
+          font-weight: 800;
+          color: #DE7048;
+          background: rgba(222, 112, 72, 0.15);
+          border: 1px solid rgba(222, 112, 72, 0.3);
+          padding: 2px 7px;
+          border-radius: 4px;
+        }
+
+        .cloud-db-pill {
+          font-size: 9.5px;
+          font-weight: 800;
+          color: #34D399;
+          background: rgba(16, 185, 129, 0.12);
+          border: 1px solid rgba(16, 185, 129, 0.3);
+          padding: 2px 7px;
+          border-radius: 4px;
+        }
+      }
+
+      .cutm-banner-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: #F7EFE8;
+        margin: 0;
+        line-height: 1.2;
+      }
+
+      .cutm-banner-desc {
+        font-size: 13px;
+        line-height: 1.45;
+        color: rgba(247, 239, 232, 0.7);
+        margin: 0;
+        max-width: 650px;
+      }
+    }
+  }
+
+  .cutm-banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    .cutm-action-primary {
+      background: linear-gradient(135deg, #DE7048 0%, #B35E17 100%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(222, 112, 72, 0.4);
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(222, 112, 72, 0.6);
+      }
+    }
+
+    .cutm-action-secondary {
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      color: #F9E7B3;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(212, 175, 55, 0.25);
+        color: #FFFFFF;
+      }
+    }
+  }
+}
+
+
 

@@ -158,6 +158,60 @@ export class MockVivaComponent implements OnInit, OnDestroy {
     this.initSpeechRecognition();
 
     this.route.queryParams.subscribe(params => {
+      if (params['courseCode']) {
+        const code = params['courseCode'];
+        const title = params['courseTitle'] || 'CUTM Course Viva Defense';
+        const topic = params['topic'] || 'Syllabus & Core Theory';
+        const cutmTrack: VivaTrack = {
+          id: `cutm-${code.toLowerCase()}`,
+          title: `${code}: ${title}`,
+          subtitle: `Centurion University CBCS Oral Defense • ${topic}`,
+          icon: '🏛️',
+          description: `Specialized oral viva defense evaluating conceptual depth, code architecture, and practical execution for CUTM course ${code}.`,
+          estimatedMinutes: 8,
+          totalQuestions: 3,
+          tags: ['CUTM CBCS', code, 'Oral Defense', 'University Exam'],
+          questions: [
+            {
+              id: 1,
+              topic: `${topic} - Core Principles & Foundations`,
+              difficulty: 'Standard',
+              assignedExaminerId: 'akshat',
+              question: `Analyze the core engineering paradigms of ${title}. What fundamental challenges does this subject address in modern computing systems?`,
+              keyConcepts: ['principles', 'architecture', 'scalability', 'complexity', 'trade-offs'],
+              hint: `Focus on foundational concepts, practical use-cases, and time/space or operational trade-offs.`,
+              modelAnswer: `In the CUTM CBCS curriculum, ${title} establishes foundational competencies. The subject addresses design efficiency, systemic constraints, algorithm correctness, and real-world deployment challenges.`,
+              commonPitfalls: ['Providing dictionary definitions without real-world application context'],
+              followUpPrompt: `How would you prove this system's scalability or reliability under high concurrent workloads?`
+            },
+            {
+              id: 2,
+              topic: `${topic} - Practical Implementation & Optimization`,
+              difficulty: 'Advanced',
+              assignedExaminerId: 'marcus',
+              question: `In laboratory experiments for ${code}, what architectural pattern or algorithmic data structure delivers optimal throughput? Explain the implementation bottlenecks.`,
+              keyConcepts: ['implementation', 'optimization', 'concurrency', 'memory', 'throughput'],
+              hint: `Reference specific laboratory assignments and design choices made during implementation.`,
+              modelAnswer: `Practical realization requires isolating memory allocations, avoiding lock contention, and selecting algorithmic invariants that guarantee optimal asymptotic bounds under worst-case inputs.`,
+              commonPitfalls: ['Ignoring edge cases and race conditions in concurrent execution']
+            },
+            {
+              id: 3,
+              topic: `${topic} - Production Capstone & Academic Defense`,
+              difficulty: 'Defense Grill',
+              assignedExaminerId: 'sophia',
+              question: `Defend your design choices for a production deployment of ${title}. Why would this approach be favored over industry-standard alternatives?`,
+              keyConcepts: ['production', 'defense', 'comparative analysis', 'fault tolerance', 'cost'],
+              hint: `Contrast with alternative frameworks and defend architectural trade-offs using quantitative reasoning.`,
+              modelAnswer: `The architecture prioritizes deterministic latency, fault tolerance, and modular decoupling. Compared to alternatives, it significantly minimizes operational overhead while maintaining formal correctness.`,
+              commonPitfalls: ['Failing to defend trade-offs when challenged on resource consumption']
+            }
+          ]
+        };
+        this.tracks = [cutmTrack, ...this.tracks.filter(t => t.id !== cutmTrack.id)];
+        this.selectedTrack = cutmTrack;
+      }
+
       if (params['step'] === 'arena') {
         this.startVivaSession();
       } else if (params['step'] === 'report') {

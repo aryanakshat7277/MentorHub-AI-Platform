@@ -76,5 +76,9 @@ export const routes: Routes = [
     loadComponent: () => import('./components/mock-viva/mock-viva.component').then(m => m.MockVivaComponent),
     canActivate: [RoleGuard(['MENTOR', 'MENTEE', 'ADMIN'])]
   },
+  { 
+    path: 'cutm-courses', 
+    loadComponent: () => import('./components/cutm-courses/cutm-courses.component').then(m => m.CutmCoursesComponent)
+  },
   { path: '**', redirectTo: 'dashboard' }
 ];
