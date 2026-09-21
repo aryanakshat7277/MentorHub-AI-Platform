@@ -31,9 +31,67 @@ export class SpatialNavigationService {
   // Spatial navigation mode
   public isSpatialModeActive$ = new BehaviorSubject<boolean>(true);
 
+  // Gaze Fixation & Dwell Progress (0.0 to 1.0)
+  public dwellProgress$ = new BehaviorSubject<number>(0);
+  private dwellStartTime = 0;
+  private currentDwellTarget: HTMLElement | null = null;
+  private readonly DWELL_THRESHOLD_MS = 800; // 800ms dwell activation
+
   constructor(private ngZone: NgZone) {
     if (typeof window !== 'undefined') {
       this.initKeyboardListener();
+    }
+  }
+
+  /**
+   * Magnetic Target Snapping driven strictly by Eye Gaze screen coordinates
+   */
+  public updateEyeGazePointer(screenXPercent: number, screenYPercent: number): void {
+    if (typeof window === 'undefined') return;
+
+    const px = (screenXPercent / 100) * window.innerWidth;
+    const py = (screenYPercent / 100) * window.innerHeight;
+
+    const candidates = this.scanInteractiveDOM();
+    let closestTarget: HTMLElement | null = null;
+    let minDistance = 85; // 85px magnetic snap radius
+
+    for (const el of candidates) {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const dist = Math.hypot(px - cx, py - cy);
+
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestTarget = el;
+      }
+    }
+
+    const now = performance.now();
+
+    if (closestTarget) {
+      if (this.currentDwellTarget !== closestTarget) {
+        this.currentDwellTarget = closestTarget;
+        this.dwellStartTime = now;
+        this.setFocus(closestTarget);
+      } else {
+        // Increment Dwell Progress
+        const elapsed = now - this.dwellStartTime;
+        const progress = Math.min(1.0, elapsed / this.DWELL_THRESHOLD_MS);
+        this.ngZone.run(() => this.dwellProgress$.next(progress));
+
+        if (progress >= 1.0) {
+          this.triggerCurrentTarget();
+          this.dwellStartTime = now + 400; // brief reset cooldown
+          this.ngZone.run(() => this.dwellProgress$.next(0));
+        }
+      }
+    } else {
+      this.currentDwellTarget = null;
+      if (this.dwellProgress$.value > 0) {
+        this.ngZone.run(() => this.dwellProgress$.next(0));
+      }
     }
   }
 

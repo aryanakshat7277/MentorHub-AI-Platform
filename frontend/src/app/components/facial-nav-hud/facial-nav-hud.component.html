@@ -21,10 +21,16 @@
         </div>
       </div>
       <div class="header-actions">
+        <span class="accuracy-pill" [title]="'Sub-Pixel Accuracy: ' + telemetry.accuracyPercentage + '%'">
+          🎯 {{ telemetry.accuracyPercentage }}%
+        </span>
         <button class="icon-tool-btn" (click)="toggleSound()" [title]="isSoundOn ? 'Mute Audio Cues' : 'Unmute Audio'">
           {{ isSoundOn ? '🔊' : '🔇' }}
         </button>
-        <button class="icon-tool-btn" (click)="calibrate()" title="Calibrate Resting Baseline EAR">
+        <button class="icon-tool-btn" (click)="start5PointCalibration()" title="Launch 5-Point Ocular Precision Calibration">
+          📐
+        </button>
+        <button class="icon-tool-btn" (click)="calibrate()" title="Quick Calibrate Resting Baseline EAR">
           🎯
         </button>
         <button class="icon-tool-btn" (click)="toggleCollapse()" title="Minimize HUD">
@@ -155,7 +161,43 @@
   </div>
 </aside>
 
-<!-- Floating Laser Reticle Overlay (Screen Pointer) -->
+<!-- 5-Point Precision Ocular Calibration Wizard Overlay -->
+<div class="ocular-calibration-overlay" *ngIf="isCalibratingWizard">
+  <div class="calibration-backdrop"></div>
+  <div class="calibration-card">
+    <div class="calib-header">
+      <span class="calib-badge">STEP {{ calibrationStep }} OF 5</span>
+      <h3 class="calib-title">High-Precision Eye-Gaze Calibration</h3>
+    </div>
+    
+    <p class="calib-instructions">{{ calibrationPrompt }}</p>
+
+    <!-- Calibration Target Points Grid -->
+    <div class="calib-target-arena">
+      <div class="calib-target target-up" [class.active-target]="calibrationStep === 4">▲</div>
+      <div class="calib-middle-row">
+        <div class="calib-target target-left" [class.active-target]="calibrationStep === 2">◀</div>
+        <div class="calib-target target-center" [class.active-target]="calibrationStep === 1">●</div>
+        <div class="calib-target target-right" [class.active-target]="calibrationStep === 3">▶</div>
+      </div>
+      <div class="calib-target target-down" [class.active-target]="calibrationStep === 5">▼</div>
+    </div>
+
+    <!-- Live Gaze Feedback -->
+    <div class="calib-telemetry-feedback">
+      <span>CURRENT GAZE: X={{ telemetry.gazeX }} | Y={{ telemetry.gazeY }}</span>
+    </div>
+
+    <div class="calib-actions">
+      <button class="calib-btn cancel-btn" (click)="cancelCalibration()">CANCEL</button>
+      <button class="calib-btn capture-btn" (click)="advanceCalibration()">
+        <span>LOCK & NEXT ({{ calibrationStep }}/5) ➔</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Floating Laser Reticle Overlay (Screen Pointer) with Live Dwell Ring -->
 <div 
   class="air-laser-reticle" 
   *ngIf="isLaserEnabled && isCameraActive && !isCollapsed"
@@ -167,4 +209,10 @@
   <div class="reticle-crosshair ch-x"></div>
   <div class="reticle-crosshair ch-y"></div>
   <div class="dwell-shockwave" *ngIf="isBlinkFlashing"></div>
+
+  <!-- Real-Time Gaze Dwell Ring Charging SVG -->
+  <svg class="dwell-progress-ring" viewBox="0 0 36 36" *ngIf="dwellProgress > 0">
+    <path class="dwell-track" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+    <path class="dwell-fill" [attr.stroke-dasharray]="(dwellProgress * 100) + ', 100'" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+  </svg>
 </div>

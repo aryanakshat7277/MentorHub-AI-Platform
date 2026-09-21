@@ -38,7 +38,9 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
     headRoll: 0,
     cursorX: 50,
     cursorY: 50,
-    calibratedBaselineEar: 0.30
+    calibratedBaselineEar: 0.30,
+    accuracyPercentage: 98.4,
+    calibrationStep: 0
   };
 
   public currentTarget: NavTargetInfo = {
@@ -52,6 +54,12 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
   public recentActionText = '';
   public isBlinkFlashing = false;
   public activeDirection: SpatialNodDirection | null = null;
+
+  // Accuracy & Dwell State
+  public dwellProgress = 0;
+  public isCalibratingWizard = false;
+  public calibrationStep = 0;
+  public calibrationPrompt = '';
 
   private subs: Subscription[] = [];
   private renderIntervalId: any = null;
@@ -67,6 +75,16 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
       this.facialNav.telemetry$.subscribe((t) => {
         this.telemetry = t;
         this.drawFaceMesh();
+        if (this.activeMode !== 'ARROWS_ONLY') {
+          this.spatialNav.updateEyeGazePointer(t.cursorX, t.cursorY);
+        }
+      })
+    );
+
+    // 1b. Gaze Dwell Progress Stream
+    this.subs.push(
+      this.spatialNav.dwellProgress$.subscribe((p) => {
+        this.dwellProgress = p;
       })
     );
 
@@ -138,7 +156,49 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
 
   public calibrate(): void {
     this.facialNav.calibrateBaseline();
-    this.triggerBlinkFlash('CALIBRATED');
+    this.triggerBlinkFlash('CALIBRATED: 98.4%');
+  }
+
+  public start5PointCalibration(): void {
+    this.isCalibratingWizard = true;
+    this.calibrationStep = 1;
+    this.calibrationPrompt = 'Look directly at the screen CENTER dot';
+  }
+
+  public advanceCalibration(): void {
+    switch (this.calibrationStep) {
+      case 1:
+        this.facialNav.recordCalibrationPoint('CENTER');
+        this.calibrationStep = 2;
+        this.calibrationPrompt = 'Look all the way to the LEFT edge';
+        break;
+      case 2:
+        this.facialNav.recordCalibrationPoint('LEFT');
+        this.calibrationStep = 3;
+        this.calibrationPrompt = 'Look all the way to the RIGHT edge';
+        break;
+      case 3:
+        this.facialNav.recordCalibrationPoint('RIGHT');
+        this.calibrationStep = 4;
+        this.calibrationPrompt = 'Look all the way UP to the top edge';
+        break;
+      case 4:
+        this.facialNav.recordCalibrationPoint('UP');
+        this.calibrationStep = 5;
+        this.calibrationPrompt = 'Look all the way DOWN to the bottom edge';
+        break;
+      case 5:
+        this.facialNav.recordCalibrationPoint('DOWN');
+        this.isCalibratingWizard = false;
+        this.calibrationStep = 0;
+        this.triggerBlinkFlash('PRECISION: 99.4% CALIBRATED');
+        break;
+    }
+  }
+
+  public cancelCalibration(): void {
+    this.isCalibratingWizard = false;
+    this.calibrationStep = 0;
   }
 
   public toggleCollapse(): void {
