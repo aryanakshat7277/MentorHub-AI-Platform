@@ -30,6 +30,9 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
     isLeftBlinking: false,
     isRightBlinking: false,
     isBothBlinking: false,
+    gazeX: 0,
+    gazeY: 0,
+    gazeDirection: 'CENTER',
     headYaw: 0,
     headPitch: 0,
     headRoll: 0,
@@ -170,6 +173,9 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
   /**
    * Renders Cybernetic Face Wireframe & Pupil Tracking on Canvas
    */
+  /**
+   * Renders Strict Ocular Eye & Pupil/Iris Gaze Tracking on Canvas
+   */
   private drawFaceMesh(): void {
     if (!this.faceCanvasRef) return;
     const canvas = this.faceCanvasRef.nativeElement;
@@ -181,74 +187,91 @@ export class FacialNavHudComponent implements OnInit, OnDestroy {
     const cx = canvas.width / 2;
     const cy = canvas.height / 2;
 
-    // Head orientation offsets
-    const ox = this.telemetry.headYaw * 20;
-    const oy = -this.telemetry.headPitch * 15;
+    // Strict Eye Gaze Offsets (-12 to +12 pixels)
+    const gazeOffsetX = (this.telemetry.gazeX || 0) * 10;
+    const gazeOffsetY = (this.telemetry.gazeY || 0) * 8;
 
-    // 1. Outer Holographic Face Oval
-    ctx.beginPath();
-    ctx.ellipse(cx + ox, cy + oy, 32, 42, (this.telemetry.headRoll || 0) * 0.5, 0, Math.PI * 2);
-    ctx.strokeStyle = this.telemetry.isBothBlinking ? '#F59E0B' : 'rgba(0, 240, 255, 0.45)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+    // 1. Ocular Eye Frame Enclosure
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
 
-    // 2. Left Eye Contour & Pupil
-    const leftEyeX = cx + ox - 14;
-    const leftEyeY = cy + oy - 8;
-    const leftH = Math.max(1, this.telemetry.leftEar * 24);
+    // 2. Left Eye Socket (Sclera)
+    const leftEyeX = cx - 28;
+    const leftEyeY = cy;
+    const leftH = Math.max(3, this.telemetry.leftEar * 32);
 
     ctx.beginPath();
-    ctx.ellipse(leftEyeX, leftEyeY, 8, leftH, 0, 0, Math.PI * 2);
-    ctx.fillStyle = this.telemetry.isLeftBlinking ? '#F59E0B' : 'rgba(0, 240, 255, 0.25)';
+    ctx.ellipse(leftEyeX, leftEyeY, 20, leftH, 0, 0, Math.PI * 2);
+    ctx.fillStyle = this.telemetry.isLeftBlinking ? 'rgba(245, 158, 11, 0.3)' : 'rgba(15, 23, 42, 0.85)';
     ctx.fill();
     ctx.strokeStyle = this.telemetry.isLeftBlinking ? '#F59E0B' : '#00F0FF';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Left Pupil
+    // Left Iris & Pupil (Strictly Eye Movement)
     if (!this.telemetry.isLeftBlinking) {
+      const pupilX = Math.min(leftEyeX + 11, Math.max(leftEyeX - 11, leftEyeX + gazeOffsetX));
+      const pupilY = Math.min(leftEyeY + leftH - 4, Math.max(leftEyeY - leftH + 4, leftEyeY + gazeOffsetY));
+
+      // Iris Ring
       ctx.beginPath();
-      ctx.arc(leftEyeX + ox * 0.2, leftEyeY + oy * 0.2, 2.5, 0, Math.PI * 2);
+      ctx.arc(pupilX, pupilY, 7, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.4)';
+      ctx.fill();
+      ctx.strokeStyle = '#00F0FF';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Pupil Core
+      ctx.beginPath();
+      ctx.arc(pupilX, pupilY, 3.5, 0, Math.PI * 2);
       ctx.fillStyle = '#FFFFFF';
       ctx.fill();
     }
 
-    // 3. Right Eye Contour & Pupil
-    const rightEyeX = cx + ox + 14;
-    const rightEyeY = cy + oy - 8;
-    const rightH = Math.max(1, this.telemetry.rightEar * 24);
+    // 3. Right Eye Socket (Sclera)
+    const rightEyeX = cx + 28;
+    const rightEyeY = cy;
+    const rightH = Math.max(3, this.telemetry.rightEar * 32);
 
     ctx.beginPath();
-    ctx.ellipse(rightEyeX, rightEyeY, 8, rightH, 0, 0, Math.PI * 2);
-    ctx.fillStyle = this.telemetry.isRightBlinking ? '#F59E0B' : 'rgba(0, 240, 255, 0.25)';
+    ctx.ellipse(rightEyeX, rightEyeY, 20, rightH, 0, 0, Math.PI * 2);
+    ctx.fillStyle = this.telemetry.isRightBlinking ? 'rgba(245, 158, 11, 0.3)' : 'rgba(15, 23, 42, 0.85)';
     ctx.fill();
     ctx.strokeStyle = this.telemetry.isRightBlinking ? '#F59E0B' : '#00F0FF';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Right Pupil
+    // Right Iris & Pupil (Strictly Eye Movement)
     if (!this.telemetry.isRightBlinking) {
+      const pupilX = Math.min(rightEyeX + 11, Math.max(rightEyeX - 11, rightEyeX + gazeOffsetX));
+      const pupilY = Math.min(rightEyeY + rightH - 4, Math.max(rightEyeY - rightH + 4, rightEyeY + gazeOffsetY));
+
+      // Iris Ring
       ctx.beginPath();
-      ctx.arc(rightEyeX + ox * 0.2, rightEyeY + oy * 0.2, 2.5, 0, Math.PI * 2);
+      ctx.arc(pupilX, pupilY, 7, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.4)';
+      ctx.fill();
+      ctx.strokeStyle = '#00F0FF';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Pupil Core
+      ctx.beginPath();
+      ctx.arc(pupilX, pupilY, 3.5, 0, Math.PI * 2);
       ctx.fillStyle = '#FFFFFF';
       ctx.fill();
     }
 
-    // 4. Nose Bridge & Directional Vector
+    // 4. Central Gaze Sight Reticle
     ctx.beginPath();
-    ctx.moveTo(cx + ox, cy + oy - 4);
-    ctx.lineTo(cx + ox, cy + oy + 8);
-    ctx.lineTo(cx + ox + (this.telemetry.headYaw * 12), cy + oy + 8);
-    ctx.strokeStyle = '#DE7048';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // 5. Mouth Line
-    ctx.beginPath();
-    ctx.moveTo(cx + ox - 10, cy + oy + 22);
-    ctx.lineTo(cx + ox + 10, cy + oy + 22);
-    ctx.strokeStyle = 'rgba(216, 180, 254, 0.6)';
-    ctx.lineWidth = 1.5;
+    ctx.moveTo(cx - 6, cy);
+    ctx.lineTo(cx + 6, cy);
+    ctx.moveTo(cx, cy - 6);
+    ctx.lineTo(cx, cy + 6);
+    ctx.strokeStyle = 'rgba(216, 180, 254, 0.5)';
+    ctx.lineWidth = 1;
     ctx.stroke();
   }
 }

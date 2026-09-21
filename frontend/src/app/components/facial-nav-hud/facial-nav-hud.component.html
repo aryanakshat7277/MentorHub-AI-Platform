@@ -16,8 +16,8 @@
       <div class="header-left">
         <span class="live-beacon" [class.active]="isCameraActive"></span>
         <div class="header-titles">
-          <span class="hud-title">CYBERNETIC AIR-NAV</span>
-          <span class="hud-subtitle">Facial Gestures & Arrow Navigation</span>
+          <span class="hud-title">OCULAR AIR-NAV</span>
+          <span class="hud-subtitle">Strict Eye Movement & Blink Control</span>
         </div>
       </div>
       <div class="header-actions">
@@ -36,7 +36,7 @@
     <!-- Active Action Announcement Banner -->
     <div class="action-banner" [class.flashing]="isBlinkFlashing">
       <span class="banner-pulse"></span>
-      <span class="banner-text">{{ recentActionText || ('ACTIVE: ' + activeMode) }}</span>
+      <span class="banner-text">{{ recentActionText || ('EYE GAZE: ' + telemetry.gazeDirection) }}</span>
     </div>
 
     <!-- Telemetry Deck (Face Mesh & EAR Openness Meters) -->
@@ -58,8 +58,8 @@
         <canvas #faceCanvas width="140" height="100" class="face-wireframe-canvas"></canvas>
         <div class="crosshair-center"></div>
         <div class="yaw-pitch-overlay">
-          <span>Y: {{ telemetry.headYaw > 0 ? '+' : '' }}{{ telemetry.headYaw }}</span>
-          <span>P: {{ telemetry.headPitch > 0 ? '+' : '' }}{{ telemetry.headPitch }}</span>
+          <span>GX: {{ telemetry.gazeX > 0 ? '+' : '' }}{{ telemetry.gazeX }}</span>
+          <span>GY: {{ telemetry.gazeY > 0 ? '+' : '' }}{{ telemetry.gazeY }}</span>
         </div>
       </div>
 
@@ -82,9 +82,9 @@
         <!-- UP Arrow -->
         <button 
           class="compass-arrow arrow-up" 
-          [class.active-nod]="activeDirection === 'UP'"
+          [class.active-nod]="activeDirection === 'UP' || telemetry.gazeDirection === 'UP'"
           (click)="onArrowClick('UP')" 
-          title="Navigate Up (Head Nod Up or ArrowUp)">
+          title="Navigate Up (Look Up or ArrowUp)">
           ▲
         </button>
 
@@ -92,9 +92,9 @@
           <!-- LEFT Arrow -->
           <button 
             class="compass-arrow arrow-left" 
-            [class.active-nod]="activeDirection === 'LEFT'"
+            [class.active-nod]="activeDirection === 'LEFT' || telemetry.gazeDirection === 'LEFT'"
             (click)="onArrowClick('LEFT')" 
-            title="Navigate Left (Head Tilt Left or ArrowLeft)">
+            title="Navigate Left (Look Left or ArrowLeft)">
             ◀
           </button>
 
@@ -103,7 +103,7 @@
             class="center-trigger-medallion" 
             [class.blink-glow]="telemetry.isBothBlinking || isBlinkFlashing"
             (click)="onCenterClick()" 
-            title="Trigger Click (Deliberate Blink or Ctrl+Enter)">
+            title="Trigger Click (Deliberate Eye Blink or Ctrl+Enter)">
             <div class="medallion-ring"></div>
             <div class="medallion-core">
               <span class="medallion-icon">👁️</span>
@@ -114,9 +114,9 @@
           <!-- RIGHT Arrow -->
           <button 
             class="compass-arrow arrow-right" 
-            [class.active-nod]="activeDirection === 'RIGHT'"
+            [class.active-nod]="activeDirection === 'RIGHT' || telemetry.gazeDirection === 'RIGHT'"
             (click)="onArrowClick('RIGHT')" 
-            title="Navigate Right (Head Tilt Right or ArrowRight)">
+            title="Navigate Right (Look Right or ArrowRight)">
             ▶
           </button>
         </div>
@@ -124,9 +124,9 @@
         <!-- DOWN Arrow -->
         <button 
           class="compass-arrow arrow-down" 
-          [class.active-nod]="activeDirection === 'DOWN'"
+          [class.active-nod]="activeDirection === 'DOWN' || telemetry.gazeDirection === 'DOWN'"
           (click)="onArrowClick('DOWN')" 
-          title="Navigate Down (Head Nod Down or ArrowDown)">
+          title="Navigate Down (Look Down or ArrowDown)">
           ▼
         </button>
       </div>
