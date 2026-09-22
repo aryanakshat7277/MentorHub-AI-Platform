@@ -47,6 +47,25 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
         WebSocketSession geminiSession = null;
         Exception lastException = null;
 
+        String requestedVoice = sessionService.getLiveVoice();
+        try {
+            if (clientSession.getUri() != null && clientSession.getUri().getQuery() != null) {
+                for (String param : clientSession.getUri().getQuery().split("&")) {
+                    String[] pair = param.split("=");
+                    if (pair.length == 2 && "voice".equalsIgnoreCase(pair[0])) {
+                        String v = pair[1].trim();
+                        if (v.equalsIgnoreCase("Aoede") || v.equalsIgnoreCase("Charon") ||
+                            v.equalsIgnoreCase("Fenrir") || v.equalsIgnoreCase("Kore") ||
+                            v.equalsIgnoreCase("Puck")) {
+                            requestedVoice = v.substring(0, 1).toUpperCase() + v.substring(1).toLowerCase();
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        final String effectiveVoice = requestedVoice;
+        logger.info("Live voice persona for client {}: {}", clientSessionId, effectiveVoice);
+
         for (int i = 0; i < apiKeys.size(); i++) {
             String apiKey = apiKeys.get(i);
             try {
@@ -56,7 +75,7 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
                 geminiSession = webSocketClient.execute(new AbstractWebSocketHandler() {
                     @Override
                     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-                        logger.info("Connected upstream to Gemini Live Bidi WebSocket for client {}", clientSessionId);
+                        logger.info("Connected upstream to Gemini Live Bidi WebSocket for client {} (Voice: {})", clientSessionId, effectiveVoice);
                         
                         String systemInstructionText = sessionService.createLiveSession("").getSystemInstruction();
                         String setupJson;
@@ -70,7 +89,7 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
                                       "speechConfig": {
                                         "voiceConfig": {
                                           "prebuiltVoiceConfig": {
-                                            "voiceName": "Puck"
+                                            "voiceName": "%s"
                                           }
                                         }
                                       }
@@ -84,7 +103,7 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
                                     }
                                   }
                                 }
-                                """, liveModel, escapeJsonString(systemInstructionText));
+                                """, liveModel, effectiveVoice, escapeJsonString(systemInstructionText));
                         } else {
                             setupJson = String.format("""
                                 {
@@ -95,14 +114,14 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
                                       "speechConfig": {
                                         "voiceConfig": {
                                           "prebuiltVoiceConfig": {
-                                            "voiceName": "Puck"
+                                            "voiceName": "%s"
                                           }
                                         }
                                       }
                                     }
                                   }
                                 }
-                                """, liveModel);
+                                """, liveModel, effectiveVoice);
                         }
                         
                         logger.info("Sending setupJson to Gemini: {}", setupJson);

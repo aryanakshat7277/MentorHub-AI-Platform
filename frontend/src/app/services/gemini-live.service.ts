@@ -25,6 +25,7 @@ export class GeminiLiveService {
   private isSetupComplete = false;
   private wsUrl = 'ws://localhost:8080/ws-ai-live';
   
+  public selectedVoice$ = new BehaviorSubject<'Aoede' | 'Charon' | 'Fenrir' | 'Kore'>('Aoede');
   public status$ = new BehaviorSubject<LiveSessionStatus>('IDLE');
   public inputTranscript$ = new BehaviorSubject<string>(''); // Kept for UI backwards compatibility, but won't populate natively
   public outputTranscript$ = new BehaviorSubject<string>('');
@@ -44,7 +45,31 @@ export class GeminiLiveService {
     private audioCapture: AudioCaptureService,
     private audioPlayback: AudioPlaybackService,
     private ngZone: NgZone
-  ) {}
+  ) {
+    this.initVoicePreference();
+  }
+
+  private initVoicePreference() {
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('mentorhub_live_voice') as 'Aoede' | 'Charon' | 'Fenrir' | 'Kore';
+      if (saved && ['Aoede', 'Charon', 'Fenrir', 'Kore'].includes(saved)) {
+        this.selectedVoice$.next(saved);
+      }
+    }
+  }
+
+  public setVoice(voice: 'Aoede' | 'Charon' | 'Fenrir' | 'Kore') {
+    this.selectedVoice$.next(voice);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('mentorhub_live_voice', voice);
+    }
+    if (this.status$.value === 'CONNECTED' || this.status$.value === 'LISTENING' || this.status$.value === 'SPEAKING') {
+      if (this.ws) {
+        try { this.ws.close(); } catch {}
+      }
+      this.connectWebSocket();
+    }
+  }
 
   private startHeartbeatMonitor() {
     this.stopHeartbeatMonitor();
@@ -95,7 +120,9 @@ export class GeminiLiveService {
 
   private connectWebSocket() {
     try {
-      this.ws = new WebSocket(this.wsUrl);
+      const voice = this.selectedVoice$.value || 'Aoede';
+      const connectionUrl = `${this.wsUrl}?voice=${voice}`;
+      this.ws = new WebSocket(connectionUrl);
 
       this.ws.onopen = () => {
         this.ngZone.run(() => {

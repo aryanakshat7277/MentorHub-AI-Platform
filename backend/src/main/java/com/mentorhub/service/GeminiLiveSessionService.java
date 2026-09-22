@@ -18,6 +18,9 @@ public class GeminiLiveSessionService {
     @Value("${ai.gemini.live-model:gemini-3.1-flash-live-preview}")
     private String liveModel;
 
+    @Value("${ai.gemini.live-voice:Aoede}")
+    private String liveVoice;
+
     private final MentorHubBrainService brainService;
 
     public GeminiLiveSessionService(MentorHubBrainService brainService) {
@@ -64,5 +67,9 @@ public class GeminiLiveSessionService {
 
     public String getLiveModel() {
         return liveModel;
+    }
+
+    public String getLiveVoice() {
+        return (liveVoice != null && !liveVoice.trim().isEmpty()) ? liveVoice.trim() : "Aoede";
     }
 }

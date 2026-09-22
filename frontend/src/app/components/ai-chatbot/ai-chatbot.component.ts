@@ -47,6 +47,15 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   liveStatus: LiveSessionStatus = 'IDLE';
   isLiveVoiceActive = false;
 
+  // Professional Voice Persona (Gemini Live & Speech Synthesis)
+  currentLiveVoice: 'Aoede' | 'Charon' | 'Fenrir' | 'Kore' = 'Aoede';
+  availableVoicePersonas = [
+    { id: 'Aoede' as const, name: 'Aoede', title: 'Executive Academic', gender: 'Female', desc: 'Warm, articulate, confident & refined diction', icon: '✨' },
+    { id: 'Charon' as const, name: 'Charon', title: 'Senior Scholar', gender: 'Male', desc: 'Composed, deep, informative & reassuring', icon: '🏛️' },
+    { id: 'Fenrir' as const, name: 'Fenrir', title: 'Principal Architect', gender: 'Male', desc: 'Resonant, authoritative & decisive', icon: '⚙️' },
+    { id: 'Kore' as const, name: 'Kore', title: 'Empathetic Mentor', gender: 'Female', desc: 'Calm, gentle, clear & encouraging', icon: '🌿' }
+  ];
+
   Math = Math;
   // Audio-reactive visualizer volume (0..1)
   userVolumeRms = 0;
@@ -113,6 +122,18 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.isLiveVoiceActive = status !== 'IDLE' && status !== 'ENDED';
       this.scrollToBottom();
     });
+
+    this.liveService.selectedVoice$.subscribe(voice => {
+      this.currentLiveVoice = voice;
+    });
+
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+      // Pre-warm voices
+      window.speechSynthesis.getVoices();
+    }
 
     this.transcriptSub = this.liveService.transcriptEvent$.subscribe(event => {
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -328,6 +349,50 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     });
   }
 
+  selectLiveVoice(voiceId: 'Aoede' | 'Charon' | 'Fenrir' | 'Kore') {
+    this.currentLiveVoice = voiceId;
+    this.liveService.setVoice(voiceId);
+    const persona = this.availableVoicePersonas.find(p => p.id === voiceId);
+    this.showToast(`🎙️ Voice persona updated to ${persona?.name} (${persona?.title})`);
+  }
+
+  private getBestProfessionalVoice(): SpeechSynthesisVoice | null {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices || voices.length === 0) return null;
+
+    // 1. High-fidelity Natural / Neural voices (Edge / Azure Online)
+    const naturalVoice = voices.find(v => 
+      v.lang.startsWith('en') && 
+      (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Online'))
+    );
+    if (naturalVoice) return naturalVoice;
+
+    // 2. Google High-Fidelity English voices (Chrome)
+    const googleVoice = voices.find(v => 
+      v.lang.startsWith('en') && 
+      (v.name.includes('Google UK English Female') || v.name.includes('Google US English') || v.name.includes('Google'))
+    );
+    if (googleVoice) return googleVoice;
+
+    // 3. Apple studio voices
+    const appleVoice = voices.find(v => 
+      v.lang.startsWith('en') && 
+      (v.name.includes('Samantha') || v.name.includes('Daniel') || v.name.includes('Karen') || v.name.includes('Victoria'))
+    );
+    if (appleVoice) return appleVoice;
+
+    // 4. Clear studio voices (Zira, Aria, Jenny, Guy)
+    const studioVoice = voices.find(v => 
+      v.lang.startsWith('en') && 
+      (v.name.includes('Zira') || v.name.includes('Aria') || v.name.includes('Jenny') || v.name.includes('Guy'))
+    );
+    if (studioVoice) return studioVoice;
+
+    // 5. Fallback: any English voice
+    return voices.find(v => v.lang.startsWith('en')) || null;
+  }
+
   speakVoiceResponse(text: string) {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
@@ -347,7 +412,13 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = 'en-US';
-    utterance.rate = 1.05;
+    utterance.rate = 0.98; // Well-paced, natural, articulate cadence
+    utterance.pitch = 1.0;
+
+    const professionalVoice = this.getBestProfessionalVoice();
+    if (professionalVoice) {
+      utterance.voice = professionalVoice;
+    }
 
     utterance.onstart = () => {
       this.isSpeakingAudio = true;

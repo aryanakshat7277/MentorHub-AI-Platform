@@ -317,7 +317,10 @@ export class MockVivaComponent implements OnInit, OnDestroy {
     utterance.pitch = this.selectedExaminer.voicePitch || 1.0;
     
     const voices = window.speechSynthesis.getVoices();
-    const englishVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('David') || v.name.includes('Zira')));
+    const naturalVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Online')));
+    const googleVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Google UK English Female') || v.name.includes('Google US English') || v.name.includes('Google')));
+    const studioVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Zira') || v.name.includes('Samantha') || v.name.includes('Jenny') || v.name.includes('Aria') || v.name.includes('Guy')));
+    const englishVoice = naturalVoice || googleVoice || studioVoice || voices.find(v => v.lang.startsWith('en'));
     if (englishVoice) {
       utterance.voice = englishVoice;
     }
@@ -666,7 +669,10 @@ GROUP BY m.id;`;
     utterance.pitch = 1.0;
 
     const voices = window.speechSynthesis.getVoices();
-    const englishVoice = voices.find(v => v.lang.startsWith('en'));
+    const naturalVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Online')));
+    const googleVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Google UK English Female') || v.name.includes('Google US English') || v.name.includes('Google')));
+    const studioVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Zira') || v.name.includes('Samantha') || v.name.includes('Jenny')));
+    const englishVoice = naturalVoice || googleVoice || studioVoice || voices.find(v => v.lang.startsWith('en'));
     if (englishVoice) utterance.voice = englishVoice;
 
     this.isPlayingModelAnswer = true;
