@@ -292,7 +292,7 @@
         <div class="progress-info-row">
           <span class="p-label serif-title">MODULE COMPLETION</span>
           <span class="p-value serif-title">
-            {{ (course.completedModules?.length || 0) }} / {{ course.modules?.length || 5 }} Modules ({{ getCourseCompletionPercentage(course) }}%)
+            {{ (course.completedModules?.length || 0) }} / {{ course.modules?.length || 0 }} Modules ({{ getCourseCompletionPercentage(course) }}%)
           </span>
         </div>
         <div class="debossed-track-mini">
@@ -311,7 +311,7 @@
           class="accordion-toggle-btn tactile-btn-3d serif-title"
           (click)="toggleExpandCourse(course.id)"
         >
-          <span>{{ isCourseExpanded(course.id) ? '▲ Hide Modules' : '▼ Syllabus Modules (' + (course.modules?.length || 5) + ')' }}</span>
+          <span>{{ isCourseExpanded(course.id) ? '▲ Hide Modules' : '▼ Syllabus Modules (' + (course.modules?.length || 0) + ')' }}</span>
         </button>
 
         <div class="action-btn-cluster">
@@ -602,7 +602,7 @@
 
         <!-- Full Modules Detailed Breakdown -->
         <div class="modal-modules-section">
-          <h4 class="serif-title section-headline">Curriculum Modules ({{ activeCourseModal.modules?.length || 5 }} Units)</h4>
+          <h4 class="serif-title section-headline">Curriculum Modules ({{ activeCourseModal.modules?.length || 0 }} Units)</h4>
 
           <div class="modal-modules-stack">
             <div *ngFor="let mod of activeCourseModal.modules" class="modal-mod-card">

@@ -1057,9 +1057,16 @@ export class CutmCoursesService {
                 modules = JSON.parse(bc.modulesJson);
               } catch {}
             }
+            // If backend modules contain legacy placeholder titles, prefer local authentic modules
+            const localCourse = this.coursesSubject.value.find(d => d.courseCode === bc.courseCode);
+            const isPlaceholder = modules.some(m => m.moduleTitle && m.moduleTitle.includes('Foundations & Principles of'));
+            const finalModules = (!isPlaceholder && modules.length > 0)
+              ? modules
+              : (localCourse?.modules && localCourse.modules.length > 0 ? localCourse.modules : modules);
+
             return {
               ...bc,
-              modules: modules.length > 0 ? modules : (this.coursesSubject.value.find(d => d.courseCode === bc.courseCode)?.modules || []),
+              modules: finalModules,
               isBookmarked: savedBookmarks.includes(bc.id),
               completedModules: savedProgress[bc.id] || []
             };

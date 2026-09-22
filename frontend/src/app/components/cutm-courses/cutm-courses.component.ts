@@ -261,7 +261,7 @@ export class CutmCoursesComponent implements OnInit, OnDestroy {
 
   // --- Metrics & Calculations ---
   getCourseCompletionPercentage(course: CutmCourse): number {
-    const total = course.modules?.length || 5;
+    const total = (course.modules && course.modules.length > 0) ? course.modules.length : 1;
     const completed = course.completedModules?.length || 0;
     return Math.round((completed / total) * 100);
   }

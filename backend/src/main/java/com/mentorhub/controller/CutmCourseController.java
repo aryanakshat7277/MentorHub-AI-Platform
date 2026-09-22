@@ -8,14 +8,38 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.mentorhub.config.CutmCourseDataSeeder;
+
 @RestController
 @RequestMapping({"/api/cutm-courses", "/api/v1/cutm-courses"})
 public class CutmCourseController {
 
     private final CutmCourseRepository courseRepository;
+    private final CutmCourseDataSeeder cutmCourseDataSeeder;
 
-    public CutmCourseController(CutmCourseRepository courseRepository) {
+    public CutmCourseController(CutmCourseRepository courseRepository, CutmCourseDataSeeder cutmCourseDataSeeder) {
         this.courseRepository = courseRepository;
+        this.cutmCourseDataSeeder = cutmCourseDataSeeder;
+    }
+
+    /**
+     * Reseed the CUTM courses database with authentic courseware modules
+     */
+    @PostMapping("/reseed")
+    public ResponseEntity<Map<String, Object>> reseedCatalog() {
+        try {
+            int count = cutmCourseDataSeeder.reseedData();
+            Map<String, Object> resp = new HashMap<>();
+            resp.put("success", true);
+            resp.put("message", "Catalog successfully reseeded with authentic CUTM Courseware modules");
+            resp.put("coursesLoaded", count);
+            return ResponseEntity.ok(resp);
+        } catch (Exception e) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("success", false);
+            err.put("error", e.getMessage());
+            return ResponseEntity.status(500).body(err);
+        }
     }
 
     /**
