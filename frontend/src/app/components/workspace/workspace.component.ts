@@ -418,7 +418,7 @@ print("Sorted:  ", quick_sort(unsorted))`
       }
     });
 
-    // Check if entered in Silent Co-Pilot Spectator mode or SOS Rescue mode
+    // Check if entered in Silent Co-Pilot Spectator mode, SOS Rescue mode, or CUTM Lab exercise mode
     this.route.queryParams.subscribe(params => {
       if (params['mode'] === 'spectator') {
         this.isSpectator = true;
@@ -429,7 +429,171 @@ print("Sorted:  ", quick_sort(unsorted))`
       if (params['sos'] === '1' || params['sos'] === 'true') {
         this.startSosRescueMode();
       }
+      if (params['course'] && params['lab']) {
+        this.loadCutmLabExercise(
+          params['course'],
+          params['courseTitle'] || '',
+          params['module'] ? parseInt(params['module']) : 1,
+          params['moduleTitle'] || '',
+          params['lab']
+        );
+      }
     });
+  }
+
+  loadCutmLabExercise(courseCode: string, courseTitle: string, moduleNum: number, moduleTitle: string, labWork: string) {
+    // 1. Detect target language based on course and lab description
+    const combined = (labWork + ' ' + courseTitle).toLowerCase();
+    let detectedLang = 'python';
+    if (combined.includes('c++') || combined.includes('cpp') || combined.includes('pointer') || combined.includes('stl') || combined.includes('runge-kutta')) {
+      detectedLang = 'cpp';
+    } else if (combined.includes('java') || combined.includes('spring') || combined.includes('jvm')) {
+      detectedLang = 'java';
+    } else if (combined.includes('javascript') || combined.includes('node') || combined.includes('react') || combined.includes('web')) {
+      detectedLang = 'javascript';
+    } else {
+      detectedLang = 'python';
+    }
+
+    this.activeLanguage = detectedLang;
+    const runtime = this.runtimes.find(r => r.language.toLowerCase() === detectedLang);
+    if (runtime) {
+      this.activeVersion = runtime.version;
+    }
+
+    // 2. Generate starter code template according to language
+    let starterCode = '';
+    if (detectedLang === 'python') {
+      starterCode = `"""
+================================================================================
+CENTURION UNIVERSITY OF TECHNOLOGY & MANAGEMENT
+Course: ${courseCode} - ${courseTitle}
+Module ${moduleNum}: ${moduleTitle}
+Assignment: ${labWork}
+================================================================================
+"""
+
+import sys
+
+def execute_centurion_lab():
+    print("=" * 60)
+    print("🎓 CUTM PRACTICAL EXPERIMENT RUNNER")
+    print("📘 Course: ${courseCode} | Module: ${moduleNum}")
+    print("🔬 Objective: ${labWork}")
+    print("=" * 60)
+    
+    # --- STUDENT IMPLEMENTATION BEGINS HERE ---
+    print("\\n[+] Executing algorithm simulation...")
+    
+    # Example computation test harness
+    status = "SUCCESS"
+    print(f"[✓] Experiment status: {status}")
+    print("[✓] All verification test vectors passed.")
+    # --- STUDENT IMPLEMENTATION ENDS HERE ---
+
+if __name__ == "__main__":
+    execute_centurion_lab()
+`;
+    } else if (detectedLang === 'cpp') {
+      starterCode = `/**
+ * ============================================================================
+ * CENTURION UNIVERSITY OF TECHNOLOGY & MANAGEMENT
+ * Course: ${courseCode} - ${courseTitle}
+ * Module ${moduleNum}: ${moduleTitle}
+ * Assignment: ${labWork}
+ * ============================================================================
+ */
+
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+int main() {
+    cout << "============================================================" << endl;
+    cout << "🎓 CUTM PRACTICAL EXPERIMENT RUNNER" << endl;
+    cout << "📘 Course: ${courseCode} | Module: ${moduleNum}" << endl;
+    cout << "🔬 Objective: ${labWork}" << endl;
+    cout << "============================================================" << endl;
+
+    // --- STUDENT IMPLEMENTATION HERE ---
+    cout << "\\n[+] Executing C++ algorithm test..." << endl;
+    cout << "[✓] Execution successful." << endl;
+
+    return 0;
+}
+`;
+    } else if (detectedLang === 'java') {
+      starterCode = `/**
+ * ============================================================================
+ * CENTURION UNIVERSITY OF TECHNOLOGY & MANAGEMENT
+ * Course: ${courseCode} - ${courseTitle}
+ * Module ${moduleNum}: ${moduleTitle}
+ * Assignment: ${labWork}
+ * ============================================================================
+ */
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("============================================================");
+        System.out.println("🎓 CUTM PRACTICAL EXPERIMENT RUNNER");
+        System.out.println("📘 Course: ${courseCode} | Module: ${moduleNum}");
+        System.out.println("🔬 Objective: ${labWork}");
+        System.out.println("============================================================");
+
+        // --- STUDENT IMPLEMENTATION HERE ---
+        System.out.println("\\n[+] Running Java experiment suite...");
+        System.out.println("[✓] All test assertions verified.");
+    }
+}
+`;
+    } else {
+      starterCode = `// ============================================================================
+// CENTURION UNIVERSITY OF TECHNOLOGY & MANAGEMENT
+// Course: ${courseCode} - ${courseTitle}
+// Module ${moduleNum}: ${moduleTitle}
+// Assignment: ${labWork}
+// ============================================================================
+
+console.log("============================================================");
+console.log("🎓 CUTM PRACTICAL EXPERIMENT RUNNER");
+console.log("📘 Course: ${courseCode} | Module: ${moduleNum}");
+console.log("🔬 Objective: ${labWork}");
+console.log("============================================================");
+
+// --- STUDENT IMPLEMENTATION HERE ---
+console.log("\\n[+] Running JavaScript experiment suite...");
+console.log("[✓] Execution complete.");
+`;
+    }
+
+    this.code = starterCode;
+    this.updateCode(this.code);
+
+    // 3. Populate Notes Tab with Detailed Lab Specification
+    this.notes = `# 🎓 Centurion University Lab Specification
+## ${courseCode}: ${courseTitle}
+### Module ${moduleNum}: ${moduleTitle}
+
+---
+
+### 🔬 Practical Lab Assignment
+**${labWork}**
+
+---
+
+### 📋 Recommended Execution Steps
+1. Review the mathematical formulation or algorithmic requirements above.
+2. Implement your core data structures and logic in the editor.
+3. Click **▶ RUN CODE** to execute the script in the Piston Sandbox.
+4. Verify your output in the Terminal STDOUT tab.
+5. Once your code works, defend your implementation in **Mock Viva Arena**!
+`;
+    this.updateNotes(this.notes);
+
+    // 4. Switch to notes tab or show toast
+    this.showToast(`✨ Loaded CUTM Lab: ${courseCode} Module ${moduleNum} into Workspace Sandbox!`);
   }
 
   ngOnDestroy() {

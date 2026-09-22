@@ -10,6 +10,7 @@ import { AudioPlaybackService } from '../../services/audio-playback.service';
 import { AiModelRouterService } from '../../services/ai-model-router.service';
 import { AppScreenReaderService, ScreenCaptureResult } from '../../services/app-screen-reader.service';
 import { VoiceCoordinatorService } from '../../services/voice-coordinator.service';
+import { AiTutorService, TutorSessionRequest } from '../../services/ai-tutor.service';
 
 export interface LiveChatMessage extends ChatMessage {
   avatar?: string;
@@ -145,6 +146,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   private textChatSub: Subscription | null = null;
   private voiceQuerySub: Subscription | null = null;
   private liveNavSub: Subscription | null = null;
+  private tutorSub: Subscription | null = null;
 
   quickPrompts: { label: string; prompt: string; icon: string }[] = [
     { icon: '🗺️', label: 'Prepare My Path', prompt: 'I need guidance on what I should do in MentorHub for my problem. Please diagnose my situation, prepare a complete step-by-step path for me, and navigate me there.' },
@@ -180,6 +182,26 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.sendMessage();
   }
 
+  startAcademicTutorSession(req: TutorSessionRequest) {
+    const prompt = `🎓 [CENTURION ACADEMIC TUTORING SESSION]
+Course: ${req.courseCode} - ${req.courseTitle}
+Module ${req.moduleNumber}: ${req.moduleTitle}
+Instructor: ${req.faculty || 'Centurion Professor'}
+
+Curriculum Topics to Master:
+${req.topics}
+${req.practicalLabWork ? '\nPractical Lab Objective: ' + req.practicalLabWork : ''}
+${req.vivaQuestions ? '\nKey Examination Query: ' + req.vivaQuestions : ''}
+
+Please act as my Centurion University Academic Mentor and tutor me on this module:
+1. Provide an intuitive, real-world engineering analogy for why these concepts matter before diving into formulas.
+2. Break down the core mechanisms step-by-step in clear, high-yield terms.
+3. Conclude with a quick 1-question interactive comprehension check to verify if I grasped the intuition!`;
+
+    this.userInput = prompt;
+    this.sendMessage();
+  }
+
   constructor(
     private aiChatService: AiChatService,
     public modelRouter: AiModelRouterService,
@@ -188,11 +210,17 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     public audioPlayback: AudioPlaybackService,
     public voiceCoordinator: VoiceCoordinatorService,
     public screenReader: AppScreenReaderService,
+    public aiTutorService: AiTutorService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    // Subscribe to CUTM Course AI Tutoring requests
+    this.tutorSub = this.aiTutorService.tutorRequest$.subscribe((req: TutorSessionRequest) => {
+      this.startAcademicTutorSession(req);
+    });
+
     // Register preemption callback so if Gemini Live or Mock Viva speaks, chatbot TTS shuts down immediately
     this.voiceCoordinator.registerPreemptHandler('chatbot-tts', () => {
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -298,6 +326,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (this.speakingSub) this.speakingSub.unsubscribe();
     if (this.textChatSub) this.textChatSub.unsubscribe();
     if (this.voiceQuerySub) this.voiceQuerySub.unsubscribe();
+    if (this.tutorSub) this.tutorSub.unsubscribe();
   }
 
   scrollToBottom() {

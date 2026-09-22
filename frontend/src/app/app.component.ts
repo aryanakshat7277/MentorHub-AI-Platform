@@ -11,6 +11,7 @@ import { GestureRecognitionService } from './services/gesture-recognition.servic
 import { SoundService } from './services/sound.service';
 import { AuthService, LoginEvent } from './services/auth.service';
 import { ThemeService } from './services/theme.service';
+import { AiTutorService } from './services/ai-tutor.service';
 
 @Component({
   selector: 'app-root',
@@ -52,12 +53,14 @@ export class AppComponent implements OnInit, OnDestroy {
   private routerSub: Subscription | null = null;
   private loginSub: Subscription | null = null;
   private gestureSub: Subscription | null = null;
+  private tutorSub: Subscription | null = null;
 
   constructor(
     private soundService: SoundService,
     public authService: AuthService,
     public gestureService: GestureRecognitionService,
     public themeService: ThemeService,
+    public aiTutorService: AiTutorService,
     private router: Router
   ) {}
 
@@ -81,12 +84,17 @@ export class AppComponent implements OnInit, OnDestroy {
       this.isAuthPage = false;
       this.isBooting = false;
     }
+
+    this.tutorSub = this.aiTutorService.isChatbotOpen$.subscribe(open => {
+      this.isAiChatbotOpen = open;
+    });
   }
 
   ngOnDestroy() {
     if (this.routerSub) this.routerSub.unsubscribe();
     if (this.loginSub) this.loginSub.unsubscribe();
     if (this.gestureSub) this.gestureSub.unsubscribe();
+    if (this.tutorSub) this.tutorSub.unsubscribe();
   }
 
   checkAuthRoute(url: string) {
@@ -156,6 +164,10 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   toggleAiChatbot() {
-    this.isAiChatbotOpen = !this.isAiChatbotOpen;
+    this.aiTutorService.toggleChatbot();
+  }
+
+  closeAiChatbot() {
+    this.aiTutorService.closeChatbot();
   }
 }

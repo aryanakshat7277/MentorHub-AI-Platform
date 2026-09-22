@@ -11,6 +11,7 @@ import {
   CoursewareCategorySummary
 } from '../../services/cutm-courses.service';
 import { SoundService } from '../../services/sound.service';
+import { AiTutorService } from '../../services/ai-tutor.service';
 
 @Component({
   selector: 'app-cutm-courses',
@@ -38,15 +39,17 @@ export class CutmCoursesComponent implements OnInit, OnDestroy {
   activeCourseModal: CutmCourse | null = null;
   activeModuleDetail: { course: CutmCourse; module: CutmModule } | null = null;
 
-  // Cloud Database Status
+  // Cloud Database Status & Interactive XP Toast
   isCloudSynced = false;
   copiedCode: string | null = null;
+  earnedXpToast: { points: number; title: string } | null = null;
 
   private sub = new Subscription();
 
   constructor(
     private cutmService: CutmCoursesService,
     private soundService: SoundService,
+    public aiTutorService: AiTutorService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -188,9 +191,61 @@ export class CutmCoursesComponent implements OnInit, OnDestroy {
 
   toggleModuleComplete(courseId: number, moduleNum: number, event?: Event): void {
     if (event) event.stopPropagation();
-    this.cutmService.toggleModuleComplete(courseId, moduleNum);
+    const isNowCompleted = this.cutmService.toggleModuleComplete(courseId, moduleNum);
     this.soundService.playClickSound();
+
+    if (isNowCompleted) {
+      this.soundService.playSuccessSound();
+      const course = this.courses.find(c => c.id === courseId);
+      const mod = course?.modules?.find(m => m.moduleNumber === moduleNum);
+      const modTitle = mod ? mod.moduleTitle : `Module ${moduleNum}`;
+
+      // Award 50 XP in localStorage
+      if (typeof localStorage !== 'undefined') {
+        const currentXp = parseInt(localStorage.getItem('userXpPoints') || '4890', 10);
+        localStorage.setItem('userXpPoints', (currentXp + 50).toString());
+      }
+
+      this.earnedXpToast = {
+        points: 50,
+        title: `${course?.courseCode || 'CUTM'} • ${modTitle}`
+      };
+
+      setTimeout(() => {
+        this.earnedXpToast = null;
+      }, 3500);
+    }
+
     this.applyFilters();
+  }
+
+  launchAiTutor(course: CutmCourse, mod: CutmModule, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.soundService.playClickSound();
+    this.aiTutorService.launchTutorSession({
+      courseCode: course.courseCode,
+      courseTitle: course.courseTitle,
+      faculty: course.faculty,
+      moduleNumber: mod.moduleNumber,
+      moduleTitle: mod.moduleTitle,
+      topics: mod.topics,
+      practicalLabWork: mod.practicalLabWork,
+      vivaQuestions: mod.vivaQuestions
+    });
+  }
+
+  launchCodeLab(course: CutmCourse, mod: CutmModule, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.soundService.playClickSound();
+    this.router.navigate(['/workspace'], {
+      queryParams: {
+        course: course.courseCode,
+        courseTitle: course.courseTitle,
+        module: mod.moduleNumber,
+        moduleTitle: mod.moduleTitle,
+        lab: mod.practicalLabWork
+      }
+    });
   }
 
   toggleExpandCourse(courseId: number): void {

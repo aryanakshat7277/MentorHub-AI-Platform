@@ -1,4 +1,14 @@
 <div class="cutm-courses-page">
+  <!-- Gamified Module Mastery XP Toast Notification -->
+  <div class="cutm-xp-toast clay-panel elevated-card-3d serif-title" *ngIf="earnedXpToast">
+    <div class="xp-toast-icon gold-seal-emboss">⚡</div>
+    <div class="xp-toast-content">
+      <div class="xp-points-badge">+{{ earnedXpToast.points }} XP AWARDED</div>
+      <div class="xp-course-name">Module Mastered: {{ earnedXpToast.title }}</div>
+    </div>
+    <span class="xp-trophy-symbol">🏆</span>
+  </div>
+
   <!-- 1. Hero Academic Banner -->
   <div class="hero-curriculum-card elevated-3d clay-panel">
     <div class="curriculum-ambient-bg">
@@ -373,14 +383,33 @@
                 <h4 class="mod-title serif-title">{{ mod.moduleTitle }}</h4>
               </div>
 
-              <button 
-                type="button" 
-                class="mod-viva-pill tactile-btn-3d serif-title"
-                (click)="launchVivaDefense(course, mod, $event)"
-                title="Practice AI Viva questions for this module"
-              >
-                🎙️ Viva Test
-              </button>
+              <div class="mod-actions-deck" (click)="$event.stopPropagation()">
+                <button 
+                  type="button" 
+                  class="mod-act-pill tutor-pill tactile-btn-3d serif-title"
+                  (click)="launchAiTutor(course, mod, $event)"
+                  title="Study this module step-by-step with AI Voice & Multimodal Tutor"
+                >
+                  🎧 AI Tutor
+                </button>
+                <button 
+                  *ngIf="mod.practicalLabWork"
+                  type="button" 
+                  class="mod-act-pill lab-pill tactile-btn-3d serif-title"
+                  (click)="launchCodeLab(course, mod, $event)"
+                  title="Launch practical lab assignment in Code Workspace Sandbox"
+                >
+                  💻 Code Lab
+                </button>
+                <button 
+                  type="button" 
+                  class="mod-act-pill viva-pill tactile-btn-3d serif-title"
+                  (click)="launchVivaDefense(course, mod, $event)"
+                  title="Practice AI Oral Viva defense for this module"
+                >
+                  🎙️ Oral Viva
+                </button>
+              </div>
             </div>
 
             <div class="mod-details-grid">
@@ -609,12 +638,33 @@
               <div class="mod-card-top">
                 <span class="mod-pill serif-title">Module {{ mod.moduleNumber }}</span>
                 <h5 class="mod-name serif-title">{{ mod.moduleTitle }}</h5>
-                <button 
-                  class="mod-viva-quick-btn tactile-btn-3d serif-title"
-                  (click)="launchVivaDefense(activeCourseModal, mod)"
-                >
-                  🎙️ AI Viva Defense
-                </button>
+                <div class="modal-mod-actions-deck" (click)="$event.stopPropagation()">
+                  <button 
+                    type="button" 
+                    class="mod-act-pill tutor-pill tactile-btn-3d serif-title"
+                    (click)="launchAiTutor(activeCourseModal, mod, $event)"
+                    title="Study this module with AI Voice & Multimodal Tutor"
+                  >
+                    🎧 AI Tutor
+                  </button>
+                  <button 
+                    *ngIf="mod.practicalLabWork"
+                    type="button" 
+                    class="mod-act-pill lab-pill tactile-btn-3d serif-title"
+                    (click)="launchCodeLab(activeCourseModal, mod, $event)"
+                    title="Launch lab assignment in Workspace Sandbox"
+                  >
+                    💻 Code Lab
+                  </button>
+                  <button 
+                    type="button" 
+                    class="mod-act-pill viva-pill tactile-btn-3d serif-title"
+                    (click)="launchVivaDefense(activeCourseModal, mod, $event)"
+                    title="AI Oral Viva Defense"
+                  >
+                    🎙️ Oral Viva
+                  </button>
+                </div>
               </div>
 
               <div class="mod-split-details">

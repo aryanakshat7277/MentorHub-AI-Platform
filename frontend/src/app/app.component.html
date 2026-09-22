@@ -91,7 +91,7 @@
   </button>
 
   <!-- Multi-Provider AI Chatbot Drawer -->
-  <app-ai-chatbot *ngIf="!isAuthPage" [isOpen]="isAiChatbotOpen" (closeChatbot)="isAiChatbotOpen = false"></app-ai-chatbot>
+  <app-ai-chatbot *ngIf="!isAuthPage" [isOpen]="isAiChatbotOpen" (closeChatbot)="closeAiChatbot()"></app-ai-chatbot>
 
   <!-- Real-Time Vision Hand Gesture HUD -->
   <app-gesture-hud *ngIf="!isAuthPage"></app-gesture-hud>
