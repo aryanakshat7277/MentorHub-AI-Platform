@@ -56,7 +56,12 @@ export class AudioCaptureService {
       highpass.connect(lowpass);
       lowpass.connect(this.analyser);
       this.analyser.connect(this.scriptNode);
-      this.scriptNode.connect(this.audioCtx.destination);
+      // Zero-gain mute node keeps ScriptProcessor active in Web Audio graph
+      // while preventing physical microphone audio from leaking into speakers (acoustic echo loopback prevention)
+      const silenceGain = this.audioCtx.createGain();
+      silenceGain.gain.setValueAtTime(0, this.audioCtx.currentTime);
+      this.scriptNode.connect(silenceGain);
+      silenceGain.connect(this.audioCtx.destination);
 
       this.scriptNode.onaudioprocess = (evt: AudioProcessingEvent) => {
         if (!this.isRecording$.value) return;

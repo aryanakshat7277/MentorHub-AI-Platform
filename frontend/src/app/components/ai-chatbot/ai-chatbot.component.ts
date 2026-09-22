@@ -274,6 +274,9 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (this.isLiveVoiceActive) {
       this.endLiveVoice();
     } else {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
       this.showToast('🟢 Live Voice Mode Active (Continuous Speech)');
       const success = await this.liveService.startLiveSession();
       if (!success) {
@@ -295,6 +298,9 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   endLiveVoice() {
     this.liveService.endLiveSession();
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
     this.showToast('⏹️ Live Voice Session Ended');
   }
 
@@ -394,6 +400,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   speakVoiceResponse(text: string) {
+    if (this.isLiveVoiceActive) return; // Do not use browser TTS when Live Voice is active (Gemini speaks natively)
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
     window.speechSynthesis.cancel();
@@ -446,7 +453,9 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.showToast(`🚀 Navigating to ${label || cleanRoute}...`);
     this.router.navigateByUrl(cleanRoute);
 
-    if (this.isLiveVoiceActive && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    // In live voice mode, Gemini's audio stream provides vocal guidance.
+    // Only invoke browser speech synthesis for standard non-live text chat.
+    if (!this.isLiveVoiceActive && typeof window !== 'undefined' && 'speechSynthesis' in window) {
       this.speakVoiceResponse(`Navigating you to ${label || cleanRoute}.`);
     }
 

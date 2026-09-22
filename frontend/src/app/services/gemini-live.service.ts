@@ -39,6 +39,9 @@ export class GeminiLiveService {
   private heartbeatInterval: any = null;
   private loudFrameCount = 0;
   private lastAiSpeechStartTime = 0;
+  private lastAiSpeechEndTime = 0;
+  private currentTurnId = 0;
+  private isTurnInProgress = false;
 
   constructor(
     private http: HttpClient,
@@ -47,6 +50,14 @@ export class GeminiLiveService {
     private ngZone: NgZone
   ) {
     this.initVoicePreference();
+    this.audioPlayback.isSpeaking$.subscribe(speaking => {
+      if (!speaking) {
+        this.lastAiSpeechEndTime = Date.now();
+        if (this.status$.value === 'SPEAKING') {
+          this.setStatus('LISTENING');
+        }
+      }
+    });
   }
 
   private initVoicePreference() {
@@ -98,6 +109,8 @@ export class GeminiLiveService {
     this.setStatus('CONNECTING');
     this.isFallbackMode = false;
     this.reconnectAttempts = 0;
+    this.currentTurnId = this.audioPlayback.startNewTurn();
+    this.isTurnInProgress = false;
 
     const captured = await this.audioCapture.startCapture();
     if (!captured) {
@@ -194,12 +207,18 @@ export class GeminiLiveService {
       if (msg.serverContent) {
         const sc = msg.serverContent;
 
-        if (sc.interrupted || sc.turnComplete === false && sc.modelTurn === null) {
+        if (sc.interrupted || (sc.turnComplete === false && sc.modelTurn === null)) {
+          this.isTurnInProgress = false;
           this.handleInterruption();
           return;
         }
 
         if (sc.modelTurn && sc.modelTurn.parts) {
+          if (!this.isTurnInProgress) {
+            this.isTurnInProgress = true;
+            this.currentTurnId = this.audioPlayback.startNewTurn();
+            this.lastAiSpeechStartTime = Date.now();
+          }
           this.setStatus('SPEAKING');
 
           for (const part of sc.modelTurn.parts) {
@@ -207,7 +226,7 @@ export class GeminiLiveService {
             if (inlineData) {
               const mime = inlineData.mimeType || inlineData.mime_type || '';
               if (inlineData.data && (mime.startsWith('audio/') || !mime)) {
-                this.audioPlayback.enqueueBase64Pcm(inlineData.data, 24000);
+                this.audioPlayback.enqueueBase64Pcm(inlineData.data, 24000, this.currentTurnId);
               }
             }
             if (part.text) {
@@ -218,12 +237,15 @@ export class GeminiLiveService {
         }
 
         if (sc.turnComplete) {
+          this.isTurnInProgress = false;
           const finalOutput = this.outputTranscript$.value.trim();
           if (finalOutput) {
             this.transcriptEvent$.next({ role: 'assistant', text: finalOutput });
             this.outputTranscript$.next('');
           }
-          this.setStatus('LISTENING');
+          if (!this.audioPlayback.isSpeaking$.value) {
+            this.setStatus('LISTENING');
+          }
         }
       }
 
@@ -234,32 +256,37 @@ export class GeminiLiveService {
 
   private handleUserMicChunk(chunkBase64: string) {
     if (!this.isSetupComplete) return;
+    if (this.isFallbackMode) return;
 
-    // Require sustained intentional human speech (3 consecutive audio frames above 0.70 RMS, ~100ms)
-    // to prevent transient noise spikes, clicks, desk bumps or breathing from triggering accidental interruptions
-    if (this.audioPlayback.isSpeaking$.value) {
-      // 600ms grace period right when AI starts speaking to prevent initial speaker output from self-triggering barge-in
+    const isSpeaking = this.audioPlayback.isSpeaking$.value;
+    const currentMicVolume = this.audioCapture.volumeRms$.value;
+
+    if (isSpeaking) {
+      // Acoustic Gate: AI is currently rendering audio through speakers.
+      // Drop mic chunks unless intentional user barge-in is detected.
       const timeSinceSpeechStart = Date.now() - this.lastAiSpeechStartTime;
-      if (timeSinceSpeechStart > 600) {
-        if (this.audioCapture.volumeRms$.value > 0.80) {
-          this.loudFrameCount++;
-          if (this.loudFrameCount >= 5) {
-            this.triggerBargeInInterruption();
-            this.loudFrameCount = 0;
-          }
-        } else {
+      // 400ms grace period at start of AI speech to avoid onset click/speaker bleed from triggering barge-in
+      if (timeSinceSpeechStart > 400 && currentMicVolume >= 0.18) {
+        this.loudFrameCount++;
+        // 3 consecutive frames (~90ms) of sustained human vocal energy above 0.18 RMS indicates intentional barge-in
+        if (this.loudFrameCount >= 3) {
+          console.log(`GeminiLiveService: User barge-in detected (volume: ${currentMicVolume.toFixed(2)}). Interrupting AI playback.`);
+          this.triggerBargeInInterruption();
           this.loudFrameCount = 0;
+        } else {
+          return;
         }
       } else {
         this.loudFrameCount = 0;
+        return; // Suppress mic packet to prevent speaker audio feedback loop into Gemini!
       }
     } else {
       this.lastAiSpeechStartTime = Date.now();
       this.loudFrameCount = 0;
-    }
-
-    if (this.isFallbackMode) {
-      return; 
+      // 200ms post-speech tail silence to ensure room reverb from AI's last word doesn't trigger prompt
+      if (Date.now() - this.lastAiSpeechEndTime < 200) {
+        return;
+      }
     }
 
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
@@ -313,8 +340,10 @@ export class GeminiLiveService {
   }
 
   public handleInterruption() {
+    this.isTurnInProgress = false;
     this.setStatus('INTERRUPTED');
     this.audioPlayback.interrupt();
+    this.currentTurnId = this.audioPlayback.activeTurnId;
     this.outputTranscript$.next('');
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
@@ -348,6 +377,7 @@ export class GeminiLiveService {
   public endLiveSession() {
     this.stopHeartbeatMonitor();
     this.setStatus('ENDED');
+    this.isTurnInProgress = false;
     this.audioPlayback.interrupt();
     this.audioCapture.stopCapture();
 

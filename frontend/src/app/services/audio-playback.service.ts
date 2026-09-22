@@ -10,6 +10,7 @@ export class AudioPlaybackService {
   private activeSources: AudioBufferSourceNode[] = [];
   private nextStartTime = 0;
   private animFrameId: number | null = null;
+  public activeTurnId = 0; // Generation/Turn sequence tracker to prevent overlapping voices
 
   public isSpeaking$ = new BehaviorSubject<boolean>(false);
   public outputVolumeRms$ = new BehaviorSubject<number>(0);
@@ -30,10 +31,24 @@ export class AudioPlaybackService {
   }
 
   /**
-   * Enqueues Base64 encoded PCM 24kHz audio or binary ArrayBuffer for sample-accurate WebAudio streaming playback
+   * Resets playback and starts a fresh turn generation ID.
+   * Any late/stale chunks from previous turns are dropped immediately.
    */
-  public enqueueBase64Pcm(base64Audio: string, sampleRate = 24000) {
+  public startNewTurn(): number {
+    this.interrupt();
+    return this.activeTurnId;
+  }
+
+  /**
+   * Enqueues Base64 encoded PCM 24kHz audio or binary ArrayBuffer for sample-accurate WebAudio streaming playback.
+   * Drops chunk if it belongs to an older/interrupted turn generation.
+   */
+  public enqueueBase64Pcm(base64Audio: string, sampleRate = 24000, turnId?: number) {
     if (!base64Audio) return;
+    if (turnId !== undefined && turnId !== this.activeTurnId) {
+      // Discard stale chunk from previous turn
+      return;
+    }
     try {
       const binary = window.atob(base64Audio);
       const len = binary.length;
@@ -41,13 +56,18 @@ export class AudioPlaybackService {
       for (let i = 0; i < len; i++) {
         bytes[i] = binary.charCodeAt(i);
       }
-      this.enqueueArrayBuffer(bytes.buffer, sampleRate);
+      this.enqueueArrayBuffer(bytes.buffer, sampleRate, turnId);
     } catch (e) {
       console.warn('AudioPlaybackService: Base64 decode error:', e);
     }
   }
 
-  public enqueueArrayBuffer(buffer: ArrayBuffer, sampleRate = 24000) {
+  public enqueueArrayBuffer(buffer: ArrayBuffer, sampleRate = 24000, turnId?: number) {
+    if (turnId !== undefined && turnId !== this.activeTurnId) {
+      // Discard stale chunk from previous turn
+      return;
+    }
+
     this.initContextIfNeeded(sampleRate);
     if (!this.audioCtx) return;
 
@@ -79,9 +99,19 @@ export class AudioPlaybackService {
         if (idx !== -1) {
           this.activeSources.splice(idx, 1);
         }
-        if (this.activeSources.length === 0 && this.audioCtx && this.audioCtx.currentTime >= this.nextStartTime - 0.05) {
-          this.isSpeaking$.next(false);
-          this.outputVolumeRms$.next(0);
+        if (this.activeSources.length === 0) {
+          const remainingTime = this.audioCtx ? (this.nextStartTime - this.audioCtx.currentTime) : 0;
+          if (remainingTime <= 0.05) {
+            this.isSpeaking$.next(false);
+            this.outputVolumeRms$.next(0);
+          } else {
+            setTimeout(() => {
+              if (this.activeSources.length === 0) {
+                this.isSpeaking$.next(false);
+                this.outputVolumeRms$.next(0);
+              }
+            }, Math.max(10, remainingTime * 1000));
+          }
         }
       };
 
@@ -91,9 +121,11 @@ export class AudioPlaybackService {
   }
 
   /**
-   * Immediate Barge-in / Interruption: Stops active playback and flushes hardware queue instantly (< 10ms)
+   * Immediate Barge-in / Interruption: Stops active playback, flushes hardware queue instantly (< 10ms),
+   * and increments activeTurnId so any trailing in-flight network chunks are discarded.
    */
   public interrupt() {
+    this.activeTurnId++; // Invalidate any incoming chunks from the interrupted turn
     this.activeSources.forEach(source => {
       try {
         source.stop(0);
