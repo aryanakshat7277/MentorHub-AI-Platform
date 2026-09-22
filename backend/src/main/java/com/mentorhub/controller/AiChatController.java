@@ -46,7 +46,7 @@ public class AiChatController {
     public ResponseEntity<Map<String, List<String>>> getProvidersAndModels() {
         Map<String, List<String>> map = new LinkedHashMap<>();
         map.put("GEMINI", List.of("gemini-3.6-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"));
-        map.put("NVIDIA", List.of("nvidia/nemotron-3-super-120b-a12b", "mistralai/mistral-nemotron"));
+        map.put("NVIDIA", List.of("nvidia/nemotron-3-ultra-550b-a55b", "nvidia/nemotron-3-super-120b-a12b", "mistralai/mistral-nemotron"));
         map.put("GROQ", List.of("openai/gpt-oss-120b", "qwen/qwen3.8-27b", "whisper-large-v3-turbo", "canopylabs/orpheus-v1-english"));
         map.put("DEEPSEEK", List.of("deepseek-chat", "deepseek-coder"));
         return ResponseEntity.ok(map);

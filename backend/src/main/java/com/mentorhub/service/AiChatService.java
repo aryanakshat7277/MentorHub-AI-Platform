@@ -40,7 +40,7 @@ public class AiChatService {
     @Value("${ai.nvidia.api-key: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}")
     private String nvidiaApiKey;
 
-    @Value("${ai.nvidia.model:nvidia/nemotron-3-super-120b-a12b}")
+    @Value("${ai.nvidia.model:nvidia/nemotron-3-ultra-550b-a55b}")
     private String nvidiaModel;
 
     @Value("${ai.groq.api-key:${groq.api.key:}}")
@@ -515,8 +515,13 @@ public class AiChatService {
     private String callNvidia(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload, String screenContext) {
         String url = "https://integrate.api.nvidia.com/v1/chat/completions";
 
+        String targetModel = (model != null && !model.trim().isEmpty() && !model.contains("gemini") && !model.contains("groq")) ? model : nvidiaModel;
+
         List<Map<String, String>> messages = new ArrayList<>();
         String globalInstruction = brainService.getMasterBrainSystemPrompt("User");
+        if (targetModel.contains("ultra") || targetModel.contains("nemotron")) {
+            globalInstruction = "detailed thinking off\n\n" + globalInstruction;
+        }
         if (systemPrompt != null && !systemPrompt.trim().isEmpty()) {
             globalInstruction = systemPrompt + "\n\n" + globalInstruction;
         }
@@ -537,11 +542,13 @@ public class AiChatService {
         messages.add(Map.of("role", "user", "content", effectiveQuery));
 
         Map<String, Object> body = new HashMap<>();
-        String targetModel = (model != null && !model.trim().isEmpty() && !model.contains("gemini") && !model.contains("groq")) ? model : nvidiaModel;
         body.put("model", targetModel);
         body.put("messages", messages);
         body.put("max_tokens", 1024);
         body.put("temperature", 0.7);
+        if (targetModel.contains("ultra") || targetModel.contains("nemotron")) {
+            body.put("chat_template_kwargs", Map.of("enable_thinking", false));
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -559,10 +566,15 @@ public class AiChatService {
                     if (choices != null && !choices.isEmpty()) {
                         Map choice = (Map) choices.get(0);
                         Map message = (Map) choice.get("message");
-                        if (message != null && message.get("content") != null) {
+                        if (message != null) {
                             String content = (String) message.get("content");
-                            content = content.replaceAll("(?s)<thought>.*?</thought>", "").trim();
-                            return content;
+                            if (content == null || content.trim().isEmpty()) {
+                                content = (String) message.get("reasoning_content");
+                            }
+                            if (content != null) {
+                                content = content.replaceAll("(?s)<thought>.*?</thought>", "").trim();
+                                return content;
+                            }
                         }
                     }
                 }
