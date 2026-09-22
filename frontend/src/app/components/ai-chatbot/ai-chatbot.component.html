@@ -10,13 +10,14 @@
 
   <!-- 3D Studio Header Section -->
   <div class="chatbot-header">
-    <div class="brand-row">
+    <!-- Top Bar: Crest, Title, Online Status & Pinned Window Controls -->
+    <div class="header-top-bar">
       <div class="title-box">
         <div class="gemini-stellar-crest gold-seal-emboss" title="Gemini 3.6 Flash Neural Core">
           <div class="orbit-glow-ring"></div>
           <span class="gemini-sparkle-icon">✨</span>
         </div>
-        <div>
+        <div class="title-info">
           <h3 class="serif-title">
             <span class="gold-foil-text">MENTORHUB</span>
             <span class="gemini-gradient-text"> AI ASSISTANT</span>
@@ -24,23 +25,47 @@
           <div class="status-indicator">
             <span class="online-dot" [class.live-active]="isLiveVoiceActive"></span>
             <span class="sub-status serif-title">
-              {{ isLiveVoiceActive ? 'Gemini Live Multimodal Voice Stream' : (selectedProvider === 'NVIDIA' ? 'NVIDIA NIM (LLaMA 3.2 11B Vision)' : 'Gemini 3.6 Flash & NVIDIA NIM Core') }}
-            </span>
-            <span class="brain-status-badge serif-title" title="Full Platform Awareness Active">
-              🧠 Master Brain • {{ selectedProvider === 'NVIDIA' ? 'NVIDIA NIM Active' : 'Gemini + NVIDIA Ready' }}
+              {{ isLiveVoiceActive ? 'Live Voice Stream' : 'Master Brain Online' }}
             </span>
           </div>
         </div>
       </div>
 
+      <!-- Window controls: Clear, Maximize, Close (ALWAYS PINNED & VISIBLE) -->
+      <div class="window-controls-cluster">
+        <button class="action-icon-btn tactile-btn-3d" (click)="clearChat()" title="Clear Conversation" *ngIf="messages.length > 1">
+          🧹
+        </button>
+
+        <button class="action-icon-btn tactile-btn-3d" (click)="toggleMaximize()" [title]="isMaximized ? 'Restore Down' : 'Maximize Window'">
+          {{ isMaximized ? '🗗' : '🗖' }}
+        </button>
+
+        <button class="action-icon-btn close-btn tactile-btn-3d" (click)="close()" title="Close AI Assistant">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Controls Bar: Telemetry Badges & Interactive Mode Toggles -->
+    <div class="header-controls-bar">
+      <div class="status-badges-group">
+        <span class="brain-status-badge serif-title" title="Full Platform Awareness Active">
+          🧠 Master Brain
+        </span>
+        <span class="model-pill-badge serif-title" [title]="selectedProvider === 'NVIDIA' ? 'NVIDIA NIM (Meta LLaMA 3.2 11B Vision)' : 'Google Gemini 3.6 Flash'">
+          {{ selectedProvider === 'NVIDIA' ? '🟢 LLaMA 3.2 11B' : '✨ Gemini 3.6' }}
+        </span>
+      </div>
+
       <div class="header-actions-right">
-        <!-- Engine selector toggle: Auto (Gemini -> NVIDIA) vs Forced NVIDIA NIM -->
+        <!-- Engine selector toggle: Auto vs Forced NVIDIA NIM -->
         <button class="engine-toggle-btn tactile-btn-3d serif-title"
                 (click)="toggleAiEngine()"
                 [class.nvidia-mode]="selectedProvider === 'NVIDIA'"
                 [title]="selectedProvider === 'NVIDIA' ? 'Active Engine: NVIDIA NIM (Meta LLaMA 3.2 11B Vision). Click to switch to Auto' : 'Active Engine: Auto (Gemini Primary + NVIDIA NIM Failover). Click to force NVIDIA NIM'">
           <span class="engine-dot" [class.nvidia]="selectedProvider === 'NVIDIA'"></span>
-          <span>{{ selectedProvider === 'NVIDIA' ? '🟢 NVIDIA NIM' : '✨ AUTO ENGINE' }}</span>
+          <span>{{ selectedProvider === 'NVIDIA' ? '🟢 NVIDIA' : '✨ AUTO' }}</span>
         </button>
 
         <!-- Screen Perception Vision Toggle Button -->
@@ -60,18 +85,6 @@
           <span class="live-pulse-dot"></span>
           <span>{{ isLiveVoiceActive ? 'END VOICE' : 'LIVE VOICE' }}</span>
           <span class="shine-sweep"></span>
-        </button>
-
-        <button class="action-icon-btn tactile-btn-3d" (click)="clearChat()" title="Clear Conversation" *ngIf="messages.length > 1">
-          🧹
-        </button>
-
-        <button class="action-icon-btn tactile-btn-3d" (click)="toggleMaximize()" [title]="isMaximized ? 'Restore Down' : 'Maximize Window'">
-          {{ isMaximized ? '🗗' : '🗖' }}
-        </button>
-
-        <button class="action-icon-btn close-btn tactile-btn-3d" (click)="close()" title="Close AI Assistant">
-          ✕
         </button>
       </div>
     </div>
