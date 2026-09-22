@@ -112,28 +112,6 @@
     </div>
   </div>
 
-  <!-- 3. Secondary Navigation: CBCS Curriculum Baskets -->
-  <div class="basket-navigator-strip clay-panel">
-    <div class="basket-nav-scroll">
-      <button 
-        *ngFor="let b of basketSummaries"
-        type="button"
-        class="basket-nav-pill tactile-btn-3d"
-        [class.active]="selectedBasket === b.category"
-        (click)="selectBasket(b.category)"
-      >
-        <span class="b-icon">{{ b.icon }}</span>
-        <div class="b-text-group">
-          <div class="b-top">
-            <span class="b-label serif-title">{{ b.shortLabel }}</span>
-            <span class="b-code-badge">{{ b.code }}</span>
-          </div>
-          <span class="b-meta serif-title">{{ b.courseCount }} Courses • {{ b.totalCredits }} Cr</span>
-        </div>
-      </button>
-    </div>
-  </div>
-
   <!-- 4. Search, Filter & View Controls -->
   <div class="controls-toolbar clay-panel elevated-card-3d">
     <div class="search-input-box">
