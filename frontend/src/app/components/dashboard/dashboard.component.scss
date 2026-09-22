@@ -1689,16 +1689,18 @@
 }
 
 /* ── CUTM CBCS CURRICULUM DASHBOARD BANNER ── */
+/* ── CUTM CBCS CURRICULUM DASHBOARD BANNER — LUXURY PORCELAIN LIGHT THEME ── */
 .cutm-dash-banner {
   position: relative;
   overflow: hidden;
   border-radius: 18px;
   padding: 24px 32px;
-  background: linear-gradient(135deg, rgba(32, 25, 22, 0.95) 0%, rgba(20, 16, 14, 0.98) 100%);
-  border: 1.5px solid rgba(222, 112, 72, 0.35);
+  background: linear-gradient(135deg, #FFFFFF 0%, #FAF4EE 50%, #F5ECE3 100%);
+  border: 1.5px solid rgba(214, 198, 183, 0.95);
   box-shadow: 
-    0 14px 34px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 10px 30px rgba(140, 110, 90, 0.08),
+    0 2px 8px rgba(140, 110, 90, 0.04),
+    inset 0 1px 0 #FFFFFF;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1707,12 +1709,12 @@
 
   .cutm-banner-glow {
     position: absolute;
-    width: 250px;
-    height: 250px;
+    width: 280px;
+    height: 280px;
     right: 5%;
-    top: -50px;
+    top: -60px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(222, 112, 72, 0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(222, 112, 72, 0.08) 0%, transparent 70%);
     pointer-events: none;
   }
 
@@ -1724,23 +1726,23 @@
     min-width: 280px;
 
     .cutm-seal-icon {
-      width: 58px;
-      height: 58px;
-      min-width: 58px;
-      min-height: 58px;
+      width: 60px;
+      height: 60px;
+      min-width: 60px;
+      min-height: 60px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #F9E7B3 0%, #D4AF37 45%, #AA7A1E 75%, #F9E7B3 100%);
-      box-shadow: 0 8px 20px rgba(212, 175, 55, 0.35);
+      background: linear-gradient(135deg, #FDE68A 0%, #D4AF37 45%, #9A6C18 80%, #FDE68A 100%);
+      box-shadow: 0 6px 18px rgba(180, 140, 60, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.8);
       overflow: hidden;
 
       .dash-cutm-seal-img {
         width: 44px;
         height: 44px;
         object-fit: contain;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
       }
     }
 
@@ -1761,8 +1763,8 @@
           background: #FFFFFF;
           padding: 3px 8px;
           border-radius: 6px;
-          border: 1px solid rgba(212, 175, 55, 0.4);
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+          border: 1px solid rgba(214, 198, 183, 0.9);
+          box-shadow: 0 2px 6px rgba(140, 110, 90, 0.08);
 
           .dash-cutm-brand-img {
             height: 18px;
@@ -1774,45 +1776,51 @@
         .univ-pill {
           font-size: 10px;
           font-weight: 800;
-          letter-spacing: 1px;
-          color: #D4AF37;
+          letter-spacing: 0.8px;
+          color: #8C2B0E;
+          background: rgba(166, 59, 25, 0.06);
+          border: 1px solid rgba(166, 59, 25, 0.20);
+          padding: 2.5px 8px;
+          border-radius: 4px;
         }
 
         .basket-counter-pill {
           font-size: 10px;
           font-weight: 800;
-          color: #DE7048;
-          background: rgba(222, 112, 72, 0.15);
-          border: 1px solid rgba(222, 112, 72, 0.3);
-          padding: 2px 7px;
+          color: #A63B19;
+          background: rgba(166, 59, 25, 0.08);
+          border: 1px solid rgba(166, 59, 25, 0.25);
+          padding: 2.5px 8px;
           border-radius: 4px;
         }
 
         .cloud-db-pill {
           font-size: 9.5px;
           font-weight: 800;
-          color: #34D399;
-          background: rgba(16, 185, 129, 0.12);
-          border: 1px solid rgba(16, 185, 129, 0.3);
-          padding: 2px 7px;
+          color: #047857;
+          background: rgba(16, 185, 129, 0.10);
+          border: 1px solid rgba(16, 185, 129, 0.28);
+          padding: 2.5px 8px;
           border-radius: 4px;
         }
       }
 
       .cutm-banner-title {
-        font-size: 20px;
-        font-weight: 800;
-        color: #F7EFE8;
+        font-size: 21px;
+        font-weight: 900;
+        color: #150E0B;
         margin: 0;
         line-height: 1.2;
+        letter-spacing: 0.2px;
       }
 
       .cutm-banner-desc {
-        font-size: 13px;
+        font-size: 13.5px;
         line-height: 1.45;
-        color: rgba(247, 239, 232, 0.7);
+        color: #5C4A42;
+        font-weight: 600;
         margin: 0;
-        max-width: 650px;
+        max-width: 680px;
       }
     }
   }
@@ -1824,38 +1832,44 @@
     flex-wrap: wrap;
 
     .cutm-action-primary {
-      background: linear-gradient(135deg, #DE7048 0%, #B35E17 100%);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: linear-gradient(135deg, #DE7048 0%, #B84720 100%);
+      border: 1px solid #993815;
       color: #FFFFFF;
-      padding: 10px 18px;
-      border-radius: 10px;
+      padding: 11px 20px;
+      border-radius: 12px;
       font-size: 12.5px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
       text-decoration: none;
-      box-shadow: 0 4px 14px rgba(222, 112, 72, 0.4);
-      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(166, 59, 25, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
       &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(222, 112, 72, 0.6);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 6px 20px rgba(166, 59, 25, 0.45);
+        color: #FFFFFF;
       }
     }
 
     .cutm-action-secondary {
-      background: rgba(212, 175, 55, 0.15);
-      border: 1px solid rgba(212, 175, 55, 0.35);
-      color: #F9E7B3;
-      padding: 10px 16px;
-      border-radius: 10px;
+      background: #FFFFFF;
+      border: 1.5px solid rgba(166, 59, 25, 0.35);
+      color: #A63B19;
+      padding: 11px 18px;
+      border-radius: 12px;
       font-size: 12.5px;
       font-weight: 800;
+      letter-spacing: 0.4px;
       text-decoration: none;
-      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(140, 110, 90, 0.08), inset 0 1px 0 #FFFFFF;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
       &:hover {
-        background: rgba(212, 175, 55, 0.25);
-        color: #FFFFFF;
+        background: #FAF4EE;
+        border-color: #A63B19;
+        color: #8C2B0E;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(166, 59, 25, 0.16);
       }
     }
   }
