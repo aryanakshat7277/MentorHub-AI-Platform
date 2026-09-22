@@ -185,7 +185,7 @@
             <span class="time-tag serif-title">{{ msg.timestamp }}</span>
           </div>
 
-          <div class="bubble-content serif-title" [innerHTML]="formatMarkdown(msg.text)"></div>
+          <div class="bubble-content serif-title" [innerHTML]="formatMarkdown(msg.text)" (click)="handleContentClick($event)"></div>
 
           <!-- Action Toolbar per Message -->
           <div class="bubble-actions-bar" *ngIf="msg.sender === 'ai'">

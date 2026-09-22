@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AiChatService, ChatMessage } from '../../services/ai-chat.service';
 import { GeminiLiveService, LiveSessionStatus } from '../../services/gemini-live.service';
@@ -61,14 +62,14 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   private voiceQuerySub: Subscription | null = null;
 
   quickPrompts: { label: string; prompt: string; icon: string }[] = [
-    { icon: '🟢', label: 'Test NVIDIA NIM', prompt: 'Test NVIDIA NIM free tier engine (meta/llama-3.2-11b-vision-instruct) and describe your awareness of MentorHub platform and CUTM courses.' },
-    { icon: '📸', label: 'Read My Screen', prompt: 'Please read my active screen, explain what I am looking at, and tell me what actions I can take here.' },
-    { icon: '🎓', label: 'CUTM Courses', prompt: 'Tell me about the 385 CUTM Courseware courses and how to access them.' },
-    { icon: '👨‍🏫', label: 'Akshat Aryan', prompt: 'Who is Senior Mentor Akshat Aryan and what is his role in MentorHub?' },
-    { icon: '🎙️', label: 'AI Mock Viva', prompt: 'How does the AI Mock Viva defense work and what are the rubrics?' },
-    { icon: '💻', label: 'Code Workspace', prompt: 'How does the Collaborative Code Workspace and Piston compiler work?' },
-    { icon: '📜', label: 'Certificates', prompt: 'How are certificates cryptographically verified on this platform?' },
-    { icon: '🎯', label: 'Goals & Sessions', prompt: 'Explain how SMART goal tracking and mentoring sessions work.' }
+    { icon: '🗺️', label: 'Prepare My Path', prompt: 'I need guidance on what I should do in MentorHub for my problem. Please diagnose my situation, prepare a complete step-by-step path for me, and navigate me there.' },
+    { icon: '🎙️', label: 'Viva Preparation Path', prompt: 'I am struggling to prepare for my academic viva exam. Diagnose my problem, prepare a roadmap for me, and navigate me to practice.' },
+    { icon: '☕', label: 'Java & Backend Path', prompt: 'I want to master Java and Backend engineering. Guide me what courses to take, where to code, and navigate me there.' },
+    { icon: '📸', label: 'Read My Screen', prompt: 'Please read my active screen, explain what I am looking at, and guide me on what actions I should take next.' },
+    { icon: '💻', label: 'Code Workspace', prompt: 'Navigate me to the Collaborative Code Workspace and explain how the Piston compiler works.' },
+    { icon: '🎯', label: 'Goals & Mentorship', prompt: 'Prepare a path for me to set SMART goals, connect with Senior Mentor Akshat Aryan, and earn verified certificates.' },
+    { icon: '🎓', label: 'CUTM Courses', prompt: 'Show me the 385 CUTM Courseware courses and navigate me to browse them.' },
+    { icon: '🟢', label: 'NVIDIA Vision', prompt: 'Analyze my current screen with NVIDIA NIM Vision and tell me what to do.' }
   ];
 
   messages: LiveChatMessage[] = [
@@ -76,7 +77,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       id: 'msg-1',
       sender: 'ai',
       avatar: 'AI',
-      text: 'Greetings! I am the **MentorHub AI Voice Assistant & Master Brain**.\n\nI possess a complete mental model and real-time awareness of our entire platform—including all **385+ CUTM Courseware courses** and **5 CBCS baskets**, **AI Mock Viva defense**, **Collaborative Code Workspace**, **cryptographic certificates**, and our team led by **Senior Mentor Akshat Aryan**.\n\n👁️ **Screen Perception is active**: Tap **📸 Read My Screen** or ask me about what is displayed on your screen. Tap **🟢 LIVE VOICE** for real-time spoken dialogue with vision!',
+      text: 'Greetings! I am the **MentorHub AI Voice Assistant & Master Academic Navigator**.\n\nI possess a complete mental model and real-time awareness of our entire platform—including all **385+ CUTM Courseware courses** and **5 CBCS baskets**, **AI Mock Viva defense**, **Collaborative Code Workspace**, **cryptographic certificates**, and our team led by **Senior Mentor Akshat Aryan**.\n\n🗺️ **Personalized Problem Diagnosis & Path Planning Active**:\nTell me what problem you are facing or what you want to achieve! I will diagnose your situation, formulate an **interactive step-by-step pathway**, and **navigate you directly to the right screen in MentorHub**.\n\n👁️ **Screen Perception is active**: Tap **📸 Read My Screen** or ask me about what is displayed on your screen. Tap **🟢 LIVE VOICE** for real-time spoken dialogue with vision!',
       provider: 'GEMINI',
       model: 'gemini-3.6-flash',
       mode: 'TEXT',
@@ -101,6 +102,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     public audioCapture: AudioCaptureService,
     public audioPlayback: AudioPlaybackService,
     public screenReader: AppScreenReaderService,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -290,6 +292,8 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     if (this.voiceQuerySub) this.voiceQuerySub.unsubscribe();
 
+    this.checkAndTriggerAutoNavigation(queryText);
+
     const historyPayload = this.buildHistoryPayload();
     this.scrollToBottom();
 
@@ -331,6 +335,8 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     const cleanText = text
       .replace(/```[\s\S]*?```/g, ' Code snippet displayed on screen. ')
+      .replace(/:::path[\s\S]*?:::/g, ' I have prepared your step by step action path on screen. ')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
       .replace(/`([^`]+)`/g, '$1')
       .replace(/\*\*([^*]+)\*\*/g, '$1')
       .replace(/###\s*/g, '')
@@ -358,6 +364,69 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     window.speechSynthesis.speak(utterance);
   }
 
+  // Direct In-App Navigation Engine
+  navigateTo(route: string, label?: string) {
+    if (!route) return;
+    let cleanRoute = route.trim();
+    if (cleanRoute.startsWith('navigate:')) {
+      cleanRoute = cleanRoute.substring('navigate:'.length).trim();
+    }
+
+    this.showToast(`🚀 Navigating to ${label || cleanRoute}...`);
+    this.router.navigateByUrl(cleanRoute);
+
+    if (this.isLiveVoiceActive && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      this.speakVoiceResponse(`Navigating you to ${label || cleanRoute}.`);
+    }
+
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      this.close();
+    }
+  }
+
+  handleContentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const btn = target.closest('.ai-nav-action-pill, .path-step-nav-btn, [data-route]') as HTMLElement;
+    if (btn) {
+      event.preventDefault();
+      event.stopPropagation();
+      const route = btn.getAttribute('data-route') || btn.getAttribute('href');
+      const label = btn.getAttribute('data-label') || btn.innerText || '';
+      if (route) {
+        this.navigateTo(route, label);
+      }
+    }
+  }
+
+  checkAndTriggerAutoNavigation(query: string) {
+    if (!query) return;
+    const q = query.toLowerCase();
+    const hasNavIntent = q.includes('navigate') || q.includes('take me to') || q.includes('open ') || q.includes('go to ') || q.includes('bring me to');
+    if (!hasNavIntent) return;
+
+    if (q.includes('viva') || q.includes('defense') || q.includes('oral exam')) {
+      this.navigateTo('/mock-viva', 'Mock Viva Defense Arena');
+    } else if (q.includes('course') || q.includes('courseware') || q.includes('cutm') || q.includes('syllabus')) {
+      this.navigateTo('/cutm-courses', 'CUTM Courses Repository');
+    } else if (q.includes('workspace') || q.includes('code') || q.includes('compiler') || q.includes('ide') || q.includes('editor')) {
+      this.navigateTo('/workspace', 'Collaborative Code Workspace');
+    } else if (q.includes('mentor') || q.includes('match')) {
+      this.navigateTo('/mentor-matching', 'Smart Mentor Matching');
+    } else if (q.includes('session') || q.includes('meeting') || q.includes('calendar')) {
+      this.navigateTo('/sessions', 'Mentoring Sessions Hub');
+    } else if (q.includes('goal') || q.includes('target') || q.includes('milestone')) {
+      this.navigateTo('/goals', 'SMART Goals Tracker');
+    } else if (q.includes('certificate') || q.includes('credential') || q.includes('verify')) {
+      this.navigateTo('/certificates', 'Verified Credentials');
+    } else if (q.includes('dashboard') || q.includes('home')) {
+      this.navigateTo('/dashboard', 'Executive Dashboard');
+    } else if (q.includes('profile')) {
+      this.navigateTo('/profile', 'User Profile');
+    } else if (q.includes('resource') || q.includes('book') || q.includes('cheat sheet')) {
+      this.navigateTo('/resource-hub', 'AI Resource Hub');
+    }
+  }
+
   // Text Chat Handler (Gemini 3.1 Flash)
   sendMessage() {
     if (!this.userInput.trim() || this.isGenerating) return;
@@ -370,6 +439,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     const query = this.userInput.trim();
+    this.checkAndTriggerAutoNavigation(query);
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     this.messages.push({
@@ -510,13 +580,79 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
 
+    // 1. Code blocks
     formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
       return `<div class="chat-code-block"><div class="code-lang-tag">${lang || 'code'}</div><pre><code>${code}</code></pre></div>`;
     });
 
+    // 2. Interactive Action Pathway Blocks (:::path ... :::)
+    formatted = formatted.replace(/:::path\s*([\s\S]*?):::/gi, (match, pathContent) => {
+      const lines = pathContent.trim().split('\n').filter((l: string) => l.trim().length > 0);
+      let stepsHtml = '';
+
+      lines.forEach((line: string, index: number) => {
+        const parts = line.split('|').map((p: string) => p.trim());
+        const rawTitle = parts[0] || `Step ${index + 1}`;
+        const desc = parts[1] || '';
+        let targetRoute = parts[2] || '';
+
+        if (targetRoute.startsWith('navigate:')) {
+          targetRoute = targetRoute.substring('navigate:'.length).trim();
+        }
+
+        const stepNumMatch = rawTitle.match(/Step\s*(\d+)[\s:]*(.*)/i);
+        const stepNum = stepNumMatch ? stepNumMatch[1] : (index + 1);
+        const stepTitle = stepNumMatch ? (stepNumMatch[2] || rawTitle) : rawTitle;
+
+        stepsHtml += `
+          <div class="path-step-item">
+            <div class="step-num-pill">${stepNum}</div>
+            <div class="step-details">
+              <div class="step-title-text serif-title">${stepTitle}</div>
+              ${desc ? `<div class="step-desc-text serif-title">${desc}</div>` : ''}
+            </div>
+            ${targetRoute ? `
+              <button type="button" class="path-step-nav-btn tactile-btn-3d serif-title" data-route="${targetRoute}" data-label="${stepTitle}">
+                <span>Navigate</span> <span class="step-arrow">➔</span>
+              </button>
+            ` : ''}
+          </div>
+        `;
+      });
+
+      return `
+        <div class="ai-path-roadmap-card elevated-card-3d">
+          <div class="path-card-header">
+            <div class="path-header-badge serif-title">
+              <span class="path-pulse-icon">🗺️</span>
+              <span>PERSONALIZED ACTION PATHWAY</span>
+            </div>
+            <span class="path-card-sub serif-title">Click any step to navigate directly</span>
+          </div>
+          <div class="path-steps-list">
+            ${stepsHtml}
+          </div>
+        </div>
+      `;
+    });
+
+    // 3. Interactive In-App Navigation Action Pills [Label](navigate:/route) or [Label](/route)
+    formatted = formatted.replace(/\[([^\]]+)\]\((navigate:[^)]+|\/[a-zA-Z0-9_\-\/?=&%#]+)\)/gi, (match, label, route) => {
+      let cleanRoute = route;
+      if (cleanRoute.startsWith('navigate:')) {
+        cleanRoute = cleanRoute.substring('navigate:'.length).trim();
+      }
+      return `<button type="button" class="ai-nav-action-pill tactile-btn-3d serif-title" data-route="${cleanRoute}" data-label="${label}">
+        <span class="pill-nav-icon">🚀</span>
+        <span class="pill-nav-label">${label}</span>
+        <span class="pill-nav-arrow">➔</span>
+      </button>`;
+    });
+
+    // 4. Standard Inline Formats
     formatted = formatted.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
     formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    formatted = formatted.replace(/^### (.*$)/gim, '<h4 class="chat-h4 orbitron-font">$1</h4>');
+    formatted = formatted.replace(/^### (.*$)/gim, '<h4 class="chat-h4 serif-title">$1</h4>');
     formatted = formatted.replace(/\n/g, '<br/>');
 
     return formatted;

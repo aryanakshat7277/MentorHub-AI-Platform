@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { 
   CutmCoursesService, 
@@ -47,7 +47,8 @@ export class CutmCoursesComponent implements OnInit, OnDestroy {
   constructor(
     private cutmService: CutmCoursesService,
     private soundService: SoundService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -57,6 +58,27 @@ export class CutmCoursesComponent implements OnInit, OnDestroy {
         this.basketSummaries = this.cutmService.getBasketSummaries();
         this.coursewareCategories = this.cutmService.getCoursewareCategories();
         this.applyFilters();
+      })
+    );
+
+    this.sub.add(
+      this.route.queryParams.subscribe(params => {
+        let changed = false;
+        if (params['search']) {
+          this.searchQuery = params['search'];
+          changed = true;
+        }
+        if (params['category']) {
+          this.selectedCourseCategory = params['category'];
+          changed = true;
+        }
+        if (params['basket']) {
+          this.selectedBasket = params['basket'];
+          changed = true;
+        }
+        if (changed) {
+          this.applyFilters();
+        }
       })
     );
 
