@@ -17,6 +17,85 @@ export interface LiveChatMessage extends ChatMessage {
   mode?: 'TEXT' | 'VOICE';
 }
 
+export interface AppRouteDefinition {
+  path: string;
+  label: string;
+  aliases: string[];
+}
+
+export const APP_ROUTES: AppRouteDefinition[] = [
+  {
+    path: '/mock-viva',
+    label: 'Mock Viva Defense Arena',
+    aliases: ['mock viva', 'viva arena', 'viva defense', 'viva exam', 'oral exam', 'oral defense', 'viva voce', 'ai viva', 'viva', 'defense']
+  },
+  {
+    path: '/cutm-courses',
+    label: 'CUTM Courses & Syllabus',
+    aliases: ['cutm course', 'cutm courses', 'courseware', 'course catalog', 'course repository', 'cutm syllabus', 'courses', 'course', 'cutm', 'syllabus', 'curriculum', 'subjects', 'subject', 'cbcs', 'baskets']
+  },
+  {
+    path: '/workspace',
+    label: 'Collaborative Code Workspace',
+    aliases: ['workspace', 'code editor', 'coding workspace', 'collaborative workspace', 'compiler', 'ide', 'editor', 'live coding', 'whiteboard', 'piston', 'programming', 'code', 'coding']
+  },
+  {
+    path: '/mentor-matching',
+    label: 'Smart Mentor Matching',
+    aliases: ['mentor matching', 'find mentor', 'match mentor', 'mentor search', 'connect mentor', 'mentors', 'mentor', 'match', 'advisors', 'advisor']
+  },
+  {
+    path: '/sessions',
+    label: 'Mentoring Sessions Hub',
+    aliases: ['mentoring sessions', 'sessions hub', 'sessions', 'session', 'meetings', 'meeting', 'calendar', 'schedule', 'book session', 'appointments', 'appointment']
+  },
+  {
+    path: '/goals',
+    label: 'SMART Goals Tracker',
+    aliases: ['smart goals', 'goal tracker', 'milestones', 'milestone', 'goals', 'goal', 'targets', 'target', 'okr', 'okrs', 'objectives']
+  },
+  {
+    path: '/learning-path',
+    label: 'Learning Paths & Roadmaps',
+    aliases: ['learning paths', 'learning path', 'roadmaps', 'roadmap', 'career path', 'study path', 'study plan', 'tracks', 'track']
+  },
+  {
+    path: '/certificates',
+    label: 'Verified Credentials',
+    aliases: ['verified credentials', 'certificates', 'certificate', 'credentials', 'credential', 'cert', 'certs', 'diploma', 'verification']
+  },
+  {
+    path: '/resource-hub',
+    label: 'AI Resource Hub & Library',
+    aliases: ['resource hub', 'resources', 'resource', 'library', 'study material', 'study materials', 'cheat sheets', 'cheat sheet', 'books', 'book', 'blueprints']
+  },
+  {
+    path: '/gamification',
+    label: 'Leaderboards & Gamification',
+    aliases: ['gamification', 'leaderboards', 'leaderboard', 'rankings', 'ranking', 'points', 'xp', 'badges', 'badge', 'rewards']
+  },
+  {
+    path: '/analytics',
+    label: 'Performance Analytics',
+    aliases: ['analytics', 'analytic', 'statistics', 'stats', 'performance metrics', 'telemetry', 'insights', 'reports', 'report']
+  },
+  {
+    path: '/profile',
+    label: 'User Profile & Settings',
+    aliases: ['user profile', 'my profile', 'my account', 'profile settings', 'profile', 'account', 'settings', 'bio']
+  },
+  {
+    path: '/admin-dashboard',
+    label: 'Administrator Control Panel',
+    aliases: ['admin dashboard', 'admin control', 'admin panel', 'administration', 'admin']
+  },
+  {
+    path: '/dashboard',
+    label: 'Executive Command Dashboard',
+    aliases: ['executive dashboard', 'command dashboard', 'dashboard', 'home page', 'main page', 'home', 'overview', 'hub']
+  }
+];
+
 @Component({
   selector: 'app-ai-chatbot',
   standalone: true,
@@ -69,6 +148,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   private speakingSub: Subscription | null = null;
   private textChatSub: Subscription | null = null;
   private voiceQuerySub: Subscription | null = null;
+  private liveNavSub: Subscription | null = null;
 
   quickPrompts: { label: string; prompt: string; icon: string }[] = [
     { icon: '🗺️', label: 'Prepare My Path', prompt: 'I need guidance on what I should do in MentorHub for my problem. Please diagnose my situation, prepare a complete step-by-step path for me, and navigate me there.' },
@@ -135,6 +215,12 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       window.speechSynthesis.getVoices();
     }
 
+    this.liveNavSub = this.liveService.navigationEvent$.subscribe(nav => {
+      if (nav && nav.route) {
+        this.navigateTo(nav.route, nav.label);
+      }
+    });
+
     this.transcriptSub = this.liveService.transcriptEvent$.subscribe(event => {
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -161,6 +247,9 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
           mode: 'VOICE',
           timestamp: timeStr
         });
+
+        // Autonomous Navigation Check from Assistant's Live Voice Transcript
+        this.checkAndTriggerAutoNavigation(event.text);
       }
       this.scrollToBottom();
     });
@@ -199,6 +288,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   ngOnDestroy() {
     this.endLiveVoice();
     if (this.liveStatusSub) this.liveStatusSub.unsubscribe();
+    if (this.liveNavSub) this.liveNavSub.unsubscribe();
     if (this.transcriptSub) this.transcriptSub.unsubscribe();
     if (this.userRmsSub) this.userRmsSub.unsubscribe();
     if (this.aiRmsSub) this.aiRmsSub.unsubscribe();
@@ -348,6 +438,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
         this.scrollToBottom();
         this.speakVoiceResponse(aiResponseText);
+        this.checkAndTriggerAutoNavigation(aiResponseText);
       },
       error: () => {
         console.warn('Voice Query processing error');
@@ -406,6 +497,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     window.speechSynthesis.cancel();
 
     const cleanText = text
+      .replace(/\[\[NAVIGATE:[^\]]+\]\]/gi, '')
       .replace(/```[\s\S]*?```/g, ' Code snippet displayed on screen. ')
       .replace(/:::path[\s\S]*?:::/g, ' I have prepared your step by step action path on screen. ')
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
@@ -442,24 +534,158 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     window.speechSynthesis.speak(utterance);
   }
 
+  // Route normalizer & alias resolver
+  normalizeRoute(rawRoute: string): string {
+    if (!rawRoute) return '/dashboard';
+    let r = rawRoute.trim();
+    if (r.startsWith('navigate:')) {
+      r = r.substring('navigate:'.length).trim();
+    }
+    // Remove tags or markdown
+    r = r.replace(/\[\[NAVIGATE:/i, '').replace(/\]\]/g, '').trim();
+    if (!r.startsWith('/')) {
+      r = '/' + r;
+    }
+
+    const pathOnly = r.split('?')[0].toLowerCase();
+    const queryParams = r.includes('?') ? r.substring(r.indexOf('?')) : '';
+
+    if (pathOnly === '/resources' || pathOnly === '/resource' || pathOnly === '/library') {
+      return '/resource-hub' + queryParams;
+    }
+    if (pathOnly === '/admin') {
+      return '/admin-dashboard' + queryParams;
+    }
+    if (pathOnly === '/viva' || pathOnly === '/mockviva') {
+      return '/mock-viva' + queryParams;
+    }
+    if (pathOnly === '/courses' || pathOnly === '/course' || pathOnly === '/courseware' || pathOnly === '/cutm') {
+      return '/cutm-courses' + queryParams;
+    }
+    if (pathOnly === '/code' || pathOnly === '/editor' || pathOnly === '/ide' || pathOnly === '/compiler') {
+      return '/workspace' + queryParams;
+    }
+    if (pathOnly === '/leaderboard' || pathOnly === '/leaderboards' || pathOnly === '/ranks') {
+      return '/gamification' + queryParams;
+    }
+    if (pathOnly === '/roadmaps' || pathOnly === '/roadmap' || pathOnly === '/learning') {
+      return '/learning-path' + queryParams;
+    }
+    if (pathOnly === '/stats' || pathOnly === '/metrics') {
+      return '/analytics' + queryParams;
+    }
+    if (pathOnly === '/certs' || pathOnly === '/cert') {
+      return '/certificates' + queryParams;
+    }
+
+    return r;
+  }
+
+  findRouteConfig(route: string): AppRouteDefinition | undefined {
+    const clean = this.normalizeRoute(route).split('?')[0].toLowerCase();
+    return APP_ROUTES.find(r => r.path === clean);
+  }
+
+  resolveNavigation(text: string): { route: string; label: string } | null {
+    if (!text || typeof text !== 'string') return null;
+    const trimmed = text.trim();
+
+    // 1. Direct explicit directive tag: [[NAVIGATE:/route]]
+    const tagMatch = trimmed.match(/\[\[NAVIGATE:(\/[a-zA-Z0-9_\-\/?=&%#]+)\]\]/i);
+    if (tagMatch) {
+      const norm = this.normalizeRoute(tagMatch[1]);
+      const cfg = this.findRouteConfig(norm);
+      return { route: norm, label: cfg ? cfg.label : norm };
+    }
+
+    // 2. Direct navigate: URI in text
+    const navUriMatch = trimmed.match(/(?:navigate:)(\/[a-zA-Z0-9_\-\/?=&%#]+)/i);
+    if (navUriMatch) {
+      const norm = this.normalizeRoute(navUriMatch[1]);
+      const cfg = this.findRouteConfig(norm);
+      return { route: norm, label: cfg ? cfg.label : norm };
+    }
+
+    // 3. Markdown link: [Label](navigate:/route) or [Label](/route)
+    const mdLinkMatch = trimmed.match(/\[([^\]]+)\]\((?:navigate:)?(\/[a-zA-Z0-9_\-\/?=&%#]+)\)/i);
+    if (mdLinkMatch) {
+      const label = mdLinkMatch[1].trim();
+      const norm = this.normalizeRoute(mdLinkMatch[2]);
+      return { route: norm, label: label || norm };
+    }
+
+    const q = trimmed.toLowerCase();
+
+    // 4. Intent Trigger Detection
+    const INTENT_TRIGGERS = [
+      'navigate', 'take me to', 'go to', 'open', 'bring me to', 'show me', 'switch to',
+      'visit', 'jump to', 'launch', 'head to', 'head over to', 'view', 'explore',
+      'direct me to', 'redirect me to', 'lead me to', 'access', 'walk me to',
+      'move to', 'enter', 'display', 'see', 'start', 'kholo', 'chalo', 'dikhao',
+      'taking you to', 'opening the', 'opening', 'navigating you to', 'leading you to', 'redirecting you to'
+    ];
+
+    const hasTrigger = INTENT_TRIGGERS.some(t => q.includes(t));
+
+    // Sort aliases by length descending so specific multi-word matches win over general single words
+    const sortedAliases: { alias: string; route: AppRouteDefinition }[] = [];
+    APP_ROUTES.forEach(r => {
+      r.aliases.forEach(a => {
+        sortedAliases.push({ alias: a.toLowerCase(), route: r });
+      });
+    });
+    sortedAliases.sort((a, b) => b.alias.length - a.alias.length);
+
+    const wordCount = trimmed.split(/\s+/).length;
+    if (hasTrigger || wordCount <= 4) {
+      for (const item of sortedAliases) {
+        const regex = new RegExp(`(^|\\b|\\s)${item.alias}(\\b|\\s|$)`, 'i');
+        if (regex.test(q) || (hasTrigger && q.includes(item.alias))) {
+          return {
+            route: item.route.path,
+            label: item.route.label
+          };
+        }
+      }
+    }
+
+    return null;
+  }
+
   // Direct In-App Navigation Engine
   navigateTo(route: string, label?: string) {
     if (!route) return;
-    let cleanRoute = route.trim();
-    if (cleanRoute.startsWith('navigate:')) {
-      cleanRoute = cleanRoute.substring('navigate:'.length).trim();
-    }
+    const cleanRoute = this.normalizeRoute(route);
+    const cfg = this.findRouteConfig(cleanRoute);
+    const displayLabel = label || (cfg ? cfg.label : cleanRoute);
 
-    this.showToast(`🚀 Navigating to ${label || cleanRoute}...`);
-    this.router.navigateByUrl(cleanRoute);
+    this.showToast(`🚀 Navigating to ${displayLabel}...`);
+
+    this.router.navigateByUrl(cleanRoute).then(success => {
+      if (success) {
+        this.showToast(`✅ Navigated to ${displayLabel}`);
+        // If screen perception is active in live voice, capture new screen after brief DOM render pause
+        if (this.isScreenPerceptionActive && this.isLiveVoiceActive) {
+          setTimeout(() => {
+            this.captureScreenSnapshot();
+          }, 800);
+        }
+      }
+    }).catch(err => {
+      console.warn('Navigation failed:', err);
+    });
 
     // In live voice mode, Gemini's audio stream provides vocal guidance.
     // Only invoke browser speech synthesis for standard non-live text chat.
     if (!this.isLiveVoiceActive && typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      this.speakVoiceResponse(`Navigating you to ${label || cleanRoute}.`);
+      this.speakVoiceResponse(`Navigating you to ${displayLabel}.`);
     }
 
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+    if (this.isMaximized) {
+      this.isMaximized = false;
+    }
+
+    if (typeof window !== 'undefined' && window.innerWidth < 768 && !this.isLiveVoiceActive) {
       this.close();
     }
   }
@@ -480,30 +706,9 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   checkAndTriggerAutoNavigation(query: string) {
     if (!query) return;
-    const q = query.toLowerCase();
-    const hasNavIntent = q.includes('navigate') || q.includes('take me to') || q.includes('open ') || q.includes('go to ') || q.includes('bring me to');
-    if (!hasNavIntent) return;
-
-    if (q.includes('viva') || q.includes('defense') || q.includes('oral exam')) {
-      this.navigateTo('/mock-viva', 'Mock Viva Defense Arena');
-    } else if (q.includes('course') || q.includes('courseware') || q.includes('cutm') || q.includes('syllabus')) {
-      this.navigateTo('/cutm-courses', 'CUTM Courses Repository');
-    } else if (q.includes('workspace') || q.includes('code') || q.includes('compiler') || q.includes('ide') || q.includes('editor')) {
-      this.navigateTo('/workspace', 'Collaborative Code Workspace');
-    } else if (q.includes('mentor') || q.includes('match')) {
-      this.navigateTo('/mentor-matching', 'Smart Mentor Matching');
-    } else if (q.includes('session') || q.includes('meeting') || q.includes('calendar')) {
-      this.navigateTo('/sessions', 'Mentoring Sessions Hub');
-    } else if (q.includes('goal') || q.includes('target') || q.includes('milestone')) {
-      this.navigateTo('/goals', 'SMART Goals Tracker');
-    } else if (q.includes('certificate') || q.includes('credential') || q.includes('verify')) {
-      this.navigateTo('/certificates', 'Verified Credentials');
-    } else if (q.includes('dashboard') || q.includes('home')) {
-      this.navigateTo('/dashboard', 'Executive Dashboard');
-    } else if (q.includes('profile')) {
-      this.navigateTo('/profile', 'User Profile');
-    } else if (q.includes('resource') || q.includes('book') || q.includes('cheat sheet')) {
-      this.navigateTo('/resource-hub', 'AI Resource Hub');
+    const target = this.resolveNavigation(query);
+    if (target) {
+      this.navigateTo(target.route, target.label);
     }
   }
 
@@ -598,6 +803,8 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
         this.isGenerating = false;
         this.textChatSub = null;
         this.scrollToBottom();
+        // Execute auto-navigation if AI concluded with an explicit navigation directive
+        this.checkAndTriggerAutoNavigation(aiMessage.text);
       }
     });
   }
@@ -725,6 +932,18 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       return `<button type="button" class="ai-nav-action-pill tactile-btn-3d serif-title" data-route="${cleanRoute}" data-label="${label}">
         <span class="pill-nav-icon">🚀</span>
         <span class="pill-nav-label">${label}</span>
+        <span class="pill-nav-arrow">➔</span>
+      </button>`;
+    });
+
+    // 3b. Explicit In-Line Navigation Tags: [[NAVIGATE:/route]]
+    formatted = formatted.replace(/\[\[NAVIGATE:(\/[a-zA-Z0-9_\-\/?=&%#]+)\]\]/gi, (match, route) => {
+      const cleanRoute = this.normalizeRoute(route);
+      const cfg = this.findRouteConfig(cleanRoute);
+      const label = cfg ? cfg.label : cleanRoute;
+      return `<button type="button" class="ai-nav-action-pill tactile-btn-3d serif-title" data-route="${cleanRoute}" data-label="${label}">
+        <span class="pill-nav-icon">🚀</span>
+        <span class="pill-nav-label">Navigated to ${label}</span>
         <span class="pill-nav-arrow">➔</span>
       </button>`;
     });

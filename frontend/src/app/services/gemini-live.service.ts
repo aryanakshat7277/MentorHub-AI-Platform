@@ -30,6 +30,7 @@ export class GeminiLiveService {
   public inputTranscript$ = new BehaviorSubject<string>(''); // Kept for UI backwards compatibility, but won't populate natively
   public outputTranscript$ = new BehaviorSubject<string>('');
   public transcriptEvent$ = new Subject<{ role: 'user' | 'assistant'; text: string }>();
+  public navigationEvent$ = new Subject<{ route: string; label?: string }>();
 
   private pcmSub: Subscription | null = null;
   private reconnectAttempts = 0;
@@ -232,6 +233,11 @@ export class GeminiLiveService {
             if (part.text) {
               const current = this.outputTranscript$.value + part.text;
               this.outputTranscript$.next(current);
+
+              const liveNavMatch = part.text.match(/\[\[NAVIGATE:(\/[a-zA-Z0-9_\-\/?=&%#]+)\]\]/i);
+              if (liveNavMatch) {
+                this.navigationEvent$.next({ route: liveNavMatch[1] });
+              }
             }
           }
         }
@@ -242,6 +248,11 @@ export class GeminiLiveService {
           if (finalOutput) {
             this.transcriptEvent$.next({ role: 'assistant', text: finalOutput });
             this.outputTranscript$.next('');
+
+            const finalNavMatch = finalOutput.match(/\[\[NAVIGATE:(\/[a-zA-Z0-9_\-\/?=&%#]+)\]\]/i);
+            if (finalNavMatch) {
+              this.navigationEvent$.next({ route: finalNavMatch[1] });
+            }
           }
           if (!this.audioPlayback.isSpeaking$.value) {
             this.setStatus('LISTENING');

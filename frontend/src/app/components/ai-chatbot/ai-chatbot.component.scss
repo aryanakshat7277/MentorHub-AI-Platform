@@ -6,10 +6,16 @@
 /* ── OVERLAY ── */
 .chatbot-overlay {
   position: fixed; inset: 0; width: 100vw; height: 100vh;
-  background: rgba(15, 8, 4, 0.65);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  background: rgba(15, 8, 4, 0.50);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   z-index: 9990;
   animation: overlayIn 0.3s ease;
+
+  @media (min-width: 1024px) {
+    background: rgba(15, 8, 4, 0.12);
+    backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+    pointer-events: none; // Allows viewing and interacting with the app while copilot is docked
+  }
 }
 
 @keyframes overlayIn {
