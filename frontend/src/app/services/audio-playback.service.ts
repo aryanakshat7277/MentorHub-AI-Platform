@@ -1,5 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { VoiceCoordinatorService } from './voice-coordinator.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,15 @@ export class AudioPlaybackService {
   public isSpeaking$ = new BehaviorSubject<boolean>(false);
   public outputVolumeRms$ = new BehaviorSubject<number>(0);
 
-  constructor(private ngZone: NgZone) {}
+  constructor(
+    private ngZone: NgZone,
+    private voiceCoordinator: VoiceCoordinatorService
+  ) {
+    // Register preemption handler so another voice can cleanly interrupt Gemini Live playback
+    this.voiceCoordinator.registerPreemptHandler('gemini-live', () => {
+      this.interrupt();
+    });
+  }
 
   private initContextIfNeeded(sampleRate = 24000) {
     if (!this.audioCtx || this.audioCtx.state === 'closed') {
@@ -72,6 +81,12 @@ export class AudioPlaybackService {
     if (!this.audioCtx) return;
 
     try {
+      // Acquire voice mutex for Gemini Live - instantly silences all other voice types across the platform
+      this.voiceCoordinator.acquireVoice('gemini-live');
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+
       const audioBuffer = this.pcm16ToAudioBuffer(buffer, this.audioCtx, sampleRate);
       const source = this.audioCtx.createBufferSource();
       source.buffer = audioBuffer;
@@ -104,11 +119,13 @@ export class AudioPlaybackService {
           if (remainingTime <= 0.05) {
             this.isSpeaking$.next(false);
             this.outputVolumeRms$.next(0);
+            this.voiceCoordinator.releaseVoice('gemini-live');
           } else {
             setTimeout(() => {
               if (this.activeSources.length === 0) {
                 this.isSpeaking$.next(false);
                 this.outputVolumeRms$.next(0);
+                this.voiceCoordinator.releaseVoice('gemini-live');
               }
             }, Math.max(10, remainingTime * 1000));
           }
@@ -137,6 +154,7 @@ export class AudioPlaybackService {
 
     this.isSpeaking$.next(false);
     this.outputVolumeRms$.next(0);
+    this.voiceCoordinator.releaseVoice('gemini-live');
 
     if (this.animFrameId !== null) {
       cancelAnimationFrame(this.animFrameId);

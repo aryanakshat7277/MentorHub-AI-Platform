@@ -9,6 +9,7 @@ import { AudioCaptureService } from '../../services/audio-capture.service';
 import { AudioPlaybackService } from '../../services/audio-playback.service';
 import { AiModelRouterService } from '../../services/ai-model-router.service';
 import { AppScreenReaderService, ScreenCaptureResult } from '../../services/app-screen-reader.service';
+import { VoiceCoordinatorService } from '../../services/voice-coordinator.service';
 
 export interface LiveChatMessage extends ChatMessage {
   avatar?: string;
@@ -190,12 +191,22 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     public liveService: GeminiLiveService,
     public audioCapture: AudioCaptureService,
     public audioPlayback: AudioPlaybackService,
+    public voiceCoordinator: VoiceCoordinatorService,
     public screenReader: AppScreenReaderService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    // Register preemption callback so if Gemini Live or Mock Viva speaks, chatbot TTS shuts down immediately
+    this.voiceCoordinator.registerPreemptHandler('chatbot-tts', () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      this.isSpeakingAudio = false;
+      this.cdr.detectChanges();
+    });
+
     // Subscribe to Gemini Live status & transcripts
     this.liveStatusSub = this.liveService.status$.subscribe(status => {
       this.liveStatus = status;
@@ -287,6 +298,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   ngOnDestroy() {
     this.endLiveVoice();
+    this.voiceCoordinator.unregisterPreemptHandler('chatbot-tts');
     if (this.liveStatusSub) this.liveStatusSub.unsubscribe();
     if (this.liveNavSub) this.liveNavSub.unsubscribe();
     if (this.transcriptSub) this.transcriptSub.unsubscribe();
@@ -364,9 +376,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (this.isLiveVoiceActive) {
       this.endLiveVoice();
     } else {
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
+      this.voiceCoordinator.stopAllVoices();
       this.showToast('🟢 Live Voice Mode Active (Continuous Speech)');
       const success = await this.liveService.startLiveSession();
       if (!success) {
@@ -387,15 +397,14 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   endLiveVoice() {
+    this.voiceCoordinator.stopAllVoices();
     this.liveService.endLiveSession();
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
     this.showToast('⏹️ Live Voice Session Ended');
   }
 
   // Instant Barge-In Interruption Handler
   triggerBargeInInterruption() {
+    this.voiceCoordinator.stopAllVoices();
     this.liveService.handleInterruption();
     this.showToast('⚡ Audio Interrupted by User');
   }
@@ -491,9 +500,13 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   speakVoiceResponse(text: string) {
-    if (this.isLiveVoiceActive) return; // Do not use browser TTS when Live Voice is active (Gemini speaks natively)
+    if (this.isLiveVoiceActive || this.voiceCoordinator.isChannelActive('gemini-live') || this.audioPlayback.isSpeaking$.value) {
+      return; // Do not use browser TTS when Live Voice is active or Gemini is vocalizing natively
+    }
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
+    // Acquire voice mutex for chatbot-tts - stops any other voice immediately
+    this.voiceCoordinator.acquireVoice('chatbot-tts');
     window.speechSynthesis.cancel();
 
     const cleanText = text
@@ -507,7 +520,10 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       .replace(/[-*#]/g, '')
       .trim();
 
-    if (!cleanText) return;
+    if (!cleanText) {
+      this.voiceCoordinator.releaseVoice('chatbot-tts');
+      return;
+    }
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = 'en-US';
@@ -521,14 +537,19 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     utterance.onstart = () => {
       this.isSpeakingAudio = true;
+      this.cdr.detectChanges();
     };
 
     utterance.onend = () => {
       this.isSpeakingAudio = false;
+      this.voiceCoordinator.releaseVoice('chatbot-tts');
+      this.cdr.detectChanges();
     };
 
     utterance.onerror = () => {
       this.isSpeakingAudio = false;
+      this.voiceCoordinator.releaseVoice('chatbot-tts');
+      this.cdr.detectChanges();
     };
 
     window.speechSynthesis.speak(utterance);
@@ -677,7 +698,9 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     // In live voice mode, Gemini's audio stream provides vocal guidance.
     // Only invoke browser speech synthesis for standard non-live text chat.
-    if (!this.isLiveVoiceActive && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    // Also suppress speech when navigating to Mock Viva to prevent overlapping with viva examiners.
+    const isMockViva = cleanRoute.includes('mock-viva');
+    if (!this.isLiveVoiceActive && !this.voiceCoordinator.isChannelActive('gemini-live') && !isMockViva && typeof window !== 'undefined' && 'speechSynthesis' in window) {
       this.speakVoiceResponse(`Navigating you to ${displayLabel}.`);
     }
 
@@ -716,12 +739,8 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   sendMessage() {
     if (!this.userInput.trim() || this.isGenerating) return;
 
-    if (this.isSpeakingAudio) {
-      this.audioPlayback.interrupt();
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
-    }
+    // Immediately stop any active voice playback when a new prompt is submitted
+    this.voiceCoordinator.stopAllVoices();
 
     const query = this.userInput.trim();
     this.checkAndTriggerAutoNavigation(query);

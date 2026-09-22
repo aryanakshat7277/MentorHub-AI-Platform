@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { AudioCaptureService } from './audio-capture.service';
 import { AudioPlaybackService } from './audio-playback.service';
+import { VoiceCoordinatorService } from './voice-coordinator.service';
 
 export type LiveSessionStatus =
   | 'IDLE'
@@ -34,7 +35,7 @@ export class GeminiLiveService {
 
   private pcmSub: Subscription | null = null;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 2;
+  private readonly maxReconnectAttempts = 3;
   public isFallbackMode = false;
 
   private heartbeatInterval: any = null;
@@ -48,6 +49,7 @@ export class GeminiLiveService {
     private http: HttpClient,
     private audioCapture: AudioCaptureService,
     private audioPlayback: AudioPlaybackService,
+    private voiceCoordinator: VoiceCoordinatorService,
     private ngZone: NgZone
   ) {
     this.initVoicePreference();
@@ -106,6 +108,9 @@ export class GeminiLiveService {
     if (this.status$.value === 'CONNECTED' || this.status$.value === 'LISTENING') {
       return true;
     }
+
+    // Stop any and all other active voices before initiating live voice session
+    this.voiceCoordinator.stopAllVoices();
 
     this.setStatus('CONNECTING');
     this.isFallbackMode = false;
@@ -353,12 +358,9 @@ export class GeminiLiveService {
   public handleInterruption() {
     this.isTurnInProgress = false;
     this.setStatus('INTERRUPTED');
-    this.audioPlayback.interrupt();
+    this.voiceCoordinator.stopAllVoices();
     this.currentTurnId = this.audioPlayback.activeTurnId;
     this.outputTranscript$.next('');
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
     setTimeout(() => {
       if (this.status$.value === 'INTERRUPTED') {
         this.setStatus('LISTENING');
@@ -389,12 +391,8 @@ export class GeminiLiveService {
     this.stopHeartbeatMonitor();
     this.setStatus('ENDED');
     this.isTurnInProgress = false;
-    this.audioPlayback.interrupt();
+    this.voiceCoordinator.stopAllVoices();
     this.audioCapture.stopCapture();
-
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
 
     if (this.pcmSub) {
       this.pcmSub.unsubscribe();

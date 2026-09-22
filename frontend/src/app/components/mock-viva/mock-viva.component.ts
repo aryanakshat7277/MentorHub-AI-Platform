@@ -16,6 +16,8 @@ import {
 } from '../../services/mock-viva.service';
 import { SoundService } from '../../services/sound.service';
 import { AuthService } from '../../services/auth.service';
+import { VoiceCoordinatorService } from '../../services/voice-coordinator.service';
+import { AudioPlaybackService } from '../../services/audio-playback.service';
 
 export interface ExaminerPersona {
   id: string;
@@ -149,10 +151,29 @@ export class MockVivaComponent implements OnInit, OnDestroy {
     private soundService: SoundService,
     private authService: AuthService,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public voiceCoordinator: VoiceCoordinatorService,
+    public audioPlayback: AudioPlaybackService
   ) {}
 
   ngOnInit(): void {
+    // Register preemption callbacks so Mock Viva speech halts instantly if another voice takes over
+    this.voiceCoordinator.registerPreemptHandler('mock-viva-examiner', () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      this.isExaminerSpeaking = false;
+      this.cdr.detectChanges();
+    });
+
+    this.voiceCoordinator.registerPreemptHandler('mock-viva-answer', () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      this.isPlayingModelAnswer = false;
+      this.cdr.detectChanges();
+    });
+
     this.tracks = this.vivaService.getTracks();
     this.selectedTrack = this.tracks[0];
     this.initSpeechRecognition();
@@ -228,9 +249,9 @@ export class MockVivaComponent implements OnInit, OnDestroy {
     if (this.audioContext) {
       try { this.audioContext.close(); } catch (e) {}
     }
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
+    this.voiceCoordinator.stopAllVoices();
+    this.voiceCoordinator.unregisterPreemptHandler('mock-viva-examiner');
+    this.voiceCoordinator.unregisterPreemptHandler('mock-viva-answer');
   }
 
   // -------------------------------------------------------------
@@ -303,13 +324,20 @@ export class MockVivaComponent implements OnInit, OnDestroy {
     this.hasRunTestsForCurrentQuestion = false;
     this.testsBonusScore = 0;
 
-    if (!this.isVoiceMuted) {
+    if (!this.isVoiceMuted && !this.voiceCoordinator.isChannelActive('gemini-live') && !this.audioPlayback.isSpeaking$.value) {
       this.speakExaminerQuestion(this.currentQuestion.question);
     }
   }
 
-  speakExaminerQuestion(text: string): void {
+  speakExaminerQuestion(text: string, force = false): void {
+    if (!force && (this.voiceCoordinator.isChannelActive('gemini-live') || this.audioPlayback.isSpeaking$.value)) {
+      console.log('MockViva: Examiner speech deferred while Gemini Live is vocalizing');
+      return;
+    }
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+
+    // Acquire lock for mock-viva-examiner - automatically silences all other voice types
+    this.voiceCoordinator.acquireVoice('mock-viva-examiner');
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
@@ -328,10 +356,12 @@ export class MockVivaComponent implements OnInit, OnDestroy {
     this.isExaminerSpeaking = true;
     utterance.onend = () => {
       this.isExaminerSpeaking = false;
+      this.voiceCoordinator.releaseVoice('mock-viva-examiner');
       this.cdr.detectChanges();
     };
     utterance.onerror = () => {
       this.isExaminerSpeaking = false;
+      this.voiceCoordinator.releaseVoice('mock-viva-examiner');
       this.cdr.detectChanges();
     };
 
@@ -340,11 +370,11 @@ export class MockVivaComponent implements OnInit, OnDestroy {
 
   toggleVoiceMute(): void {
     this.isVoiceMuted = !this.isVoiceMuted;
-    if (this.isVoiceMuted && typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+    if (this.isVoiceMuted) {
+      this.voiceCoordinator.stopAllVoices();
       this.isExaminerSpeaking = false;
-    } else if (!this.isVoiceMuted && this.currentQuestion) {
-      this.speakExaminerQuestion(this.currentQuestion.question);
+    } else if (!this.isVoiceMuted && this.currentQuestion && !this.voiceCoordinator.isChannelActive('gemini-live') && !this.audioPlayback.isSpeaking$.value) {
+      this.speakExaminerQuestion(this.currentQuestion.question, true);
     }
   }
 
@@ -617,7 +647,7 @@ GROUP BY m.id;`;
     this.currentHintVisible = true;
     this.soundService.playSuccessSound();
     if (!this.isVoiceMuted) {
-      this.speakExaminerQuestion(`Examiner Lifeline Hint: ${this.currentQuestion.hint}`);
+      this.speakExaminerQuestion(`Examiner Lifeline Hint: ${this.currentQuestion.hint}`, true);
     }
   }
 
@@ -657,13 +687,16 @@ GROUP BY m.id;`;
     if (!answerToSpeak || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
     if (this.isPlayingModelAnswer) {
-      window.speechSynthesis.cancel();
+      this.voiceCoordinator.stopAllVoices();
       this.isPlayingModelAnswer = false;
       this.cdr.detectChanges();
       return;
     }
 
+    // Acquire lock for mock-viva-answer - automatically preempts examiner or any other voice
+    this.voiceCoordinator.acquireVoice('mock-viva-answer');
     window.speechSynthesis.cancel();
+
     const utterance = new SpeechSynthesisUtterance(answerToSpeak);
     utterance.rate = 0.95;
     utterance.pitch = 1.0;
@@ -678,10 +711,12 @@ GROUP BY m.id;`;
     this.isPlayingModelAnswer = true;
     utterance.onend = () => {
       this.isPlayingModelAnswer = false;
+      this.voiceCoordinator.releaseVoice('mock-viva-answer');
       this.cdr.detectChanges();
     };
     utterance.onerror = () => {
       this.isPlayingModelAnswer = false;
+      this.voiceCoordinator.releaseVoice('mock-viva-answer');
       this.cdr.detectChanges();
     };
 
