@@ -26,6 +26,9 @@
             <span class="sub-status serif-title">
               {{ isLiveVoiceActive ? 'Gemini Live Multimodal Voice Stream' : 'Gemini 3.6 Flash Neural Core' }}
             </span>
+            <span class="brain-status-badge serif-title" title="Full Platform Awareness Active">
+              🧠 Master Brain Active • 385+ CUTM Courses
+            </span>
           </div>
         </div>
       </div>
@@ -179,6 +182,18 @@
 
   <!-- Interactive Controls Footer (3D Studio Command Deck) -->
   <div class="chatbot-footer">
+    <!-- 1-Click Master Brain Knowledge Quick Prompt Chips -->
+    <div class="quick-prompts-scroll-bar" *ngIf="!isLiveVoiceActive">
+      <button *ngFor="let qp of quickPrompts" 
+              class="quick-chip-btn tactile-btn-3d serif-title"
+              (click)="sendQuickPrompt(qp.prompt)"
+              [disabled]="isGenerating"
+              [title]="qp.prompt">
+        <span class="chip-icon">{{ qp.icon }}</span>
+        <span>{{ qp.label }}</span>
+      </button>
+    </div>
+
     <div class="input-row">
       <!-- 3D Inset Track with Textarea and Mic Button -->
       <div class="input-deck-track 3d-inset-well">

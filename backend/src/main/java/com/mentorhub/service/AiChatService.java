@@ -48,11 +48,13 @@ public class AiChatService {
     private final GoalRepository goalRepository;
     private final CertificateRepository certificateRepository;
     private final MentoringSessionRepository sessionRepository;
+    private final MentorHubBrainService brainService;
 
     public AiChatService(UserRepository userRepository,
                          GoalRepository goalRepository,
                          CertificateRepository certificateRepository,
-                         MentoringSessionRepository sessionRepository) {
+                         MentoringSessionRepository sessionRepository,
+                         MentorHubBrainService brainService) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(5000);
         factory.setReadTimeout(30000);
@@ -61,6 +63,7 @@ public class AiChatService {
         this.goalRepository = goalRepository;
         this.certificateRepository = certificateRepository;
         this.sessionRepository = sessionRepository;
+        this.brainService = brainService;
     }
 
     public ChatResponse processChat(ChatRequest request) {
@@ -205,10 +208,7 @@ public class AiChatService {
         Exception lastEx = null;
 
         List<Map<String, Object>> contents = new ArrayList<>();
-        String liveContext = buildPlatformContextSummary();
-        String globalInstruction = "You are MentorHub AI Copilot. You are an expert AI assistant with vast global knowledge across programming, science, mathematics, software architecture, general facts, and mentorship.\n\n" +
-                "LIVE PLATFORM CONTEXT:\n" + liveContext + "\n\n" +
-                "DIRECTIVE: Answer ANY question asked directly, concisely, and helpfully without using repetitive canned template phrases or echo intros.";
+        String globalInstruction = brainService.getMasterBrainSystemPrompt("User");
 
         Map<String, Object> systemInstruction = Map.of(
             "parts", List.of(Map.of("text", globalInstruction))
@@ -312,11 +312,7 @@ public class AiChatService {
         List<String> keys = getGeminiApiKeys();
 
         List<Map<String, Object>> contents = new ArrayList<>();
-
-        String liveContext = buildPlatformContextSummary();
-        String globalInstruction = "You are MentorHub AI Copilot. You are an expert AI assistant with vast global knowledge across programming, science, mathematics, software architecture, general facts, and mentorship.\n\n" +
-                "LIVE PLATFORM CONTEXT:\n" + liveContext + "\n\n" +
-                "DIRECTIVE: Answer ANY question asked directly, concisely, and helpfully without using repetitive canned template phrases or echo intros.";
+        String globalInstruction = brainService.getMasterBrainSystemPrompt("User");
 
         Map<String, Object> systemInstruction = Map.of(
             "parts", List.of(Map.of("text", globalInstruction))
@@ -385,8 +381,8 @@ public class AiChatService {
         String url = "https://api.groq.com/openai/v1/chat/completions";
 
         List<Map<String, String>> messages = new ArrayList<>();
-        String liveContext = buildPlatformContextSummary();
-        messages.add(Map.of("role", "system", "content", "You are MentorHub AI Copilot. Answer any question directly, concisely, and helpfully.\nLive Platform Context:\n" + liveContext));
+        String globalInstruction = brainService.getMasterBrainSystemPrompt("User");
+        messages.add(Map.of("role", "system", "content", globalInstruction));
 
         if (historyPayload != null) {
             messages.addAll(historyPayload);
@@ -424,41 +420,9 @@ public class AiChatService {
     }
 
     /**
-     * Build live summary of users, sessions, goals, and certificates from H2 database
-     */
-    private String buildPlatformContextSummary() {
-        StringBuilder sb = new StringBuilder();
-        try {
-            List<User> users = userRepository.findAll();
-            String userList = users.stream()
-                    .map(u -> u.getName() + " (" + u.getRole() + ")")
-                    .collect(Collectors.joining(", "));
-            sb.append("• Registered Users: ").append(userList).append("\n");
-
-            List<Certificate> certs = certificateRepository.findAll();
-            String menteeCerts = certs.stream()
-                    .map(Certificate::getStudentName)
-                    .distinct()
-                    .collect(Collectors.joining(", "));
-            sb.append("• Verified Certificates: ").append(certs.size()).append(" (Mentees: ").append(menteeCerts).append(")\n");
-
-            List<Goal> goals = goalRepository.findAll();
-            long inProgress = goals.stream().filter(g -> "IN_PROGRESS".equals(g.getStatus())).count();
-            long achieved = goals.stream().filter(g -> "ACHIEVED".equals(g.getStatus())).count();
-            sb.append("• SMART Goals: ").append(goals.size()).append(" total (In-Progress: ").append(inProgress).append(", Achieved: ").append(achieved).append(")\n");
-
-            long sessionCount = sessionRepository.count();
-            sb.append("• Active Mentoring Sessions: ").append(sessionCount).append(" scheduled\n");
-        } catch (Exception e) {
-            sb.append("• Platform: MentorHub AI Academy\n");
-        }
-        return sb.toString();
-    }
-
-    /**
      * Fast & Direct Multi-Domain Knowledge Response Engine with Live Platform Data
      */
     private String buildInstantCopilotResponse(String query, String provider, String model) {
-        return "I'm currently unable to connect to AI services. Please check that the API keys are configured correctly in application.yml and that you have internet connectivity.";
+        return brainService.generateIntelligentResponse(query);
     }
 }

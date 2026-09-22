@@ -54,18 +54,32 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   private textChatSub: Subscription | null = null;
   private voiceQuerySub: Subscription | null = null;
 
+  quickPrompts: { label: string; prompt: string; icon: string }[] = [
+    { icon: '🎓', label: 'CUTM Courses', prompt: 'Tell me about the 385 CUTM Courseware courses and how to access them.' },
+    { icon: '👨‍🏫', label: 'Akshat Aryan', prompt: 'Who is Senior Mentor Akshat Aryan and what is his role in MentorHub?' },
+    { icon: '🎙️', label: 'AI Mock Viva', prompt: 'How does the AI Mock Viva defense work and what are the rubrics?' },
+    { icon: '💻', label: 'Code Workspace', prompt: 'How does the Collaborative Code Workspace and Piston compiler work?' },
+    { icon: '📜', label: 'Certificates', prompt: 'How are certificates cryptographically verified on this platform?' },
+    { icon: '🎯', label: 'Goals & Sessions', prompt: 'Explain how SMART goal tracking and mentoring sessions work.' }
+  ];
+
   messages: LiveChatMessage[] = [
     {
       id: 'msg-1',
       sender: 'ai',
       avatar: 'AI',
-      text: 'Greetings! I am the **MentorHub AI Assistant** (Gemini 3.6 Flash).\n\nAsk me code questions in text chat, or click **🟢 LIVE VOICE** for a continuous, real-time voice conversation with barge-in interruption support!',
+      text: 'Greetings! I am the **MentorHub AI Voice Assistant & Master Brain**.\n\nI possess a complete mental model and real-time awareness of our entire platform—including all **385+ CUTM Courseware courses** and **5 CBCS baskets**, **AI Mock Viva defense**, **Collaborative Code Workspace**, **cryptographic certificates**, and our team led by **Senior Mentor Akshat Aryan**.\n\nAsk me anything in text chat, tap the prompt chips below, or click **🟢 LIVE VOICE** for real-time spoken dialogue with barge-in interruption support!',
       provider: 'GEMINI',
       model: 'gemini-3.6-flash',
       mode: 'TEXT',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ];
+
+  sendQuickPrompt(prompt: string) {
+    this.userInput = prompt;
+    this.sendMessage();
+  }
 
   constructor(
     private aiChatService: AiChatService,
