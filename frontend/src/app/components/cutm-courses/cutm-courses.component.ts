@@ -268,12 +268,12 @@ export class CutmCoursesComponent implements OnInit, OnDestroy {
 
   getBasketColor(category: string): string {
     switch (category) {
-      case 'BASKET_I': return '#3B82F6';
-      case 'BASKET_II': return '#10B981';
-      case 'BASKET_III': return '#DE7048';
-      case 'BASKET_IV': return '#8B5CF6';
-      case 'BASKET_V': return '#EC4899';
-      default: return '#D4AF37';
+      case 'BASKET_I': return '#1D4ED8';
+      case 'BASKET_II': return '#15803D';
+      case 'BASKET_III': return '#A63B19';
+      case 'BASKET_IV': return '#6D28D9';
+      case 'BASKET_V': return '#BE185D';
+      default: return '#B45309';
     }
   }
 
