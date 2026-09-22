@@ -36,7 +36,10 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
         logger.info("Client connected to Live Voice Proxy on /ws-ai-live: {}", clientSessionId);
 
         java.util.List<String> apiKeys = sessionService.getGeminiApiKeys();
-        String liveModel = sessionService.getLiveModel();
+        String requestedModel = sessionService.getLiveModel();
+        if (requestedModel == null || requestedModel.trim().isEmpty()) {
+            requestedModel = "gemini-3.1-flash-live-preview";
+        }
 
         if (apiKeys == null || apiKeys.isEmpty()) {
             logger.warn("Gemini API key is empty for Live API proxy. Sending FALLBACK signal to client.");
@@ -52,19 +55,27 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
             if (clientSession.getUri() != null && clientSession.getUri().getQuery() != null) {
                 for (String param : clientSession.getUri().getQuery().split("&")) {
                     String[] pair = param.split("=");
-                    if (pair.length == 2 && "voice".equalsIgnoreCase(pair[0])) {
-                        String v = pair[1].trim();
-                        if (v.equalsIgnoreCase("Aoede") || v.equalsIgnoreCase("Charon") ||
-                            v.equalsIgnoreCase("Fenrir") || v.equalsIgnoreCase("Kore") ||
-                            v.equalsIgnoreCase("Puck")) {
-                            requestedVoice = v.substring(0, 1).toUpperCase() + v.substring(1).toLowerCase();
+                    if (pair.length == 2) {
+                        if ("voice".equalsIgnoreCase(pair[0])) {
+                            String v = pair[1].trim();
+                            if (v.equalsIgnoreCase("Aoede") || v.equalsIgnoreCase("Charon") ||
+                                v.equalsIgnoreCase("Fenrir") || v.equalsIgnoreCase("Kore") ||
+                                v.equalsIgnoreCase("Puck")) {
+                                requestedVoice = v.substring(0, 1).toUpperCase() + v.substring(1).toLowerCase();
+                            }
+                        } else if ("model".equalsIgnoreCase(pair[0])) {
+                            String m = pair[1].trim();
+                            if (!m.isEmpty()) {
+                                requestedModel = m;
+                            }
                         }
                     }
                 }
             }
         } catch (Exception ignored) {}
         final String effectiveVoice = requestedVoice;
-        logger.info("Live voice persona for client {}: {}", clientSessionId, effectiveVoice);
+        final String effectiveModel = requestedModel;
+        logger.info("Live Voice Proxy for client {}: Model={}, Voice={}", clientSessionId, effectiveModel, effectiveVoice);
 
         for (int i = 0; i < apiKeys.size(); i++) {
             String apiKey = apiKeys.get(i);
@@ -75,62 +86,48 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
                 geminiSession = webSocketClient.execute(new AbstractWebSocketHandler() {
                     @Override
                     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-                        logger.info("Connected upstream to Gemini Live Bidi WebSocket for client {} (Voice: {})", clientSessionId, effectiveVoice);
+                        logger.info("Connected upstream to Gemini Live Bidi WebSocket for client {} (Model: {}, Voice: {})", clientSessionId, effectiveModel, effectiveVoice);
                         
                         String systemInstructionText = sessionService.createLiveSession("").getSystemInstruction();
-                        String setupJson;
-                        if (systemInstructionText != null && !systemInstructionText.trim().isEmpty()) {
-                            setupJson = String.format("""
-                                {
-                                  "setup": {
-                                    "model": "models/%s",
-                                    "generationConfig": {
-                                      "responseModalities": ["AUDIO"],
-                                      "speechConfig": {
-                                        "voiceConfig": {
-                                          "prebuiltVoiceConfig": {
-                                            "voiceName": "%s"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "systemInstruction": {
-                                      "parts": [
-                                        {
-                                          "text": %s
-                                        }
-                                      ]
-                                    }
-                                  }
-                                }
-                                """, liveModel, effectiveVoice, escapeJsonString(systemInstructionText));
-                        } else {
-                            setupJson = String.format("""
-                                {
-                                  "setup": {
-                                    "model": "models/%s",
-                                    "generationConfig": {
-                                      "responseModalities": ["AUDIO"],
-                                      "speechConfig": {
-                                        "voiceConfig": {
-                                          "prebuiltVoiceConfig": {
-                                            "voiceName": "%s"
-                                          }
-                                        }
+                        String setupTemplate = """
+                            {
+                              "setup": {
+                                "model": "models/{{MODEL}}",
+                                "generationConfig": {
+                                  "responseModalities": ["AUDIO"],
+                                  "speechConfig": {
+                                    "voiceConfig": {
+                                      "prebuiltVoiceConfig": {
+                                        "voiceName": "{{VOICE}}"
                                       }
                                     }
                                   }
+                                },
+                                "systemInstruction": {
+                                  "parts": [
+                                    {
+                                      "text": {{SYSTEM_INSTRUCTION}}
+                                    }
+                                  ]
                                 }
-                                """, liveModel, effectiveVoice);
-                        }
+                              }
+                            }
+                            """;
+                        String setupJson = setupTemplate
+                                .replace("{{MODEL}}", effectiveModel)
+                                .replace("{{VOICE}}", effectiveVoice)
+                                .replace("{{SYSTEM_INSTRUCTION}}", escapeJsonString(systemInstructionText));
                         
-                        logger.info("Sending setupJson to Gemini: {}", setupJson);
+                        logger.info("Sending setupJson to Gemini Live (Model: {}, Voice: {})", effectiveModel, effectiveVoice);
                         session.sendMessage(new TextMessage(setupJson));
                     }
 
                     @Override
                     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-                        logger.info("Gemini -> Client text message: {}", message.getPayload());
+                        String payloadStr = message.getPayload();
+                        if (logger.isDebugEnabled() || (!payloadStr.contains("inlineData") && !payloadStr.contains("audio/pcm"))) {
+                            logger.info("Gemini -> Client text: {}", payloadStr.length() > 200 ? payloadStr.substring(0, 200) + "..." : payloadStr);
+                        }
                         if (clientSession.isOpen()) {
                             clientSession.sendMessage(message);
                         }
@@ -138,8 +135,10 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
 
                     @Override
                     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
-                        String payloadStr = new String(message.getPayload().array(), java.nio.charset.StandardCharsets.UTF_8);
-                        logger.info("Gemini -> Client binary converted message: {}", payloadStr);
+                        String payloadStr = java.nio.charset.StandardCharsets.UTF_8.decode(message.getPayload()).toString();
+                        if (logger.isDebugEnabled() || (!payloadStr.contains("inlineData") && !payloadStr.contains("audio/pcm"))) {
+                            logger.info("Gemini -> Client binary message: {}", payloadStr.length() > 200 ? payloadStr.substring(0, 200) + "..." : payloadStr);
+                        }
                         if (clientSession.isOpen()) {
                             clientSession.sendMessage(new TextMessage(payloadStr));
                         }
@@ -148,17 +147,21 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
                     @Override
                     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
                         logger.info("Upstream Gemini session closed for client {}: {}", clientSessionId, status);
-                        if (clientSession.isOpen()) {
-                            clientSession.sendMessage(new TextMessage("{\"type\":\"DISCONNECTED\",\"status\":\"" + status.getReason() + "\"}"));
-                        }
+                        try {
+                            if (clientSession.isOpen()) {
+                                clientSession.sendMessage(new TextMessage("{\"type\":\"DISCONNECTED\",\"status\":\"" + status.getReason() + "\"}"));
+                            }
+                        } catch (Exception ignored) {}
                     }
 
                     @Override
                     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
                         logger.error("Upstream Gemini transport error for client {}: {}", clientSessionId, exception.getMessage());
-                        if (clientSession.isOpen()) {
-                            clientSession.sendMessage(new TextMessage("{\"type\":\"FALLBACK\",\"reason\":\"TRANSPORT_ERROR\"}"));
-                        }
+                        try {
+                            if (clientSession.isOpen()) {
+                                clientSession.sendMessage(new TextMessage("{\"type\":\"FALLBACK\",\"reason\":\"TRANSPORT_ERROR\"}"));
+                            }
+                        } catch (Exception ignored) {}
                     }
                 }, new WebSocketHttpHeaders(), URI.create(geminiWsUri)).get();
 
@@ -174,7 +177,11 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
         }
 
         logger.error("All Gemini API keys failed to establish connection for client {}. Last error: {}", clientSessionId, lastException != null ? lastException.getMessage() : "Unknown");
-        clientSession.sendMessage(new TextMessage("{\"type\":\"FALLBACK\",\"reason\":\"CONNECTION_FAILED\"}"));
+        try {
+            if (clientSession.isOpen()) {
+                clientSession.sendMessage(new TextMessage("{\"type\":\"FALLBACK\",\"reason\":\"CONNECTION_FAILED\"}"));
+            }
+        } catch (Exception ignored) {}
     }
 
     @Override

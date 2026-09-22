@@ -121,14 +121,15 @@ export class GeminiLiveService {
   private connectWebSocket() {
     try {
       const voice = this.selectedVoice$.value || 'Aoede';
-      const connectionUrl = `${this.wsUrl}?voice=${voice}`;
+      const connectionUrl = `${this.wsUrl}?voice=${voice}&model=gemini-3.1-flash-live-preview`;
       this.ws = new WebSocket(connectionUrl);
 
       this.ws.onopen = () => {
         this.ngZone.run(() => {
           this.reconnectAttempts = 0;
-          this.isSetupComplete = true;
+          this.isSetupComplete = false;
           this.setStatus('LISTENING');
+          console.log('GeminiLiveService: Connected to Live Voice Proxy. Awaiting Gemini Live setupComplete...');
         });
       };
 
@@ -163,7 +164,7 @@ export class GeminiLiveService {
       } else if (typeof ArrayBuffer !== 'undefined' && data instanceof ArrayBuffer) {
         textData = new TextDecoder('utf-8').decode(data);
       }
-      const msg = JSON.parse(textData); console.log("SERVER FRAME:", msg);
+      const msg = JSON.parse(textData);
 
       if (msg.type === 'FALLBACK' || msg.type === 'DISCONNECTED') {
         console.warn('GeminiLiveService: Upstream disconnected or fallback triggered:', msg);
@@ -173,14 +174,15 @@ export class GeminiLiveService {
 
       if (msg.setupComplete) {
         this.isSetupComplete = true;
-        // Wake up the AI with an initial invisible ping
-        if (this.ws) {
+        console.log('GeminiLiveService: Gemini Live (gemini-3.1-flash-live-preview) setupComplete received! Initializing greeting...');
+        // Wake up the AI with an initial invisible ping so it speaks first
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
           this.ws.send(JSON.stringify({
             clientContent: {
               turns: [
                 {
                   role: 'user',
-                  parts: [{ text: 'Hello, I am connected. Please greet me briefly.' }]
+                  parts: [{ text: 'Hello, I am connected. Please greet me briefly in 1 or 2 articulate sentences as MentorHub AI.' }]
                 }
               ],
               turnComplete: true
