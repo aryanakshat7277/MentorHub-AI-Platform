@@ -78,7 +78,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     { icon: '💻', label: 'Code Workspace', prompt: 'Navigate me to the Collaborative Code Workspace and explain how the Piston compiler works.' },
     { icon: '🎯', label: 'Goals & Mentorship', prompt: 'Prepare a path for me to set SMART goals, connect with Senior Mentor Akshat Aryan, and earn verified certificates.' },
     { icon: '🎓', label: 'CUTM Courses', prompt: 'Show me the 385 CUTM Courseware courses and navigate me to browse them.' },
-    { icon: '🟢', label: 'NVIDIA Vision', prompt: 'Analyze my current screen with NVIDIA NIM Vision and tell me what to do.' }
+    { icon: '⚡', label: 'Ultra-Fast Assist', prompt: 'Give me an ultra-fast high-level briefing on my semester goals, courses, and next steps.' }
   ];
 
   messages: LiveChatMessage[] = [
@@ -226,13 +226,13 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   toggleAiEngine() {
     if (this.selectedProvider === 'GEMINI') {
-      this.selectedProvider = 'NVIDIA';
-      this.selectedModel = this.modelRouter.config.nvidiaModel;
-      this.showToast('🟢 Forced Engine: NVIDIA NIM (Meta LLaMA 3.2 11B Vision)');
+      this.selectedProvider = 'GROQ';
+      this.selectedModel = this.modelRouter.config.groqModel;
+      this.showToast('⚡ High-Speed Engine: Groq Cloud (Ultra-Fast ~1s)');
     } else {
       this.selectedProvider = 'GEMINI';
       this.selectedModel = this.modelRouter.config.textModel;
-      this.showToast('✨ Auto Engine: Gemini Core + NVIDIA NIM Failover');
+      this.showToast('✨ Auto Engine: Gemini Multimodal Vision + Groq Failover');
     }
   }
 

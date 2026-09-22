@@ -6,7 +6,7 @@ import { GeminiLiveService } from './gemini-live.service';
 
 export interface ModelRoutingConfig {
   textModel: string;
-  nvidiaModel: string;
+  groqModel: string;
   liveModel: string;
   fallbackSttModel: string;
   fallbackTtsModel: string;
@@ -18,7 +18,7 @@ export interface ModelRoutingConfig {
 export class AiModelRouterService {
   public readonly config: ModelRoutingConfig = {
     textModel: 'gemini-3.6-flash',
-    nvidiaModel: 'nvidia/nemotron-3-ultra-550b-a55b',
+    groqModel: 'openai/gpt-oss-120b',
     liveModel: 'gemini-3.1-flash-live-preview',
     fallbackSttModel: 'whisper-large-v3-turbo',
     fallbackTtsModel: 'canopylabs/orpheus-v1-english'
@@ -40,7 +40,7 @@ export class AiModelRouterService {
     provider: string = 'GEMINI',
     model?: string
   ): Observable<any> {
-    const chosenModel = model || (provider === 'NVIDIA' ? this.config.nvidiaModel : this.config.textModel);
+    const chosenModel = model || (provider === 'GROQ' ? this.config.groqModel : this.config.textModel);
     return this.chatService.sendMessage(
       message,
       provider,
@@ -61,7 +61,7 @@ export class AiModelRouterService {
     provider: string = 'GEMINI',
     model?: string
   ): Observable<any> {
-    const chosenModel = model || (provider === 'NVIDIA' ? this.config.nvidiaModel : this.config.textModel);
+    const chosenModel = model || (provider === 'GROQ' ? this.config.groqModel : this.config.textModel);
     return this.chatService.streamMessage(
       message,
       provider,
@@ -74,13 +74,12 @@ export class AiModelRouterService {
     );
   }
 
-  public sendNvidiaMessage(
+  public sendGroqMessage(
     message: string,
     history?: { role: string; content: string }[],
-    screenImage?: string,
     screenContext?: string
   ): Observable<any> {
-    return this.sendTextMessage(message, history, screenImage, screenContext, 'NVIDIA', this.config.nvidiaModel);
+    return this.sendTextMessage(message, history, undefined, screenContext, 'GROQ', this.config.groqModel);
   }
 
   public synthesizeGroqFallbackSpeech(text: string): Observable<any> {

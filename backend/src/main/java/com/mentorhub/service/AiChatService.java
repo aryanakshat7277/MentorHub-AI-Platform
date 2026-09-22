@@ -37,12 +37,6 @@ public class AiChatService {
     @Value("${ai.gemini.fallback-api-key:}")
     private String fallbackGeminiApiKey;
 
-    @Value("${ai.nvidia.api-key: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}")
-    private String nvidiaApiKey;
-
-    @Value("${ai.nvidia.model:nvidia/nemotron-3-ultra-550b-a55b}")
-    private String nvidiaModel;
-
     @Value("${ai.groq.api-key:${groq.api.key:}}")
     private String groqApiKey;
 
@@ -134,25 +128,24 @@ public class AiChatService {
         System.out.println("DEBUG: AiChatService.processChat started. reqModel=" + reqModel + ", screenImage=" + (screenImage != null ? screenImage.length() : "none") + ", screenContext=" + (screenContext != null ? "yes" : "no"));
         System.out.println("DEBUG: Gemini Key=" + (geminiApiKey != null ? geminiApiKey.length() : "null") + " Groq Key=" + (groqApiKey != null ? groqApiKey.length() : "null"));
         
-        // 1. If provider explicitly specified as NVIDIA, attempt NVIDIA first:
-        if ("NVIDIA".equalsIgnoreCase(reqProvider) && isValidKey(nvidiaApiKey)) {
+        // 1. If provider explicitly specified as GROQ, execute Groq immediately:
+        if ("GROQ".equalsIgnoreCase(reqProvider) && isValidKey(groqApiKey)) {
             try {
-                System.out.println("DEBUG: Calling NVIDIA NIM (Primary)...");
-                String targetNvidiaModel = (reqModel != null && !reqModel.isEmpty() && !reqModel.contains("gemini") && !reqModel.contains("groq")) ? reqModel : nvidiaModel;
-                String response = callNvidia(query, targetNvidiaModel, systemPrompt, historyPayload, screenContext);
+                String targetGroqModel = (reqModel != null && !reqModel.isEmpty() && reqModel.contains("groq")) ? reqModel : "openai/gpt-oss-120b";
+                String response = callGroq(query, targetGroqModel, systemPrompt, historyPayload, screenContext);
                 if (response != null && !response.trim().isEmpty()) {
-                    result.put("provider", "NVIDIA");
-                    result.put("model", targetNvidiaModel);
+                    result.put("provider", "GROQ");
+                    result.put("model", targetGroqModel);
                     result.put("response", response);
                     return result;
                 }
             } catch (Exception e) {
-                System.err.println("Live AI API Warning (NVIDIA PRIMARY): " + e.getMessage());
+                System.err.println("Live AI API Warning (GROQ PRIMARY): " + e.getMessage());
             }
         }
 
-        // 2. Primary Fast-path: Gemini (multimodal vision + text)
-        if (isValidKey(geminiApiKey) && !"NVIDIA".equalsIgnoreCase(reqProvider)) {
+        // 2. Primary Engine: Google Gemini (multimodal vision + live academic reasoning)
+        if (isValidKey(geminiApiKey) && !"GROQ".equalsIgnoreCase(reqProvider) && !"BRAIN".equalsIgnoreCase(reqProvider)) {
             try {
                 System.out.println("DEBUG: Calling Gemini with multimodal screen awareness...");
                 String response = callGemini(query, reqModel, systemPrompt, historyPayload, screenImage, screenContext);
@@ -164,24 +157,7 @@ public class AiChatService {
                     return result;
                 }
             } catch (Exception e) {
-                System.err.println("Live AI API Warning (GEMINI): " + e.getMessage() + ". Falling back to NVIDIA NIM.");
-            }
-        }
-
-        // 3. Secondary Fast-path: NVIDIA NIM (Meta LLaMA 3.2 11B Vision Instruct via NVIDIA integrate API)
-        if (isValidKey(nvidiaApiKey)) {
-            try {
-                System.out.println("DEBUG: Calling NVIDIA NIM (" + nvidiaModel + ")...");
-                String response = callNvidia(query, nvidiaModel, systemPrompt, historyPayload, screenContext);
-                System.out.println("DEBUG: NVIDIA NIM response returned: " + (response != null ? "not null" : "null"));
-                if (response != null && !response.trim().isEmpty()) {
-                    result.put("provider", "NVIDIA");
-                    result.put("model", nvidiaModel);
-                    result.put("response", response);
-                    return result;
-                }
-            } catch (Exception e) {
-                System.err.println("Live AI API Warning (NVIDIA NIM): " + e.getMessage() + ". Falling back to GROQ.");
+                System.err.println("Live AI API Warning (GEMINI): " + e.getMessage() + ". Falling back to GROQ.");
             }
         }
         
@@ -235,13 +211,13 @@ public class AiChatService {
                 }
                 String reqProvider = (request.getProvider() != null) ? request.getProvider().toUpperCase() : "GEMINI";
 
-                // If NVIDIA requested explicitly, process via NVIDIA immediately
-                if ("NVIDIA".equalsIgnoreCase(reqProvider)) {
-                    ChatResponse nvidiaResp = processChat(request);
+                // If GROQ or BRAIN requested explicitly, process immediately
+                if ("GROQ".equalsIgnoreCase(reqProvider) || "BRAIN".equalsIgnoreCase(reqProvider)) {
+                    ChatResponse fastResp = processChat(request);
                     Map<String, Object> payload = new HashMap<>();
-                    payload.put("text", nvidiaResp.getResponse());
-                    payload.put("provider", nvidiaResp.getProvider());
-                    payload.put("model", nvidiaResp.getModel());
+                    payload.put("text", fastResp.getResponse());
+                    payload.put("provider", fastResp.getProvider());
+                    payload.put("model", fastResp.getModel());
                     ObjectMapper mapper = new ObjectMapper();
                     emitter.send(SseEmitter.event().data(mapper.writeValueAsString(payload)));
                     emitter.complete();
@@ -506,86 +482,6 @@ public class AiChatService {
                 }
             } catch (Exception e) {
                 System.err.println("DEBUG: callGemini failed with key index " + k + ": " + e.getMessage());
-            }
-        }
-        return null;
-    }
-
-    @SuppressWarnings("rawtypes")
-    private String callNvidia(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload, String screenContext) {
-        String url = "https://integrate.api.nvidia.com/v1/chat/completions";
-
-        String targetModel = (model != null && !model.trim().isEmpty() && !model.contains("gemini") && !model.contains("groq")) ? model : nvidiaModel;
-
-        List<Map<String, String>> messages = new ArrayList<>();
-        String globalInstruction = brainService.getMasterBrainSystemPrompt("User");
-        if (targetModel.contains("ultra") || targetModel.contains("nemotron")) {
-            globalInstruction = "detailed thinking off\n\n" + globalInstruction;
-        }
-        if (systemPrompt != null && !systemPrompt.trim().isEmpty()) {
-            globalInstruction = systemPrompt + "\n\n" + globalInstruction;
-        }
-        messages.add(Map.of("role", "system", "content", globalInstruction));
-
-        if (historyPayload != null) {
-            for (Map<String, String> msg : historyPayload) {
-                String r = msg.getOrDefault("role", "user");
-                String c = msg.getOrDefault("content", "");
-                if (c != null && !c.trim().isEmpty()) {
-                    messages.add(Map.of("role", r, "content", c));
-                }
-            }
-        }
-        String effectiveQuery = (screenContext != null && !screenContext.trim().isEmpty())
-                ? "[ACTIVE SCREEN CONTEXT]\n" + screenContext + "\n\n[USER QUESTION]\n" + query
-                : query;
-        messages.add(Map.of("role", "user", "content", effectiveQuery));
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("model", targetModel);
-        body.put("messages", messages);
-        body.put("max_tokens", 1024);
-        body.put("temperature", 0.7);
-        if (targetModel.contains("ultra") || targetModel.contains("nemotron")) {
-            body.put("chat_template_kwargs", Map.of("enable_thinking", false));
-        }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(nvidiaApiKey);
-
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-        
-        int maxRetries = 2;
-        for (int attempt = 1; attempt <= maxRetries; attempt++) {
-            try {
-                ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
-
-                if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                    List choices = (List) response.getBody().get("choices");
-                    if (choices != null && !choices.isEmpty()) {
-                        Map choice = (Map) choices.get(0);
-                        Map message = (Map) choice.get("message");
-                        if (message != null) {
-                            String content = (String) message.get("content");
-                            if (content == null || content.trim().isEmpty()) {
-                                content = (String) message.get("reasoning_content");
-                            }
-                            if (content != null) {
-                                content = content.replaceAll("(?s)<thought>.*?</thought>", "").trim();
-                                return content;
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                if (attempt < maxRetries && (e.getMessage() != null && (e.getMessage().contains("503") || e.getMessage().contains("429")))) {
-                    try {
-                        Thread.sleep(650);
-                    } catch (InterruptedException ignored) {}
-                    continue;
-                }
-                throw e;
             }
         }
         return null;

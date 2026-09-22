@@ -53,19 +53,19 @@
         <span class="brain-status-badge serif-title" title="Full Platform Awareness Active">
           🧠 Master Brain
         </span>
-        <span class="model-pill-badge serif-title" [title]="selectedProvider === 'NVIDIA' ? 'NVIDIA NIM (Meta LLaMA 3.2 11B Vision)' : 'Google Gemini 3.6 Flash'">
-          {{ selectedProvider === 'NVIDIA' ? '🟢 LLaMA 3.2 11B' : '✨ Gemini 3.6' }}
+        <span class="model-pill-badge serif-title" [title]="selectedProvider === 'GROQ' ? 'Groq Cloud (openai/gpt-oss-120b)' : 'Google Gemini 3.6 Flash'">
+          {{ selectedProvider === 'GROQ' ? '⚡ Groq 120B' : '✨ Gemini 3.6' }}
         </span>
       </div>
 
       <div class="header-actions-right">
-        <!-- Engine selector toggle: Auto vs Forced NVIDIA NIM -->
+        <!-- Engine selector toggle: Auto (Gemini) vs Forced Groq Ultra-Fast -->
         <button class="engine-toggle-btn tactile-btn-3d serif-title"
                 (click)="toggleAiEngine()"
-                [class.nvidia-mode]="selectedProvider === 'NVIDIA'"
-                [title]="selectedProvider === 'NVIDIA' ? 'Active Engine: NVIDIA NIM (Meta LLaMA 3.2 11B Vision). Click to switch to Auto' : 'Active Engine: Auto (Gemini Primary + NVIDIA NIM Failover). Click to force NVIDIA NIM'">
-          <span class="engine-dot" [class.nvidia]="selectedProvider === 'NVIDIA'"></span>
-          <span>{{ selectedProvider === 'NVIDIA' ? '🟢 NVIDIA' : '✨ AUTO' }}</span>
+                [class.groq-mode]="selectedProvider === 'GROQ'"
+                [title]="selectedProvider === 'GROQ' ? 'Active Engine: Groq Cloud (Ultra-Fast 1s). Click to switch to Auto' : 'Active Engine: Auto (Gemini Multimodal Vision + Groq Failover). Click to force Groq Ultra-Fast'">
+          <span class="engine-dot" [class.groq]="selectedProvider === 'GROQ'"></span>
+          <span>{{ selectedProvider === 'GROQ' ? '⚡ GROQ' : '✨ AUTO' }}</span>
         </button>
 
         <!-- Screen Perception Vision Toggle Button -->
@@ -198,10 +198,11 @@
                 {{ msg.mode === 'VOICE' ? '🎙️ VOICE' : '💬 TEXT' }}
               </span>
               <span class="engine-badge 3d-inset-well serif-title" 
-                    [class.nvidia]="msg.provider === 'NVIDIA'"
+                    [class.groq]="msg.provider === 'GROQ'"
                     [class.gemini]="msg.provider === 'GEMINI'"
+                    [class.brain]="msg.provider === 'BRAIN'"
                     *ngIf="msg.sender === 'ai' && msg.provider">
-                {{ msg.provider === 'NVIDIA' ? '🟢 NVIDIA NIM' : (msg.provider === 'GEMINI' ? '✨ GEMINI' : msg.provider) }}
+                {{ msg.provider === 'GROQ' ? '⚡ GROQ (1s)' : (msg.provider === 'GEMINI' ? '✨ GEMINI' : (msg.provider === 'BRAIN' ? '🏛️ BRAIN' : msg.provider)) }}
               </span>
             </div>
             <span class="time-tag serif-title">{{ msg.timestamp }}</span>

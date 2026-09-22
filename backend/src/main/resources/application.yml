@@ -45,9 +45,6 @@ ai:
     text-model: ${AI_GEMINI_TEXT_MODEL:gemini-3.6-flash}
     live-model: ${AI_GEMINI_LIVE_MODEL:gemini-3.1-flash-live-preview}
     live-voice: ${AI_GEMINI_LIVE_VOICE:Aoede}
-  nvidia:
-    api-key: ${AI_NVIDIA_KEY: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}
-    model: ${AI_NVIDIA_MODEL:nvidia/nemotron-3-ultra-550b-a55b}
   groq:
     api-key: ${AI_GROQ_KEY:}
     stt-model: ${AI_GROQ_STT_MODEL:whisper-large-v3-turbo}

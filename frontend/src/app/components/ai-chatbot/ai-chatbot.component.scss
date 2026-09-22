@@ -259,18 +259,18 @@
         .engine-dot {
           width: 7px; height: 7px; border-radius: 50%;
           background: #EAB308; box-shadow: 0 0 6px rgba(234,179,8,0.7);
-          &.nvidia {
-            background: #16A34A;
-            box-shadow: 0 0 8px rgba(22, 163, 74, 0.6);
+          &.groq {
+            background: #F97316;
+            box-shadow: 0 0 8px rgba(249, 115, 22, 0.6);
             animation: pulseDot 1.5s infinite;
           }
         }
 
-        &.nvidia-mode {
-          background: #F0FDF4;
-          border-color: #16A34A;
-          color: #15803D;
-          box-shadow: 0 2px 8px rgba(22, 163, 74, 0.15);
+        &.groq-mode {
+          background: #FFF7ED;
+          border-color: #EA580C;
+          color: #C2410C;
+          box-shadow: 0 2px 8px rgba(234, 88, 12, 0.15);
         }
       }
 
@@ -761,13 +761,17 @@
         background: rgba(16,185,129,0.12); color: #059669;
         border: 1px solid rgba(16,185,129,0.30); box-shadow: var(--shadow-inset-well);
         letter-spacing: 0.3px;
-        &.nvidia {
-          background: rgba(118,185,0,0.16); color: #4D7C0F;
-          border-color: rgba(118,185,0,0.45);
+        &.groq {
+          background: rgba(249,115,22,0.14); color: #C2410C;
+          border-color: rgba(249,115,22,0.40);
         }
         &.gemini {
           background: rgba(59,130,246,0.12); color: #2563EB;
           border-color: rgba(59,130,246,0.35);
+        }
+        &.brain {
+          background: rgba(139,92,246,0.14); color: #7C3AED;
+          border-color: rgba(139,92,246,0.40);
         }
       }
     }
