@@ -18,7 +18,7 @@ export interface ModelRoutingConfig {
 export class AiModelRouterService {
   public readonly config: ModelRoutingConfig = {
     textModel: 'gemini-3.6-flash',
-    nvidiaModel: 'meta/llama-3.2-11b-vision-instruct',
+    nvidiaModel: 'nvidia/nemotron-3-super-120b-a12b',
     liveModel: 'gemini-3.1-flash-live-preview',
     fallbackSttModel: 'whisper-large-v3-turbo',
     fallbackTtsModel: 'canopylabs/orpheus-v1-english'

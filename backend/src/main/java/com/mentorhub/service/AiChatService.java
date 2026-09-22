@@ -40,7 +40,7 @@ public class AiChatService {
     @Value("${ai.nvidia.api-key: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}")
     private String nvidiaApiKey;
 
-    @Value("${ai.nvidia.model:meta/llama-3.2-11b-vision-instruct}")
+    @Value("${ai.nvidia.model:nvidia/nemotron-3-super-120b-a12b}")
     private String nvidiaModel;
 
     @Value("${ai.groq.api-key:${groq.api.key:}}")
@@ -138,10 +138,11 @@ public class AiChatService {
         if ("NVIDIA".equalsIgnoreCase(reqProvider) && isValidKey(nvidiaApiKey)) {
             try {
                 System.out.println("DEBUG: Calling NVIDIA NIM (Primary)...");
-                String response = callNvidia(query, nvidiaModel, systemPrompt, historyPayload, screenContext);
+                String targetNvidiaModel = (reqModel != null && !reqModel.isEmpty() && !reqModel.contains("gemini") && !reqModel.contains("groq")) ? reqModel : nvidiaModel;
+                String response = callNvidia(query, targetNvidiaModel, systemPrompt, historyPayload, screenContext);
                 if (response != null && !response.trim().isEmpty()) {
                     result.put("provider", "NVIDIA");
-                    result.put("model", nvidiaModel);
+                    result.put("model", targetNvidiaModel);
                     result.put("response", response);
                     return result;
                 }
@@ -547,16 +548,32 @@ public class AiChatService {
         headers.setBearerAuth(nvidiaApiKey);
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-        ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+        
+        int maxRetries = 2;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
 
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            List choices = (List) response.getBody().get("choices");
-            if (choices != null && !choices.isEmpty()) {
-                Map choice = (Map) choices.get(0);
-                Map message = (Map) choice.get("message");
-                if (message != null && message.get("content") != null) {
-                    return (String) message.get("content");
+                if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                    List choices = (List) response.getBody().get("choices");
+                    if (choices != null && !choices.isEmpty()) {
+                        Map choice = (Map) choices.get(0);
+                        Map message = (Map) choice.get("message");
+                        if (message != null && message.get("content") != null) {
+                            String content = (String) message.get("content");
+                            content = content.replaceAll("(?s)<thought>.*?</thought>", "").trim();
+                            return content;
+                        }
+                    }
                 }
+            } catch (Exception e) {
+                if (attempt < maxRetries && (e.getMessage() != null && (e.getMessage().contains("503") || e.getMessage().contains("429")))) {
+                    try {
+                        Thread.sleep(650);
+                    } catch (InterruptedException ignored) {}
+                    continue;
+                }
+                throw e;
             }
         }
         return null;

@@ -114,8 +114,8 @@ export class AiChatService {
     return this.http.get(`${this.baseUrl}/providers`).pipe(
       catchError(() => of({
         GEMINI: ['gemini-2.0-flash', 'gemini-3.6-flash'],
-        NVIDIA: ['meta/llama-3.2-11b-vision-instruct'],
-        GROQ: ['llama-3.1-8b-instant', 'whisper-large-v3-turbo'],
+        NVIDIA: ['nvidia/nemotron-3-super-120b-a12b', 'mistralai/mistral-nemotron'],
+        GROQ: ['openai/gpt-oss-120b', 'whisper-large-v3-turbo'],
         DEEPSEEK: ['deepseek-chat']
       }))
     );
