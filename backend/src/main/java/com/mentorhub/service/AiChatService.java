@@ -187,10 +187,10 @@ public class AiChatService {
         // 4. Tertiary: Groq
         if (isValidKey(groqApiKey)) {
             try {
-                String response = callGroq(query, "groq/compound-mini", systemPrompt, historyPayload, screenContext);
+                String response = callGroq(query, "openai/gpt-oss-120b", systemPrompt, historyPayload, screenContext);
                 if (response != null && !response.trim().isEmpty()) {
                     result.put("provider", "GROQ");
-                    result.put("model", "groq/compound-mini");
+                    result.put("model", "openai/gpt-oss-120b");
                     result.put("response", response);
                     return result;
                 }

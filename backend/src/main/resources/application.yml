@@ -30,8 +30,8 @@ jwt:
 
 piston:
   base-url: ${PISTON_BASE_URL:https://emkc.org}
-  execute-path: /api/v2/execute
-  runtimes-path: /api/v2/runtimes
+  execute-path: /api/v2/piston/execute
+  runtimes-path: /api/v2/piston/runtimes
   connect-timeout: 5000
   read-timeout: 10000
   max-code-size: 65536

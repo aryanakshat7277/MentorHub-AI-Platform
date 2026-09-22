@@ -47,7 +47,7 @@ public class AiChatController {
         Map<String, List<String>> map = new LinkedHashMap<>();
         map.put("GEMINI", List.of("gemini-3.6-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"));
         map.put("NVIDIA", List.of("meta/llama-3.2-11b-vision-instruct"));
-        map.put("GROQ", List.of("whisper-large-v3-turbo", "canopylabs/orpheus-v1-english", "llama-3.1-70b-versatile", "llama3-8b-8192"));
+        map.put("GROQ", List.of("openai/gpt-oss-120b", "qwen/qwen3.8-27b", "whisper-large-v3-turbo", "canopylabs/orpheus-v1-english"));
         map.put("DEEPSEEK", List.of("deepseek-chat", "deepseek-coder"));
         return ResponseEntity.ok(map);
     }
