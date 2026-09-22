@@ -44,6 +44,7 @@ export class GeminiLiveService {
   private lastAiSpeechEndTime = 0;
   private currentTurnId = 0;
   private isTurnInProgress = false;
+  private isInitialGreeting = false;
 
   constructor(
     private http: HttpClient,
@@ -56,6 +57,10 @@ export class GeminiLiveService {
     this.audioPlayback.isSpeaking$.subscribe(speaking => {
       if (!speaking) {
         this.lastAiSpeechEndTime = Date.now();
+        if (this.isInitialGreeting) {
+          this.isInitialGreeting = false;
+          console.log('GeminiLiveService: Initial greeting completed cleanly. Live voice microphone now active for user input.');
+        }
         if (this.status$.value === 'SPEAKING') {
           this.setStatus('LISTENING');
         }
@@ -109,6 +114,7 @@ export class GeminiLiveService {
     this.reconnectAttempts = 0;
     this.currentTurnId = this.audioPlayback.startNewTurn();
     this.isTurnInProgress = false;
+    this.isInitialGreeting = true;
 
     const captured = await this.audioCapture.startCapture();
     if (!captured) {
@@ -185,6 +191,7 @@ export class GeminiLiveService {
 
       if (msg.setupComplete) {
         this.isSetupComplete = true;
+        this.isInitialGreeting = true;
         console.log('GeminiLiveService: Gemini Live (gemini-3.1-flash-live-preview) setupComplete received! Initializing greeting...');
         // Wake up the AI with an initial invisible ping so it speaks first
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
@@ -200,6 +207,14 @@ export class GeminiLiveService {
             }
           }));
         }
+
+        // Safety fallback: if greeting response generates no audio within 8s, release greeting guard
+        setTimeout(() => {
+          if (this.isInitialGreeting && !this.audioPlayback.isSpeaking$.value) {
+            this.isInitialGreeting = false;
+            console.log('GeminiLiveService: Greeting guard timer elapsed. Listening for user.');
+          }
+        }, 8000);
       }
 
       if (msg.serverContent) {
@@ -266,18 +281,25 @@ export class GeminiLiveService {
     if (!this.isSetupComplete) return;
     if (this.isFallbackMode) return;
 
+    // Greeting Shield: Never send mic frames or trigger barge-in while the initial greeting is loading or playing.
+    // This eliminates laptop speaker feedback loop from cutting off the initial greeting.
+    if (this.isInitialGreeting) {
+      return;
+    }
+
     const isSpeaking = this.audioPlayback.isSpeaking$.value;
     const currentMicVolume = this.audioCapture.volumeRms$.value;
 
     if (isSpeaking) {
       // Acoustic Gate: AI is currently rendering audio through speakers.
-      // Drop mic chunks unless intentional user barge-in is detected.
+      // Suppress mic chunks to prevent speaker audio feedback loop into Gemini.
+      // Only allow intentional user barge-in with robust thresholds:
       const timeSinceSpeechStart = Date.now() - this.lastAiSpeechStartTime;
-      // 400ms grace period at start of AI speech to avoid onset click/speaker bleed from triggering barge-in
-      if (timeSinceSpeechStart > 400 && currentMicVolume >= 0.18) {
+      // 1500ms grace period prevents speech onset and initial syllables from falsely triggering interruption
+      if (timeSinceSpeechStart > 1500 && currentMicVolume >= 0.42) {
         this.loudFrameCount++;
-        // 3 consecutive frames (~90ms) of sustained human vocal energy above 0.18 RMS indicates intentional barge-in
-        if (this.loudFrameCount >= 3) {
+        // 6 consecutive frames (~180ms) of sustained human vocal energy above 0.42 RMS indicates deliberate barge-in
+        if (this.loudFrameCount >= 6) {
           console.log(`GeminiLiveService: User barge-in detected (volume: ${currentMicVolume.toFixed(2)}). Interrupting AI playback.`);
           this.triggerBargeInInterruption();
           this.loudFrameCount = 0;
@@ -291,8 +313,8 @@ export class GeminiLiveService {
     } else {
       this.lastAiSpeechStartTime = Date.now();
       this.loudFrameCount = 0;
-      // 200ms post-speech tail silence to ensure room reverb from AI's last word doesn't trigger prompt
-      if (Date.now() - this.lastAiSpeechEndTime < 200) {
+      // 250ms post-speech tail silence to ensure room reverb from AI's last word doesn't trigger prompt
+      if (Date.now() - this.lastAiSpeechEndTime < 250) {
         return;
       }
     }
@@ -383,6 +405,8 @@ export class GeminiLiveService {
     this.stopHeartbeatMonitor();
     this.setStatus('ENDED');
     this.isTurnInProgress = false;
+    this.isInitialGreeting = false;
+    this.loudFrameCount = 0;
     this.voiceCoordinator.stopAllVoices();
     this.audioCapture.stopCapture();
 
