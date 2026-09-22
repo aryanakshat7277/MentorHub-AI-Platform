@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { GestureRecognitionService } from '../../services/gesture-recognition.service';
-import { FacialNavigationService } from '../../services/facial-navigation.service';
 import { SoundService } from '../../services/sound.service';
 import { ThemeService } from '../../services/theme.service';
 
@@ -81,7 +80,6 @@ export class HeaderComponent implements OnInit {
     private apiService: ApiService,
     private authService: AuthService,
     public gestureService: GestureRecognitionService,
-    public facialNavService: FacialNavigationService,
     public soundService: SoundService,
     public themeService: ThemeService,
     private router: Router
@@ -90,11 +88,6 @@ export class HeaderComponent implements OnInit {
   toggleTheme() {
     this.soundService.playClickSound();
     this.themeService.toggleTheme();
-  }
-
-  toggleFacialAirNav() {
-    this.soundService.playClickSound();
-    this.facialNavService.toggleTracking();
   }
 
   @HostListener('window:keydown', ['$event'])

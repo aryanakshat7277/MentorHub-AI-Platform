@@ -42,13 +42,6 @@
       <span class="gesture-label">{{ (gestureService.isEnabled$ | async) ? 'GESTURES ON' : 'GESTURES' }}</span>
     </button>
 
-    <!-- Cybernetic Nose AirNav & Double-Blink Screen Navigation Button -->
-    <button class="gesture-toggle-btn airnav-header-btn clay-badge-3d" [class.active]="(facialNavService.isEnabled$ | async)" (click)="toggleFacialAirNav()" title="Toggle Nose Pointer & Double-Blink Navigation [F]">
-      <span class="gesture-pulse-ring" *ngIf="(facialNavService.isEnabled$ | async)"></span>
-      <span class="gesture-icon">👃</span>
-      <span class="gesture-label">{{ (facialNavService.isEnabled$ | async) ? 'AIR-NAV ON' : 'AIR-NAV' }}</span>
-    </button>
-
     <!-- What's New / Feature Spotlight Modal Button -->
     <button class="features-spotlight-btn clay-badge-3d" (click)="openFeaturesModal()" title="Explore 6 Unique New Features">
       <span class="spotlight-sparkle">✨</span>
