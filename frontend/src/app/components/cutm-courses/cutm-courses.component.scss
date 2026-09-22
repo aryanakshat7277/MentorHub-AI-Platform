@@ -145,7 +145,7 @@
         font-size: 11px;
         font-weight: 800;
         letter-spacing: 1.5px;
-        color: #92400E;
+        color: var(--text-dark-amber);
         text-transform: uppercase;
       }
 
@@ -153,9 +153,9 @@
         font-size: 10px;
         font-weight: 800;
         letter-spacing: 1px;
-        background: rgba(166, 59, 25, 0.09);
-        color: #A63B19;
-        border: 1px solid rgba(166, 59, 25, 0.30);
+        background: var(--badge-crimson-bg);
+        color: var(--text-dark-crimson);
+        border: 1px solid var(--badge-crimson-border);
         padding: 2px 8px;
         border-radius: 6px;
       }
@@ -169,9 +169,9 @@
         letter-spacing: 0.5px;
         padding: 3px 10px;
         border-radius: 20px;
-        background: rgba(16, 185, 129, 0.10);
-        color: #047857;
-        border: 1px solid rgba(16, 185, 129, 0.30);
+        background: var(--badge-emerald-bg);
+        color: var(--text-dark-emerald);
+        border: 1px solid var(--badge-emerald-border);
 
         .sync-dot {
           width: 7px;
@@ -183,9 +183,9 @@
         }
 
         &.synced {
-          background: rgba(29, 78, 216, 0.09);
-          color: #1D4ED8;
-          border-color: rgba(29, 78, 216, 0.30);
+          background: var(--badge-navy-bg);
+          color: var(--text-dark-navy);
+          border-color: var(--badge-navy-border);
 
           .sync-dot {
             background: #1D4ED8;
@@ -198,7 +198,7 @@
     .page-main-heading {
       font-size: 28px;
       font-weight: 900;
-      color: #150E0B;
+      color: var(--text-primary);
       letter-spacing: 0.5px;
       margin: 0;
       line-height: 1.25;
@@ -208,18 +208,18 @@
     .curriculum-subtitle {
       font-size: 13.5px;
       line-height: 1.55;
-      color: #4A352C;
+      color: var(--text-secondary);
       margin: 0;
       max-width: 920px;
       word-break: break-word;
 
       .hero-inline-link {
-        color: #1D4ED8;
+        color: var(--text-dark-navy);
         text-decoration: underline;
         font-weight: 700;
 
         &:hover {
-          color: #1E40AF;
+          color: var(--text-dark-navy-deep);
         }
       }
     }
@@ -247,24 +247,25 @@
       font-size: 10px;
       font-weight: 800;
       letter-spacing: 1px;
-      color: #6A5047;
+      color: var(--text-tertiary);
       text-transform: uppercase;
     }
 
     .tile-val {
       font-size: 24px;
       font-weight: 900;
-      color: #150E0B;
+      color: var(--text-primary);
       line-height: 1.1;
 
       &.gold-text {
-        color: #92400E;
+        color: var(--text-dark-amber);
       }
     }
 
     .tile-sub {
       font-size: 11px;
-      color: #6A5047;
+      color: var(--text-tertiary);
+      font-weight: 600;
     }
 
     &.progress-tile {
@@ -279,7 +280,7 @@
         .tile-percent {
           font-size: 13px;
           font-weight: 800;
-          color: #A63B19;
+          color: var(--text-dark-crimson);
         }
       }
 
@@ -527,7 +528,7 @@
           font-size: 13px;
           font-weight: 800;
           letter-spacing: 0.3px;
-          color: #150E0B;
+          color: var(--text-primary);
         }
 
         .b-code-badge {
@@ -536,34 +537,35 @@
           padding: 1px 5px;
           border-radius: 4px;
           background: #EFE5DB;
-          color: #2C1D16;
+          color: var(--text-secondary);
         }
       }
 
       .b-meta {
         font-size: 10.5px;
-        color: #6A5047;
+        color: var(--text-tertiary);
+        font-weight: 600;
       }
     }
 
     &:hover {
       background: #F5ECE3;
-      border-color: rgba(166, 59, 25, 0.4);
+      border-color: rgba(127, 29, 29, 0.4);
       transform: translateY(-1px);
     }
 
     &.active {
-      background: linear-gradient(135deg, rgba(166, 59, 25, 0.10) 0%, rgba(217, 119, 6, 0.10) 100%);
-      border-color: #A63B19;
+      background: linear-gradient(135deg, rgba(127, 29, 29, 0.10) 0%, rgba(120, 53, 15, 0.10) 100%);
+      border-color: var(--text-dark-crimson);
       box-shadow: 
-        0 4px 14px rgba(166, 59, 25, 0.18),
+        0 4px 14px rgba(127, 29, 29, 0.18),
         inset 0 1px 0 rgba(255, 255, 255, 0.9);
 
       .b-label {
-        color: #A63B19;
+        color: var(--text-dark-crimson);
       }
       .b-code-badge {
-        background: #A63B19;
+        background: var(--text-dark-crimson);
         color: #FFFFFF;
       }
     }
@@ -902,7 +904,7 @@
       .faculty-label {
         font-size: 9px;
         font-weight: 800;
-        color: #92400E;
+        color: var(--text-dark-amber);
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
@@ -910,7 +912,7 @@
       .faculty-name {
         font-size: 12.5px;
         font-weight: 800;
-        color: #150E0B;
+        color: var(--text-primary);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -920,7 +922,7 @@
     .faculty-dept-badge {
       font-size: 10px;
       font-weight: 700;
-      color: #5A443B;
+      color: var(--text-tertiary);
       background: #FFFFFF;
       border: 1px solid rgba(200, 182, 166, 0.7);
       padding: 2px 7px;
@@ -951,8 +953,8 @@
         padding: 3px 10px;
         border-radius: 6px;
         background: #FFFFFF;
-        border: 1px solid rgba(166, 59, 25, 0.35);
-        color: #150E0B;
+        border: 1px solid rgba(127, 29, 29, 0.35);
+        color: var(--text-primary);
         cursor: pointer;
         box-shadow: 0 2px 5px rgba(140, 110, 90, 0.10);
         transition: all 0.15s ease;
@@ -968,18 +970,18 @@
           font-size: 12px;
           font-weight: 900;
           letter-spacing: 1px;
-          color: #A63B19;
+          color: var(--text-dark-crimson);
         }
 
         .copy-icon {
           font-size: 10px;
-          color: #8C531B;
+          color: var(--text-dark-amber);
           opacity: 0.85;
         }
 
         &:hover {
-          background: rgba(166, 59, 25, 0.08);
-          border-color: #A63B19;
+          background: var(--badge-crimson-bg);
+          border-color: var(--text-dark-crimson);
         }
       }
 
@@ -988,16 +990,16 @@
         font-weight: 800;
         padding: 3px 7px;
         border-radius: 6px;
-        background: #FEF3C7;
-        border: 1px solid #FCD34D;
-        color: #92400E;
+        background: var(--badge-amber-bg);
+        border: 1px solid var(--badge-amber-border);
+        color: var(--text-dark-amber);
         flex-shrink: 0;
       }
 
       .ltp-pill, .sem-pill {
         font-size: 11px;
         font-weight: 700;
-        color: #4A352C;
+        color: var(--text-secondary);
         background: #F5ECE3;
         border: 1px solid rgba(200, 182, 166, 0.6);
         padding: 2px 7px;
@@ -1009,7 +1011,7 @@
     .course-heading {
       font-size: 18px;
       font-weight: 800;
-      color: #150E0B;
+      color: var(--text-primary);
       margin: 0;
       line-height: 1.35;
       cursor: pointer;
@@ -1018,7 +1020,7 @@
       transition: color 0.2s ease;
 
       &:hover {
-        color: #A63B19;
+        color: var(--text-dark-crimson);
       }
     }
   }
@@ -1026,7 +1028,7 @@
   .course-desc {
     font-size: 13px;
     line-height: 1.55;
-    color: #4A352C;
+    color: var(--text-secondary);
     margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 3;

@@ -122,16 +122,16 @@
         gap: 14px;
 
         .greeting-prefix {
-          color: #8C2B0E;
+          color: var(--text-dark-crimson);
           font-size: 13px;
           letter-spacing: 1.5px;
           font-weight: 800;
         }
 
         .level-pill {
-          background: rgba(166, 59, 25, 0.08);
-          border: 1px solid rgba(166, 59, 25, 0.25);
-          color: #A63B19 !important;
+          background: var(--badge-crimson-bg);
+          border: 1px solid var(--badge-crimson-border);
+          color: var(--text-dark-crimson) !important;
           font-size: 11px;
           padding: 4px 14px;
           border-radius: var(--radius-full);
@@ -139,15 +139,15 @@
           letter-spacing: 0.5px;
 
           &.mentee-pill {
-            background: rgba(212, 175, 55, 0.12);
-            border-color: rgba(212, 175, 55, 0.35);
-            color: #92400E !important;
+            background: var(--badge-amber-bg);
+            border-color: var(--badge-amber-border);
+            color: var(--text-dark-amber) !important;
           }
 
           &.admin-pill {
-            background: rgba(16, 185, 129, 0.12);
-            border-color: rgba(16, 185, 129, 0.35);
-            color: #065F46 !important;
+            background: var(--badge-emerald-bg);
+            border-color: var(--badge-emerald-border);
+            color: var(--text-dark-emerald) !important;
           }
         }
       }
@@ -155,15 +155,15 @@
       .user-display-name {
         font-size: 32px;
         font-weight: 900;
-        color: #150E0B !important;
+        color: var(--text-primary) !important;
         letter-spacing: 0.5px;
         margin: 0;
 
         .profile-link {
-          color: #150E0B !important;
+          color: var(--text-primary) !important;
           text-decoration: none;
           &:hover {
-            color: #DE7048 !important;
+            color: var(--text-dark-navy) !important;
             text-decoration: underline;
           }
         }
@@ -182,8 +182,8 @@
           font-size: 11px;
           font-weight: 800;
 
-          .bar-lbl { color: #5C4A42; letter-spacing: 0.5px; }
-          .bar-val { color: #150E0B; }
+          .bar-lbl { color: var(--text-tertiary); letter-spacing: 0.5px; font-weight: 700; }
+          .bar-val { color: var(--text-primary); font-weight: 800; }
         }
 
         .track {
@@ -283,10 +283,10 @@
           transform: scale(1.06);
         }
 
-        &.cyan { background: var(--accent-terracotta-tint); color: var(--accent-terracotta); }
-        &.green { background: var(--accent-forest-tint); color: var(--accent-forest); }
-        &.orange { background: var(--accent-amber-tint); color: var(--accent-amber); }
-        &.gold { background: var(--accent-amber-tint); color: var(--accent-ochre); }
+        &.cyan   { background: var(--badge-navy-bg); color: var(--text-dark-navy); border: 1px solid var(--badge-navy-border); }
+        &.green  { background: var(--badge-emerald-bg); color: var(--text-dark-emerald); border: 1px solid var(--badge-emerald-border); }
+        &.orange { background: var(--badge-crimson-bg); color: var(--text-dark-crimson); border: 1px solid var(--badge-crimson-border); }
+        &.gold   { background: var(--badge-amber-bg); color: var(--text-dark-amber); border: 1px solid var(--badge-amber-border); }
       }
     }
 
@@ -301,10 +301,10 @@
         color: var(--text-primary);
         transition: transform 0.2s ease;
 
-        &.purple-glow { color: var(--accent-amber); }
-        &.orange-glow { color: var(--accent-terracotta); }
-        &.green-glow { color: var(--accent-forest); }
-        &.gold-glow { color: var(--accent-ochre); }
+        &.purple-glow { color: var(--text-dark-amethyst); }
+        &.orange-glow { color: var(--text-dark-crimson); }
+        &.green-glow  { color: var(--text-dark-emerald); }
+        &.gold-glow   { color: var(--text-dark-amber); }
       }
 
       .mini-gauge-wrap {

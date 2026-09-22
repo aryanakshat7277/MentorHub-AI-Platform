@@ -24,37 +24,85 @@
   --grad-hero: linear-gradient(135deg, #FFFFFF 0%, #FAF4EE 50%, #F5ECE3 100%);
   --grad-gold: linear-gradient(135deg, #F5D770 0%, #D4AF37 50%, #A8882A 100%);
 
-  /* Semantic Accents */
-  --accent-terracotta: #A63B19;
-  --accent-terracotta-hover: #8E3013;
-  --accent-terracotta-tint: rgba(166,59,25,0.09);
-  --accent-amber: #B35E17;
-  --accent-amber-tint: rgba(179,94,23,0.09);
-  --accent-forest: #2A5A3D;
-  --accent-forest-tint: rgba(42,90,61,0.09);
-  --accent-ochre: #663914;
-  --accent-gold: #D4AF37;
-  --accent-gold-tint: rgba(212,175,55,0.10);
+  /* Semantic Accents — Rich, Deep Tones */
+  --accent-terracotta: #8C2B0E;
+  --accent-terracotta-hover: #701F08;
+  --accent-terracotta-tint: rgba(140, 43, 14, 0.09);
+  --accent-amber: #78350F;
+  --accent-amber-tint: rgba(120, 53, 15, 0.09);
+  --accent-forest: #064E3B;
+  --accent-forest-tint: rgba(6, 78, 59, 0.09);
+  --accent-ochre: #5C3A0A;
+  --accent-gold: #B8860B;
+  --accent-gold-tint: rgba(184, 134, 11, 0.12);
 
   /* Legacy */
-  --accent-cyan: #A63B19;
-  --glow-cyan: rgba(166,59,25,0.22);
-  --accent-purple: #B35E17;
-  --accent-purple-dark: #8E3013;
-  --glow-purple: rgba(179,94,23,0.22);
-  --accent-emerald: #2A5A3D;
-  --glow-emerald: rgba(42,90,61,0.18);
+  --accent-cyan: #1E3A8A;
+  --glow-cyan: rgba(30, 58, 138, 0.22);
+  --accent-purple: #581C87;
+  --accent-purple-dark: #3B0764;
+  --glow-purple: rgba(88, 28, 135, 0.22);
+  --accent-emerald: #064E3B;
+  --glow-emerald: rgba(6, 78, 59, 0.18);
 
-  /* Typography — Dark Espresso */
-  --text-primary: #150E0B;
-  --text-secondary: #2C1D16;
-  --text-tertiary: #5A443B;
-  --text-on-accent: #FAF4EE;
-  --text-main: #150E0B;
-  --text-sub: #2C1D16;
-  --text-muted: #6A5047;
-  --text-cyan: #A63B19;
-  --text-purple: #B35E17;
+  /* ==========================================================================
+     TYPOGRAPHY — HIGH-CONTRAST LUXURY DARK COMBINATIONS SYSTEM
+     Authoritative, ultra-legible dark tones curated for maximum contrast & beauty
+     ========================================================================== */
+  --text-primary: #0A0F1D;           /* Deep Midnight Obsidian — for headings, titles, key numbers */
+  --text-secondary: #1E293B;         /* Deep Slate Ink — for paragraphs, body descriptions, lists */
+  --text-tertiary: #334155;          /* Carbon Charcoal — for subheadings, subtitles, card meta, labels */
+  --text-muted: #475569;             /* Dark Steel — for timestamps, microcopy, footnotes */
+  --text-on-accent: #FAF4EE;         /* Light cream for buttons/dark badges */
+  --text-main: #0A0F1D;
+  --text-sub: #1E293B;
+
+  /* Curated Semantic Dark Color Combinations */
+  /* 1. Deep Royal Navy Combination (Academic, Platform, Key Metrics) */
+  --text-dark-navy: #1E3A8A;
+  --text-dark-navy-deep: #0F172A;
+  --text-dark-navy-vibrant: #1D4ED8;
+  --badge-navy-bg: rgba(30, 58, 138, 0.08);
+  --badge-navy-border: rgba(30, 58, 138, 0.28);
+
+  /* 2. Deep Imperial Crimson Combination (Urgent, Action, Active Status) */
+  --text-dark-crimson: #7F1D1D;
+  --text-dark-crimson-deep: #450A0A;
+  --text-dark-crimson-vibrant: #991B1B;
+  --badge-crimson-bg: rgba(127, 29, 29, 0.08);
+  --badge-crimson-border: rgba(127, 29, 29, 0.28);
+
+  /* 3. Deep Forest Emerald Combination (Verified, Passing, Success) */
+  --text-dark-emerald: #064E3B;
+  --text-dark-emerald-deep: #022C22;
+  --text-dark-emerald-vibrant: #065F46;
+  --badge-emerald-bg: rgba(6, 78, 59, 0.08);
+  --badge-emerald-border: rgba(6, 78, 59, 0.28);
+
+  /* 4. Deep Burnished Bronze Combination (Prestige, XP, CBCS Baskets) */
+  --text-dark-amber: #78350F;
+  --text-dark-amber-deep: #451A03;
+  --text-dark-amber-vibrant: #854D0E;
+  --badge-amber-bg: rgba(120, 53, 15, 0.08);
+  --badge-amber-border: rgba(120, 53, 15, 0.28);
+
+  /* 5. Deep Royal Amethyst Combination (Gemini Live AI, Reasoning, Prompts) */
+  --text-dark-amethyst: #581C87;
+  --text-dark-amethyst-deep: #2E1065;
+  --text-dark-amethyst-vibrant: #6B21A8;
+  --badge-amethyst-bg: rgba(88, 28, 135, 0.08);
+  --badge-amethyst-border: rgba(88, 28, 135, 0.28);
+
+  /* 6. Deep Oceanic Teal Combination (Code, Compiler, Telemetry) */
+  --text-dark-teal: #0F766E;
+  --text-dark-teal-deep: #042F2E;
+  --text-dark-teal-vibrant: #0E7490;
+  --badge-teal-bg: rgba(15, 118, 110, 0.08);
+  --badge-teal-border: rgba(15, 118, 110, 0.28);
+
+  /* Legacy compatibility aliases */
+  --text-cyan: var(--text-dark-navy);
+  --text-purple: var(--text-dark-amethyst);
 
   /* Fonts - Maintained Times New Roman Font */
   --font-sans: "Times New Roman", Times, Georgia, serif;
@@ -171,13 +219,22 @@ code, pre, .code-textarea, .highlight-layer, .line-number, .logs-content,
   font-weight: 500 !important; line-height: 22px !important;
 }
 
-h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em; }
-h1 { font-size: 30px; line-height: 1.25; }
-h2 { font-size: 24px; line-height: 1.30; }
-h3 { font-size: 20px; line-height: 1.35; font-weight: 700; }
-h4 { font-size: 17px; line-height: 1.40; font-weight: 700; }
-p, span, label, div, a { color: var(--text-primary); }
-.subtitle, .text-muted, caption { color: var(--text-tertiary); font-weight: 500; }
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.015em;
+}
+h1 { font-size: 30px; line-height: 1.25; color: var(--text-primary); }
+h2 { font-size: 24px; line-height: 1.30; color: var(--text-primary); }
+h3 { font-size: 20px; line-height: 1.35; font-weight: 700; color: var(--text-primary); }
+h4 { font-size: 17px; line-height: 1.40; font-weight: 700; color: var(--text-primary); }
+p { color: var(--text-secondary); line-height: 1.6; font-weight: 500; }
+span, div, a { color: inherit; }
+label { color: var(--text-secondary); font-weight: 700; }
+strong, b { color: var(--text-primary); font-weight: 800; }
+small, .micro-copy { color: var(--text-muted); font-weight: 600; }
+.subtitle, .text-muted, caption { color: var(--text-tertiary); font-weight: 600; }
 button, input, select, textarea, .nav-item { font-family: var(--font-sans); font-weight: 600; transition: all 0.22s var(--ease-smooth); }
 img { max-width: 100%; height: auto; }
 
@@ -473,6 +530,89 @@ button:hover .shine-sweep { left: 160%; }
 .gold-text {
   background: linear-gradient(135deg, #F5D770 0%, #D4AF37 50%, #A8882A 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* ==========================================================================
+   HIGH-CONTRAST DARK TYPOGRAPHY UTILITIES & COMBINATIONS
+   ========================================================================== */
+
+/* 1. Core Dark Hierarchy */
+.text-dark-primary   { color: var(--text-primary) !important; }
+.text-dark-secondary { color: var(--text-secondary) !important; }
+.text-dark-tertiary  { color: var(--text-tertiary) !important; }
+.text-dark-muted     { color: var(--text-muted) !important; }
+
+/* 2. Semantic Dark Color Combinations */
+.text-dark-navy      { color: var(--text-dark-navy) !important; }
+.text-dark-crimson   { color: var(--text-dark-crimson) !important; }
+.text-dark-emerald   { color: var(--text-dark-emerald) !important; }
+.text-dark-amber     { color: var(--text-dark-amber) !important; }
+.text-dark-amethyst  { color: var(--text-dark-amethyst) !important; }
+.text-dark-teal      { color: var(--text-dark-teal) !important; }
+
+/* 3. Luxury Dual-Tone Dark Gradient Text */
+.gradient-dark-navy {
+  background: linear-gradient(135deg, #0A0F1D 0%, #1E3A8A 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  font-weight: 900;
+}
+.gradient-dark-crimson {
+  background: linear-gradient(135deg, #0A0F1D 0%, #7F1D1D 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  font-weight: 900;
+}
+.gradient-dark-amber {
+  background: linear-gradient(135deg, #0A0F1D 0%, #78350F 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  font-weight: 900;
+}
+.gradient-dark-emerald {
+  background: linear-gradient(135deg, #0A0F1D 0%, #064E3B 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  font-weight: 900;
+}
+.gradient-dark-amethyst {
+  background: linear-gradient(135deg, #0A0F1D 0%, #581C87 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  font-weight: 900;
+}
+
+/* 4. High-Contrast Dark Pill / Badge Combinations */
+.badge-combo-navy {
+  background: var(--badge-navy-bg) !important;
+  border: 1px solid var(--badge-navy-border) !important;
+  color: var(--text-dark-navy) !important;
+  font-weight: 800 !important;
+}
+.badge-combo-crimson {
+  background: var(--badge-crimson-bg) !important;
+  border: 1px solid var(--badge-crimson-border) !important;
+  color: var(--text-dark-crimson) !important;
+  font-weight: 800 !important;
+}
+.badge-combo-emerald {
+  background: var(--badge-emerald-bg) !important;
+  border: 1px solid var(--badge-emerald-border) !important;
+  color: var(--text-dark-emerald) !important;
+  font-weight: 800 !important;
+}
+.badge-combo-amber {
+  background: var(--badge-amber-bg) !important;
+  border: 1px solid var(--badge-amber-border) !important;
+  color: var(--text-dark-amber) !important;
+  font-weight: 800 !important;
+}
+.badge-combo-amethyst {
+  background: var(--badge-amethyst-bg) !important;
+  border: 1px solid var(--badge-amethyst-border) !important;
+  color: var(--text-dark-amethyst) !important;
+  font-weight: 800 !important;
+}
+.badge-combo-teal {
+  background: var(--badge-teal-bg) !important;
+  border: 1px solid var(--badge-teal-border) !important;
+  color: var(--text-dark-teal) !important;
+  font-weight: 800 !important;
 }
 
 /* ==========================================================================
