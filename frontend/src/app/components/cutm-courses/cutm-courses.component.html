@@ -19,15 +19,15 @@
               <img src="assets/cutm-logo.png" alt="Centurion University Logo" class="official-cutm-brand-img" />
             </div>
             <span class="university-tag serif-title">CENTURION UNIVERSITY OF TECHNOLOGY & MANAGEMENT</span>
-            <span class="cbcs-badge serif-title">CBCS CURRICULUM FRAMEWORK</span>
+            <span class="cbcs-badge serif-title">OFFICIAL COURSEWARE PORTAL</span>
             <span class="cloud-sync-pill" [class.synced]="isCloudSynced">
               <span class="sync-dot"></span>
               {{ isCloudSynced ? '● LIVE CLOUD DB CONNECTED (Spring Boot JPA)' : '● CACHED EDGE SYNC (Autonomous Engine)' }}
             </span>
           </div>
-          <h1 class="page-main-heading serif-title">CUTM CBCS Academic Course Repository</h1>
+          <h1 class="page-main-heading serif-title">CUTM Official Courseware & Academic Repository</h1>
           <p class="curriculum-subtitle serif-title">
-            Comprehensive multi-disciplinary curriculum spanning all 5 Baskets (AECC, PCC, PEC, OE, SEC) with 92 syllabus modules, laboratory assignments, and integrated AI oral defense viva examination.
+            Comprehensive university academic curriculum directly integrated with the CUTM Courseware portal (<a href="https://courseware.cutm.ac.in/courses" target="_blank" rel="noopener noreferrer" class="hero-inline-link">courseware.cutm.ac.in/courses</a>). Spanning all official Courseware categories (Core, Domain, Skill, Certificate, Diploma) and CBCS Baskets (AECC, PCC, PEC, OE, SEC) with authentic faculty instructors, session plans, and AI oral viva defense.
           </p>
         </div>
       </div>
@@ -37,17 +37,22 @@
         <div class="telemetry-stat-tile">
           <span class="tile-label serif-title">TOTAL COURSES</span>
           <span class="tile-val serif-title">{{ courses.length }}</span>
-          <span class="tile-sub serif-title">All 5 Baskets</span>
+          <span class="tile-sub serif-title">All CUTM Disciplines</span>
+        </div>
+        <div class="telemetry-stat-tile">
+          <span class="tile-label serif-title">FACULTY INSTRUCTORS</span>
+          <span class="tile-val serif-title gold-text">145+</span>
+          <span class="tile-sub serif-title">Centurion Professors</span>
         </div>
         <div class="telemetry-stat-tile">
           <span class="tile-label serif-title">TOTAL CREDITS</span>
           <span class="tile-val serif-title gold-text">{{ getTotalCreditsCount() }}</span>
-          <span class="tile-sub serif-title">Degree Requirement</span>
+          <span class="tile-sub serif-title">Degree Requirements</span>
         </div>
         <div class="telemetry-stat-tile">
           <span class="tile-label serif-title">SYLLABUS MODULES</span>
           <span class="tile-val serif-title">{{ getTotalModulesCount() }}</span>
-          <span class="tile-sub serif-title">With Lab Practicals</span>
+          <span class="tile-sub serif-title">With Practicals & Labs</span>
         </div>
         <div class="telemetry-stat-tile progress-tile">
           <div class="tile-progress-header">
@@ -65,7 +70,49 @@
     </div>
   </div>
 
-  <!-- 2. Basket Navigation Ribbon (Baskets I to V + ALL) -->
+  <!-- 2. Primary Navigation: Official CUTM Courseware Categories -->
+  <div class="courseware-category-strip clay-panel">
+    <div class="category-strip-top">
+      <div class="strip-badge-left">
+        <span class="portal-dot"></span>
+        <span class="strip-heading serif-title">CUTM COURSEWARE TAXONOMY</span>
+        <span class="official-subtag serif-title">Official portal classification</span>
+      </div>
+      <a 
+        href="https://courseware.cutm.ac.in/courses" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        class="official-portal-ext-link serif-title"
+        title="Visit the live Centurion University Courseware Portal"
+      >
+        <span>🌐 Open Live Courseware Portal (courseware.cutm.ac.in)</span>
+        <span class="ext-arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="category-nav-scroll">
+      <button 
+        *ngFor="let cat of coursewareCategories"
+        type="button"
+        class="category-nav-pill tactile-btn-3d"
+        [class.active]="selectedCourseCategory === cat.category"
+        [style.--cat-color]="cat.color"
+        [style.--cat-bg]="cat.badgeBg"
+        (click)="selectCourseCategory(cat.category)"
+      >
+        <span class="cat-icon">{{ cat.icon }}</span>
+        <div class="cat-text-group">
+          <div class="cat-top">
+            <span class="cat-label serif-title">{{ cat.shortLabel }}</span>
+            <span class="cat-count-badge" [style.background]="cat.color">{{ cat.courseCount }}</span>
+          </div>
+          <span class="cat-desc serif-title">{{ cat.name }}</span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- 3. Secondary Navigation: CBCS Curriculum Baskets -->
   <div class="basket-navigator-strip clay-panel">
     <div class="basket-nav-scroll">
       <button 
@@ -87,14 +134,14 @@
     </div>
   </div>
 
-  <!-- 3. Search, Filter & View Controls -->
+  <!-- 4. Search, Filter & View Controls -->
   <div class="controls-toolbar clay-panel elevated-card-3d">
     <div class="search-input-box">
       <span class="search-lens">🔍</span>
       <input 
         type="text" 
         class="search-text-field serif-title" 
-        placeholder="Search courses, modules, codes (e.g. CUTM1011, Java, Kafka, Deep Learning, Cloud)..."
+        placeholder="Search courses, faculty (e.g. Patjoshi, Manoj Padhi, Sowgandhika), codes (e.g. CUTM1011), topics..."
         [(ngModel)]="searchQuery"
         (ngModelChange)="onSearchChange()"
       />
@@ -155,7 +202,7 @@
           class="view-btn" 
           [class.active]="viewMode === 'detailed'"
           (click)="setViewMode('detailed')"
-          title="Detailed Syllabus View"
+          title="Detailed Table View"
         >
           ☰
         </button>
@@ -164,19 +211,19 @@
   </div>
 
   <!-- Filter Summary Bar -->
-  <div class="filter-feedback-row" *ngIf="selectedBasket !== 'ALL' || searchQuery || selectedSemester !== 'ALL' || bookmarkedOnly">
+  <div class="filter-feedback-row" *ngIf="selectedCourseCategory !== 'ALL' || selectedBasket !== 'ALL' || searchQuery || selectedSemester !== 'ALL' || bookmarkedOnly">
     <span class="feedback-text serif-title">
-      Showing <strong>{{ filteredCourses.length }}</strong> of {{ courses.length }} courses matching criteria
+      Showing <strong>{{ filteredCourses.length }}</strong> of {{ courses.length }} CUTM courses matching active criteria
     </span>
     <button 
       class="reset-filters-btn serif-title" 
-      (click)="selectedBasket = 'ALL'; searchQuery = ''; selectedSemester = 'ALL'; bookmarkedOnly = false; applyFilters()"
+      (click)="resetAllFilters()"
     >
       Reset All Filters ✕
     </button>
   </div>
 
-  <!-- 4. Course Catalog Content (Grid Mode) -->
+  <!-- 5. Course Catalog Content (Grid Mode) -->
   <div *ngIf="viewMode === 'grid' && filteredCourses.length > 0" class="courses-grid-layout">
     <div 
       *ngFor="let course of filteredCourses" 
@@ -186,14 +233,27 @@
       <!-- Card Header -->
       <div class="card-top-bar">
         <div class="basket-and-credits">
+          <!-- Courseware Classification Badge -->
+          <span 
+            *ngIf="course.courseCategory"
+            class="courseware-category-badge serif-title"
+            [style.color]="getCourseCategoryColor(course.courseCategory)"
+            [style.borderColor]="getCourseCategoryColor(course.courseCategory) + '55'"
+            [style.background]="getCourseCategoryColor(course.courseCategory) + '18'"
+          >
+            {{ getCourseCategoryIcon(course.courseCategory) }} {{ course.courseCategory }} Courses
+          </span>
+
+          <!-- CBCS Basket Badge -->
           <span 
             class="basket-badge" 
             [style.background]="getBasketColor(course.basketCategory) + '22'"
             [style.color]="getBasketColor(course.basketCategory)"
             [style.borderColor]="getBasketColor(course.basketCategory) + '55'"
           >
-            {{ getBasketShortLabel(course.basketCategory) }} • {{ course.basketCategory.replace('_', ' ') }}
+            {{ getBasketShortLabel(course.basketCategory) }}
           </span>
+
           <span class="credits-pill serif-title">⭐ {{ course.credits }} Credits</span>
         </div>
 
@@ -206,6 +266,16 @@
         >
           {{ course.isBookmarked ? '★' : '☆' }}
         </button>
+      </div>
+
+      <!-- Assigned Faculty Instructor Lead Bar -->
+      <div class="faculty-lead-bar" *ngIf="course.faculty">
+        <div class="faculty-avatar-icon">👨‍🏫</div>
+        <div class="faculty-meta">
+          <span class="faculty-label serif-title">Faculty Instructor</span>
+          <span class="faculty-name serif-title">{{ course.faculty }}</span>
+        </div>
+        <span class="faculty-dept-badge serif-title">{{ course.department }}</span>
       </div>
 
       <!-- Course Identifier & Code -->
@@ -221,6 +291,7 @@
             <span class="code-text">{{ course.courseCode }}</span>
             <span class="copy-icon">{{ copiedCode === course.courseCode ? '✓ Copied' : '📋' }}</span>
           </button>
+          <span class="cw-id-pill serif-title" *ngIf="course.coursewareId">CW #{{ course.coursewareId }}</span>
           <span class="ltp-pill serif-title">L-T-P: {{ course.ltp }}</span>
           <span class="sem-pill serif-title">{{ course.semester }}</span>
         </div>
@@ -266,6 +337,16 @@
         </button>
 
         <div class="action-btn-cluster">
+          <!-- Direct Official CUTM Courseware Portal Link -->
+          <button 
+            type="button" 
+            class="courseware-link-btn tactile-btn-3d serif-title"
+            (click)="openCoursewarePortal(course, $event)"
+            title="Open official courseware session plan on courseware.cutm.ac.in"
+          >
+            🌐 Courseware ↗
+          </button>
+
           <button 
             type="button" 
             class="dossier-btn tactile-btn-3d serif-title"
@@ -286,7 +367,7 @@
         </div>
       </div>
 
-      <!-- 5. Expandable Modules Accordion -->
+      <!-- 6. Expandable Modules Accordion -->
       <div *ngIf="isCourseExpanded(course.id)" class="modules-accordion-drawer">
         <div class="drawer-header">
           <span class="drawer-title serif-title">📖 Formal CUTM Module Syllabus & Practical Labs</span>
@@ -346,13 +427,15 @@
     </div>
   </div>
 
-  <!-- 4b. Course Catalog Content (Detailed Table Mode) -->
+  <!-- 7. Detailed Table View Mode -->
   <div *ngIf="viewMode === 'detailed' && filteredCourses.length > 0" class="detailed-table-container clay-panel elevated-card-3d">
     <table class="cutm-syllabus-table">
       <thead>
         <tr>
           <th class="serif-title">Code</th>
           <th class="serif-title">Course Title</th>
+          <th class="serif-title">Faculty Instructor</th>
+          <th class="serif-title">Category</th>
           <th class="serif-title">Basket</th>
           <th class="serif-title">Credits</th>
           <th class="serif-title">L-T-P</th>
@@ -376,6 +459,21 @@
               </strong>
               <span class="table-dept serif-title">{{ course.department }}</span>
             </div>
+          </td>
+          <td>
+            <span class="table-faculty-name serif-title">
+              👨‍🏫 {{ course.faculty || 'Centurion Faculty' }}
+            </span>
+          </td>
+          <td>
+            <span 
+              *ngIf="course.courseCategory"
+              class="table-cat-badge serif-title"
+              [style.color]="getCourseCategoryColor(course.courseCategory)"
+              [style.borderColor]="getCourseCategoryColor(course.courseCategory) + '55'"
+            >
+              {{ course.courseCategory }}
+            </span>
           </td>
           <td>
             <span 
@@ -407,6 +505,13 @@
                 {{ course.isBookmarked ? '★' : '☆' }}
               </button>
               <button 
+                class="table-act-btn ext-style serif-title" 
+                (click)="openCoursewarePortal(course, $event)"
+                title="Open CUTM Courseware Portal"
+              >
+                🌐
+              </button>
+              <button 
                 class="table-act-btn dossier-style serif-title" 
                 (click)="openCourseModal(course, $event)"
                 title="Inspect Syllabus Dossier"
@@ -418,7 +523,7 @@
                 (click)="launchVivaDefense(course, undefined, $event)"
                 title="Launch AI Viva Defense"
               >
-                🎙️ Viva
+                🎙️
               </button>
             </div>
           </td>
@@ -432,17 +537,17 @@
     <div class="empty-icon gold-seal-emboss">🔍</div>
     <h3 class="serif-title">No CUTM Courses Found</h3>
     <p class="serif-title">
-      No courses matched your current filter criteria "{{ searchQuery || selectedBasket }}".
+      No courses matched your current filter criteria "{{ searchQuery || selectedCourseCategory || selectedBasket }}".
     </p>
     <button 
       class="reset-action-btn tactile-btn-3d serif-title"
-      (click)="selectedBasket = 'ALL'; searchQuery = ''; selectedSemester = 'ALL'; bookmarkedOnly = false; applyFilters()"
+      (click)="resetAllFilters()"
     >
-      Reset Filters & View All 20 Courses
+      Reset Filters & View All {{ courses.length }} Courses
     </button>
   </div>
 
-  <!-- 6. Detailed Course Syllabus Dossier Modal -->
+  <!-- 8. Detailed Course Syllabus Dossier Modal -->
   <div *ngIf="activeCourseModal" class="dossier-modal-backdrop" (click)="closeCourseModal()">
     <div class="dossier-modal-window elevated-3d clay-panel" (click)="$event.stopPropagation()">
       <div class="modal-top-bar">
@@ -451,9 +556,19 @@
             <img src="assets/cutm-seal.svg" alt="Official CUTM Seal" class="modal-cutm-seal-img" />
           </div>
           <div>
-            <span class="modal-basket-tag serif-title">
-              {{ activeCourseModal.basketName }} ({{ activeCourseModal.courseCode }})
-            </span>
+            <div class="modal-badge-group">
+              <span 
+                *ngIf="activeCourseModal.courseCategory"
+                class="modal-cat-pill serif-title"
+                [style.color]="getCourseCategoryColor(activeCourseModal.courseCategory)"
+                [style.borderColor]="getCourseCategoryColor(activeCourseModal.courseCategory) + '55'"
+              >
+                {{ getCourseCategoryIcon(activeCourseModal.courseCategory) }} {{ activeCourseModal.courseCategory }} Courses
+              </span>
+              <span class="modal-basket-tag serif-title">
+                {{ activeCourseModal.basketName }} ({{ activeCourseModal.courseCode }})
+              </span>
+            </div>
             <h2 class="modal-course-title serif-title">{{ activeCourseModal.courseTitle }}</h2>
           </div>
         </div>
@@ -461,6 +576,23 @@
       </div>
 
       <div class="modal-body-content">
+        <!-- Faculty Instructor Callout in Modal -->
+        <div class="modal-faculty-strip clay-panel" *ngIf="activeCourseModal.faculty">
+          <div class="m-fac-icon">👨‍🏫</div>
+          <div class="m-fac-info">
+            <span class="m-fac-lbl serif-title">OFFICIAL INSTRUCTOR / PROFESSOR</span>
+            <span class="m-fac-name serif-title">{{ activeCourseModal.faculty }}</span>
+            <span class="m-fac-dept serif-title">{{ activeCourseModal.department }}</span>
+          </div>
+          <button 
+            type="button" 
+            class="modal-open-cw-btn tactile-btn-3d serif-title"
+            (click)="openCoursewarePortal(activeCourseModal, $event)"
+          >
+            🌐 Open in CUTM Courseware ↗
+          </button>
+        </div>
+
         <!-- Specs Bar -->
         <div class="specs-ribbon">
           <div class="spec-cell">
@@ -480,8 +612,8 @@
             <span class="sc-val serif-title">{{ activeCourseModal.ltp }}</span>
           </div>
           <div class="spec-cell">
-            <span class="sc-lbl serif-title">Prerequisites</span>
-            <span class="sc-val serif-title">{{ activeCourseModal.prerequisites }}</span>
+            <span class="sc-lbl serif-title">Courseware ID</span>
+            <span class="sc-val serif-title gold-text">#{{ activeCourseModal.coursewareId || activeCourseModal.id }}</span>
           </div>
         </div>
 
@@ -529,6 +661,12 @@
       </div>
 
       <div class="modal-footer-bar">
+        <button 
+          class="modal-secondary-btn tactile-btn-3d serif-title"
+          (click)="openCoursewarePortal(activeCourseModal, $event)"
+        >
+          🌐 CUTM Courseware Portal
+        </button>
         <button 
           class="modal-secondary-btn tactile-btn-3d serif-title"
           (click)="copyCourseCode(activeCourseModal.courseCode)"

@@ -1588,3 +1588,365 @@
     }
   }
 }
+
+/* ==========================================================================
+   CUTM COURSEWARE TAXONOMY & PORTAL INTEGRATION STYLES
+   ========================================================================== */
+
+.hero-inline-link {
+  color: #D4AF37;
+  text-decoration: underline;
+  font-weight: 700;
+  transition: color 0.15s ease;
+  &:hover {
+    color: #F9E7B3;
+  }
+}
+
+/* Courseware Category Navigation Strip */
+.courseware-category-strip {
+  background: rgba(22, 18, 15, 0.92);
+  border-radius: 16px;
+  border: 1px solid rgba(222, 112, 72, 0.22);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .category-strip-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .strip-badge-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .portal-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10B981;
+        box-shadow: 0 0 8px #10B981;
+      }
+
+      .strip-heading {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: #D4AF37;
+        text-transform: uppercase;
+      }
+
+      .official-subtag {
+        font-size: 10.5px;
+        color: rgba(247, 239, 232, 0.45);
+      }
+    }
+
+    .official-portal-ext-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: #DE7048;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(222, 112, 72, 0.1);
+      border: 1px solid rgba(222, 112, 72, 0.2);
+      transition: all 0.2s ease;
+
+      .ext-arrow {
+        font-size: 12px;
+      }
+
+      &:hover {
+        background: rgba(222, 112, 72, 0.22);
+        color: #F9E7B3;
+        border-color: rgba(222, 112, 72, 0.4);
+      }
+    }
+  }
+
+  .category-nav-scroll {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(222, 112, 72, 0.3);
+      border-radius: 4px;
+    }
+  }
+
+  .category-nav-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 15px;
+    border-radius: 12px;
+    background: rgba(30, 24, 21, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #F7EFE8;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    flex-shrink: 0;
+
+    .cat-icon {
+      font-size: 18px;
+    }
+
+    .cat-text-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
+
+      .cat-top {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        .cat-label {
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 0.3px;
+        }
+
+        .cat-count-badge {
+          font-size: 10px;
+          font-weight: 900;
+          padding: 1px 6px;
+          border-radius: 999px;
+          color: #FFFFFF;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      .cat-desc {
+        font-size: 10px;
+        color: rgba(247, 239, 232, 0.5);
+      }
+    }
+
+    &:hover {
+      background: rgba(45, 36, 31, 0.85);
+      border-color: var(--cat-color, rgba(222, 112, 72, 0.4));
+    }
+
+    &.active {
+      background: var(--cat-bg, rgba(222, 112, 72, 0.2));
+      border-color: var(--cat-color, #DE7048);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+
+      .cat-label {
+        color: var(--cat-color, #DE7048);
+      }
+    }
+  }
+}
+
+/* Courseware Category Badge & Pills */
+.courseware-category-badge {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid;
+  text-transform: uppercase;
+}
+
+/* Faculty Lead Bar */
+.faculty-lead-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(14, 11, 9, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 6px 12px;
+
+  .faculty-avatar-icon {
+    font-size: 16px;
+  }
+
+  .faculty-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1;
+
+    .faculty-label {
+      font-size: 9px;
+      font-weight: 800;
+      color: #D4AF37;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .faculty-name {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #F7EFE8;
+    }
+  }
+
+  .faculty-dept-badge {
+    font-size: 10px;
+    color: rgba(247, 239, 232, 0.55);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 2px 6px;
+    border-radius: 4px;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.cw-id-pill {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #D4AF37;
+}
+
+.courseware-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border-radius: 10px;
+  background: rgba(29, 78, 216, 0.16);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: #93C5FD;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(29, 78, 216, 0.35);
+    border-color: #60A5FA;
+    color: #FFFFFF;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+  }
+}
+
+/* Modal Faculty Strip */
+.modal-faculty-strip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(22, 17, 14, 0.9);
+  border: 1px solid rgba(222, 112, 72, 0.2);
+  margin-bottom: 8px;
+
+  .m-fac-icon {
+    font-size: 24px;
+  }
+
+  .m-fac-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+
+    .m-fac-lbl {
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #D4AF37;
+      letter-spacing: 0.8px;
+    }
+
+    .m-fac-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: #F7EFE8;
+    }
+
+    .m-fac-dept {
+      font-size: 11px;
+      color: rgba(247, 239, 232, 0.6);
+    }
+  }
+
+  .modal-open-cw-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: rgba(29, 78, 216, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: #93C5FD;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(29, 78, 216, 0.4);
+      color: #FFFFFF;
+    }
+  }
+}
+
+.modal-cat-pill {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid;
+  text-transform: uppercase;
+}
+
+.modal-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+/* Table Enhancements */
+.table-faculty-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #F7EFE8;
+  white-space: nowrap;
+}
+
+.table-cat-badge {
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1px solid;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table-act-btn.ext-style {
+  color: #60A5FA;
+  &:hover {
+    background: rgba(59, 130, 246, 0.2);
+  }
+}
+

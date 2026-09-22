@@ -14,13 +14,21 @@ public interface CutmCourseRepository extends JpaRepository<CutmCourse, Long> {
 
     List<CutmCourse> findByBasketCategoryOrderByCourseCodeAsc(String basketCategory);
 
+    List<CutmCourse> findByCourseCategoryIgnoreCaseOrderByCourseCodeAsc(String courseCategory);
+
+    List<CutmCourse> findByFacultyContainingIgnoreCaseOrderByCourseCodeAsc(String faculty);
+
     Optional<CutmCourse> findByCourseCodeIgnoreCase(String courseCode);
+
+    Optional<CutmCourse> findByCoursewareId(Long coursewareId);
 
     List<CutmCourse> findByDepartmentContainingIgnoreCase(String department);
 
     @Query("SELECT c FROM CutmCourse c WHERE " +
            "LOWER(c.courseCode) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(c.courseTitle) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(c.faculty) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(c.courseCategory) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(c.basketName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(c.department) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(c.description) LIKE LOWER(CONCAT('%', :query, '%')) " +

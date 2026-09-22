@@ -7,7 +7,8 @@ import {
   CutmCoursesService, 
   CutmCourse, 
   CutmModule, 
-  BasketSummary 
+  BasketSummary,
+  CoursewareCategorySummary
 } from '../../services/cutm-courses.service';
 import { SoundService } from '../../services/sound.service';
 
@@ -22,9 +23,11 @@ export class CutmCoursesComponent implements OnInit, OnDestroy {
   courses: CutmCourse[] = [];
   filteredCourses: CutmCourse[] = [];
   basketSummaries: BasketSummary[] = [];
+  coursewareCategories: CoursewareCategorySummary[] = [];
 
   // Filters & State
   selectedBasket = 'ALL';
+  selectedCourseCategory = 'ALL';
   searchQuery = '';
   selectedSemester = 'ALL';
   bookmarkedOnly = false;
@@ -52,6 +55,7 @@ export class CutmCoursesComponent implements OnInit, OnDestroy {
       this.cutmService.courses$.subscribe(list => {
         this.courses = list;
         this.basketSummaries = this.cutmService.getBasketSummaries();
+        this.coursewareCategories = this.cutmService.getCoursewareCategories();
         this.applyFilters();
       })
     );
@@ -70,6 +74,12 @@ export class CutmCoursesComponent implements OnInit, OnDestroy {
   // --- Filtering & View Controls ---
   selectBasket(category: string): void {
     this.selectedBasket = category;
+    this.soundService.playClickSound();
+    this.applyFilters();
+  }
+
+  selectCourseCategory(cat: string): void {
+    this.selectedCourseCategory = cat;
     this.soundService.playClickSound();
     this.applyFilters();
   }
@@ -93,9 +103,24 @@ export class CutmCoursesComponent implements OnInit, OnDestroy {
     this.soundService.playClickSound();
   }
 
+  resetAllFilters(): void {
+    this.selectedBasket = 'ALL';
+    this.selectedCourseCategory = 'ALL';
+    this.searchQuery = '';
+    this.selectedSemester = 'ALL';
+    this.bookmarkedOnly = false;
+    this.applyFilters();
+    this.soundService.playClickSound();
+  }
+
   applyFilters(): void {
     const q = this.searchQuery.trim().toLowerCase();
     this.filteredCourses = this.courses.filter(course => {
+      // Courseware Category filter
+      if (this.selectedCourseCategory !== 'ALL' && course.courseCategory !== this.selectedCourseCategory) {
+        return false;
+      }
+
       // Basket filter
       if (this.selectedBasket !== 'ALL' && course.basketCategory !== this.selectedBasket) {
         return false;
@@ -111,18 +136,20 @@ export class CutmCoursesComponent implements OnInit, OnDestroy {
         return false;
       }
 
-      // Search Query filter
+      // Search Query filter (matches Code, Title, Faculty, Dept, Description, Modules)
       if (q) {
-        const inCode = course.courseCode.toLowerCase().includes(q);
-        const inTitle = course.courseTitle.toLowerCase().includes(q);
-        const inDept = course.department.toLowerCase().includes(q);
-        const inDesc = course.description.toLowerCase().includes(q);
+        const inCode = (course.courseCode || '').toLowerCase().includes(q);
+        const inTitle = (course.courseTitle || '').toLowerCase().includes(q);
+        const inFaculty = (course.faculty || '').toLowerCase().includes(q);
+        const inDept = (course.department || '').toLowerCase().includes(q);
+        const inDesc = (course.description || '').toLowerCase().includes(q);
+        const inCat = (course.courseCategory || '').toLowerCase().includes(q);
         const inModules = (course.modules || []).some(m => 
           m.moduleTitle.toLowerCase().includes(q) || 
           m.topics.toLowerCase().includes(q) ||
           m.practicalLabWork.toLowerCase().includes(q)
         );
-        return inCode || inTitle || inDept || inDesc || inModules;
+        return inCode || inTitle || inFaculty || inDept || inDesc || inCat || inModules;
       }
 
       return true;
@@ -175,6 +202,15 @@ export class CutmCoursesComponent implements OnInit, OnDestroy {
 
   closeModuleDetail(): void {
     this.activeModuleDetail = null;
+  }
+
+  openCoursewarePortal(course: CutmCourse, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.soundService.playClickSound();
+    const url = course.coursewareUrl || (course.coursewareId ? `https://courseware.cutm.ac.in/course/${course.coursewareId}` : 'https://courseware.cutm.ac.in/courses');
+    if (typeof window !== 'undefined') {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   }
 
   copyCourseCode(code: string, event?: Event): void {
@@ -249,6 +285,30 @@ export class CutmCoursesComponent implements OnInit, OnDestroy {
       case 'BASKET_IV': return 'OE';
       case 'BASKET_V': return 'SEC';
       default: return 'CBCS';
+    }
+  }
+
+  getCourseCategoryColor(category?: string): string {
+    switch (category) {
+      case 'Core': return '#1D4ED8';
+      case 'Domain': return '#15803D';
+      case 'Skill': return '#C2410C';
+      case 'Certificate': return '#6D28D9';
+      case 'Advanced Certificate': return '#0D9488';
+      case 'Diploma': return '#BE185D';
+      default: return '#D4AF37';
+    }
+  }
+
+  getCourseCategoryIcon(category?: string): string {
+    switch (category) {
+      case 'Core': return '📘';
+      case 'Domain': return '🚀';
+      case 'Skill': return '🛠️';
+      case 'Certificate': return '📜';
+      case 'Advanced Certificate': return '🏅';
+      case 'Diploma': return '🎓';
+      default: return '🏛️';
     }
   }
 }

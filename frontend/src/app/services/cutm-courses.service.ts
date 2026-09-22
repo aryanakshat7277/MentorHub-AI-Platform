@@ -17,6 +17,10 @@ export interface CutmCourse {
   courseTitle: string;
   basketCategory: 'BASKET_I' | 'BASKET_II' | 'BASKET_III' | 'BASKET_IV' | 'BASKET_V';
   basketName: string;
+  courseCategory?: string; // Core, Domain, Skill, Certificate, Advanced Certificate, Diploma
+  coursewareId?: number;
+  coursewareUrl?: string;
+  faculty?: string;
   credits: number;
   ltp: string;
   department: string;
@@ -27,6 +31,17 @@ export interface CutmCourse {
   modules?: CutmModule[];
   isBookmarked?: boolean;
   completedModules?: number[];
+}
+
+export interface CoursewareCategorySummary {
+  category: string;
+  name: string;
+  shortLabel: string;
+  icon: string;
+  color: string;
+  badgeBg: string;
+  courseCount: number;
+  description: string;
 }
 
 export interface BasketSummary {
@@ -1000,7 +1015,7 @@ export class CutmCoursesService {
     const savedBookmarks = this.loadBookmarks();
     const savedProgress = this.loadProgress();
 
-    // Populate initial state with offline dataset
+    // 1. Initial hydration from default seed courses
     const hydrated = this.defaultCourses.map(c => ({
       ...c,
       isBookmarked: savedBookmarks.includes(c.id),
@@ -1008,7 +1023,30 @@ export class CutmCoursesService {
     }));
     this.coursesSubject.next(hydrated);
 
-    // Attempt live fetch from Spring Boot Cloud Database backend
+    // 2. Load complete 385 Courseware catalog from static assets (100% offline & GitHub Pages support)
+    this.http.get<any[]>('assets/cutm_courses.json').pipe(
+      tap((localCatalog) => {
+        if (localCatalog && localCatalog.length > 0) {
+          const parsed = localCatalog.map(lc => {
+            let modules: CutmModule[] = lc.modules || [];
+            if ((!modules || modules.length === 0) && lc.modulesJson) {
+              try { modules = JSON.parse(lc.modulesJson); } catch {}
+            }
+            return {
+              ...lc,
+              modules,
+              isBookmarked: savedBookmarks.includes(lc.id),
+              completedModules: savedProgress[lc.id] || []
+            };
+          });
+          this.coursesSubject.next(parsed);
+          console.log(`📦 Loaded ${parsed.length} CUTM Courseware & CBCS courses from local catalog.`);
+        }
+      }),
+      catchError(() => of([]))
+    ).subscribe();
+
+    // 3. Attempt live fetch from Spring Boot Cloud Database backend
     this.http.get<any[]>(this.apiUrl).pipe(
       tap((backendCourses) => {
         if (backendCourses && backendCourses.length > 0) {
@@ -1021,7 +1059,7 @@ export class CutmCoursesService {
             }
             return {
               ...bc,
-              modules: modules.length > 0 ? modules : (this.defaultCourses.find(d => d.courseCode === bc.courseCode)?.modules || []),
+              modules: modules.length > 0 ? modules : (this.coursesSubject.value.find(d => d.courseCode === bc.courseCode)?.modules || []),
               isBookmarked: savedBookmarks.includes(bc.id),
               completedModules: savedProgress[bc.id] || []
             };
@@ -1046,6 +1084,82 @@ export class CutmCoursesService {
   public getCourseByCode(code: string): Observable<CutmCourse | undefined> {
     const found = this.coursesSubject.value.find(c => c.courseCode.toUpperCase() === code.toUpperCase());
     return of(found);
+  }
+
+  public getCoursewareCategories(): CoursewareCategorySummary[] {
+    const all = this.coursesSubject.value;
+    return [
+      {
+        category: 'ALL',
+        name: 'All Categories',
+        shortLabel: 'All Courses',
+        icon: '🏛️',
+        color: '#D4AF37',
+        badgeBg: 'rgba(212, 175, 55, 0.15)',
+        courseCount: all.length,
+        description: 'Complete University repository across all Courseware classifications and CBCS disciplines.'
+      },
+      {
+        category: 'Core',
+        name: 'Core Courses',
+        shortLabel: 'Core',
+        icon: '📘',
+        color: '#1D4ED8',
+        badgeBg: 'rgba(29, 78, 216, 0.15)',
+        courseCount: all.filter(c => c.courseCategory === 'Core').length,
+        description: 'Compulsory foundational and core engineering curriculum across university departments.'
+      },
+      {
+        category: 'Domain',
+        name: 'Domain Courses',
+        shortLabel: 'Domain',
+        icon: '🚀',
+        color: '#15803D',
+        badgeBg: 'rgba(21, 128, 61, 0.15)',
+        courseCount: all.filter(c => c.courseCategory === 'Domain').length,
+        description: 'Advanced specialized industry domain concentrations and engineering tracks.'
+      },
+      {
+        category: 'Skill',
+        name: 'Skill Courses',
+        shortLabel: 'Skill',
+        icon: '🛠️',
+        color: '#C2410C',
+        badgeBg: 'rgba(194, 65, 12, 0.15)',
+        courseCount: all.filter(c => c.courseCategory === 'Skill').length,
+        description: 'Hands-on practical industry action learning and Sector Skill Council certifications.'
+      },
+      {
+        category: 'Certificate',
+        name: 'Certificate Courses',
+        shortLabel: 'Certificate',
+        icon: '📜',
+        color: '#6D28D9',
+        badgeBg: 'rgba(109, 40, 217, 0.15)',
+        courseCount: all.filter(c => c.courseCategory === 'Certificate').length,
+        description: 'Competency-based professional credentials and interdisciplinary management electives.'
+      },
+      {
+        category: 'Advanced Certificate',
+        name: 'Advanced Certificate',
+        shortLabel: 'Adv. Cert',
+        icon: '🏅',
+        color: '#0D9488',
+        badgeBg: 'rgba(13, 148, 136, 0.15)',
+        courseCount: all.filter(c => c.courseCategory === 'Advanced Certificate').length,
+        description: 'Deep specialized vocational master classes and postgraduate professional qualifications.'
+      },
+      {
+        category: 'Diploma',
+        name: 'Diploma Courses',
+        shortLabel: 'Diploma',
+        icon: '🎓',
+        color: '#BE185D',
+        badgeBg: 'rgba(190, 24, 93, 0.15)',
+        courseCount: all.filter(c => c.courseCategory === 'Diploma').length,
+        description: 'Comprehensive polytechnic and vocational diploma programs for applied technologists.'
+      }
+    ];
   }
 
   public toggleBookmark(courseId: number): boolean {

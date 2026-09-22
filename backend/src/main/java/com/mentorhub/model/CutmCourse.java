@@ -1,9 +1,11 @@
 package com.mentorhub.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "cutm_courses")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CutmCourse {
 
     @Id
@@ -11,7 +13,7 @@ public class CutmCourse {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
-    private String courseCode; // e.g. CUTM1001, CUTM1010, CUTM1601
+    private String courseCode; // e.g. CUTM1001, CUTM1010, CUTM1601, CUFS1092
 
     @Column(nullable = false, length = 255)
     private String courseTitle;
@@ -21,6 +23,17 @@ public class CutmCourse {
 
     @Column(nullable = false, length = 150)
     private String basketName; // Basket I: Foundation Courses, etc.
+
+    @Column(length = 100)
+    private String courseCategory; // Core, Domain, Skill, Certificate, Advanced Certificate, Diploma
+
+    private Long coursewareId; // Official CUTM Courseware Portal ID e.g. 1115, 1114, 1020
+
+    @Column(length = 500)
+    private String coursewareUrl; // https://courseware.cutm.ac.in/course/{id}
+
+    @Column(length = 255)
+    private String faculty; // Assigned faculty instructor e.g. Dr. Pramod Kumar Patjoshi, Manoj Kumar Padhi
 
     private Integer credits; // 2, 3, 4
 
@@ -40,16 +53,23 @@ public class CutmCourse {
     private String prerequisites;
 
     @Column(columnDefinition = "TEXT")
-    private String modulesJson; // JSON string array of 4-5 modules with titles, topics, labs, viva questions
+    private String modulesJson; // JSON string array of modules with titles, topics, labs, viva questions
 
     public CutmCourse() {}
 
-    public CutmCourse(Long id, String courseCode, String courseTitle, String basketCategory, String basketName, Integer credits, String ltp, String department, String semester, String description, String prerequisites, String modulesJson) {
+    public CutmCourse(Long id, String courseCode, String courseTitle, String basketCategory, String basketName,
+                      String courseCategory, Long coursewareId, String coursewareUrl, String faculty,
+                      Integer credits, String ltp, String department, String semester,
+                      String description, String prerequisites, String modulesJson) {
         this.id = id;
         this.courseCode = courseCode;
         this.courseTitle = courseTitle;
         this.basketCategory = basketCategory;
         this.basketName = basketName;
+        this.courseCategory = courseCategory;
+        this.coursewareId = coursewareId;
+        this.coursewareUrl = coursewareUrl;
+        this.faculty = faculty;
         this.credits = credits;
         this.ltp = ltp;
         this.department = department;
@@ -78,6 +98,18 @@ public class CutmCourse {
     public String getBasketName() { return basketName; }
     public void setBasketName(String basketName) { this.basketName = basketName; }
 
+    public String getCourseCategory() { return courseCategory; }
+    public void setCourseCategory(String courseCategory) { this.courseCategory = courseCategory; }
+
+    public Long getCoursewareId() { return coursewareId; }
+    public void setCoursewareId(Long coursewareId) { this.coursewareId = coursewareId; }
+
+    public String getCoursewareUrl() { return coursewareUrl; }
+    public void setCoursewareUrl(String coursewareUrl) { this.coursewareUrl = coursewareUrl; }
+
+    public String getFaculty() { return faculty; }
+    public void setFaculty(String faculty) { this.faculty = faculty; }
+
     public Integer getCredits() { return credits; }
     public void setCredits(Integer credits) { this.credits = credits; }
 
@@ -105,6 +137,10 @@ public class CutmCourse {
         private String courseTitle;
         private String basketCategory;
         private String basketName;
+        private String courseCategory;
+        private Long coursewareId;
+        private String coursewareUrl;
+        private String faculty;
         private Integer credits;
         private String ltp;
         private String department;
@@ -118,6 +154,10 @@ public class CutmCourse {
         public CutmCourseBuilder courseTitle(String courseTitle) { this.courseTitle = courseTitle; return this; }
         public CutmCourseBuilder basketCategory(String basketCategory) { this.basketCategory = basketCategory; return this; }
         public CutmCourseBuilder basketName(String basketName) { this.basketName = basketName; return this; }
+        public CutmCourseBuilder courseCategory(String courseCategory) { this.courseCategory = courseCategory; return this; }
+        public CutmCourseBuilder coursewareId(Long coursewareId) { this.coursewareId = coursewareId; return this; }
+        public CutmCourseBuilder coursewareUrl(String coursewareUrl) { this.coursewareUrl = coursewareUrl; return this; }
+        public CutmCourseBuilder faculty(String faculty) { this.faculty = faculty; return this; }
         public CutmCourseBuilder credits(Integer credits) { this.credits = credits; return this; }
         public CutmCourseBuilder ltp(String ltp) { this.ltp = ltp; return this; }
         public CutmCourseBuilder department(String department) { this.department = department; return this; }
@@ -127,7 +167,9 @@ public class CutmCourse {
         public CutmCourseBuilder modulesJson(String modulesJson) { this.modulesJson = modulesJson; return this; }
 
         public CutmCourse build() {
-            return new CutmCourse(id, courseCode, courseTitle, basketCategory, basketName, credits, ltp, department, semester, description, prerequisites, modulesJson);
+            return new CutmCourse(id, courseCode, courseTitle, basketCategory, basketName, courseCategory,
+                    coursewareId, coursewareUrl, faculty, credits, ltp, department, semester, description,
+                    prerequisites, modulesJson);
         }
     }
 }
