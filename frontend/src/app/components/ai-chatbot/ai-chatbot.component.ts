@@ -30,7 +30,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   isMaximized = false;
   selectedProvider = 'GEMINI';
-  selectedModel = 'gemini-2.5-flash';
+  selectedModel = 'gemini-3.6-flash';
 
   userInput = '';
   isGenerating = false;
@@ -223,13 +223,15 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.showToast('📸 Capturing screen snapshot...');
     try {
       const capture = await this.screenReader.captureScreen();
-      if (capture && capture.dataUrl) {
+      if (capture && capture.dataUrl && capture.imageBase64 && capture.imageBase64.length > 100) {
         this.attachedScreenSnapshot = capture;
         this.showToast('🖼️ Screen snapshot attached');
         // If live voice is active, forward the visual frame to Gemini Live WebSocket
-        if (this.isLiveVoiceActive && capture.imageBase64) {
+        if (this.isLiveVoiceActive) {
           this.liveService.sendScreenFrame(capture.imageBase64);
         }
+      } else if (capture && capture.semanticContext) {
+        this.showToast('ℹ️ Active screen context attached');
       }
     } catch (e) {
       this.showToast('⚠️ Screen scan failed');
@@ -258,7 +260,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
         if (this.isScreenPerceptionActive) {
           setTimeout(() => {
             this.screenReader.captureScreen().then(cap => {
-              if (cap && cap.imageBase64) {
+              if (cap && cap.imageBase64 && cap.imageBase64.length > 100) {
                 this.liveService.sendScreenFrame(cap.imageBase64);
               }
             });
@@ -404,8 +406,8 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       sender: 'ai',
       avatar: 'AI',
       text: '',
-      provider: 'GEMINI',
-      model: 'gemini-3.6-flash',
+      provider: this.selectedProvider,
+      model: this.selectedModel,
       mode: 'TEXT',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
@@ -422,13 +424,14 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     ).subscribe({
       next: (res) => {
         // As chunks arrive, append them to the aiMessage
-        if (res && res.text) {
-          aiMessage.text += res.text;
+        const chunkText = res ? (res.text || res.response || res.message || '') : '';
+        if (chunkText) {
+          aiMessage.text += chunkText;
           
           if (res.provider) aiMessage.provider = res.provider;
           if (res.model) aiMessage.model = res.model;
 
-          // Force view update if necessary, but Angular array reference mutates fine
+          // Force view update
           this.cdr.detectChanges();
           this.scrollToBottom();
         }

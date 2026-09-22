@@ -125,6 +125,9 @@ public class AiChatService {
         if (reqModel.endsWith("-latest")) {
             reqModel = reqModel.replace("-latest", "");
         }
+        if ("gemini-2.5-flash".equalsIgnoreCase(reqModel)) {
+            reqModel = "gemini-3.6-flash";
+        }
 
         Map<String, Object> result = new HashMap<>();
 
@@ -226,6 +229,9 @@ public class AiChatService {
             try {
                 String query = request.getMessage();
                 String reqModel = (request.getModel() != null && !request.getModel().isEmpty()) ? request.getModel() : "gemini-3.6-flash";
+                if ("gemini-2.5-flash".equalsIgnoreCase(reqModel)) {
+                    reqModel = "gemini-3.6-flash";
+                }
                 String reqProvider = (request.getProvider() != null) ? request.getProvider().toUpperCase() : "GEMINI";
 
                 // If NVIDIA requested explicitly, process via NVIDIA immediately
@@ -272,8 +278,27 @@ public class AiChatService {
         return emitter;
     }
 
+    private String resolveGeminiModel(String model) {
+        if (model == null || model.isEmpty()) {
+            return "gemini-3.6-flash";
+        }
+        if (model.contains("pro")) {
+            return "gemini-1.5-pro";
+        }
+        if (model.contains("3.6") || model.contains("3.5") || model.contains("3.1")) {
+            return "gemini-3.6-flash";
+        }
+        if (model.contains("2.0")) {
+            return "gemini-2.0-flash";
+        }
+        if (model.contains("1.5")) {
+            return "gemini-1.5-flash";
+        }
+        return "gemini-3.6-flash";
+    }
+
     private void streamGemini(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload, String screenImage, String screenContext, SseEmitter emitter) throws Exception {
-        String cleanModel = (model != null && model.contains("pro")) ? "gemini-2.5-pro" : "gemini-2.5-flash";
+        String cleanModel = resolveGeminiModel(model);
         List<String> keys = getGeminiApiKeys();
         ObjectMapper mapper = new ObjectMapper();
         Exception lastEx = null;
@@ -398,7 +423,7 @@ public class AiChatService {
 
     @SuppressWarnings("rawtypes")
     private String callGemini(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload, String screenImage, String screenContext) {
-        String cleanModel = (model != null && model.contains("pro")) ? "gemini-2.5-pro" : "gemini-2.5-flash";
+        String cleanModel = resolveGeminiModel(model);
         List<String> keys = getGeminiApiKeys();
 
         List<Map<String, Object>> contents = new ArrayList<>();

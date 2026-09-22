@@ -45,7 +45,7 @@ public class AiChatController {
     @GetMapping("/providers")
     public ResponseEntity<Map<String, List<String>>> getProvidersAndModels() {
         Map<String, List<String>> map = new LinkedHashMap<>();
-        map.put("GEMINI", List.of("gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash"));
+        map.put("GEMINI", List.of("gemini-3.6-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"));
         map.put("NVIDIA", List.of("meta/llama-3.2-11b-vision-instruct"));
         map.put("GROQ", List.of("whisper-large-v3-turbo", "canopylabs/orpheus-v1-english", "llama-3.1-70b-versatile", "llama3-8b-8192"));
         map.put("DEEPSEEK", List.of("deepseek-chat", "deepseek-coder"));

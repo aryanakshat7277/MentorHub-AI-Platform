@@ -95,9 +95,21 @@ export class AppScreenReaderService {
         }
       }
 
-      const quality = 0.82;
-      const dataUrl = finalCanvas.toDataURL('image/jpeg', quality);
-      const pureBase64 = dataUrl.replace(/^data:image\/jpeg;base64,/, '');
+      let pureBase64 = '';
+      let dataUrl = '';
+
+      if (finalCanvas && finalCanvas.width > 20 && finalCanvas.height > 20) {
+        try {
+          const quality = 0.82;
+          const rawUrl = finalCanvas.toDataURL('image/jpeg', quality);
+          if (rawUrl && rawUrl.startsWith('data:image/jpeg;base64,') && rawUrl.length > 100) {
+            dataUrl = rawUrl;
+            pureBase64 = rawUrl.substring('data:image/jpeg;base64,'.length);
+          }
+        } catch (e) {
+          console.warn('AppScreenReaderService: Canvas toDataURL failed:', e);
+        }
+      }
 
       // 2. Extract structured DOM semantic context
       const route = this.router.url || '/';

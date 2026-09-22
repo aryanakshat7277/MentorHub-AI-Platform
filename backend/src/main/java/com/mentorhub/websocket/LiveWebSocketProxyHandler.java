@@ -164,6 +164,18 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
         if (payload != null && !payload.contains("mediaChunks") && !payload.contains("audio")) {
             logger.info("Client -> Gemini message: {}", payload);
         }
+
+        // Sanitize incoming mediaChunks to prevent Gemini Live CloseStatus 1007 (malformed base64)
+        if (payload != null && payload.contains("mediaChunks")) {
+            if (payload.contains("\"data\":\"data:,") ||
+                payload.contains("\"data\":\"data:image") ||
+                payload.contains("\"data\":\"\"") ||
+                payload.contains("\"data\": \"data:,")) {
+                logger.warn("LiveWebSocketProxyHandler: Dropped malformed mediaChunk to prevent upstream 1007 crash for client {}", clientSession.getId());
+                return;
+            }
+        }
+
         WebSocketSession geminiSession = clientToGeminiSessions.get(clientSession.getId());
         if (geminiSession != null && geminiSession.isOpen()) {
             geminiSession.sendMessage(message);

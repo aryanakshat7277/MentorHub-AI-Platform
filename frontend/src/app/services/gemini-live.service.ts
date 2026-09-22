@@ -138,7 +138,8 @@ export class GeminiLiveService {
       }
       const msg = JSON.parse(textData); console.log("SERVER FRAME:", msg);
 
-      if (msg.type === 'FALLBACK') {
+      if (msg.type === 'FALLBACK' || msg.type === 'DISCONNECTED') {
+        console.warn('GeminiLiveService: Upstream disconnected or fallback triggered:', msg);
         this.activateGroqFallback();
         return;
       }
@@ -250,8 +251,12 @@ export class GeminiLiveService {
    * Enables multimodal vision during live voice conversations.
    */
   public sendScreenFrame(base64Jpeg: string): boolean {
-    if (!base64Jpeg) return false;
-    const cleanBase64 = base64Jpeg.replace(/^data:image\/[a-z]+;base64,/, '');
+    if (!base64Jpeg || typeof base64Jpeg !== 'string') return false;
+    const cleanBase64 = base64Jpeg.replace(/^data:image\/[a-z]+;base64,/, '').trim();
+    if (cleanBase64.length < 100 || cleanBase64.startsWith('data:') || !/^[A-Za-z0-9+/=]+$/.test(cleanBase64)) {
+      console.warn('GeminiLiveService: Skipping invalid or malformed screen frame base64');
+      return false;
+    }
     if (this.ws && this.ws.readyState === WebSocket.OPEN && this.isSetupComplete) {
       const framePayload = {
         realtimeInput: {
