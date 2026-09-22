@@ -182,6 +182,40 @@
     .header-actions-right {
       display: flex; align-items: center; gap: 9px;
 
+      .screen-vision-pill-btn {
+        position: relative; overflow: hidden;
+        display: inline-flex; align-items: center; gap: 7px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
+        border: 1px solid rgba(212,175,55,0.30);
+        color: #FAF4EE; font-size: 11px; font-weight: 900; letter-spacing: 0.6px;
+        padding: 8px 14px; border-radius: var(--radius-full); cursor: pointer;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+        &:hover {
+          transform: translateY(-2px) scale(1.04);
+          border-color: rgba(212,175,55,0.60);
+          box-shadow: 0 6px 18px rgba(212,175,55,0.25);
+        }
+
+        .vision-pulse-dot {
+          width: 8px; height: 8px; border-radius: 50%;
+          background: #64748B; box-shadow: 0 0 6px #64748B;
+          &.active {
+            background: #38BDF8;
+            box-shadow: 0 0 8px #38BDF8, 0 0 16px rgba(56,189,248,0.6);
+            animation: pulseDot 1.6s infinite;
+          }
+        }
+
+        &.active-mode {
+          background: linear-gradient(135deg, rgba(14,116,144,0.7) 0%, rgba(15,23,42,0.8) 100%);
+          border-color: rgba(56,189,248,0.65);
+          color: #E0F2FE;
+          box-shadow: 0 4px 18px rgba(14,116,144,0.45), 0 0 20px rgba(56,189,248,0.20);
+        }
+      }
+
       .gemini-live-pill-btn {
         position: relative; overflow: hidden;
         display: inline-flex; align-items: center; gap: 8px;
@@ -720,6 +754,52 @@
     }
   }
 
+  .attached-screen-chip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px;
+    margin-bottom: 10px;
+    background: var(--bg-surface-sunken);
+    border: 1.5px solid rgba(212,175,55,0.45);
+    border-radius: var(--radius-hero);
+    box-shadow: var(--shadow-inset-well), 0 2px 10px rgba(212,175,55,0.12);
+    animation: smoothFadeInUp 0.25s ease;
+
+    .screen-thumb-preview {
+      width: 54px; height: 38px; border-radius: 6px; overflow: hidden;
+      border: 1px solid rgba(200,182,166,0.8); flex-shrink: 0;
+      background: #000;
+      img { width: 100%; height: 100%; object-fit: cover; }
+    }
+
+    .screen-chip-info {
+      flex: 1; display: flex; flex-direction: column; gap: 2px;
+      overflow: hidden;
+
+      .chip-route-title {
+        font-size: 12.5px; font-weight: 800; color: var(--accent-terracotta);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .chip-sub-desc {
+        font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+      }
+    }
+
+    .remove-chip-btn {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(220,38,38,0.12); border: 1px solid rgba(220,38,38,0.3);
+      color: #DC2626; font-size: 12px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #DC2626; color: #FFF; transform: scale(1.15);
+      }
+    }
+  }
+
   .input-row { display: flex; align-items: center; gap: 12px; }
 
   .input-deck-track {
@@ -741,6 +821,34 @@
       color: var(--text-primary); font-size: 14.5px; font-weight: 700;
       outline: none; resize: none; line-height: 1.45; overflow: hidden;
       &::placeholder { color: var(--text-tertiary); font-weight: 600; }
+    }
+
+    .screen-snap-btn {
+      width: 40px; height: 40px; min-width: 40px; min-height: 40px;
+      border-radius: 50%; background: var(--bg-surface);
+      border: 1.5px solid rgba(200,182,166,0.80);
+      color: var(--text-primary); font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      box-shadow: 2px 2px 6px rgba(61,28,11,0.08), inset 0 1px 0 rgba(255,255,255,0.95);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+      &:hover:not(:disabled) {
+        border-color: #38BDF8;
+        color: #0284C7;
+        transform: scale(1.10);
+        box-shadow: 0 4px 14px rgba(56,189,248,0.30);
+      }
+
+      &.capturing {
+        animation: liveMicPulse 1s ease-in-out infinite;
+        border-color: #F59E0B;
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: wait;
+      }
     }
 
     .stt-btn {

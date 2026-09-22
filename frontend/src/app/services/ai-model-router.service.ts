@@ -30,25 +30,39 @@ export class AiModelRouterService {
     private liveService: GeminiLiveService
   ) {}
 
-  public sendTextMessage(message: string, history?: { role: string; content: string }[]): Observable<any> {
+  public sendTextMessage(
+    message: string,
+    history?: { role: string; content: string }[],
+    screenImage?: string,
+    screenContext?: string
+  ): Observable<any> {
     return this.chatService.sendMessage(
       message,
       'GEMINI',
       this.config.textModel,
       undefined,
       'en-US',
-      history
+      history,
+      screenImage,
+      screenContext
     );
   }
 
-  public streamTextMessage(message: string, history?: { role: string; content: string }[]): Observable<any> {
+  public streamTextMessage(
+    message: string,
+    history?: { role: string; content: string }[],
+    screenImage?: string,
+    screenContext?: string
+  ): Observable<any> {
     return this.chatService.streamMessage(
       message,
       'GEMINI',
       this.config.textModel,
       undefined,
       'en-US',
-      history
+      history,
+      screenImage,
+      screenContext
     );
   }
 

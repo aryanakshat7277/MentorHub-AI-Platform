@@ -73,6 +73,8 @@ public class AiChatService {
         String systemPrompt = request.getSystemPrompt();
         String language = request.getLanguage();
         List<Map<String, String>> historyPayload = request.getHistory();
+        String screenImage = request.getScreenImage();
+        String screenContext = request.getScreenContext();
 
         Map<String, Object> result = chat(
                 query,
@@ -80,7 +82,9 @@ public class AiChatService {
                 model,
                 systemPrompt,
                 language,
-                historyPayload
+                historyPayload,
+                screenImage,
+                screenContext
         );
         String respText = (String) result.get("response");
         String respProvider = (String) result.get("provider");
@@ -96,6 +100,19 @@ public class AiChatService {
             String language,
             List<Map<String, String>> historyPayload
     ) {
+        return chat(query, provider, model, systemPrompt, language, historyPayload, null, null);
+    }
+
+    public Map<String, Object> chat(
+            String query,
+            String provider,
+            String model,
+            String systemPrompt,
+            String language,
+            List<Map<String, String>> historyPayload,
+            String screenImage,
+            String screenContext
+    ) {
         String reqProvider = (provider != null) ? provider.toUpperCase() : "GEMINI";
         String reqModel = (model != null && !model.isEmpty()) ? model : "gemini-3.6-flash";
 
@@ -105,14 +122,14 @@ public class AiChatService {
 
         Map<String, Object> result = new HashMap<>();
 
-        System.out.println("DEBUG: AiChatService.processChat started. reqModel=" + reqModel);
+        System.out.println("DEBUG: AiChatService.processChat started. reqModel=" + reqModel + ", screenImage=" + (screenImage != null ? screenImage.length() : "none") + ", screenContext=" + (screenContext != null ? "yes" : "no"));
         System.out.println("DEBUG: Gemini Key=" + (geminiApiKey != null ? geminiApiKey.length() : "null") + " Groq Key=" + (groqApiKey != null ? groqApiKey.length() : "null"));
         
         // Fast-path API attempt: Try Gemini first, then Groq, then DeepSeek
         if (isValidKey(geminiApiKey)) {
             try {
-                System.out.println("DEBUG: Calling Gemini...");
-                String response = callGemini(query, reqModel, systemPrompt, historyPayload);
+                System.out.println("DEBUG: Calling Gemini with multimodal screen awareness...");
+                String response = callGemini(query, reqModel, systemPrompt, historyPayload, screenImage, screenContext);
                 System.out.println("DEBUG: Gemini response returned: " + (response != null ? "not null" : "null"));
                 if (response != null && !response.trim().isEmpty()) {
                     result.put("provider", "GEMINI");
@@ -127,7 +144,7 @@ public class AiChatService {
         
         if (isValidKey(groqApiKey)) {
             try {
-                String response = callGroq(query, "groq/compound-mini", systemPrompt, historyPayload);
+                String response = callGroq(query, "groq/compound-mini", systemPrompt, historyPayload, screenContext);
                 if (response != null && !response.trim().isEmpty()) {
                     result.put("provider", "GROQ");
                     result.put("model", "groq/compound-mini");
@@ -141,7 +158,7 @@ public class AiChatService {
         
         if (isValidKey(deepseekApiKey)) {
             try {
-                String response = callDeepSeek(query, "deepseek-v4-flash", systemPrompt, historyPayload);
+                String response = callDeepSeek(query, "deepseek-v4-flash", systemPrompt, historyPayload, screenContext);
                 if (response != null && !response.trim().isEmpty()) {
                     result.put("provider", "DEEPSEEK");
                     result.put("model", "deepseek-v4-flash");
@@ -153,8 +170,8 @@ public class AiChatService {
             }
         }
 
-        // Direct Multi-Domain Knowledge Response Engine (Global Answers + Live User Platform Data)
-        String fallbackResponse = buildInstantCopilotResponse(query, reqProvider, reqModel);
+        // Direct Multi-Domain Knowledge Response Engine with Screen Awareness
+        String fallbackResponse = buildInstantCopilotResponse(query, reqProvider, reqModel, screenContext);
         result.put("provider", "GEMINI");
         result.put("model", reqModel);
         result.put("response", fallbackResponse);
@@ -172,7 +189,7 @@ public class AiChatService {
                 
                 if (isValidKey(geminiApiKey)) {
                     try {
-                        streamGemini(query, reqModel, request.getSystemPrompt(), request.getHistory(), emitter);
+                        streamGemini(query, reqModel, request.getSystemPrompt(), request.getHistory(), request.getScreenImage(), request.getScreenContext(), emitter);
                         return;
                     } catch (Exception e) {
                         System.err.println("Live AI API Warning (GEMINI STREAM): " + e.getMessage());
@@ -201,7 +218,7 @@ public class AiChatService {
         return emitter;
     }
 
-    private void streamGemini(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload, SseEmitter emitter) throws Exception {
+    private void streamGemini(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload, String screenImage, String screenContext, SseEmitter emitter) throws Exception {
         String cleanModel = (model != null && model.contains("pro")) ? "gemini-2.5-pro" : "gemini-2.5-flash";
         List<String> keys = getGeminiApiKeys();
         ObjectMapper mapper = new ObjectMapper();
@@ -224,9 +241,28 @@ public class AiChatService {
             }
         }
 
+        List<Map<String, Object>> userParts = new ArrayList<>();
+        if (screenImage != null && !screenImage.trim().isEmpty()) {
+            String cleanBase64 = screenImage.replaceFirst("^data:image/[a-z]+;base64,", "").trim();
+            if (cleanBase64.length() > 50) {
+                userParts.add(Map.of(
+                    "inlineData", Map.of(
+                        "mimeType", "image/jpeg",
+                        "data", cleanBase64
+                    )
+                ));
+            }
+        }
+
+        String effectiveQuery = query;
+        if (screenContext != null && !screenContext.trim().isEmpty()) {
+            effectiveQuery = "[ACTIVE SCREEN CONTEXT]\n" + screenContext + "\n\n[USER QUESTION]\n" + query;
+        }
+        userParts.add(Map.of("text", effectiveQuery));
+
         contents.add(Map.of(
                 "role", "user",
-                "parts", List.of(Map.of("text", query))
+                "parts", userParts
         ));
 
         Map<String, Object> body = new HashMap<>();
@@ -307,7 +343,7 @@ public class AiChatService {
     }
 
     @SuppressWarnings("rawtypes")
-    private String callGemini(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload) {
+    private String callGemini(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload, String screenImage, String screenContext) {
         String cleanModel = (model != null && model.contains("pro")) ? "gemini-2.5-pro" : "gemini-2.5-flash";
         List<String> keys = getGeminiApiKeys();
 
@@ -328,9 +364,28 @@ public class AiChatService {
             }
         }
 
+        List<Map<String, Object>> userParts = new ArrayList<>();
+        if (screenImage != null && !screenImage.trim().isEmpty()) {
+            String cleanBase64 = screenImage.replaceFirst("^data:image/[a-z]+;base64,", "").trim();
+            if (cleanBase64.length() > 50) {
+                userParts.add(Map.of(
+                    "inlineData", Map.of(
+                        "mimeType", "image/jpeg",
+                        "data", cleanBase64
+                    )
+                ));
+            }
+        }
+
+        String effectiveQuery = query;
+        if (screenContext != null && !screenContext.trim().isEmpty()) {
+            effectiveQuery = "[ACTIVE SCREEN CONTEXT]\n" + screenContext + "\n\n[USER QUESTION]\n" + query;
+        }
+        userParts.add(Map.of("text", effectiveQuery));
+
         contents.add(Map.of(
                 "role", "user",
-                "parts", List.of(Map.of("text", query))
+                "parts", userParts
         ));
 
         Map<String, Object> body = new HashMap<>();
@@ -377,7 +432,7 @@ public class AiChatService {
     }
 
     @SuppressWarnings("rawtypes")
-    private String callGroq(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload) {
+    private String callGroq(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload, String screenContext) {
         String url = "https://api.groq.com/openai/v1/chat/completions";
 
         List<Map<String, String>> messages = new ArrayList<>();
@@ -387,7 +442,10 @@ public class AiChatService {
         if (historyPayload != null) {
             messages.addAll(historyPayload);
         }
-        messages.add(Map.of("role", "user", "content", query));
+        String effectiveQuery = (screenContext != null && !screenContext.trim().isEmpty())
+                ? "[ACTIVE SCREEN CONTEXT]\n" + screenContext + "\n\n[USER QUESTION]\n" + query
+                : query;
+        messages.add(Map.of("role", "user", "content", effectiveQuery));
 
         Map<String, Object> body = Map.of(
                 "model", model,
@@ -415,14 +473,14 @@ public class AiChatService {
         return null;
     }
 
-    private String callDeepSeek(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload) {
-        return callGroq(query, model, systemPrompt, historyPayload);
+    private String callDeepSeek(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload, String screenContext) {
+        return callGroq(query, model, systemPrompt, historyPayload, screenContext);
     }
 
     /**
-     * Fast & Direct Multi-Domain Knowledge Response Engine with Live Platform Data
+     * Fast & Direct Multi-Domain Knowledge Response Engine with Live Platform Data and Screen Perception
      */
-    private String buildInstantCopilotResponse(String query, String provider, String model) {
-        return brainService.generateIntelligentResponse(query);
+    private String buildInstantCopilotResponse(String query, String provider, String model, String screenContext) {
+        return brainService.generateIntelligentResponse(query, screenContext);
     }
 }

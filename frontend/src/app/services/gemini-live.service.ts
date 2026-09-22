@@ -245,6 +245,31 @@ export class GeminiLiveService {
     }
   }
 
+  /**
+   * Transmits a visual screen snapshot into the Gemini Live Bidi WebSocket stream.
+   * Enables multimodal vision during live voice conversations.
+   */
+  public sendScreenFrame(base64Jpeg: string): boolean {
+    if (!base64Jpeg) return false;
+    const cleanBase64 = base64Jpeg.replace(/^data:image\/[a-z]+;base64,/, '');
+    if (this.ws && this.ws.readyState === WebSocket.OPEN && this.isSetupComplete) {
+      const framePayload = {
+        realtimeInput: {
+          mediaChunks: [
+            {
+              mimeType: 'image/jpeg',
+              data: cleanBase64
+            }
+          ]
+        }
+      };
+      this.ws.send(JSON.stringify(framePayload));
+      console.log('GeminiLiveService: Sent visual screen frame to upstream Gemini Live API (length: ' + cleanBase64.length + ')');
+      return true;
+    }
+    return false;
+  }
+
   public triggerBargeInInterruption() {
     this.handleInterruption();
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {

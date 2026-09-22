@@ -34,6 +34,15 @@
       </div>
 
       <div class="header-actions-right">
+        <!-- Screen Perception Vision Toggle Button -->
+        <button class="screen-vision-pill-btn tactile-btn-3d serif-title" 
+                [class.active-mode]="isScreenPerceptionActive" 
+                (click)="toggleScreenPerception()" 
+                [title]="isScreenPerceptionActive ? 'Screen Perception is ACTIVE (AI reads your app screen)' : 'Screen Perception is PAUSED'">
+          <span class="vision-pulse-dot" [class.active]="isScreenPerceptionActive"></span>
+          <span>{{ isScreenPerceptionActive ? '👁️ VISION' : '👁️ OFF' }}</span>
+        </button>
+
         <!-- Main Live Voice Toggle Button -->
         <button class="gemini-live-pill-btn tactile-btn-3d serif-title" 
                 [class.active-mode]="isLiveVoiceActive" 
@@ -194,14 +203,35 @@
       </button>
     </div>
 
+    <!-- Attached Visual Screen Snapshot Preview Chip -->
+    <div class="attached-screen-chip 3d-inset-well" *ngIf="attachedScreenSnapshot">
+      <div class="screen-thumb-preview">
+        <img [src]="attachedScreenSnapshot.dataUrl" alt="Screen Snapshot" />
+      </div>
+      <div class="screen-chip-info serif-title">
+        <span class="chip-route-title">🖼️ Screen: {{ attachedScreenSnapshot.route }}</span>
+        <span class="chip-sub-desc">Visual Snapshot Attached • Ready to analyze</span>
+      </div>
+      <button class="remove-chip-btn tactile-btn-3d" (click)="removeAttachedScreen()" title="Remove Screen Attachment">✕</button>
+    </div>
+
     <div class="input-row">
-      <!-- 3D Inset Track with Textarea and Mic Button -->
+      <!-- 3D Inset Track with Textarea, Camera and Mic Button -->
       <div class="input-deck-track 3d-inset-well">
         <textarea [(ngModel)]="userInput" 
                   (keyup.enter)="$event.preventDefault(); sendMessage()" 
                   rows="1" 
                   placeholder="Ask MentorHub AI Assistant anything or tap 🎙️ for Live Voice..." 
                   class="chat-textarea serif-title"></textarea>
+
+        <!-- Capture Screen Snapshot Action Button -->
+        <button class="screen-snap-btn tactile-btn-3d" 
+                [class.capturing]="isCapturingScreen"
+                (click)="captureScreenSnapshot()" 
+                [disabled]="isCapturingScreen"
+                title="Capture active application screen and attach to message">
+          <span>{{ isCapturingScreen ? '⏳' : '📸' }}</span>
+        </button>
 
         <!-- Live Voice Toggle Button -->
         <button class="stt-btn tactile-btn-3d" [class.live-active]="isLiveVoiceActive" (click)="toggleLiveVoice()" [title]="isLiveVoiceActive ? 'End Live Voice Session' : 'Start Google Gemini Live Voice Session'">

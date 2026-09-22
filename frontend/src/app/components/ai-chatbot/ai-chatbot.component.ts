@@ -7,6 +7,7 @@ import { GeminiLiveService, LiveSessionStatus } from '../../services/gemini-live
 import { AudioCaptureService } from '../../services/audio-capture.service';
 import { AudioPlaybackService } from '../../services/audio-playback.service';
 import { AiModelRouterService } from '../../services/ai-model-router.service';
+import { AppScreenReaderService, ScreenCaptureResult } from '../../services/app-screen-reader.service';
 
 export interface LiveChatMessage extends ChatMessage {
   avatar?: string;
@@ -36,6 +37,11 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   toastMessage: string | null = null;
   private shouldScrollToBottom = true;
 
+  // Multimodal Screen Reader State
+  attachedScreenSnapshot: ScreenCaptureResult | null = null;
+  isCapturingScreen = false;
+  isScreenPerceptionActive = true;
+
   // Live Voice State
   liveStatus: LiveSessionStatus = 'IDLE';
   isLiveVoiceActive = false;
@@ -55,6 +61,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   private voiceQuerySub: Subscription | null = null;
 
   quickPrompts: { label: string; prompt: string; icon: string }[] = [
+    { icon: '📸', label: 'Read My Screen', prompt: 'Please read my active screen, explain what I am looking at, and tell me what actions I can take here.' },
     { icon: '🎓', label: 'CUTM Courses', prompt: 'Tell me about the 385 CUTM Courseware courses and how to access them.' },
     { icon: '👨‍🏫', label: 'Akshat Aryan', prompt: 'Who is Senior Mentor Akshat Aryan and what is his role in MentorHub?' },
     { icon: '🎙️', label: 'AI Mock Viva', prompt: 'How does the AI Mock Viva defense work and what are the rubrics?' },
@@ -68,7 +75,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       id: 'msg-1',
       sender: 'ai',
       avatar: 'AI',
-      text: 'Greetings! I am the **MentorHub AI Voice Assistant & Master Brain**.\n\nI possess a complete mental model and real-time awareness of our entire platform—including all **385+ CUTM Courseware courses** and **5 CBCS baskets**, **AI Mock Viva defense**, **Collaborative Code Workspace**, **cryptographic certificates**, and our team led by **Senior Mentor Akshat Aryan**.\n\nAsk me anything in text chat, tap the prompt chips below, or click **🟢 LIVE VOICE** for real-time spoken dialogue with barge-in interruption support!',
+      text: 'Greetings! I am the **MentorHub AI Voice Assistant & Master Brain**.\n\nI possess a complete mental model and real-time awareness of our entire platform—including all **385+ CUTM Courseware courses** and **5 CBCS baskets**, **AI Mock Viva defense**, **Collaborative Code Workspace**, **cryptographic certificates**, and our team led by **Senior Mentor Akshat Aryan**.\n\n👁️ **Screen Perception is active**: Tap **📸 Read My Screen** or ask me about what is displayed on your screen. Tap **🟢 LIVE VOICE** for real-time spoken dialogue with vision!',
       provider: 'GEMINI',
       model: 'gemini-3.6-flash',
       mode: 'TEXT',
@@ -76,7 +83,12 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
   ];
 
-  sendQuickPrompt(prompt: string) {
+  async sendQuickPrompt(prompt: string) {
+    if (prompt.includes('Screen') || prompt.includes('screen')) {
+      if (!this.attachedScreenSnapshot) {
+        await this.captureScreenSnapshot();
+      }
+    }
     this.userInput = prompt;
     this.sendMessage();
   }
@@ -87,6 +99,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     public liveService: GeminiLiveService,
     public audioCapture: AudioCaptureService,
     public audioPlayback: AudioPlaybackService,
+    public screenReader: AppScreenReaderService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -187,6 +200,37 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.isMaximized = !this.isMaximized;
   }
 
+  toggleScreenPerception() {
+    this.isScreenPerceptionActive = this.screenReader.toggleScreenPerception();
+    this.showToast(this.isScreenPerceptionActive ? '👁️ Screen Perception: Active' : '🚫 Screen Perception: Paused');
+  }
+
+  async captureScreenSnapshot() {
+    this.isCapturingScreen = true;
+    this.showToast('📸 Capturing screen snapshot...');
+    try {
+      const capture = await this.screenReader.captureScreen();
+      if (capture && capture.dataUrl) {
+        this.attachedScreenSnapshot = capture;
+        this.showToast('🖼️ Screen snapshot attached');
+        // If live voice is active, forward the visual frame to Gemini Live WebSocket
+        if (this.isLiveVoiceActive && capture.imageBase64) {
+          this.liveService.sendScreenFrame(capture.imageBase64);
+        }
+      }
+    } catch (e) {
+      this.showToast('⚠️ Screen scan failed');
+    } finally {
+      this.isCapturingScreen = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  removeAttachedScreen() {
+    this.attachedScreenSnapshot = null;
+    this.showToast('Attachment removed');
+  }
+
   // Toggle Live Continuous Voice Mode
   async toggleLiveVoice() {
     if (this.isLiveVoiceActive) {
@@ -196,6 +240,17 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       const success = await this.liveService.startLiveSession();
       if (!success) {
         this.showToast('⚠️ Microphone access required for Live Voice');
+      } else {
+        // Send initial visual frame to Gemini Live if screen perception is on
+        if (this.isScreenPerceptionActive) {
+          setTimeout(() => {
+            this.screenReader.captureScreen().then(cap => {
+              if (cap && cap.imageBase64) {
+                this.liveService.sendScreenFrame(cap.imageBase64);
+              }
+            });
+          }, 800);
+        }
       }
     }
   }
@@ -223,7 +278,14 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     const historyPayload = this.buildHistoryPayload();
     this.scrollToBottom();
 
-    this.voiceQuerySub = this.modelRouter.sendTextMessage(queryText, historyPayload).subscribe({
+    // Extract active DOM context so fallback AI has screen awareness
+    let screenCtx: string | undefined;
+    if (this.isScreenPerceptionActive) {
+      const route = typeof window !== 'undefined' && window.location ? window.location.pathname : '/';
+      screenCtx = this.screenReader.extractSemanticContext(route);
+    }
+
+    this.voiceQuerySub = this.modelRouter.sendTextMessage(queryText, historyPayload, undefined, screenCtx).subscribe({
       next: (res) => {
         const aiResponseText = res.response || res.message || 'I have processed your speech input.';
 
@@ -310,6 +372,18 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     const historyPayload = this.buildHistoryPayload();
 
+    // Multimodal Screen Perception Context
+    const screenImg = this.attachedScreenSnapshot ? this.attachedScreenSnapshot.imageBase64 : undefined;
+    let screenCtx: string | undefined = this.attachedScreenSnapshot ? this.attachedScreenSnapshot.semanticContext : undefined;
+
+    if (this.isScreenPerceptionActive && !screenCtx) {
+      const route = typeof window !== 'undefined' && window.location ? window.location.pathname : '/';
+      screenCtx = this.screenReader.extractSemanticContext(route);
+    }
+
+    // Clear attached snapshot after attaching to request
+    this.attachedScreenSnapshot = null;
+
     // Create a placeholder message for the AI response
     const aiMessageId = 'msg-' + Date.now();
     const aiMessage: LiveChatMessage = {
@@ -325,7 +399,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.messages.push(aiMessage);
     this.scrollToBottom();
 
-    this.textChatSub = this.modelRouter.streamTextMessage(query, historyPayload).subscribe({
+    this.textChatSub = this.modelRouter.streamTextMessage(query, historyPayload, screenImg, screenCtx).subscribe({
       next: (res) => {
         // As chunks arrive, append them to the aiMessage
         if (res && res.text) {

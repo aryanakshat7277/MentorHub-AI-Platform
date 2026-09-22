@@ -10,6 +10,8 @@ public class ChatRequest {
     private String systemPrompt;
     private String language;
     private List<Map<String, String>> history; // Multi-turn conversation history
+    private String screenImage; // Base64 JPEG snapshot of active screen
+    private String screenContext; // Structured DOM semantic text context
 
     public ChatRequest() {}
 
@@ -20,6 +22,17 @@ public class ChatRequest {
         this.systemPrompt = systemPrompt;
         this.language = language;
         this.history = history;
+    }
+
+    public ChatRequest(String message, String provider, String model, String systemPrompt, String language, List<Map<String, String>> history, String screenImage, String screenContext) {
+        this.message = message;
+        this.provider = provider;
+        this.model = model;
+        this.systemPrompt = systemPrompt;
+        this.language = language;
+        this.history = history;
+        this.screenImage = screenImage;
+        this.screenContext = screenContext;
     }
 
     public String getMessage() { return message; }
@@ -39,4 +52,10 @@ public class ChatRequest {
 
     public List<Map<String, String>> getHistory() { return history; }
     public void setHistory(List<Map<String, String>> history) { this.history = history; }
+
+    public String getScreenImage() { return screenImage; }
+    public void setScreenImage(String screenImage) { this.screenImage = screenImage; }
+
+    public String getScreenContext() { return screenContext; }
+    public void setScreenContext(String screenContext) { this.screenContext = screenContext; }
 }

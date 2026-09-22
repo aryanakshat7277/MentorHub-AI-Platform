@@ -102,6 +102,12 @@ public class MentorHubBrainService {
             - WebSockets: /ws-workspace (STOMP code/whiteboard broadcast), /ws-ai-live (Gemini Live bidirectional PCM audio stream).
             - Hosting: Backend on port 8080; Frontend deployed on GitHub Pages.
             
+            MULTIMODAL SCREEN READING & VISION PERCEPTION:
+            - You have live visual perception and semantic awareness of the user's active screen.
+            - Whenever the user asks about what is displayed on their screen ("What am I looking at?", "Explain this course on my screen", "Help me fix the code on my screen", "Analyze this viva question", "What should I do next?"), examine the active screen image and [ACTIVE SCREEN CONTEXT] text carefully.
+            - Directly cite specific visible elements: course titles, course codes, faculty names, categories, code lines in the editor, viva exam rubrics, or goal metrics shown on the screen.
+            - Provide clear, actionable, and helpful guidance based directly on the user's active visual viewport.
+
             VOICE CONVERSATIONAL STYLE & ETIQUETTE:
             1. NATURAL & VOCAL: Speak like a knowledgeable, helpful senior professor and technical architect.
             2. CONCISE YET THOROUGH: Keep spoken answers punchy and conversational (typically 2-4 spoken sentences unless the user explicitly asks for a detailed deep-dive).
@@ -147,9 +153,51 @@ public class MentorHubBrainService {
     /**
      * Intelligent local semantic brain response generator for offline fallback mode.
      * Accurately answers questions about MentorHub, CUTM courses, faculty, and coding.
-     */
     public String generateIntelligentResponse(String query) {
+        return generateIntelligentResponse(query, null);
+    }
+
+    /**
+     * Intelligent local semantic brain response generator for offline fallback mode.
+     * Multimodal screen context aware: accurately answers questions about what is on screen,
+     * MentorHub, CUTM courses, faculty, and coding.
+     */
+    public String generateIntelligentResponse(String query, String screenContext) {
         String q = query.trim().toLowerCase();
+
+        // 0. Screen Perception & Active Visual Context
+        if (screenContext != null && !screenContext.trim().isEmpty()) {
+            boolean isAskingAboutScreen = q.contains("screen") || q.contains("looking at") || q.contains("see") ||
+                    q.contains("page") || q.contains("view") || q.contains("read") || q.contains("what is this") ||
+                    q.contains("explain this") || q.contains("tell me about this") || q.contains("what am i") ||
+                    q.contains("help me with this") || q.contains("analyze") || q.contains("what should i");
+
+            if (isAskingAboutScreen) {
+                if (screenContext.contains("cutm-courses") || screenContext.contains("Courseware Repository")) {
+                    return "Looking at your active screen: You are currently browsing the Centurion University (CUTM) Courseware Repository. " +
+                            "I can see the course catalog cards and category filters displayed in your viewport. " +
+                            "You can click on any course to open its academic dossier, view the official courseware slides, or launch an immediate AI Viva examination on that subject.";
+                } else if (screenContext.contains("workspace") || screenContext.contains("Collaborative Code Workspace")) {
+                    return "Examining your active screen: You are inside the Collaborative Code Workspace. " +
+                            "I can see your active code editor and compiler terminal. " +
+                            "You can write and compile your code in real-time across Java, Python, C++, TypeScript, or Go using our Piston engine, or design architecture on the collaborative whiteboard.";
+                } else if (screenContext.contains("mock-viva") || screenContext.contains("Viva Defense")) {
+                    return "Analyzing your active screen: You are in the AI Mock Viva Defense Arena. " +
+                            "I can see your active examination panel and viva questions on screen. " +
+                            "Speak your response or type into the answer scratchpad to receive real-time scoring on Conceptual Depth, Technical Precision, and Academic Articulation.";
+                } else if (screenContext.contains("goals")) {
+                    return "Reviewing your active screen: You are on the SMART Goals Tracker. " +
+                            "I can see your active milestone targets and progress telemetry. " +
+                            "Continue checking off your milestone objectives to advance your academic portfolio.";
+                } else if (screenContext.contains("certificate")) {
+                    return "Inspecting your active screen: You are viewing the Verified Credentials portal. " +
+                            "The completion certificates shown on screen are cryptographically signed with tamper-proof SHA-256 hashes issued under Senior Mentor Akshat Aryan.";
+                } else if (screenContext.contains("dashboard")) {
+                    return "Scanning your screen: You are on the Executive Dashboard. " +
+                            "I can see your platform metrics, upcoming 1-on-1 mentoring sessions, and current course progress summary.";
+                }
+            }
+        }
 
         // 1. Questions about Akshat Aryan
         if (q.contains("akshat") || q.contains("aryan") || q.contains("senior mentor") || q.contains("who made") || q.contains("who built") || q.contains("architect")) {

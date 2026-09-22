@@ -26,9 +26,11 @@ export class AiChatService {
     model: string,
     systemPrompt?: string,
     language?: string,
-    history?: { role: string; content: string }[]
+    history?: { role: string; content: string }[],
+    screenImage?: string,
+    screenContext?: string
   ): Observable<any> {
-    const payload = { message, provider, model, systemPrompt, language, history };
+    const payload = { message, provider, model, systemPrompt, language, history, screenImage, screenContext };
     return this.http.post(`${this.baseUrl}/send`, payload).pipe(
       catchError((err) => {
         console.warn('Backend API unreachable:', err);
@@ -48,10 +50,12 @@ export class AiChatService {
     model: string,
     systemPrompt?: string,
     language?: string,
-    history?: { role: string; content: string }[]
+    history?: { role: string; content: string }[],
+    screenImage?: string,
+    screenContext?: string
   ): Observable<any> {
     return new Observable((observer) => {
-      const payload = { message, provider, model, systemPrompt, language, history };
+      const payload = { message, provider, model, systemPrompt, language, history, screenImage, screenContext };
       const controller = new AbortController();
 
       fetch(`${this.baseUrl}/stream`, {
