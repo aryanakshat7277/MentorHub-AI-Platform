@@ -127,14 +127,9 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   liveStatus: LiveSessionStatus = 'IDLE';
   isLiveVoiceActive = false;
 
-  // Professional Voice Persona (Gemini Live & Speech Synthesis)
-  currentLiveVoice: 'Aoede' | 'Charon' | 'Fenrir' | 'Kore' = 'Aoede';
-  availableVoicePersonas = [
-    { id: 'Aoede' as const, name: 'Aoede', title: 'Executive Academic', gender: 'Female', desc: 'Warm, articulate, confident & refined diction', icon: '✨' },
-    { id: 'Charon' as const, name: 'Charon', title: 'Senior Scholar', gender: 'Male', desc: 'Composed, deep, informative & reassuring', icon: '🏛️' },
-    { id: 'Fenrir' as const, name: 'Fenrir', title: 'Principal Architect', gender: 'Male', desc: 'Resonant, authoritative & decisive', icon: '⚙️' },
-    { id: 'Kore' as const, name: 'Kore', title: 'Empathetic Mentor', gender: 'Female', desc: 'Calm, gentle, clear & encouraging', icon: '🌿' }
-  ];
+  // Unified Single Professional Voice Persona (Executive Academic - Aoede)
+  readonly professionalVoiceName = 'Executive Academic';
+  readonly currentLiveVoice = 'Aoede';
 
   Math = Math;
   // Audio-reactive visualizer volume (0..1)
@@ -212,10 +207,6 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.liveStatus = status;
       this.isLiveVoiceActive = status !== 'IDLE' && status !== 'ENDED';
       this.scrollToBottom();
-    });
-
-    this.liveService.selectedVoice$.subscribe(voice => {
-      this.currentLiveVoice = voice;
     });
 
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -455,11 +446,8 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     });
   }
 
-  selectLiveVoice(voiceId: 'Aoede' | 'Charon' | 'Fenrir' | 'Kore') {
-    this.currentLiveVoice = voiceId;
-    this.liveService.setVoice(voiceId);
-    const persona = this.availableVoicePersonas.find(p => p.id === voiceId);
-    this.showToast(`🎙️ Voice persona updated to ${persona?.name} (${persona?.title})`);
+  selectLiveVoice() {
+    this.showToast('🎙️ Professional Voice: Executive Academic (Studio 24kHz HD)');
   }
 
   private getBestProfessionalVoice(): SpeechSynthesisVoice | null {

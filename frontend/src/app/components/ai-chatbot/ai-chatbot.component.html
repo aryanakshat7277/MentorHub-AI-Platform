@@ -143,26 +143,15 @@
       <span class="tx-content serif-title">{{ liveService.outputTranscript$.value }}</span>
     </div>
 
-    <!-- Executive Voice Persona Selector Deck -->
-    <div class="voice-persona-selector-deck 3d-inset-well">
-      <div class="persona-deck-header">
-        <span class="persona-title serif-title">🎙️ PROFESSIONAL VOICE PERSONA:</span>
-        <span class="persona-active-badge serif-title">{{ currentLiveVoice }} Active</span>
+    <!-- Single Professional Voice Indicator -->
+    <div class="single-voice-badge 3d-inset-well">
+      <div class="voice-badge-info">
+        <span class="voice-status-pulsar"></span>
+        <span class="voice-badge-icon">🎙️</span>
+        <span class="voice-badge-title serif-title">PROFESSIONAL AI VOICE:</span>
+        <span class="voice-badge-persona serif-title">Executive Academic</span>
       </div>
-      <div class="persona-chips-grid">
-        <button 
-          *ngFor="let persona of availableVoicePersonas"
-          type="button" 
-          class="persona-chip tactile-btn-3d serif-title"
-          [class.active-persona]="currentLiveVoice === persona.id"
-          (click)="selectLiveVoice(persona.id)"
-          [title]="persona.desc"
-        >
-          <span class="p-icon">{{ persona.icon }}</span>
-          <span class="p-name">{{ persona.name }}</span>
-          <span class="p-title">({{ persona.title }})</span>
-        </button>
-      </div>
+      <span class="voice-quality-tag serif-title">Studio 24kHz HD</span>
     </div>
 
     <!-- Interrupt Action Control -->

@@ -26,7 +26,7 @@ export class GeminiLiveService {
   private isSetupComplete = false;
   private wsUrl = 'ws://localhost:8080/ws-ai-live';
   
-  public selectedVoice$ = new BehaviorSubject<'Aoede' | 'Charon' | 'Fenrir' | 'Kore'>('Aoede');
+  public readonly selectedVoice$ = new BehaviorSubject<string>('Aoede');
   public status$ = new BehaviorSubject<LiveSessionStatus>('IDLE');
   public inputTranscript$ = new BehaviorSubject<string>(''); // Kept for UI backwards compatibility, but won't populate natively
   public outputTranscript$ = new BehaviorSubject<string>('');
@@ -64,24 +64,16 @@ export class GeminiLiveService {
   }
 
   private initVoicePreference() {
+    this.selectedVoice$.next('Aoede');
     if (typeof localStorage !== 'undefined') {
-      const saved = localStorage.getItem('mentorhub_live_voice') as 'Aoede' | 'Charon' | 'Fenrir' | 'Kore';
-      if (saved && ['Aoede', 'Charon', 'Fenrir', 'Kore'].includes(saved)) {
-        this.selectedVoice$.next(saved);
-      }
+      localStorage.setItem('mentorhub_live_voice', 'Aoede');
     }
   }
 
-  public setVoice(voice: 'Aoede' | 'Charon' | 'Fenrir' | 'Kore') {
-    this.selectedVoice$.next(voice);
+  public setVoice(voice: string = 'Aoede') {
+    this.selectedVoice$.next('Aoede');
     if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('mentorhub_live_voice', voice);
-    }
-    if (this.status$.value === 'CONNECTED' || this.status$.value === 'LISTENING' || this.status$.value === 'SPEAKING') {
-      if (this.ws) {
-        try { this.ws.close(); } catch {}
-      }
-      this.connectWebSocket();
+      localStorage.setItem('mentorhub_live_voice', 'Aoede');
     }
   }
 
