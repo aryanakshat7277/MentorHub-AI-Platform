@@ -61,6 +61,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   private voiceQuerySub: Subscription | null = null;
 
   quickPrompts: { label: string; prompt: string; icon: string }[] = [
+    { icon: '🟢', label: 'Test NVIDIA NIM', prompt: 'Test NVIDIA NIM free tier engine (meta/llama-3.2-11b-vision-instruct) and describe your awareness of MentorHub platform and CUTM courses.' },
     { icon: '📸', label: 'Read My Screen', prompt: 'Please read my active screen, explain what I am looking at, and tell me what actions I can take here.' },
     { icon: '🎓', label: 'CUTM Courses', prompt: 'Tell me about the 385 CUTM Courseware courses and how to access them.' },
     { icon: '👨‍🏫', label: 'Akshat Aryan', prompt: 'Who is Senior Mentor Akshat Aryan and what is his role in MentorHub?' },
@@ -198,6 +199,18 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   toggleMaximize() {
     this.isMaximized = !this.isMaximized;
+  }
+
+  toggleAiEngine() {
+    if (this.selectedProvider === 'GEMINI') {
+      this.selectedProvider = 'NVIDIA';
+      this.selectedModel = this.modelRouter.config.nvidiaModel;
+      this.showToast('🟢 Forced Engine: NVIDIA NIM (Meta LLaMA 3.2 11B Vision)');
+    } else {
+      this.selectedProvider = 'GEMINI';
+      this.selectedModel = this.modelRouter.config.textModel;
+      this.showToast('✨ Auto Engine: Gemini Core + NVIDIA NIM Failover');
+    }
   }
 
   toggleScreenPerception() {
@@ -399,7 +412,14 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.messages.push(aiMessage);
     this.scrollToBottom();
 
-    this.textChatSub = this.modelRouter.streamTextMessage(query, historyPayload, screenImg, screenCtx).subscribe({
+    this.textChatSub = this.modelRouter.streamTextMessage(
+      query,
+      historyPayload,
+      screenImg,
+      screenCtx,
+      this.selectedProvider,
+      this.selectedModel
+    ).subscribe({
       next: (res) => {
         // As chunks arrive, append them to the aiMessage
         if (res && res.text) {

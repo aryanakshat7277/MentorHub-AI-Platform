@@ -24,16 +24,25 @@
           <div class="status-indicator">
             <span class="online-dot" [class.live-active]="isLiveVoiceActive"></span>
             <span class="sub-status serif-title">
-              {{ isLiveVoiceActive ? 'Gemini Live Multimodal Voice Stream' : 'Gemini 3.6 Flash Neural Core' }}
+              {{ isLiveVoiceActive ? 'Gemini Live Multimodal Voice Stream' : (selectedProvider === 'NVIDIA' ? 'NVIDIA NIM (LLaMA 3.2 11B Vision)' : 'Gemini 3.6 Flash & NVIDIA NIM Core') }}
             </span>
             <span class="brain-status-badge serif-title" title="Full Platform Awareness Active">
-              🧠 Master Brain Active • 385+ CUTM Courses
+              🧠 Master Brain • {{ selectedProvider === 'NVIDIA' ? 'NVIDIA NIM Active' : 'Gemini + NVIDIA Ready' }}
             </span>
           </div>
         </div>
       </div>
 
       <div class="header-actions-right">
+        <!-- Engine selector toggle: Auto (Gemini -> NVIDIA) vs Forced NVIDIA NIM -->
+        <button class="engine-toggle-btn tactile-btn-3d serif-title"
+                (click)="toggleAiEngine()"
+                [class.nvidia-mode]="selectedProvider === 'NVIDIA'"
+                [title]="selectedProvider === 'NVIDIA' ? 'Active Engine: NVIDIA NIM (Meta LLaMA 3.2 11B Vision). Click to switch to Auto' : 'Active Engine: Auto (Gemini Primary + NVIDIA NIM Failover). Click to force NVIDIA NIM'">
+          <span class="engine-dot" [class.nvidia]="selectedProvider === 'NVIDIA'"></span>
+          <span>{{ selectedProvider === 'NVIDIA' ? '🟢 NVIDIA NIM' : '✨ AUTO ENGINE' }}</span>
+        </button>
+
         <!-- Screen Perception Vision Toggle Button -->
         <button class="screen-vision-pill-btn tactile-btn-3d serif-title" 
                 [class.active-mode]="isScreenPerceptionActive" 
@@ -152,6 +161,12 @@
               </span>
               <span class="mode-badge 3d-inset-well serif-title" [class.voice-mode]="msg.mode === 'VOICE'">
                 {{ msg.mode === 'VOICE' ? '🎙️ VOICE' : '💬 TEXT' }}
+              </span>
+              <span class="engine-badge 3d-inset-well serif-title" 
+                    [class.nvidia]="msg.provider === 'NVIDIA'"
+                    [class.gemini]="msg.provider === 'GEMINI'"
+                    *ngIf="msg.sender === 'ai' && msg.provider">
+                {{ msg.provider === 'NVIDIA' ? '🟢 NVIDIA NIM' : (msg.provider === 'GEMINI' ? '✨ GEMINI' : msg.provider) }}
               </span>
             </div>
             <span class="time-tag serif-title">{{ msg.timestamp }}</span>

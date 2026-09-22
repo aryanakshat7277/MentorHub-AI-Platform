@@ -6,6 +6,7 @@ import { GeminiLiveService } from './gemini-live.service';
 
 export interface ModelRoutingConfig {
   textModel: string;
+  nvidiaModel: string;
   liveModel: string;
   fallbackSttModel: string;
   fallbackTtsModel: string;
@@ -17,6 +18,7 @@ export interface ModelRoutingConfig {
 export class AiModelRouterService {
   public readonly config: ModelRoutingConfig = {
     textModel: 'gemini-3.5-flash',
+    nvidiaModel: 'meta/llama-3.2-11b-vision-instruct',
     liveModel: 'gemini-3.1-flash-live-preview',
     fallbackSttModel: 'whisper-large-v3-turbo',
     fallbackTtsModel: 'canopylabs/orpheus-v1-english'
@@ -34,12 +36,15 @@ export class AiModelRouterService {
     message: string,
     history?: { role: string; content: string }[],
     screenImage?: string,
-    screenContext?: string
+    screenContext?: string,
+    provider: string = 'GEMINI',
+    model?: string
   ): Observable<any> {
+    const chosenModel = model || (provider === 'NVIDIA' ? this.config.nvidiaModel : this.config.textModel);
     return this.chatService.sendMessage(
       message,
-      'GEMINI',
-      this.config.textModel,
+      provider,
+      chosenModel,
       undefined,
       'en-US',
       history,
@@ -52,18 +57,30 @@ export class AiModelRouterService {
     message: string,
     history?: { role: string; content: string }[],
     screenImage?: string,
-    screenContext?: string
+    screenContext?: string,
+    provider: string = 'GEMINI',
+    model?: string
   ): Observable<any> {
+    const chosenModel = model || (provider === 'NVIDIA' ? this.config.nvidiaModel : this.config.textModel);
     return this.chatService.streamMessage(
       message,
-      'GEMINI',
-      this.config.textModel,
+      provider,
+      chosenModel,
       undefined,
       'en-US',
       history,
       screenImage,
       screenContext
     );
+  }
+
+  public sendNvidiaMessage(
+    message: string,
+    history?: { role: string; content: string }[],
+    screenImage?: string,
+    screenContext?: string
+  ): Observable<any> {
+    return this.sendTextMessage(message, history, screenImage, screenContext, 'NVIDIA', this.config.nvidiaModel);
   }
 
   public synthesizeGroqFallbackSpeech(text: string): Observable<any> {

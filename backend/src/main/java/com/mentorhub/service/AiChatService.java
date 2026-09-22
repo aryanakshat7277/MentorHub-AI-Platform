@@ -37,6 +37,12 @@ public class AiChatService {
     @Value("${ai.gemini.fallback-api-key:}")
     private String fallbackGeminiApiKey;
 
+    @Value("${ai.nvidia.api-key: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}")
+    private String nvidiaApiKey;
+
+    @Value("${ai.nvidia.model:meta/llama-3.2-11b-vision-instruct}")
+    private String nvidiaModel;
+
     @Value("${ai.groq.api-key:${groq.api.key:}}")
     private String groqApiKey;
 
@@ -125,8 +131,24 @@ public class AiChatService {
         System.out.println("DEBUG: AiChatService.processChat started. reqModel=" + reqModel + ", screenImage=" + (screenImage != null ? screenImage.length() : "none") + ", screenContext=" + (screenContext != null ? "yes" : "no"));
         System.out.println("DEBUG: Gemini Key=" + (geminiApiKey != null ? geminiApiKey.length() : "null") + " Groq Key=" + (groqApiKey != null ? groqApiKey.length() : "null"));
         
-        // Fast-path API attempt: Try Gemini first, then Groq, then DeepSeek
-        if (isValidKey(geminiApiKey)) {
+        // 1. If provider explicitly specified as NVIDIA, attempt NVIDIA first:
+        if ("NVIDIA".equalsIgnoreCase(reqProvider) && isValidKey(nvidiaApiKey)) {
+            try {
+                System.out.println("DEBUG: Calling NVIDIA NIM (Primary)...");
+                String response = callNvidia(query, nvidiaModel, systemPrompt, historyPayload, screenContext);
+                if (response != null && !response.trim().isEmpty()) {
+                    result.put("provider", "NVIDIA");
+                    result.put("model", nvidiaModel);
+                    result.put("response", response);
+                    return result;
+                }
+            } catch (Exception e) {
+                System.err.println("Live AI API Warning (NVIDIA PRIMARY): " + e.getMessage());
+            }
+        }
+
+        // 2. Primary Fast-path: Gemini (multimodal vision + text)
+        if (isValidKey(geminiApiKey) && !"NVIDIA".equalsIgnoreCase(reqProvider)) {
             try {
                 System.out.println("DEBUG: Calling Gemini with multimodal screen awareness...");
                 String response = callGemini(query, reqModel, systemPrompt, historyPayload, screenImage, screenContext);
@@ -138,10 +160,28 @@ public class AiChatService {
                     return result;
                 }
             } catch (Exception e) {
-                System.err.println("Live AI API Warning (GEMINI): " + e.getMessage() + ". Falling back to GROQ.");
+                System.err.println("Live AI API Warning (GEMINI): " + e.getMessage() + ". Falling back to NVIDIA NIM.");
+            }
+        }
+
+        // 3. Secondary Fast-path: NVIDIA NIM (Meta LLaMA 3.2 11B Vision Instruct via NVIDIA integrate API)
+        if (isValidKey(nvidiaApiKey)) {
+            try {
+                System.out.println("DEBUG: Calling NVIDIA NIM (" + nvidiaModel + ")...");
+                String response = callNvidia(query, nvidiaModel, systemPrompt, historyPayload, screenContext);
+                System.out.println("DEBUG: NVIDIA NIM response returned: " + (response != null ? "not null" : "null"));
+                if (response != null && !response.trim().isEmpty()) {
+                    result.put("provider", "NVIDIA");
+                    result.put("model", nvidiaModel);
+                    result.put("response", response);
+                    return result;
+                }
+            } catch (Exception e) {
+                System.err.println("Live AI API Warning (NVIDIA NIM): " + e.getMessage() + ". Falling back to GROQ.");
             }
         }
         
+        // 4. Tertiary: Groq
         if (isValidKey(groqApiKey)) {
             try {
                 String response = callGroq(query, "groq/compound-mini", systemPrompt, historyPayload, screenContext);
@@ -186,7 +226,21 @@ public class AiChatService {
             try {
                 String query = request.getMessage();
                 String reqModel = (request.getModel() != null && !request.getModel().isEmpty()) ? request.getModel() : "gemini-3.6-flash";
-                
+                String reqProvider = (request.getProvider() != null) ? request.getProvider().toUpperCase() : "GEMINI";
+
+                // If NVIDIA requested explicitly, process via NVIDIA immediately
+                if ("NVIDIA".equalsIgnoreCase(reqProvider)) {
+                    ChatResponse nvidiaResp = processChat(request);
+                    Map<String, Object> payload = new HashMap<>();
+                    payload.put("text", nvidiaResp.getResponse());
+                    payload.put("provider", nvidiaResp.getProvider());
+                    payload.put("model", nvidiaResp.getModel());
+                    ObjectMapper mapper = new ObjectMapper();
+                    emitter.send(SseEmitter.event().data(mapper.writeValueAsString(payload)));
+                    emitter.complete();
+                    return;
+                }
+
                 if (isValidKey(geminiApiKey)) {
                     try {
                         streamGemini(query, reqModel, request.getSystemPrompt(), request.getHistory(), request.getScreenImage(), request.getScreenContext(), emitter);
@@ -426,6 +480,58 @@ public class AiChatService {
                 }
             } catch (Exception e) {
                 System.err.println("DEBUG: callGemini failed with key index " + k + ": " + e.getMessage());
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private String callNvidia(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload, String screenContext) {
+        String url = "https://integrate.api.nvidia.com/v1/chat/completions";
+
+        List<Map<String, String>> messages = new ArrayList<>();
+        String globalInstruction = brainService.getMasterBrainSystemPrompt("User");
+        if (systemPrompt != null && !systemPrompt.trim().isEmpty()) {
+            globalInstruction = systemPrompt + "\n\n" + globalInstruction;
+        }
+        messages.add(Map.of("role", "system", "content", globalInstruction));
+
+        if (historyPayload != null) {
+            for (Map<String, String> msg : historyPayload) {
+                String r = msg.getOrDefault("role", "user");
+                String c = msg.getOrDefault("content", "");
+                if (c != null && !c.trim().isEmpty()) {
+                    messages.add(Map.of("role", r, "content", c));
+                }
+            }
+        }
+        String effectiveQuery = (screenContext != null && !screenContext.trim().isEmpty())
+                ? "[ACTIVE SCREEN CONTEXT]\n" + screenContext + "\n\n[USER QUESTION]\n" + query
+                : query;
+        messages.add(Map.of("role", "user", "content", effectiveQuery));
+
+        Map<String, Object> body = new HashMap<>();
+        String targetModel = (model != null && !model.trim().isEmpty() && !model.contains("gemini") && !model.contains("groq")) ? model : nvidiaModel;
+        body.put("model", targetModel);
+        body.put("messages", messages);
+        body.put("max_tokens", 1024);
+        body.put("temperature", 0.7);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(nvidiaApiKey);
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+        ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+
+        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+            List choices = (List) response.getBody().get("choices");
+            if (choices != null && !choices.isEmpty()) {
+                Map choice = (Map) choices.get(0);
+                Map message = (Map) choice.get("message");
+                if (message != null && message.get("content") != null) {
+                    return (String) message.get("content");
+                }
             }
         }
         return null;
