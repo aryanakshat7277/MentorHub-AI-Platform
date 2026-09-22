@@ -67,6 +67,48 @@
           <span class="tile-sub serif-title">{{ getCompletedModulesTotal() }} of {{ getTotalModulesCount() }} Modules Mastered</span>
         </div>
       </div>
+
+      <!-- Live CBCS Curriculum Credit Distribution Graphic Matrix -->
+      <div class="cbcs-distribution-card clay-panel 3d-inset-well">
+        <div class="distribution-header">
+          <div class="dist-left">
+            <span class="dist-icon">📊</span>
+            <div>
+              <h4 class="dist-title serif-title">CBCS 5-Basket Degree Credit Distribution Matrix</h4>
+              <span class="dist-sub serif-title">Dual Curriculum Weight Breakdown across all {{ getTotalCreditsCount() }} Degree Credits</span>
+            </div>
+          </div>
+          <span class="dist-pill serif-title">🏛️ CUTM Academic Regulation</span>
+        </div>
+
+        <!-- Visual Segmented Credit Distribution Bar -->
+        <div class="visual-distribution-bar">
+          <div 
+            *ngFor="let seg of getCbcsCreditDistribution()" 
+            class="dist-segment"
+            [style.width.%]="seg.percent"
+            [style.background]="seg.color"
+            (click)="selectBasket(seg.category)"
+            [title]="seg.label + ': ' + seg.credits + ' Credits (' + seg.percent + '%) - Click to filter'"
+          >
+            <span class="seg-label" *ngIf="seg.percent > 7">{{ seg.label }} {{ seg.percent }}%</span>
+          </div>
+        </div>
+
+        <!-- Graphic Legend Row with 1-Click Basket Filters -->
+        <div class="dist-legend-row">
+          <button 
+            *ngFor="let seg of getCbcsCreditDistribution()" 
+            type="button"
+            class="legend-item serif-title tactile-btn-3d" 
+            [class.active-seg]="selectedBasket === seg.category"
+            (click)="selectBasket(seg.category)"
+          >
+            <span class="legend-dot" [style.background]="seg.color"></span>
+            <span class="legend-text"><strong>{{ seg.label }}</strong> ({{ seg.credits }} Cr • {{ seg.percent }}%)</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -230,36 +272,27 @@
       class="course-card clay-panel elevated-card-3d"
       [class.bookmarked-card]="course.isBookmarked"
     >
-      <!-- Card Header -->
-      <div class="card-top-bar">
-        <div class="basket-and-credits">
-          <!-- Courseware Classification Badge -->
-          <span 
-            *ngIf="course.courseCategory"
-            class="courseware-category-badge serif-title"
-            [style.color]="getCourseCategoryColor(course.courseCategory)"
-            [style.borderColor]="getCourseCategoryColor(course.courseCategory) + '55'"
-            [style.background]="getCourseCategoryColor(course.courseCategory) + '18'"
-          >
-            {{ getCourseCategoryIcon(course.courseCategory) }} {{ course.courseCategory }} Courses
-          </span>
+      <!-- 1. Thematic Visual Graphic Banner -->
+      <div class="card-graphic-banner" [style.background]="getCourseGraphic(course).gradient">
+        <!-- Thematic Pattern Overlay Texture -->
+        <div class="banner-pattern-overlay" [ngClass]="getCourseGraphic(course).pattern"></div>
+        <div class="banner-glint-line"></div>
 
-          <!-- CBCS Basket Badge -->
-          <span 
-            class="basket-badge" 
-            [style.background]="getBasketColor(course.basketCategory) + '22'"
-            [style.color]="getBasketColor(course.basketCategory)"
-            [style.borderColor]="getBasketColor(course.basketCategory) + '55'"
-          >
-            {{ getBasketShortLabel(course.basketCategory) }}
-          </span>
-
-          <span class="credits-pill serif-title">⭐ {{ course.credits }} Credits</span>
+        <!-- Thematic Graphic Crest Badge with 3D Gold Seal -->
+        <div class="banner-crest-badge gold-seal-emboss">
+          <span class="banner-glyph">{{ getCourseGraphic(course).glyph }}</span>
         </div>
 
+        <!-- Banner Meta Tags -->
+        <div class="banner-meta-pills">
+          <span class="discipline-tag serif-title">{{ getCourseGraphic(course).domainTag }}</span>
+          <span class="lab-pill serif-title" *ngIf="hasPracticalLab(course)">🔬 Lab Practicum Included</span>
+        </div>
+
+        <!-- Bookmark Star Action Button -->
         <button 
           type="button" 
-          class="bookmark-icon-btn" 
+          class="bookmark-banner-btn" 
           [class.active]="course.isBookmarked"
           (click)="toggleBookmark(course, $event)"
           [title]="course.isBookmarked ? 'Remove Bookmark' : 'Bookmark this course'"
@@ -268,63 +301,120 @@
         </button>
       </div>
 
-      <!-- Assigned Faculty Instructor Lead Bar -->
-      <div class="faculty-lead-bar" *ngIf="course.faculty">
-        <div class="faculty-avatar-icon">👨‍🏫</div>
-        <div class="faculty-meta">
-          <span class="faculty-label serif-title">Faculty Instructor</span>
-          <span class="faculty-name serif-title">{{ course.faculty }}</span>
+      <!-- 2. Card Content Body -->
+      <div class="card-body-wrapper">
+        <!-- Card Header Badges -->
+        <div class="card-top-bar">
+          <div class="basket-and-credits">
+            <!-- Courseware Classification Badge -->
+            <span 
+              *ngIf="course.courseCategory"
+              class="courseware-category-badge serif-title"
+              [style.color]="getCourseCategoryColor(course.courseCategory)"
+              [style.borderColor]="getCourseCategoryColor(course.courseCategory) + '55'"
+              [style.background]="getCourseCategoryColor(course.courseCategory) + '18'"
+            >
+              {{ getCourseCategoryIcon(course.courseCategory) }} {{ course.courseCategory }} Courses
+            </span>
+
+            <!-- CBCS Basket Badge -->
+            <span 
+              class="basket-badge" 
+              [style.background]="getBasketColor(course.basketCategory) + '22'"
+              [style.color]="getBasketColor(course.basketCategory)"
+              [style.borderColor]="getBasketColor(course.basketCategory) + '55'"
+            >
+              {{ getBasketShortLabel(course.basketCategory) }}
+            </span>
+
+            <span class="credits-pill serif-title">⭐ {{ course.credits }} Credits</span>
+          </div>
         </div>
-        <span class="faculty-dept-badge serif-title">{{ course.department }}</span>
-      </div>
 
-      <!-- Course Identifier & Code -->
-      <div class="code-and-title">
-        <div class="code-pill-row">
-          <button 
-            type="button" 
-            class="course-code-pill tactile-btn-3d" 
-            (click)="copyCourseCode(course.courseCode, $event)"
-            title="Click to copy Course Code"
-          >
-            <img src="assets/cutm-seal.svg" alt="CUTM" class="cutm-pill-seal" />
-            <span class="code-text">{{ course.courseCode }}</span>
-            <span class="copy-icon">{{ copiedCode === course.courseCode ? '✓ Copied' : '📋' }}</span>
-          </button>
-          <span class="cw-id-pill serif-title" *ngIf="course.coursewareId">CW #{{ course.coursewareId }}</span>
-          <span class="ltp-pill serif-title">L-T-P: {{ course.ltp }}</span>
-          <span class="sem-pill serif-title">{{ course.semester }}</span>
+        <!-- Assigned Faculty Instructor Lead Bar -->
+        <div class="faculty-lead-bar" *ngIf="course.faculty">
+          <div class="faculty-avatar-icon">👨‍🏫</div>
+          <div class="faculty-meta">
+            <span class="faculty-label serif-title">Faculty Instructor</span>
+            <span class="faculty-name serif-title">{{ course.faculty }}</span>
+          </div>
+          <span class="faculty-dept-badge serif-title">{{ course.department }}</span>
         </div>
 
-        <h3 class="course-heading serif-title" (click)="openCourseModal(course, $event)">
-          {{ course.courseTitle }}
-        </h3>
-      </div>
+        <!-- Course Identifier & Code -->
+        <div class="code-and-title">
+          <div class="code-pill-row">
+            <button 
+              type="button" 
+              class="course-code-pill tactile-btn-3d" 
+              (click)="copyCourseCode(course.courseCode, $event)"
+              title="Click to copy Course Code"
+            >
+              <img src="assets/cutm-seal.svg" alt="CUTM" class="cutm-pill-seal" />
+              <span class="code-text">{{ course.courseCode }}</span>
+              <span class="copy-icon">{{ copiedCode === course.courseCode ? '✓ Copied' : '📋' }}</span>
+            </button>
+            <span class="cw-id-pill serif-title" *ngIf="course.coursewareId">CW #{{ course.coursewareId }}</span>
+            <span class="sem-pill serif-title">{{ course.semester }}</span>
+          </div>
 
-      <!-- Description & Prerequisites -->
-      <p class="course-desc serif-title">{{ course.description }}</p>
-
-      <div class="prereq-box" *ngIf="course.prerequisites && course.prerequisites !== 'None'">
-        <span class="prereq-label serif-title">Prerequisites:</span>
-        <span class="prereq-val serif-title">{{ course.prerequisites }}</span>
-      </div>
-
-      <!-- Progress Tracking Bar -->
-      <div class="card-progress-zone">
-        <div class="progress-info-row">
-          <span class="p-label serif-title">MODULE COMPLETION</span>
-          <span class="p-value serif-title">
-            {{ (course.completedModules?.length || 0) }} / {{ course.modules?.length || 5 }} Modules ({{ getCourseCompletionPercentage(course) }}%)
-          </span>
+          <h3 class="course-heading serif-title" (click)="openCourseModal(course, $event)">
+            {{ course.courseTitle }}
+          </h3>
         </div>
-        <div class="debossed-track-mini">
-          <div 
-            class="track-fill" 
-            [style.width.%]="getCourseCompletionPercentage(course)"
-            [style.background]="getBasketColor(course.basketCategory)"
-          ></div>
+
+        <!-- Graphical LTP Visual Meter & Academic Rigor Gauge -->
+        <div class="graphical-ltp-meter">
+          <div class="ltp-segmented-bar">
+            <div class="ltp-seg lecture" [style.flex]="getParsedLtp(course).lecture || 1" title="Lecture: {{ getParsedLtp(course).lecture }} Hours / Week">
+              <span>📘 {{ getParsedLtp(course).lecture }}h Lecture</span>
+            </div>
+            <div class="ltp-seg tutorial" *ngIf="getParsedLtp(course).tutorial > 0" [style.flex]="getParsedLtp(course).tutorial" title="Tutorial: {{ getParsedLtp(course).tutorial }} Hours / Week">
+              <span>💡 {{ getParsedLtp(course).tutorial }}h Tutorial</span>
+            </div>
+            <div class="ltp-seg practical" *ngIf="getParsedLtp(course).practical > 0" [style.flex]="getParsedLtp(course).practical" title="Practical: {{ getParsedLtp(course).practical }} Hours / Week">
+              <span>🔬 {{ getParsedLtp(course).practical }}h Lab Practicum</span>
+            </div>
+          </div>
+          <div class="ltp-labels-row">
+            <span class="ltp-detail serif-title">L-T-P: {{ course.ltp }}</span>
+            <div class="rigor-gauge-box" title="Academic Rigor: {{ getCourseGraphic(course).rigorLevel }}">
+              <span class="rigor-label serif-title">{{ getCourseGraphic(course).rigorLevel }}</span>
+              <div class="rigor-bars">
+                <span class="r-bar" [class.filled]="getCourseGraphic(course).rigorBars >= 1"></span>
+                <span class="r-bar" [class.filled]="getCourseGraphic(course).rigorBars >= 2"></span>
+                <span class="r-bar" [class.filled]="getCourseGraphic(course).rigorBars >= 3"></span>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+
+        <!-- Description & Prerequisites -->
+        <p class="course-desc serif-title">{{ course.description }}</p>
+
+        <div class="prereq-box" *ngIf="course.prerequisites && course.prerequisites !== 'None'">
+          <span class="prereq-label serif-title">Prerequisites:</span>
+          <span class="prereq-val serif-title">{{ course.prerequisites }}</span>
+        </div>
+
+        <!-- Progress Tracking Bar with Graphical Pulse -->
+        <div class="card-progress-zone">
+          <div class="progress-info-row">
+            <span class="p-label serif-title">MODULE COMPLETION</span>
+            <span class="p-value serif-title">
+              {{ (course.completedModules?.length || 0) }} / {{ course.modules?.length || 5 }} Modules ({{ getCourseCompletionPercentage(course) }}%)
+            </span>
+          </div>
+          <div class="debossed-track-mini">
+            <div 
+              class="track-fill" 
+              [style.width.%]="getCourseCompletionPercentage(course)"
+              [style.background]="getBasketColor(course.basketCategory)"
+            >
+              <div class="fill-glint" *ngIf="getCourseCompletionPercentage(course) > 0"></div>
+            </div>
+          </div>
+        </div>
 
       <!-- Card Action Buttons -->
       <div class="card-footer-actions">
@@ -366,9 +456,10 @@
           </button>
         </div>
       </div>
+    </div>
 
-      <!-- 6. Expandable Modules Accordion -->
-      <div *ngIf="isCourseExpanded(course.id)" class="modules-accordion-drawer">
+    <!-- 6. Expandable Modules Accordion -->
+    <div *ngIf="isCourseExpanded(course.id)" class="modules-accordion-drawer">
         <div class="drawer-header">
           <span class="drawer-title serif-title">📖 Formal CUTM Module Syllabus & Practical Labs</span>
           <span class="drawer-sub serif-title">Click checkbox to record your progress</span>
