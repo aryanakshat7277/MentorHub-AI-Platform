@@ -1,4 +1,4 @@
-<div class="chatbot-overlay" *ngIf="isOpen" (click)="close()"></div>
+<div class="chatbot-overlay" *ngIf="isOpen" (click)="!isLiveVoiceActive && close()"></div>
 
 <div class="chatbot-drawer clay-panel elevated-card-3d" [class.open]="isOpen" [class.maximized]="isMaximized" [class.voice-active-drawer]="isLiveVoiceActive">
   
@@ -13,7 +13,7 @@
     <!-- Top Bar: Crest, Title, Online Status & Pinned Window Controls -->
     <div class="header-top-bar">
       <div class="title-box">
-        <div class="gemini-stellar-crest gold-seal-emboss" title="Gemini 3.6 Flash Neural Core">
+        <div class="gemini-stellar-crest gold-seal-emboss" title="Gemini 3.8 Flash Neural Core">
           <div class="orbit-glow-ring"></div>
           <span class="gemini-sparkle-icon">✨</span>
         </div>
@@ -53,8 +53,8 @@
         <span class="brain-status-badge serif-title" title="Full Platform Awareness Active">
           🧠 Master Brain
         </span>
-        <span class="model-pill-badge serif-title" [title]="selectedProvider === 'GROQ' ? 'Groq Cloud (openai/gpt-oss-120b)' : 'Google Gemini 3.6 Flash'">
-          {{ selectedProvider === 'GROQ' ? '⚡ Groq 120B' : '✨ Gemini 3.6' }}
+        <span class="model-pill-badge serif-title" [title]="selectedProvider === 'GROQ' ? 'Groq Cloud (openai/gpt-oss-120b)' : 'Google Gemini 3.8 Flash'">
+          {{ selectedProvider === 'GROQ' ? '⚡ Groq 120B' : '✨ Gemini 3.8' }}
         </span>
       </div>
 
@@ -143,17 +143,6 @@
       <span class="tx-content serif-title">{{ liveService.outputTranscript$.value }}</span>
     </div>
 
-    <!-- Single Professional Voice Indicator -->
-    <div class="single-voice-badge 3d-inset-well">
-      <div class="voice-badge-info">
-        <span class="voice-status-pulsar"></span>
-        <span class="voice-badge-icon">🎙️</span>
-        <span class="voice-badge-title serif-title">PROFESSIONAL AI VOICE:</span>
-        <span class="voice-badge-persona serif-title">Executive Academic</span>
-      </div>
-      <span class="voice-quality-tag serif-title">Studio 24kHz HD</span>
-    </div>
-
     <!-- Interrupt Action Control -->
     <div class="live-controls-row">
       <button class="live-interrupt-btn tactile-btn-3d serif-title" *ngIf="isSpeakingAudio" (click)="triggerBargeInInterruption()">
@@ -197,7 +186,7 @@
             <span class="time-tag serif-title">{{ msg.timestamp }}</span>
           </div>
 
-          <div class="bubble-content serif-title" [innerHTML]="formatMarkdown(msg.text)" (click)="handleContentClick($event)"></div>
+          <div class="bubble-content serif-title" [innerHTML]="formatMarkdown(msg.text)"></div>
 
           <!-- Action Toolbar per Message -->
           <div class="bubble-actions-bar" *ngIf="msg.sender === 'ai'">
@@ -220,7 +209,7 @@
           <div class="gemini-thinking-sparkle gold-seal-emboss">
             <span>✨</span>
           </div>
-          <span class="thinking-text serif-title">Gemini 3.6 Flash synthesizing answer</span>
+          <span class="thinking-text serif-title">Gemini 3.8 Flash synthesizing answer</span>
           <span class="thinking-dots">
             <span></span><span></span><span></span>
           </span>

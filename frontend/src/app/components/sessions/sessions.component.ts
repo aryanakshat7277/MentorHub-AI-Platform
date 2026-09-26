@@ -103,15 +103,6 @@ export class SessionsComponent implements OnInit {
     reverseTopic: ''
   };
 
-  // 10-Minute SOS Bug Rescue State
-  showSosModal = false;
-  activeSosRequests: any[] = [];
-  newSosRequest = {
-    title: '',
-    problemDescription: '',
-    techStack: 'Spring Boot'
-  };
-
   // Toast Notification
   toastMessage = '';
   showToast = false;
@@ -123,7 +114,6 @@ export class SessionsComponent implements OnInit {
 
   ngOnInit() {
     this.loadSessions();
-    this.loadSosRequests();
   }
 
   getAvatarByName(name: string): string {
@@ -146,12 +136,6 @@ export class SessionsComponent implements OnInit {
     });
   }
 
-  loadSosRequests() {
-    this.apiService.getActiveSosRequests().subscribe(reqs => {
-      this.activeSosRequests = reqs || [];
-    });
-  }
-
   toggleReverseMentoring() {
     this.soundService.playClick();
     this.newSession.isReverseMentoring = !this.newSession.isReverseMentoring;
@@ -163,52 +147,6 @@ export class SessionsComponent implements OnInit {
       this.newSession.durationMinutes = 60;
       this.newSession.topic = 'Spring Boot 3 WebSockets & Microservices';
     }
-  }
-
-  openSosModal() {
-    this.soundService.playClick();
-    this.showSosModal = true;
-  }
-
-  closeSosModal() {
-    this.soundService.playClick();
-    this.showSosModal = false;
-  }
-
-  submitSosRequest() {
-    if (!this.newSosRequest.title.trim()) return;
-    this.soundService.playClick();
-
-    const payload = {
-      title: this.newSosRequest.title,
-      problemDescription: this.newSosRequest.problemDescription,
-      techStack: this.newSosRequest.techStack,
-      menteeName: 'KRITI SAGAR',
-      menteeId: 2,
-      status: 'OPEN',
-      karmaPoints: 100
-    };
-
-    this.apiService.createSosRequest(payload).subscribe(() => {
-      this.soundService.playSuccess();
-      this.showSosModal = false;
-      this.displayToast('🚨 SOS Bug Rescue Beacon Fired! Active online mentors have been notified.');
-      this.newSosRequest = { title: '', problemDescription: '', techStack: 'Spring Boot' };
-      this.loadSosRequests();
-    });
-  }
-
-  claimSos(req: any) {
-    this.soundService.playClick();
-    this.apiService.claimSosRequest(req.id, {
-      mentorId: 1,
-      mentorName: 'AKSHAT ARYAN'
-    }).subscribe(() => {
-      this.soundService.playSuccess();
-      req.status = 'CLAIMED';
-      this.displayToast(`🛡️ Claimed SOS Rescue! Opening 10-min huddle workspace...`);
-      window.location.href = '/workspace?sessionId=1';
-    });
   }
 
   joinShadow(session: any) {

@@ -217,6 +217,7 @@
       *ngFor="let course of filteredCourses" 
       class="course-card clay-panel elevated-card-3d"
       [class.bookmarked-card]="course.isBookmarked"
+      [class.expanded-card]="isCourseExpanded(course.id)"
     >
       <!-- Card Header -->
       <div class="card-top-bar">
@@ -334,24 +335,6 @@
           >
             🌐 Courseware ↗
           </button>
-
-          <button 
-            type="button" 
-            class="dossier-btn tactile-btn-3d serif-title"
-            (click)="openCourseModal(course, $event)"
-            title="Inspect full university syllabus dossier"
-          >
-            📜 Dossier
-          </button>
-
-          <button 
-            type="button" 
-            class="viva-launch-btn tactile-btn-3d serif-title"
-            (click)="launchVivaDefense(course, undefined, $event)"
-            title="Launch AI Mock Viva Defense examination for this course"
-          >
-            🎙️ AI Viva
-          </button>
         </div>
       </div>
 
@@ -401,14 +384,6 @@
                 >
                   💻 Code Lab
                 </button>
-                <button 
-                  type="button" 
-                  class="mod-act-pill viva-pill tactile-btn-3d serif-title"
-                  (click)="launchVivaDefense(course, mod, $event)"
-                  title="Practice AI Oral Viva defense for this module"
-                >
-                  🎙️ Oral Viva
-                </button>
               </div>
             </div>
 
@@ -421,11 +396,6 @@
               <div class="mod-lab-col" *ngIf="mod.practicalLabWork">
                 <span class="section-tag serif-title">🔬 Practical / Lab Assignment:</span>
                 <p class="lab-text serif-title">{{ mod.practicalLabWork }}</p>
-              </div>
-
-              <div class="mod-viva-col" *ngIf="mod.vivaQuestions">
-                <span class="section-tag serif-title">🎙️ Sample Viva Examination Queries:</span>
-                <p class="viva-questions-text serif-title">{{ mod.vivaQuestions }}</p>
               </div>
             </div>
           </div>
@@ -518,20 +488,6 @@
               >
                 🌐
               </button>
-              <button 
-                class="table-act-btn dossier-style serif-title" 
-                (click)="openCourseModal(course, $event)"
-                title="Inspect Syllabus Dossier"
-              >
-                📜
-              </button>
-              <button 
-                class="table-act-btn viva-style serif-title" 
-                (click)="launchVivaDefense(course, undefined, $event)"
-                title="Launch AI Viva Defense"
-              >
-                🎙️
-              </button>
             </div>
           </td>
         </tr>
@@ -554,9 +510,9 @@
     </button>
   </div>
 
-  <!-- 8. Detailed Course Syllabus Dossier Modal -->
-  <div *ngIf="activeCourseModal" class="dossier-modal-backdrop" (click)="closeCourseModal()">
-    <div class="dossier-modal-window elevated-3d clay-panel" (click)="$event.stopPropagation()">
+  <!-- 8. Detailed Course Syllabus Details Modal -->
+  <div *ngIf="activeCourseModal" class="course-modal-backdrop" (click)="closeCourseModal()">
+    <div class="course-modal-window elevated-3d clay-panel" (click)="$event.stopPropagation()">
       <div class="modal-top-bar">
         <div class="modal-crest-row">
           <div class="modal-cutm-seal-box gold-seal-emboss">
@@ -656,14 +612,6 @@
                   >
                     💻 Code Lab
                   </button>
-                  <button 
-                    type="button" 
-                    class="mod-act-pill viva-pill tactile-btn-3d serif-title"
-                    (click)="launchVivaDefense(activeCourseModal, mod, $event)"
-                    title="AI Oral Viva Defense"
-                  >
-                    🎙️ Oral Viva
-                  </button>
                 </div>
               </div>
 
@@ -700,12 +648,6 @@
           (click)="copyCourseCode(activeCourseModal.courseCode)"
         >
           📋 Copy Course Code
-        </button>
-        <button 
-          class="modal-primary-btn tactile-btn-3d serif-title"
-          (click)="launchVivaDefense(activeCourseModal)"
-        >
-          🎓 Launch Full Course Oral Defense
         </button>
       </div>
     </div>

@@ -832,6 +832,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
   gap: 20px;
+  align-items: start;
 }
 
 .course-card {
@@ -850,6 +851,15 @@
   min-width: 0;
   overflow: hidden;
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+
+  &.expanded-card {
+    grid-column: 1 / -1;
+    border-color: rgba(166, 59, 25, 0.55);
+    box-shadow:
+      0 16px 38px rgba(140, 110, 90, 0.18),
+      0 4px 12px rgba(166, 59, 25, 0.08),
+      inset 0 1px 0 #FFFFFF;
+  }
 
   &:hover {
     transform: translateY(-4px);
@@ -1162,12 +1172,12 @@
     }
   }
 
-  /* 3-Button Cluster & Accordion Actions — Non-Overlapping Responsive Layout */
+  /* Action Buttons Cluster & Accordion Actions — Non-Overlapping Responsive Layout */
   .card-footer-actions {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-top: auto;
+    margin-top: 4px;
     padding-top: 10px;
     border-top: 1px dashed rgba(200, 182, 166, 0.7);
 
@@ -1196,21 +1206,20 @@
 
     .action-btn-cluster {
       display: grid;
-      grid-template-columns: 1.15fr 0.9fr 0.95fr;
-      gap: 6px;
+      grid-template-columns: 1fr;
       width: 100%;
 
       .courseware-link-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 4px;
-        padding: 7px 6px;
+        gap: 6px;
+        padding: 8px 12px;
         border-radius: 8px;
         background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
         border: 1px solid #1D4ED8;
         color: #FFFFFF;
-        font-size: 11px;
+        font-size: 11.5px;
         font-weight: 800;
         cursor: pointer;
         box-shadow: 0 3px 8px rgba(29, 78, 216, 0.25);
@@ -1225,100 +1234,60 @@
           transform: translateY(-1px);
         }
       }
-
-      .dossier-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        background: #FEF3C7;
-        border: 1px solid #D97706;
-        color: #92400E;
-        padding: 7px 6px;
-        border-radius: 8px;
-        font-size: 11px;
-        font-weight: 800;
-        cursor: pointer;
-        box-shadow: 0 2px 6px rgba(217, 119, 6, 0.15);
-        transition: all 0.15s ease;
-        white-space: nowrap;
-
-        &:hover {
-          background: #FDE68A;
-          color: #78350F;
-          box-shadow: 0 3px 10px rgba(217, 119, 6, 0.25);
-        }
-      }
-
-      .viva-launch-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        background: linear-gradient(135deg, #DE7048 0%, #A63B19 100%);
-        border: 1px solid #DE7048;
-        color: #FFFFFF;
-        padding: 7px 6px;
-        border-radius: 8px;
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 0.2px;
-        cursor: pointer;
-        box-shadow: 0 3px 8px rgba(166, 59, 25, 0.28);
-        transition: all 0.15s ease;
-        white-space: nowrap;
-
-        &:hover {
-          transform: translateY(-1px);
-          background: #A63B19;
-          box-shadow: 0 5px 14px rgba(166, 59, 25, 0.40);
-        }
-      }
     }
   }
 
-  /* 5. Modules Accordion Drawer — Light Ivory & Clean Hierarchy */
+  /* 5. Modules Accordion Drawer — Light Ivory & Multi-Column Executive Bento Grid */
   .modules-accordion-drawer {
     margin-top: 10px;
-    padding-top: 14px;
-    border-top: 1px dashed rgba(200, 182, 166, 0.8);
+    padding-top: 16px;
+    border-top: 1.5px dashed rgba(200, 182, 166, 0.85);
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    animation: fadeIn 0.3s ease both;
+    gap: 14px;
+    animation: fadeIn 0.25s ease both;
 
     .drawer-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px 14px;
+      background: #F7F1EB;
+      border-radius: 10px;
+      border: 1px solid rgba(200, 182, 166, 0.7);
 
       .drawer-title {
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 800;
         color: #A63B19;
       }
 
       .drawer-sub {
-        font-size: 10px;
+        font-size: 11px;
+        font-weight: 700;
         color: #6A5047;
       }
     }
 
     .modules-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 310px), 1fr));
+      gap: 14px;
+      align-items: stretch;
     }
 
     .module-item-card {
       background: #FBF7F2;
-      border: 1px solid rgba(200, 182, 166, 0.7);
-      border-radius: 10px;
-      padding: 12px 14px;
+      border: 1px solid rgba(200, 182, 166, 0.75);
+      border-radius: 12px;
+      padding: 14px 16px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      box-shadow: 0 2px 6px rgba(140, 110, 90, 0.06);
+      gap: 10px;
+      height: 100%;
+      box-shadow: 0 3px 10px rgba(140, 110, 90, 0.07);
       transition: all 0.2s ease;
 
       &.completed-module {
@@ -1699,29 +1668,6 @@
             color: #FFFFFF;
           }
         }
-
-        &.dossier-style {
-          background: #FEF3C7;
-          border-color: #D97706;
-          color: #92400E;
-
-          &:hover {
-            background: #FDE68A;
-            color: #78350F;
-          }
-        }
-
-        &.viva-style {
-          background: rgba(166, 59, 25, 0.10);
-          border-color: rgba(166, 59, 25, 0.35);
-          color: #A63B19;
-          font-weight: 800;
-
-          &:hover {
-            background: #A63B19;
-            color: #FFFFFF;
-          }
-        }
       }
     }
   }
@@ -1782,8 +1728,8 @@
   }
 }
 
-/* 6. Syllabus Dossier Modal — Light Executive Dialog */
-.dossier-modal-backdrop {
+/* 6. Syllabus Course Details Modal — Light Executive Dialog */
+.course-modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(30, 20, 14, 0.65);
@@ -1796,7 +1742,7 @@
   animation: fadeIn 0.25s ease both;
 }
 
-.dossier-modal-window {
+.course-modal-window {
   width: 100%;
   max-width: 860px;
   max-height: 88vh;
@@ -2349,7 +2295,7 @@
     }
   }
 
-  .dossier-modal-window {
+  .course-modal-window {
     max-height: 94vh;
     border-radius: 14px;
     margin: 10px;

@@ -180,12 +180,12 @@ export class AppScreenReaderService {
         });
       }
 
-      // Check if Dossier Modal is open
-      const dossierModal = document.querySelector('.dossier-modal, .course-dossier-card');
-      if (dossierModal) {
-        const modalTitle = dossierModal.querySelector('h2, h3')?.textContent?.trim();
-        const modalDesc = dossierModal.querySelector('.dossier-desc, .description-p')?.textContent?.trim();
-        lines.push(`[OPEN DOSSIER MODAL] Viewing Details for: ${modalTitle}`);
+      // Check if Course Details Modal is open
+      const courseModal = document.querySelector('.course-detail-modal, .course-modal-window');
+      if (courseModal) {
+        const modalTitle = courseModal.querySelector('h2, h3')?.textContent?.trim();
+        const modalDesc = courseModal.querySelector('.modal-course-title, .course-statement-box p')?.textContent?.trim();
+        lines.push(`[OPEN COURSE DETAILS MODAL] Viewing Details for: ${modalTitle}`);
         if (modalDesc) lines.push(`Description: ${modalDesc.slice(0, 300)}...`);
       }
     }

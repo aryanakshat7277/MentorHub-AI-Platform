@@ -26,6 +26,10 @@ export class AudioPlaybackService {
     });
   }
 
+  public ensureContext(sampleRate = 24000) {
+    this.initContextIfNeeded(sampleRate);
+  }
+
   private initContextIfNeeded(sampleRate = 24000) {
     if (!this.audioCtx || this.audioCtx.state === 'closed') {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
@@ -48,6 +52,9 @@ export class AudioPlaybackService {
     return this.activeTurnId;
   }
 
+  private speakingEndTimer: any = null;
+  private lastRmsEmitTime = 0;
+
   /**
    * Enqueues Base64 encoded PCM 24kHz audio or binary ArrayBuffer for sample-accurate WebAudio streaming playback.
    * Drops chunk if it belongs to an older/interrupted turn generation.
@@ -55,12 +62,14 @@ export class AudioPlaybackService {
   public enqueueBase64Pcm(base64Audio: string, sampleRate = 24000, turnId?: number) {
     if (!base64Audio) return;
     if (turnId !== undefined && turnId !== this.activeTurnId) {
-      // Discard stale chunk from previous turn
       return;
     }
     try {
       const binary = window.atob(base64Audio);
-      const len = binary.length;
+      // Ensure even number of bytes for 16-bit signed PCM (2 bytes per sample)
+      const len = binary.length - (binary.length % 2);
+      if (len <= 0) return;
+
       const bytes = new Uint8Array(len);
       for (let i = 0; i < len; i++) {
         bytes[i] = binary.charCodeAt(i);
@@ -73,21 +82,34 @@ export class AudioPlaybackService {
 
   public enqueueArrayBuffer(buffer: ArrayBuffer, sampleRate = 24000, turnId?: number) {
     if (turnId !== undefined && turnId !== this.activeTurnId) {
-      // Discard stale chunk from previous turn
       return;
     }
+
+    const byteLen = buffer.byteLength - (buffer.byteLength % 2);
+    if (byteLen <= 0) return;
 
     this.initContextIfNeeded(sampleRate);
     if (!this.audioCtx) return;
 
     try {
-      // Acquire voice mutex for Gemini Live - instantly silences all other voice types across the platform
-      this.voiceCoordinator.acquireVoice('gemini-live');
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
+      if (this.speakingEndTimer) {
+        clearTimeout(this.speakingEndTimer);
+        this.speakingEndTimer = null;
       }
 
-      const audioBuffer = this.pcm16ToAudioBuffer(buffer, this.audioCtx, sampleRate);
+      // Only acquire lock and set isSpeaking = true once when playback begins (prevents 50x/sec change detection thrashing)
+      if (!this.isSpeaking$.value) {
+        this.voiceCoordinator.acquireVoice('gemini-live');
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+        this.ngZone.run(() => {
+          this.isSpeaking$.next(true);
+        });
+      }
+
+      const safeBuffer = byteLen === buffer.byteLength ? buffer : buffer.slice(0, byteLen);
+      const audioBuffer = this.pcm16ToAudioBuffer(safeBuffer, this.audioCtx, sampleRate);
       const source = this.audioCtx.createBufferSource();
       source.buffer = audioBuffer;
 
@@ -99,14 +121,13 @@ export class AudioPlaybackService {
 
       const currentTime = this.audioCtx.currentTime;
       if (this.nextStartTime < currentTime) {
-        this.nextStartTime = currentTime + 0.03; // 30ms buffer jitter compensation
+        this.nextStartTime = currentTime + 0.025;
       }
 
       source.start(this.nextStartTime);
       this.nextStartTime += audioBuffer.duration;
 
       this.activeSources.push(source);
-      this.isSpeaking$.next(true);
       this.startVolumeMonitoring();
 
       source.onended = () => {
@@ -115,20 +136,18 @@ export class AudioPlaybackService {
           this.activeSources.splice(idx, 1);
         }
         if (this.activeSources.length === 0) {
-          const remainingTime = this.audioCtx ? (this.nextStartTime - this.audioCtx.currentTime) : 0;
-          if (remainingTime <= 0.05) {
-            this.isSpeaking$.next(false);
-            this.outputVolumeRms$.next(0);
-            this.voiceCoordinator.releaseVoice('gemini-live');
-          } else {
-            setTimeout(() => {
-              if (this.activeSources.length === 0) {
+          const remainingTime = this.audioCtx ? Math.max(0, this.nextStartTime - this.audioCtx.currentTime) : 0;
+          const waitMs = Math.max(160, Math.round(remainingTime * 1000) + 120);
+          if (this.speakingEndTimer) clearTimeout(this.speakingEndTimer);
+          this.speakingEndTimer = setTimeout(() => {
+            if (this.activeSources.length === 0) {
+              this.ngZone.run(() => {
                 this.isSpeaking$.next(false);
                 this.outputVolumeRms$.next(0);
-                this.voiceCoordinator.releaseVoice('gemini-live');
-              }
-            }, Math.max(10, remainingTime * 1000));
-          }
+              });
+              this.voiceCoordinator.releaseVoice('gemini-live');
+            }
+          }, waitMs);
         }
       };
 
@@ -142,7 +161,11 @@ export class AudioPlaybackService {
    * and increments activeTurnId so any trailing in-flight network chunks are discarded.
    */
   public interrupt() {
-    this.activeTurnId++; // Invalidate any incoming chunks from the interrupted turn
+    this.activeTurnId++;
+    if (this.speakingEndTimer) {
+      clearTimeout(this.speakingEndTimer);
+      this.speakingEndTimer = null;
+    }
     this.activeSources.forEach(source => {
       try {
         source.stop(0);
@@ -152,8 +175,12 @@ export class AudioPlaybackService {
     this.activeSources = [];
     this.nextStartTime = 0;
 
-    this.isSpeaking$.next(false);
-    this.outputVolumeRms$.next(0);
+    if (this.isSpeaking$.value) {
+      this.ngZone.run(() => {
+        this.isSpeaking$.next(false);
+        this.outputVolumeRms$.next(0);
+      });
+    }
     this.voiceCoordinator.releaseVoice('gemini-live');
 
     if (this.animFrameId !== null) {
@@ -163,32 +190,34 @@ export class AudioPlaybackService {
   }
 
   private startVolumeMonitoring() {
+    if (this.animFrameId !== null) return;
     const dataArray = new Uint8Array(32);
 
     const updateVolume = () => {
       if (this.activeSources.length === 0 || !this.analyser) {
+        this.animFrameId = null;
         this.outputVolumeRms$.next(0);
         return;
       }
 
-      this.analyser.getByteFrequencyData(dataArray);
-      let sum = 0;
-      for (let i = 0; i < dataArray.length; i++) {
-        sum += dataArray[i];
-      }
-      const avg = sum / dataArray.length;
-      const normalized = Math.min(1, avg / 128);
-
-      this.ngZone.runOutsideAngular(() => {
+      const now = performance.now();
+      // Throttle RMS emissions to ~16 FPS (every 60ms) so Angular change detection never saturates the CPU
+      if (now - this.lastRmsEmitTime >= 60) {
+        this.lastRmsEmitTime = now;
+        this.analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i];
+        }
+        const avg = sum / dataArray.length;
+        const normalized = Math.min(1, avg / 128);
         this.outputVolumeRms$.next(normalized);
-      });
+      }
 
       this.animFrameId = requestAnimationFrame(updateVolume);
     };
 
-    if (this.animFrameId === null) {
-      this.animFrameId = requestAnimationFrame(updateVolume);
-    }
+    this.animFrameId = requestAnimationFrame(updateVolume);
   }
 
   private pcm16ToAudioBuffer(buffer: ArrayBuffer, ctx: AudioContext, sampleRate: number): AudioBuffer {

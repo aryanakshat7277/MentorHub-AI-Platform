@@ -616,45 +616,6 @@ export class ApiService {
   }
 
   // ==========================================
-  // 10-Minute SOS Bug Rescue APIs
-  // ==========================================
-  getActiveSosRequests(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/sos/active`).pipe(
-      catchError(() => of([
-        {
-          id: 1,
-          menteeId: 2,
-          menteeName: 'Kriti Sagar',
-          title: 'Spring Boot H2 Connection Refused on Port 8080',
-          problemDescription: 'Application failed to start because embedded H2 console locks the db file on Windows. Need quick 10-min pointer on lock file cleanup.',
-          techStack: 'Spring Boot',
-          status: 'OPEN',
-          karmaPoints: 100,
-          createdAt: new Date().toISOString()
-        }
-      ]))
-    );
-  }
-
-  createSosRequest(request: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/sos/create`, request).pipe(
-      catchError(err => of(request))
-    );
-  }
-
-  claimSosRequest(id: number, payload: any): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/sos/${id}/claim`, payload).pipe(
-      catchError(err => of({ id, status: 'CLAIMED', workspaceRoomId: 'sos-room-' + id }))
-    );
-  }
-
-  resolveSosRequest(id: number): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/sos/${id}/resolve`, {}).pipe(
-      catchError(err => of({ id, status: 'RESOLVED' }))
-    );
-  }
-
-  // ==========================================
   // Silent Co-Pilot Spectator APIs
   // ==========================================
   joinShadowSession(sessionId: number): Observable<any> {

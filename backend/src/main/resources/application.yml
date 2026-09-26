@@ -42,9 +42,9 @@ ai:
   gemini:
     api-key: ${AI_GEMINI_KEY:}
     fallback-api-key: ${AI_GEMINI_FALLBACK_KEY:}
-    text-model: ${AI_GEMINI_TEXT_MODEL:gemini-3.6-flash}
+    text-model: ${AI_GEMINI_TEXT_MODEL:gemini-3.8-flash}
     live-model: ${AI_GEMINI_LIVE_MODEL:gemini-3.1-flash-live-preview}
-    live-voice: ${AI_GEMINI_LIVE_VOICE:Aoede}
+    live-voice: ${AI_GEMINI_LIVE_VOICE:Kore}
   groq:
     api-key: ${AI_GROQ_KEY:}
     stt-model: ${AI_GROQ_STT_MODEL:whisper-large-v3-turbo}

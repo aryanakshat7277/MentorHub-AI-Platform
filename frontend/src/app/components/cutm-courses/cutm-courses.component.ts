@@ -300,20 +300,6 @@ export class CutmCoursesComponent implements OnInit, OnDestroy {
     }, 2000);
   }
 
-  launchVivaDefense(course: CutmCourse, mod?: CutmModule, event?: Event): void {
-    if (event) event.stopPropagation();
-    this.soundService.playClickSound();
-    const queryParams: any = {
-      courseCode: course.courseCode,
-      courseTitle: course.courseTitle
-    };
-    if (mod) {
-      queryParams.module = mod.moduleNumber;
-      queryParams.topic = mod.moduleTitle;
-    }
-    this.router.navigate(['/mock-viva'], { queryParams });
-  }
-
   // --- Metrics & Calculations ---
   getCourseCompletionPercentage(course: CutmCourse): number {
     const total = (course.modules && course.modules.length > 0) ? course.modules.length : 1;

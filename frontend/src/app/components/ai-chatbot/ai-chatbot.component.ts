@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AiChatService, ChatMessage } from '../../services/ai-chat.service';
 import { GeminiLiveService, LiveSessionStatus } from '../../services/gemini-live.service';
@@ -19,85 +18,6 @@ export interface LiveChatMessage extends ChatMessage {
   mode?: 'TEXT' | 'VOICE';
 }
 
-export interface AppRouteDefinition {
-  path: string;
-  label: string;
-  aliases: string[];
-}
-
-export const APP_ROUTES: AppRouteDefinition[] = [
-  {
-    path: '/mock-viva',
-    label: 'Mock Viva Defense Arena',
-    aliases: ['mock viva', 'viva arena', 'viva defense', 'viva exam', 'oral exam', 'oral defense', 'viva voce', 'ai viva', 'viva', 'defense']
-  },
-  {
-    path: '/cutm-courses',
-    label: 'CUTM Courses & Syllabus',
-    aliases: ['cutm course', 'cutm courses', 'courseware', 'course catalog', 'course repository', 'cutm syllabus', 'courses', 'course', 'cutm', 'syllabus', 'curriculum', 'subjects', 'subject', 'cbcs', 'baskets']
-  },
-  {
-    path: '/workspace',
-    label: 'Collaborative Code Workspace',
-    aliases: ['workspace', 'code editor', 'coding workspace', 'collaborative workspace', 'compiler', 'ide', 'editor', 'live coding', 'whiteboard', 'piston', 'programming', 'code', 'coding']
-  },
-  {
-    path: '/mentor-matching',
-    label: 'Smart Mentor Matching',
-    aliases: ['mentor matching', 'find mentor', 'match mentor', 'mentor search', 'connect mentor', 'mentors', 'mentor', 'match', 'advisors', 'advisor']
-  },
-  {
-    path: '/sessions',
-    label: 'Mentoring Sessions Hub',
-    aliases: ['mentoring sessions', 'sessions hub', 'sessions', 'session', 'meetings', 'meeting', 'calendar', 'schedule', 'book session', 'appointments', 'appointment']
-  },
-  {
-    path: '/goals',
-    label: 'SMART Goals Tracker',
-    aliases: ['smart goals', 'goal tracker', 'milestones', 'milestone', 'goals', 'goal', 'targets', 'target', 'okr', 'okrs', 'objectives']
-  },
-  {
-    path: '/learning-path',
-    label: 'Learning Paths & Roadmaps',
-    aliases: ['learning paths', 'learning path', 'roadmaps', 'roadmap', 'career path', 'study path', 'study plan', 'tracks', 'track']
-  },
-  {
-    path: '/certificates',
-    label: 'Verified Credentials',
-    aliases: ['verified credentials', 'certificates', 'certificate', 'credentials', 'credential', 'cert', 'certs', 'diploma', 'verification']
-  },
-  {
-    path: '/resource-hub',
-    label: 'AI Resource Hub & Library',
-    aliases: ['resource hub', 'resources', 'resource', 'library', 'study material', 'study materials', 'cheat sheets', 'cheat sheet', 'books', 'book', 'blueprints']
-  },
-  {
-    path: '/gamification',
-    label: 'Leaderboards & Gamification',
-    aliases: ['gamification', 'leaderboards', 'leaderboard', 'rankings', 'ranking', 'points', 'xp', 'badges', 'badge', 'rewards']
-  },
-  {
-    path: '/analytics',
-    label: 'Performance Analytics',
-    aliases: ['analytics', 'analytic', 'statistics', 'stats', 'performance metrics', 'telemetry', 'insights', 'reports', 'report']
-  },
-  {
-    path: '/profile',
-    label: 'User Profile & Settings',
-    aliases: ['user profile', 'my profile', 'my account', 'profile settings', 'profile', 'account', 'settings', 'bio']
-  },
-  {
-    path: '/admin-dashboard',
-    label: 'Administrator Control Panel',
-    aliases: ['admin dashboard', 'admin control', 'admin panel', 'administration', 'admin']
-  },
-  {
-    path: '/dashboard',
-    label: 'Executive Command Dashboard',
-    aliases: ['executive dashboard', 'command dashboard', 'dashboard', 'home page', 'main page', 'home', 'overview', 'hub']
-  }
-];
-
 @Component({
   selector: 'app-ai-chatbot',
   standalone: true,
@@ -112,7 +32,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   isMaximized = false;
   selectedProvider = 'GEMINI';
-  selectedModel = 'gemini-3.6-flash';
+  selectedModel = 'gemini-3.8-flash';
 
   userInput = '';
   isGenerating = false;
@@ -128,9 +48,9 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   liveStatus: LiveSessionStatus = 'IDLE';
   isLiveVoiceActive = false;
 
-  // Unified Single Professional Voice Persona (Executive Academic - Aoede)
-  readonly professionalVoiceName = 'Executive Academic';
-  readonly currentLiveVoice = 'Aoede';
+  // Unified Single Professional Voice Persona (Executive - Kore)
+  readonly professionalVoiceName = 'Executive (Kore)';
+  readonly currentLiveVoice = 'Kore';
 
   Math = Math;
   // Audio-reactive visualizer volume (0..1)
@@ -145,18 +65,15 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   private speakingSub: Subscription | null = null;
   private textChatSub: Subscription | null = null;
   private voiceQuerySub: Subscription | null = null;
-  private liveNavSub: Subscription | null = null;
   private tutorSub: Subscription | null = null;
 
   quickPrompts: { label: string; prompt: string; icon: string }[] = [
-    { icon: '🗺️', label: 'Prepare My Path', prompt: 'I need guidance on what I should do in MentorHub for my problem. Please diagnose my situation, prepare a complete step-by-step path for me, and navigate me there.' },
-    { icon: '🎙️', label: 'Viva Preparation Path', prompt: 'I am struggling to prepare for my academic viva exam. Diagnose my problem, prepare a roadmap for me, and navigate me to practice.' },
-    { icon: '☕', label: 'Java & Backend Path', prompt: 'I want to master Java and Backend engineering. Guide me what courses to take, where to code, and navigate me there.' },
-    { icon: '📸', label: 'Read My Screen', prompt: 'Please read my active screen, explain what I am looking at, and guide me on what actions I should take next.' },
-    { icon: '💻', label: 'Code Workspace', prompt: 'Navigate me to the Collaborative Code Workspace and explain how the Piston compiler works.' },
-    { icon: '🎯', label: 'Goals & Mentorship', prompt: 'Prepare a path for me to set SMART goals, connect with Senior Mentor Akshat Aryan, and earn verified certificates.' },
-    { icon: '🎓', label: 'CUTM Courses', prompt: 'Show me the 385 CUTM Courseware courses and navigate me to browse them.' },
-    { icon: '⚡', label: 'Ultra-Fast Assist', prompt: 'Give me an ultra-fast high-level briefing on my semester goals, courses, and next steps.' }
+    { icon: '🗺️', label: 'My Roadmap', prompt: 'Give me a short step-by-step learning roadmap.' },
+    { icon: '☕', label: 'Java & Backend', prompt: 'Recommend Java & Backend courses in 3 short points.' },
+    { icon: '📸', label: 'Read Screen', prompt: 'Briefly explain what is on my active screen in 2-3 short lines.' },
+    { icon: '💻', label: 'Code IDE', prompt: 'Explain the key features of the Live Code Workspace.' },
+    { icon: '🎯', label: 'My Goals', prompt: 'Give me 3 actionable tips for setting SMART academic goals.' },
+    { icon: '🎓', label: 'CUTM Courses', prompt: 'Summarize the core engineering curriculum in CUTM courses.' }
   ];
 
   messages: LiveChatMessage[] = [
@@ -164,9 +81,9 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       id: 'msg-1',
       sender: 'ai',
       avatar: 'AI',
-      text: 'Greetings! I am the **MentorHub AI Voice Assistant & Master Academic Navigator**.\n\nI possess a complete mental model and real-time awareness of our entire platform—including all **385+ CUTM Courseware courses** and **5 CBCS baskets**, **AI Mock Viva defense**, **Collaborative Code Workspace**, **cryptographic certificates**, and our team led by **Senior Mentor Akshat Aryan**.\n\n🗺️ **Personalized Problem Diagnosis & Path Planning Active**:\nTell me what problem you are facing or what you want to achieve! I will diagnose your situation, formulate an **interactive step-by-step pathway**, and **navigate you directly to the right screen in MentorHub**.\n\n👁️ **Screen Perception is active**: Tap **📸 Read My Screen** or ask me about what is displayed on your screen. Tap **🟢 LIVE VOICE** for real-time spoken dialogue with vision!',
+      text: '👋 **Hi! How can I help you today?**\nAsk about **CUTM courses**, **code**, or tap **🟢 LIVE VOICE** to talk.',
       provider: 'GEMINI',
-      model: 'gemini-3.6-flash',
+      model: 'gemini-3.8-flash',
       mode: 'TEXT',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
@@ -211,7 +128,6 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     public voiceCoordinator: VoiceCoordinatorService,
     public screenReader: AppScreenReaderService,
     public aiTutorService: AiTutorService,
-    private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -245,12 +161,6 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
       window.speechSynthesis.getVoices();
     }
 
-    this.liveNavSub = this.liveService.navigationEvent$.subscribe(nav => {
-      if (nav && nav.route) {
-        this.navigateTo(nav.route, nav.label);
-      }
-    });
-
     this.transcriptSub = this.liveService.transcriptEvent$.subscribe(event => {
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -263,9 +173,6 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
           mode: 'VOICE',
           timestamp: timeStr
         });
-
-        this.processVoiceQuery(event.text);
-
       } else if (event.role === 'assistant') {
         this.messages.push({
           id: 'msg-' + Date.now(),
@@ -277,9 +184,6 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
           mode: 'VOICE',
           timestamp: timeStr
         });
-
-        // Autonomous Navigation Check from Assistant's Live Voice Transcript
-        this.checkAndTriggerAutoNavigation(event.text);
       }
       this.scrollToBottom();
     });
@@ -287,14 +191,21 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     // Subscribe to Web Audio RMS levels for dynamic audio-reactive waveform visualizer
     this.userRmsSub = this.audioCapture.volumeRms$.subscribe(rms => {
       this.userVolumeRms = rms;
+      if (this.isLiveVoiceActive) {
+        this.cdr.markForCheck();
+      }
     });
 
     this.aiRmsSub = this.audioPlayback.outputVolumeRms$.subscribe(rms => {
       this.aiVolumeRms = rms;
+      if (this.isLiveVoiceActive) {
+        this.cdr.markForCheck();
+      }
     });
 
     this.speakingSub = this.audioPlayback.isSpeaking$.subscribe(speaking => {
       this.isSpeakingAudio = speaking;
+      this.cdr.markForCheck();
     });
   }
 
@@ -319,7 +230,6 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     this.endLiveVoice();
     this.voiceCoordinator.unregisterPreemptHandler('chatbot-tts');
     if (this.liveStatusSub) this.liveStatusSub.unsubscribe();
-    if (this.liveNavSub) this.liveNavSub.unsubscribe();
     if (this.transcriptSub) this.transcriptSub.unsubscribe();
     if (this.userRmsSub) this.userRmsSub.unsubscribe();
     if (this.aiRmsSub) this.aiRmsSub.unsubscribe();
@@ -397,21 +307,10 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
       this.endLiveVoice();
     } else {
       this.voiceCoordinator.stopAllVoices();
-      this.showToast('🟢 Live Voice Mode Active (Continuous Speech)');
+      this.showToast('🟢 Live Voice Mode Active (Kore Professional Voice)');
       const success = await this.liveService.startLiveSession();
       if (!success) {
         this.showToast('⚠️ Microphone access required for Live Voice');
-      } else {
-        // Send initial visual frame to Gemini Live if screen perception is on
-        if (this.isScreenPerceptionActive) {
-          setTimeout(() => {
-            this.screenReader.captureScreen().then(cap => {
-              if (cap && cap.imageBase64 && cap.imageBase64.length > 100) {
-                this.liveService.sendScreenFrame(cap.imageBase64);
-              }
-            });
-          }, 800);
-        }
       }
     }
   }
@@ -430,20 +329,15 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
   }
 
   private processVoiceQuery(queryText: string) {
-    // Only send voice transcript to text API during fallback mode.
-    // When Gemini Live is connected natively, audio responses come via WebSocket.
     if (!this.liveService.isFallbackMode) {
       return;
     }
 
     if (this.voiceQuerySub) this.voiceQuerySub.unsubscribe();
 
-    this.checkAndTriggerAutoNavigation(queryText);
-
     const historyPayload = this.buildHistoryPayload();
     this.scrollToBottom();
 
-    // Extract active DOM context so fallback AI has screen awareness
     let screenCtx: string | undefined;
     if (this.isScreenPerceptionActive) {
       const route = typeof window !== 'undefined' && window.location ? window.location.pathname : '/';
@@ -460,14 +354,13 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
           avatar: 'AI',
           text: aiResponseText,
           provider: res.provider || 'GEMINI',
-          model: res.model || 'gemini-3.6-flash',
+          model: res.model || 'gemini-3.8-flash',
           mode: 'VOICE',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         });
 
         this.scrollToBottom();
         this.speakVoiceResponse(aiResponseText);
-        this.checkAndTriggerAutoNavigation(aiResponseText);
       },
       error: () => {
         console.warn('Voice Query processing error');
@@ -476,7 +369,36 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
   }
 
   selectLiveVoice() {
-    this.showToast('🎙️ Professional Voice: Executive Academic (Studio 24kHz HD)');
+    this.showToast('🎙️ Single Professional Voice: Kore (Studio 24kHz HD)');
+  }
+
+  private detectLanguageCode(text: string): string {
+    if (!text) return 'en-US';
+    if (/[\u0900-\u097F]/.test(text)) return 'hi-IN'; // Hindi / Marathi
+    if (/[\u0980-\u09FF]/.test(text)) return 'bn-IN'; // Bengali
+    if (/[\u0B00-\u0B7F]/.test(text)) return 'or-IN'; // Odia
+    if (/[\u0C00-\u0C7F]/.test(text)) return 'te-IN'; // Telugu
+    if (/[\u0B80-\u0BFF]/.test(text)) return 'ta-IN'; // Tamil
+    if (/[\u0C80-\u0CFF]/.test(text)) return 'kn-IN'; // Kannada
+    if (/[\u0D00-\u0D7F]/.test(text)) return 'ml-IN'; // Malayalam
+    if (/[\u0A80-\u0AFF]/.test(text)) return 'gu-IN'; // Gujarati
+    if (/\b(hola|gracias|buenos|por favor|amigo)\b/i.test(text)) return 'es-ES';
+    if (/\b(bonjour|merci|s'il vous plaît|oui)\b/i.test(text)) return 'fr-FR';
+    if (/\b(hallo|guten tag|danke|bitte)\b/i.test(text)) return 'de-DE';
+    return 'en-US';
+  }
+
+  private getBestVoiceForLanguage(langCode: string): SpeechSynthesisVoice | null {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices || voices.length === 0) return null;
+
+    if (!langCode.startsWith('en')) {
+      const match = voices.find(v => v.lang.replace('_', '-').toLowerCase().startsWith(langCode.toLowerCase().substring(0, 2)));
+      if (match) return match;
+    }
+
+    return this.getBestProfessionalVoice();
   }
 
   private getBestProfessionalVoice(): SpeechSynthesisVoice | null {
@@ -484,45 +406,32 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     const voices = window.speechSynthesis.getVoices();
     if (!voices || voices.length === 0) return null;
 
-    // 1. High-fidelity Natural / Neural voices (Edge / Azure Online)
-    const naturalVoice = voices.find(v => 
-      v.lang.startsWith('en') && 
-      (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Online'))
+    // Strictly prefer a single authoritative English Male professional voice
+    const maleVoice = voices.find(v =>
+      v.lang.startsWith('en') &&
+      (v.name.includes('Guy') ||
+       v.name.includes('David') ||
+       v.name.includes('Christopher') ||
+       v.name.includes('Eric') ||
+       v.name.includes('Roger') ||
+       v.name.includes('Daniel') ||
+       v.name.includes('George') ||
+       v.name.includes('Oliver') ||
+       v.name.includes('Google UK English Male') ||
+       (v.name.includes('Male') && !v.name.includes('Female')))
     );
-    if (naturalVoice) return naturalVoice;
+    if (maleVoice) return maleVoice;
 
-    // 2. Google High-Fidelity English voices (Chrome)
-    const googleVoice = voices.find(v => 
-      v.lang.startsWith('en') && 
-      (v.name.includes('Google UK English Female') || v.name.includes('Google US English') || v.name.includes('Google'))
-    );
-    if (googleVoice) return googleVoice;
-
-    // 3. Apple studio voices
-    const appleVoice = voices.find(v => 
-      v.lang.startsWith('en') && 
-      (v.name.includes('Samantha') || v.name.includes('Daniel') || v.name.includes('Karen') || v.name.includes('Victoria'))
-    );
-    if (appleVoice) return appleVoice;
-
-    // 4. Clear studio voices (Zira, Aria, Jenny, Guy)
-    const studioVoice = voices.find(v => 
-      v.lang.startsWith('en') && 
-      (v.name.includes('Zira') || v.name.includes('Aria') || v.name.includes('Jenny') || v.name.includes('Guy'))
-    );
-    if (studioVoice) return studioVoice;
-
-    // 5. Fallback: any English voice
     return voices.find(v => v.lang.startsWith('en')) || null;
   }
 
   speakVoiceResponse(text: string) {
-    if (this.isLiveVoiceActive || this.voiceCoordinator.isChannelActive('gemini-live') || this.audioPlayback.isSpeaking$.value) {
-      return; // Do not use browser TTS when Live Voice is active or Gemini is vocalizing natively
+    // STRICT SINGLE VOICE GUARANTEE: Never allow browser speechSynthesis to speak if Gemini Live is active!
+    if (this.isLiveVoiceActive || this.liveService.status$.value !== 'IDLE' || this.voiceCoordinator.isChannelActive('gemini-live') || this.audioPlayback.isSpeaking$.value) {
+      return;
     }
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
-    // Acquire voice mutex for chatbot-tts - stops any other voice immediately
     this.voiceCoordinator.acquireVoice('chatbot-tts');
     window.speechSynthesis.cancel();
 
@@ -535,6 +444,7 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
       .replace(/\*\*([^*]+)\*\*/g, '$1')
       .replace(/###\s*/g, '')
       .replace(/[-*#]/g, '')
+      .replace(/\bCUTM\b/gi, 'C.U.T.M.')
       .trim();
 
     if (!cleanText) {
@@ -542,12 +452,13 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
       return;
     }
 
+    const langCode = this.detectLanguageCode(cleanText);
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.98; // Well-paced, natural, articulate cadence
-    utterance.pitch = 1.0;
+    utterance.lang = langCode;
+    utterance.rate = 0.98;
+    utterance.pitch = 0.94;
 
-    const professionalVoice = this.getBestProfessionalVoice();
+    const professionalVoice = this.getBestVoiceForLanguage(langCode);
     if (professionalVoice) {
       utterance.voice = professionalVoice;
     }
@@ -572,187 +483,7 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     window.speechSynthesis.speak(utterance);
   }
 
-  // Route normalizer & alias resolver
-  normalizeRoute(rawRoute: string): string {
-    if (!rawRoute) return '/dashboard';
-    let r = rawRoute.trim();
-    if (r.startsWith('navigate:')) {
-      r = r.substring('navigate:'.length).trim();
-    }
-    // Remove tags or markdown
-    r = r.replace(/\[\[NAVIGATE:/i, '').replace(/\]\]/g, '').trim();
-    if (!r.startsWith('/')) {
-      r = '/' + r;
-    }
-
-    const pathOnly = r.split('?')[0].toLowerCase();
-    const queryParams = r.includes('?') ? r.substring(r.indexOf('?')) : '';
-
-    if (pathOnly === '/resources' || pathOnly === '/resource' || pathOnly === '/library') {
-      return '/resource-hub' + queryParams;
-    }
-    if (pathOnly === '/admin') {
-      return '/admin-dashboard' + queryParams;
-    }
-    if (pathOnly === '/viva' || pathOnly === '/mockviva') {
-      return '/mock-viva' + queryParams;
-    }
-    if (pathOnly === '/courses' || pathOnly === '/course' || pathOnly === '/courseware' || pathOnly === '/cutm') {
-      return '/cutm-courses' + queryParams;
-    }
-    if (pathOnly === '/code' || pathOnly === '/editor' || pathOnly === '/ide' || pathOnly === '/compiler') {
-      return '/workspace' + queryParams;
-    }
-    if (pathOnly === '/leaderboard' || pathOnly === '/leaderboards' || pathOnly === '/ranks') {
-      return '/gamification' + queryParams;
-    }
-    if (pathOnly === '/roadmaps' || pathOnly === '/roadmap' || pathOnly === '/learning') {
-      return '/learning-path' + queryParams;
-    }
-    if (pathOnly === '/stats' || pathOnly === '/metrics') {
-      return '/analytics' + queryParams;
-    }
-    if (pathOnly === '/certs' || pathOnly === '/cert') {
-      return '/certificates' + queryParams;
-    }
-
-    return r;
-  }
-
-  findRouteConfig(route: string): AppRouteDefinition | undefined {
-    const clean = this.normalizeRoute(route).split('?')[0].toLowerCase();
-    return APP_ROUTES.find(r => r.path === clean);
-  }
-
-  resolveNavigation(text: string): { route: string; label: string } | null {
-    if (!text || typeof text !== 'string') return null;
-    const trimmed = text.trim();
-
-    // 1. Direct explicit directive tag: [[NAVIGATE:/route]]
-    const tagMatch = trimmed.match(/\[\[NAVIGATE:(\/[a-zA-Z0-9_\-\/?=&%#]+)\]\]/i);
-    if (tagMatch) {
-      const norm = this.normalizeRoute(tagMatch[1]);
-      const cfg = this.findRouteConfig(norm);
-      return { route: norm, label: cfg ? cfg.label : norm };
-    }
-
-    // 2. Direct navigate: URI in text
-    const navUriMatch = trimmed.match(/(?:navigate:)(\/[a-zA-Z0-9_\-\/?=&%#]+)/i);
-    if (navUriMatch) {
-      const norm = this.normalizeRoute(navUriMatch[1]);
-      const cfg = this.findRouteConfig(norm);
-      return { route: norm, label: cfg ? cfg.label : norm };
-    }
-
-    // 3. Markdown link: [Label](navigate:/route) or [Label](/route)
-    const mdLinkMatch = trimmed.match(/\[([^\]]+)\]\((?:navigate:)?(\/[a-zA-Z0-9_\-\/?=&%#]+)\)/i);
-    if (mdLinkMatch) {
-      const label = mdLinkMatch[1].trim();
-      const norm = this.normalizeRoute(mdLinkMatch[2]);
-      return { route: norm, label: label || norm };
-    }
-
-    const q = trimmed.toLowerCase();
-
-    // 4. Intent Trigger Detection
-    const INTENT_TRIGGERS = [
-      'navigate', 'take me to', 'go to', 'open', 'bring me to', 'show me', 'switch to',
-      'visit', 'jump to', 'launch', 'head to', 'head over to', 'view', 'explore',
-      'direct me to', 'redirect me to', 'lead me to', 'access', 'walk me to',
-      'move to', 'enter', 'display', 'see', 'start', 'kholo', 'chalo', 'dikhao',
-      'taking you to', 'opening the', 'opening', 'navigating you to', 'leading you to', 'redirecting you to'
-    ];
-
-    const hasTrigger = INTENT_TRIGGERS.some(t => q.includes(t));
-
-    // Sort aliases by length descending so specific multi-word matches win over general single words
-    const sortedAliases: { alias: string; route: AppRouteDefinition }[] = [];
-    APP_ROUTES.forEach(r => {
-      r.aliases.forEach(a => {
-        sortedAliases.push({ alias: a.toLowerCase(), route: r });
-      });
-    });
-    sortedAliases.sort((a, b) => b.alias.length - a.alias.length);
-
-    const wordCount = trimmed.split(/\s+/).length;
-    if (hasTrigger || wordCount <= 4) {
-      for (const item of sortedAliases) {
-        const regex = new RegExp(`(^|\\b|\\s)${item.alias}(\\b|\\s|$)`, 'i');
-        if (regex.test(q) || (hasTrigger && q.includes(item.alias))) {
-          return {
-            route: item.route.path,
-            label: item.route.label
-          };
-        }
-      }
-    }
-
-    return null;
-  }
-
-  // Direct In-App Navigation Engine
-  navigateTo(route: string, label?: string) {
-    if (!route) return;
-    const cleanRoute = this.normalizeRoute(route);
-    const cfg = this.findRouteConfig(cleanRoute);
-    const displayLabel = label || (cfg ? cfg.label : cleanRoute);
-
-    this.showToast(`🚀 Navigating to ${displayLabel}...`);
-
-    this.router.navigateByUrl(cleanRoute).then(success => {
-      if (success) {
-        this.showToast(`✅ Navigated to ${displayLabel}`);
-        // If screen perception is active in live voice, capture new screen after brief DOM render pause
-        if (this.isScreenPerceptionActive && this.isLiveVoiceActive) {
-          setTimeout(() => {
-            this.captureScreenSnapshot();
-          }, 800);
-        }
-      }
-    }).catch(err => {
-      console.warn('Navigation failed:', err);
-    });
-
-    // In live voice mode, Gemini's audio stream provides vocal guidance.
-    // Only invoke browser speech synthesis for standard non-live text chat.
-    // Also suppress speech when navigating to Mock Viva to prevent overlapping with viva examiners.
-    const isMockViva = cleanRoute.includes('mock-viva');
-    if (!this.isLiveVoiceActive && !this.voiceCoordinator.isChannelActive('gemini-live') && !isMockViva && typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      this.speakVoiceResponse(`Navigating you to ${displayLabel}.`);
-    }
-
-    if (this.isMaximized) {
-      this.isMaximized = false;
-    }
-
-    if (typeof window !== 'undefined' && window.innerWidth < 768 && !this.isLiveVoiceActive) {
-      this.close();
-    }
-  }
-
-  handleContentClick(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    const btn = target.closest('.ai-nav-action-pill, .path-step-nav-btn, [data-route]') as HTMLElement;
-    if (btn) {
-      event.preventDefault();
-      event.stopPropagation();
-      const route = btn.getAttribute('data-route') || btn.getAttribute('href');
-      const label = btn.getAttribute('data-label') || btn.innerText || '';
-      if (route) {
-        this.navigateTo(route, label);
-      }
-    }
-  }
-
-  checkAndTriggerAutoNavigation(query: string) {
-    if (!query) return;
-    const target = this.resolveNavigation(query);
-    if (target) {
-      this.navigateTo(target.route, target.label);
-    }
-  }
-
-  // Text Chat Handler (Gemini 3.1 Flash)
+  // Text Chat Handler (Gemini 3.8 Flash)
   sendMessage() {
     if (!this.userInput.trim() || this.isGenerating) return;
 
@@ -760,7 +491,6 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     this.voiceCoordinator.stopAllVoices();
 
     const query = this.userInput.trim();
-    this.checkAndTriggerAutoNavigation(query);
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     this.messages.push({
@@ -839,8 +569,6 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
         this.isGenerating = false;
         this.textChatSub = null;
         this.scrollToBottom();
-        // Execute auto-navigation if AI concluded with an explicit navigation directive
-        this.checkAndTriggerAutoNavigation(aiMessage.text);
       }
     });
   }
@@ -908,7 +636,7 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
       return `<div class="chat-code-block"><div class="code-lang-tag">${lang || 'code'}</div><pre><code>${code}</code></pre></div>`;
     });
 
-    // 2. Interactive Action Pathway Blocks (:::path ... :::)
+    // 2. Action Pathway Blocks (:::path ... :::)
     formatted = formatted.replace(/:::path\s*([\s\S]*?):::/gi, (match, pathContent) => {
       const lines = pathContent.trim().split('\n').filter((l: string) => l.trim().length > 0);
       let stepsHtml = '';
@@ -917,11 +645,6 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
         const parts = line.split('|').map((p: string) => p.trim());
         const rawTitle = parts[0] || `Step ${index + 1}`;
         const desc = parts[1] || '';
-        let targetRoute = parts[2] || '';
-
-        if (targetRoute.startsWith('navigate:')) {
-          targetRoute = targetRoute.substring('navigate:'.length).trim();
-        }
 
         const stepNumMatch = rawTitle.match(/Step\s*(\d+)[\s:]*(.*)/i);
         const stepNum = stepNumMatch ? stepNumMatch[1] : (index + 1);
@@ -934,11 +657,6 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
               <div class="step-title-text serif-title">${stepTitle}</div>
               ${desc ? `<div class="step-desc-text serif-title">${desc}</div>` : ''}
             </div>
-            ${targetRoute ? `
-              <button type="button" class="path-step-nav-btn tactile-btn-3d serif-title" data-route="${targetRoute}" data-label="${stepTitle}">
-                <span>Navigate</span> <span class="step-arrow">➔</span>
-              </button>
-            ` : ''}
           </div>
         `;
       });
@@ -948,9 +666,8 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
           <div class="path-card-header">
             <div class="path-header-badge serif-title">
               <span class="path-pulse-icon">🗺️</span>
-              <span>PERSONALIZED ACTION PATHWAY</span>
+              <span>ACADEMIC STUDY PATHWAY</span>
             </div>
-            <span class="path-card-sub serif-title">Click any step to navigate directly</span>
           </div>
           <div class="path-steps-list">
             ${stepsHtml}
@@ -959,30 +676,9 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
       `;
     });
 
-    // 3. Interactive In-App Navigation Action Pills [Label](navigate:/route) or [Label](/route)
-    formatted = formatted.replace(/\[([^\]]+)\]\((navigate:[^)]+|\/[a-zA-Z0-9_\-\/?=&%#]+)\)/gi, (match, label, route) => {
-      let cleanRoute = route;
-      if (cleanRoute.startsWith('navigate:')) {
-        cleanRoute = cleanRoute.substring('navigate:'.length).trim();
-      }
-      return `<button type="button" class="ai-nav-action-pill tactile-btn-3d serif-title" data-route="${cleanRoute}" data-label="${label}">
-        <span class="pill-nav-icon">🚀</span>
-        <span class="pill-nav-label">${label}</span>
-        <span class="pill-nav-arrow">➔</span>
-      </button>`;
-    });
-
-    // 3b. Explicit In-Line Navigation Tags: [[NAVIGATE:/route]]
-    formatted = formatted.replace(/\[\[NAVIGATE:(\/[a-zA-Z0-9_\-\/?=&%#]+)\]\]/gi, (match, route) => {
-      const cleanRoute = this.normalizeRoute(route);
-      const cfg = this.findRouteConfig(cleanRoute);
-      const label = cfg ? cfg.label : cleanRoute;
-      return `<button type="button" class="ai-nav-action-pill tactile-btn-3d serif-title" data-route="${cleanRoute}" data-label="${label}">
-        <span class="pill-nav-icon">🚀</span>
-        <span class="pill-nav-label">Navigated to ${label}</span>
-        <span class="pill-nav-arrow">➔</span>
-      </button>`;
-    });
+    // 3. Strip any in-line navigation directives or tags completely
+    formatted = formatted.replace(/\[\[NAVIGATE:[^\]]+\]\]/gi, '');
+    formatted = formatted.replace(/\[([^\]]+)\]\((?:navigate:[^)]+|\/[a-zA-Z0-9_\-\/?=&%#]+)\)/gi, '<strong>$1</strong>');
 
     // 4. Standard Inline Formats
     formatted = formatted.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');

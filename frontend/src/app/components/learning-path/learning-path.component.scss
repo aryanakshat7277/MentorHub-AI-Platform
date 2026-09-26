@@ -625,13 +625,67 @@ h1, h2, h3, h4, .column-title, .card-title, .step-title, .percentage {
   .rpg-map-viewport {
     position: relative;
     width: 100%;
-    height: 520px;
-    background: 
-      radial-gradient(circle at 50% 50%, rgba(250, 246, 240, 0.3) 0%, rgba(234, 222, 206, 0.9) 100%),
-      url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0V0zm20 20h20v20H20V20z' fill='%23d4af37' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+    height: 550px;
+    background:
+      radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.75) 0%, rgba(242, 233, 220, 0.92) 100%),
+      linear-gradient(to right, rgba(26, 82, 118, 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(26, 82, 118, 0.045) 1px, transparent 1px);
+    background-size: 100% 100%, 36px 36px, 36px 36px;
     overflow: hidden;
 
-    /* SVG Glowing Energy Conduit */
+    /* Architectural Blueprint Stage Columns */
+    .blueprint-grid-columns {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      pointer-events: none;
+      z-index: 1;
+
+      .blueprint-col {
+        position: relative;
+        height: 100%;
+        border-right: 1px dashed rgba(26, 82, 118, 0.12);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 12px;
+
+        &:last-child {
+          border-right: none;
+        }
+
+        .blueprint-col-header {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 3px 10px;
+          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.82);
+          border: 1px solid rgba(26, 82, 118, 0.16);
+          box-shadow: 0 2px 6px rgba(26, 82, 118, 0.05);
+
+          .col-stage-idx {
+            font-size: 9.5px;
+            font-weight: 900;
+            color: #1A5276;
+            background: rgba(26, 82, 118, 0.1);
+            padding: 1px 5px;
+            border-radius: 4px;
+          }
+
+          .col-stage-domain {
+            font-size: 9.5px;
+            font-weight: 800;
+            color: #4A5568;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+          }
+        }
+      }
+    }
+
+    /* SVG Connecting Architectural Pipeline */
     .map-svg-conduit {
       position: absolute;
       top: 0;
@@ -639,252 +693,230 @@ h1, h2, h3, h4, .column-title, .card-title, .step-title, .percentage {
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 1;
+      z-index: 2;
 
       .path-shadow {
         fill: none;
-        stroke: rgba(0, 0, 0, 0.15);
-        stroke-width: 10;
+        stroke: rgba(26, 82, 118, 0.12);
+        stroke-width: 9;
         stroke-linecap: round;
         stroke-linejoin: round;
-        transform: translateY(4px);
+        transform: translateY(3px);
       }
 
       .path-glowing-line {
         fill: none;
         stroke: url(#pathGradient);
-        stroke-width: 6;
+        stroke-width: 4.5;
         stroke-linecap: round;
         stroke-linejoin: round;
-        stroke-dasharray: 12 6;
-        animation: flowDash 25s linear infinite;
-        filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6));
+        filter: drop-shadow(0 2px 6px rgba(26, 82, 118, 0.28));
       }
 
       .path-energy-flow {
-        fill: none;
-        stroke: #F9E7B3;
-        stroke-width: 3.5;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        stroke-dasharray: 10 30;
-        animation: flowDash 8s linear infinite;
-        filter: drop-shadow(0 0 8px rgba(249, 231, 179, 0.9));
-        opacity: 0.9;
-      }
-
-      .path-spark-pulse {
         fill: none;
         stroke: #FFFFFF;
         stroke-width: 2;
         stroke-linecap: round;
         stroke-linejoin: round;
-        stroke-dasharray: 4 48;
-        animation: flowDashReverse 4s linear infinite;
-        filter: drop-shadow(0 0 10px #FFFFFF);
+        stroke-dasharray: 8 24;
+        animation: flowDash 10s linear infinite;
+        opacity: 0.85;
+      }
+
+      .path-spark-pulse {
+        fill: none;
+        stroke: #D4AF37;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 4 44;
+        animation: flowDashReverse 6s linear infinite;
+        filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.8));
       }
     }
 
-    /* Terrain Zone Labels */
-    .terrain-zones-layer {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 2;
-
-      .terrain-zone-marker {
-        position: absolute;
-        transform: translate(-50%, 0);
-        padding: 4px 12px;
-        background: rgba(255, 255, 255, 0.7);
-        border: 1px solid rgba(212, 175, 55, 0.3);
-        border-radius: var(--radius-full);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-
-        .zone-name {
-          font-size: 10.5px;
-          font-weight: 800;
-          color: #7A6230;
-          letter-spacing: 0.5px;
-        }
-      }
-    }
-
-    /* Interactive Quest Nodes */
+    /* Interactive Engineering Milestone Stations */
     .map-quest-node {
       position: absolute;
-      transform: translate(-50%, -50%);
+      /* Anchor so mapY aligns directly with the center of the 54px medallion */
+      transform: translate(-50%, -27px);
       z-index: 10;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 168px;
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 
       &:hover {
-        transform: translate(-50%, -50%) scale(1.15);
+        transform: translate(-50%, -31px) scale(1.04);
         z-index: 25;
 
-        .node-hover-card {
-          opacity: 1;
-          pointer-events: auto;
-          transform: translateY(0);
+        .node-station-card {
+          border-color: #D4AF37 !important;
+          box-shadow: 0 14px 30px rgba(26, 82, 118, 0.22), 0 0 0 2px rgba(212, 175, 55, 0.25);
+        }
+      }
+
+      /* Medallion Wrapper keeps Concentric Pulse Rings 100% Centered */
+      .node-medallion-wrap {
+        position: relative;
+        width: 54px;
+        height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        .active-node-rings {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          .ring-pulse {
+            position: absolute;
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            border: 2px solid #D4AF37;
+            animation: mapPulseRing 2.2s infinite ease-out;
+
+            &.pulse-2 {
+              animation-delay: 0.9s;
+            }
+          }
         }
       }
 
       .node-medallion {
-        width: 56px;
-        height: 56px;
+        width: 54px;
+        height: 54px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
-        box-shadow: 
-          0 8px 20px rgba(0, 0, 0, 0.25),
-          inset 0 2px 4px rgba(255, 255, 255, 0.9);
-        border: 3px solid #FAF4EE;
+        z-index: 2;
+        box-shadow:
+          0 8px 18px rgba(15, 23, 42, 0.24),
+          inset 0 2px 4px rgba(255, 255, 255, 0.85);
+        border: 3px solid #FFFFFF;
         transition: all 0.25s ease;
 
         .node-icon {
-          font-size: 24px;
+          font-size: 22px;
         }
 
         .node-level-tag {
           position: absolute;
-          top: -6px;
-          right: -6px;
+          top: -5px;
+          right: -7px;
           font-size: 9px;
           font-weight: 900;
           padding: 2px 6px;
-          border-radius: 8px;
-          background: #1A5276;
+          border-radius: 6px;
+          background: #0F2942;
           color: #FFFFFF;
-          border: 1px solid #FFFFFF;
+          border: 1.5px solid #FFFFFF;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+          letter-spacing: 0.4px;
         }
 
         &.mastered {
           border-color: #D4AF37 !important;
-          box-shadow: 
-            0 0 16px rgba(212, 175, 55, 0.6),
-            0 8px 20px rgba(0, 0, 0, 0.25),
+          box-shadow:
+            0 0 14px rgba(17, 122, 101, 0.45),
+            0 8px 18px rgba(15, 23, 42, 0.22),
             inset 0 2px 4px rgba(255, 255, 255, 0.9) !important;
         }
-
-        .node-obj-mini-badge {
-          position: absolute;
-          bottom: -6px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: #117A65;
-          color: #FFFFFF;
-          font-size: 8.5px;
-          font-weight: 900;
-          padding: 1px 6px;
-          border-radius: 8px;
-          border: 1px solid #FFFFFF;
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
-          white-space: nowrap;
-          letter-spacing: 0.3px;
-        }
       }
 
-      /* Active Node Pulse Rings */
-      .active-node-rings {
-        position: absolute;
-        top: 0; left: 0; width: 56px; height: 56px;
-        pointer-events: none;
-
-        .ring-pulse {
-          position: absolute;
-          top: -10px; left: -10px; right: -10px; bottom: -10px;
-          border-radius: 50%;
-          border: 2px solid #D4AF37;
-          animation: mapPulseRing 2s infinite ease-out;
-
-          &.pulse-2 {
-            animation-delay: 0.8s;
-          }
-        }
-      }
-
-      .node-floating-badge {
-        margin-top: 6px;
-        font-size: 9.5px;
-        font-weight: 900;
-        padding: 2px 8px;
-        border-radius: 10px;
-        background: #FFFFFF;
-        border: 1px solid var(--border-strong);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        white-space: nowrap;
-        letter-spacing: 0.3px;
-      }
-
-      /* Hover Tooltip Card */
-      .node-hover-card {
-        position: absolute;
-        bottom: 74px;
-        width: 220px;
-        background: #FFFFFF;
-        border: 1.5px solid #D4AF37;
-        border-radius: var(--radius-md);
-        padding: 12px 14px;
-        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
-        opacity: 0;
-        pointer-events: none;
-        transform: translateY(8px);
+      /* Attached Executive Milestone Station Card */
+      .node-station-card {
+        margin-top: 8px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(8px);
+        border: 1.5px solid rgba(26, 82, 118, 0.22);
+        border-radius: 12px;
+        padding: 9px 11px;
+        box-shadow:
+          0 10px 22px rgba(26, 82, 118, 0.11),
+          inset 0 1px 0 #FFFFFF;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        text-align: left;
         transition: all 0.25s ease;
-        z-index: 30;
 
-        .hover-top {
+        .station-card-top {
           display: flex;
-          justify-content: space-between;
           align-items: center;
-          margin-bottom: 4px;
-
-          .hover-type {
-            font-size: 9px;
-            font-weight: 900;
-            color: var(--text-tertiary);
-          }
-
-          .hover-xp {
-            font-size: 10px;
-            font-weight: 900;
-            color: #117A65;
-          }
-        }
-
-        .hover-title {
-          font-size: 12.5px !important;
-          color: var(--text-primary) !important;
-          margin: 0 0 3px 0;
-          line-height: 1.2;
-        }
-
-        .hover-desc {
-          font-size: 10px;
-          color: var(--text-tertiary);
-          margin: 0;
-        }
-
-        .hover-progress-meta {
-          margin-top: 8px;
-          padding-top: 8px;
-          border-top: 1px dashed rgba(212, 175, 55, 0.35);
-          display: flex;
-          flex-direction: column;
+          justify-content: space-between;
           gap: 4px;
 
-          .mini-progress-track {
-            height: 6px;
-            background: var(--bg-surface-sunken);
+          .station-status-badge {
+            font-size: 8.5px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 5px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            background: #EBF5FB;
+            color: #1A5276;
+          }
+
+          .station-xp-tag {
+            font-size: 9px;
+            font-weight: 900;
+            color: #9A7A1E;
+            background: rgba(212, 175, 55, 0.15);
+            padding: 1.5px 5px;
+            border-radius: 5px;
+          }
+        }
+
+        .station-card-title {
+          font-size: 11.5px !important;
+          font-weight: 800 !important;
+          color: #1B2631 !important;
+          margin: 2px 0 0 0;
+          line-height: 1.25;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .station-card-zone {
+          font-size: 9.5px;
+          font-weight: 600;
+          color: #5D6D7E;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .station-card-progress {
+          margin-top: 3px;
+          padding-top: 5px;
+          border-top: 1px solid rgba(26, 82, 118, 0.1);
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+
+          .station-progress-bar {
+            width: 100%;
+            height: 5px;
+            background: #E5E8E8;
             border-radius: 3px;
             overflow: hidden;
-            border: 1px solid var(--border-strong);
 
-            .mini-fill {
+            .station-progress-fill {
               height: 100%;
               background: linear-gradient(90deg, #117A65 0%, #D4AF37 100%);
               border-radius: 3px;
@@ -892,10 +924,12 @@ h1, h2, h3, h4, .column-title, .card-title, .step-title, .percentage {
             }
           }
 
-          .mini-progress-txt {
-            font-size: 9.5px;
-            font-weight: 700;
-            color: var(--text-tertiary);
+          .station-progress-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8.5px;
+            font-weight: 800;
+            color: #4A5568;
           }
         }
       }
@@ -907,24 +941,33 @@ h1, h2, h3, h4, .column-title, .card-title, .step-title, .percentage {
           color: #FFFFFF;
           border-color: #A3E4D7;
         }
-        .node-floating-badge {
-          background: #E8F8F5;
-          color: #117A65;
-          border-color: rgba(17, 122, 101, 0.3);
+        .node-station-card {
+          border-color: rgba(17, 122, 101, 0.38);
+          .station-status-badge {
+            background: #E8F8F5;
+            color: #0E6251;
+            border: 1px solid rgba(17, 122, 101, 0.25);
+          }
         }
       }
 
       &.active_quest {
+        z-index: 18;
         .node-medallion {
-          background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+          background: linear-gradient(135deg, #D4AF37 0%, #9A7A1E 100%);
           color: #FFFFFF;
-          border-color: #FDFEFE;
-          animation: activeNodeBob 2s ease-in-out infinite;
+          border-color: #FFFFFF;
+          box-shadow: 0 0 20px rgba(212, 175, 55, 0.7), 0 8px 18px rgba(0, 0, 0, 0.25);
         }
-        .node-floating-badge {
-          background: #FEF9E7;
-          color: #B8860B;
-          border-color: rgba(212, 175, 55, 0.5);
+        .node-station-card {
+          border: 2px solid #D4AF37;
+          background: #FFFFFF;
+          box-shadow: 0 12px 28px rgba(184, 134, 11, 0.22);
+          .station-status-badge {
+            background: linear-gradient(135deg, #FEF9E7 0%, #F9E7B3 100%);
+            color: #856404;
+            border: 1px solid rgba(212, 175, 55, 0.55);
+          }
         }
       }
 
@@ -934,52 +977,39 @@ h1, h2, h3, h4, .column-title, .card-title, .step-title, .percentage {
           color: #FFFFFF;
           border-color: #AED6F1;
         }
-        .node-floating-badge {
-          background: #EBF5FB;
-          color: #1A5276;
-          border-color: rgba(26, 82, 118, 0.3);
-        }
-      }
-
-      &.locked {
-        opacity: 0.65;
-        .node-medallion {
-          background: #BDC3C7;
-          color: #7F8C8D;
-          border-color: #ECF0F1;
-        }
-        .node-floating-badge {
-          background: #F2F4F4;
-          color: #7F8C8D;
-        }
-      }
-
-      &.boss {
-        .node-medallion {
-          width: 68px;
-          height: 68px;
-          background: linear-gradient(135deg, #C0392B 0%, #78281F 100%);
-          border-color: #FADBD8;
-
-          .node-icon {
-            font-size: 30px;
+        .node-station-card {
+          border-color: rgba(26, 82, 118, 0.35);
+          .station-status-badge {
+            background: #EBF5FB;
+            color: #1A5276;
+            border: 1px solid rgba(26, 82, 118, 0.25);
           }
         }
       }
 
-      &.chest {
+      &.locked {
+        opacity: 0.82;
         .node-medallion {
-          background: linear-gradient(135deg, #E67E22 0%, #A04000 100%);
-          border-color: #EDBB99;
+          background: linear-gradient(135deg, #5D6D7E 0%, #34495E 100%);
+          color: #ECF0F1;
+          border-color: #D5DBDB;
+        }
+        .node-station-card {
+          background: rgba(248, 249, 249, 0.92);
+          border-color: rgba(127, 140, 141, 0.35);
+          .station-status-badge {
+            background: #EAECEE;
+            color: #566573;
+          }
         }
       }
     }
 
-    /* Dynamic Hero Avatar Map Pin */
+    /* Dynamic Active Architect Position Beacon */
     .hero-avatar-pin {
       position: absolute;
       transform: translate(-50%, -100%);
-      z-index: 20;
+      z-index: 22;
       pointer-events: none;
       animation: heroPinBob 2.5s ease-in-out infinite;
 
@@ -989,11 +1019,11 @@ h1, h2, h3, h4, .column-title, .card-title, .step-title, .percentage {
         align-items: center;
 
         .hero-pin-avatar-frame {
-          width: 46px;
-          height: 46px;
+          width: 44px;
+          height: 44px;
           border-radius: 50%;
-          border: 3px solid #D4AF37;
-          box-shadow: 0 0 16px rgba(212, 175, 55, 0.9), 0 8px 16px rgba(0, 0, 0, 0.3);
+          border: 2.5px solid #D4AF37;
+          box-shadow: 0 0 14px rgba(212, 175, 55, 0.75), 0 6px 14px rgba(0, 0, 0, 0.25);
           background: #FFFFFF;
           overflow: hidden;
 
@@ -1006,15 +1036,27 @@ h1, h2, h3, h4, .column-title, .card-title, .step-title, .percentage {
 
         .hero-pin-tag {
           margin-top: 4px;
-          background: linear-gradient(135deg, #1A5276 0%, #0E3A53 100%);
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          background: linear-gradient(135deg, #0F2942 0%, #1A5276 100%);
           color: #FFFFFF;
           font-size: 8.5px;
           font-weight: 900;
-          padding: 2px 8px;
-          border-radius: 8px;
-          border: 1px solid rgba(255, 255, 255, 0.8);
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+          padding: 3px 9px;
+          border-radius: 6px;
+          border: 1px solid #D4AF37;
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
           white-space: nowrap;
+          letter-spacing: 0.5px;
+
+          .live-pin-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #2ECC71;
+            box-shadow: 0 0 6px #2ECC71;
+          }
         }
       }
     }

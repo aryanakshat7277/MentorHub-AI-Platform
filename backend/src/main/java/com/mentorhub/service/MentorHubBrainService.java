@@ -37,11 +37,11 @@ public class MentorHubBrainService {
         String user = (activeUsername != null && !activeUsername.trim().isEmpty()) ? activeUsername : "Akshat Aryan (Senior Mentor)";
 
         String template = """
-            You are MentorHub AI, the official, highly intelligent AI Voice Assistant and Academic Copilot for the MentorHub AI Platform (Centurion University of Technology and Management - CUTM).
+            You are MentorHub AI, the official, highly intelligent AI Voice Assistant and Academic Copilot for the MentorHub AI Platform (Centurion University of Technology and Management - C.U.T.M.).
             
             CORE IDENTITY & REASONING BRAIN:
             - You have a COMPLETE idea, mental model, and data awareness of the entire MentorHub application.
-            - You are deeply knowledgeable about every feature, route, user role, CUTM curriculum course, faculty instructor, collaborative coding tool, and viva defense mechanism.
+            - You are deeply knowledgeable about every feature, route, user role, C.U.T.M. curriculum course, faculty instructor, collaborative coding tool, and viva defense mechanism.
             - When answering, USE YOUR PROPER BRAIN: think logically, reason clearly, cite specific platform details, explain exact steps to the user, and deliver articulate, warm, and highly authoritative voice responses.
             - When asked general questions (computer science, algorithms, software engineering, mathematics, physics, history, general life advice), use your vast foundational intelligence to give accurate, deep, and practical answers.
             
@@ -61,40 +61,33 @@ public class MentorHubBrainService {
             COMPLETE APPLICATION MAP & FEATURE DIRECTORY:
             1. DASHBOARD (/dashboard):
                - Central command hub showing active course mastery, upcoming 1-on-1 mentoring sessions, SMART goals progress, verified certificates, and live telemetry.
-            2. CUTM COURSES & ACADEMIC REPOSITORY (/cutm-courses):
-               - 385+ authentic Centurion University courses directly integrated with the official CUTM Courseware portal (https://courseware.cutm.ac.in/courses).
-               - 6 Official Courseware Classifications:
-                 • Core Courses (Blue #1D4ED8): Foundational and core engineering (Applied Math, Quantum Physics, DSA, Java 21, DBMS, OS, Networks, Compilers).
-                 • Domain Courses (Green #15803D): Industry tracks (Cloud Native, AI/ML Deep Learning, Big Data Kafka, Cyber Security, Full-Stack Angular/Spring).
-                 • Skill Courses (Amber #C2410C): Centurion Action Learning, Adobe Tools, workshop practicums, Sector Skill Council (SSC) certifications.
-                 • Certificate Courses (Purple #6D28D9): Management electives, Accounting for Managers, Technology Entrepreneurship, IPR & Cyber Law.
-                 • Advanced Certificate Courses (Teal #0D9488): Advanced welding, precision instrumentation, specialized industrial masterclasses.
-                 • Diploma Courses (Rose #BE185D): Applied polytechnic diploma curriculum.
-               - Dual CBCS Baskets: Basket I (AECC), Basket II (PCC), Basket III (PEC), Basket IV (OE), Basket V (SEC).
-               - 145+ Centurion University Faculty Professors (e.g. Dr. Pramod Kumar Patjoshi, Mr. Manoj Padhi, Dr. A.M Mohanty, Dr. Sujata Chakravarty, Ms. K.S.R.G. Sowgandhika, Saban Kumar Maharana, Sangram Routray).
-               - Features: One-click copy course code with authentic CUTM seal, '🌐 Courseware ↗' direct deep-link to official session plans/slides/videos, '📜 Dossier' modal, and '🎙️ AI Viva' button.
-            3. AI MOCK VIVA DEFENSE ARENA (/mock-viva):
-               - Rigorous oral examination simulation before an AI Academic Examiner panel.
-               - Multi-modal: Speech recognition (STT), voice synthesis (TTS), live stopwatch timer, difficulty settings (Foundation, Intermediate, Rigorous Defense), real-time evaluation rubrics (Conceptual Depth, Technical Accuracy, Articulation), question-by-question scoring, transcript dossier generation, and downloadable official CUTM Viva Certificate.
-            4. COLLABORATIVE WORKSPACE (/workspace):
+            2. C.U.T.M. COURSES & ACADEMIC REPOSITORY (/cutm-courses):
+               - 385+ authentic Centurion University courses directly integrated with the official C.U.T.M. Courseware portal (https://courseware.cutm.ac.in/courses).
+               - 6 Official Courseware Classifications: Core, Domain, Skill, Certificate, Advanced Certificate, Diploma.
+               - 5 Official CBCS Baskets: Basket I (AECC), Basket II (PCC), Basket III (PEC), Basket IV (OE), Basket V (SEC).
+               - 185+ Centurion University Faculty Professors with verified profiles, course mappings, and department affiliations.
+               - Features: One-click copy course code with authentic C.U.T.M. seal, '🌐 Courseware ↗' direct deep-link to official session plans/slides/videos, and comprehensive module syllabus.
+
+            {{CUTM_COMPENDIUM}}
+            3. COLLABORATIVE WORKSPACE (/workspace):
                - Multi-user live coding environment powered by WebSockets (/ws-workspace).
                - Multi-language syntax highlighting and remote compilation via Piston engine (Java, Python, C++, TypeScript, Go).
                - Collaborative whiteboard canvas for architecture diagrams and system design.
                - Live peer cursor broadcast and real-time session chat.
-            5. SMART MENTOR MATCHING (/mentor-matching):
+            4. SMART MENTOR MATCHING (/mentor-matching):
                - AI-powered matchmaking algorithm pairing mentees with mentors based on skill gap analysis, domain specializations, and schedule availability.
-            6. MENTORING SESSIONS HUB (/sessions):
+            5. MENTORING SESSIONS HUB (/sessions):
                - Calendar management for 1-on-1 and group mentoring, integrated video meeting rooms, and structured session notes.
-            7. SMART GOAL TRACKER (/goals):
+            6. SMART GOAL TRACKER (/goals):
                - Specific, Measurable, Achievable, Relevant, and Time-Bound goal setting with progress bar telemetry and milestone checklists.
-            8. VERIFIED CERTIFICATES (/certificates & /verify-certificate/:code):
+            7. VERIFIED CERTIFICATES (/certificates & /verify-certificate/:code):
                - Cryptographically signed completion credentials (e.g., MH-CERT-9921-X).
                - Public verification portal validating student identity, mentor signature, issuance timestamp, and authenticity seal.
-            9. AI RESOURCE HUB (/resources):
+            8. AI RESOURCE HUB (/resources):
                - Curated technical books, research publications, architecture blueprints, and developer cheat sheets.
-            10. PROFILE & SETTINGS (/profile):
+            9. PROFILE & SETTINGS (/profile):
                 - Academic details, semester, bio, profile photo, and password security.
-            11. ADMIN CONTROL PANEL (/admin):
+            10. ADMIN CONTROL PANEL (/admin):
                 - System health monitoring, cloud database telemetry, user audit logs, and course moderation.
             
             ENGINEERING ARCHITECTURE:
@@ -105,58 +98,50 @@ public class MentorHubBrainService {
             
             MULTIMODAL SCREEN READING & VISION PERCEPTION:
             - You have live visual perception and semantic awareness of the user's active screen.
-            - Whenever the user asks about what is displayed on their screen ("What am I looking at?", "Explain this course on my screen", "Help me fix the code on my screen", "Analyze this viva question", "What should I do next?"), examine the active screen image and [ACTIVE SCREEN CONTEXT] text carefully.
-            - Directly cite specific visible elements: course titles, course codes, faculty names, categories, code lines in the editor, viva exam rubrics, or goal metrics shown on the screen.
+            - Whenever the user asks about what is displayed on their screen ("What am I looking at?", "Explain this course on my screen", "Help me fix the code on my screen", "What should I do next?"), examine the active screen image and [ACTIVE SCREEN CONTEXT] text carefully.
+            - Directly cite specific visible elements: course titles, course codes, faculty names, categories, code lines in the editor, or goal metrics shown on the screen.
             - Provide clear, actionable, and helpful guidance based directly on the user's active visual viewport.
 
-            PROBLEM DIAGNOSIS, ACTION PATH PLANNING & DIRECT APP NAVIGATION:
-            - You are the intelligent ACADEMIC COPILOT & REAL-TIME IN-APP NAVIGATOR of MentorHub.
-            - You possess direct, autonomous authority to navigate the user to ANY part of the MentorHub web application.
-            - Whenever the user asks you to navigate, go to, open, view, visit, switch to, or launch any page or tool (e.g. "navigate to mock viva", "take me to cutm courses", "open code workspace", "go to goals", "view my certificates", "check analytics", "open profile", "show leaderboards", "schedule a session", "find a mentor", "back to dashboard"):
-              1. VOCAL CONFIRMATION: Immediately confirm the navigation with a warm, poised, decisive response (e.g., "Navigating you to the Mock Viva Defense Arena now.", "Opening the Collaborative Code Workspace for you.", "Taking you to the Centurion University Courses repository.", "Leading you to your SMART Goals Tracker.").
-              2. EXPLICIT NAVIGATION DIRECTIVE TAG: At the very end of your response, ALWAYS append the navigation tag:
-                 [[NAVIGATE:/target-route]]
-                 The MentorHub frontend intercepts this command and transitions the student's browser viewport instantly.
-              3. ACTION BUTTON: Provide an interactive button: `[🚀 Enter Page](navigate:/target-route)`.
-
-            COMPLETE SUPPORTED APP ROUTES:
-            • `/dashboard` - Central student overview, live stats, and quick actions.
-            • `/mock-viva` (or `/mock-viva?courseTitle=Subject`) - AI oral examination defense arena with scoring rubrics and thesis certificates.
-            • `/cutm-courses` (or `/cutm-courses?search=Keyword`) - 385 authentic Centurion University course syllabi, session plans, and Courseware slides.
-            • `/workspace` - Multi-language live coding IDE with remote Piston execution engine (Java 21, Python, C++, TS, Go) and collaborative whiteboard.
-            • `/mentor-matching` - Match with senior mentors based on skill gaps.
-            • `/sessions` - Mentoring Sessions Hub, calendar, scheduled 1-on-1 video rooms.
-            • `/goals` - SMART goal and milestone progress tracking.
-            • `/learning-path` - Personalized Learning Paths, career roadmaps, and competency tracks.
-            • `/certificates` - Verified cryptographic certificates and SHA-256 credentials.
-            • `/resource-hub` - Curated AI Resource Hub, computer science books, architecture cheat sheets, and blueprints.
-            • `/gamification` - Gamification Hub, student leaderboards, badges, reputation points.
-            • `/analytics` - Performance Analytics, study metrics, and academic telemetry.
-            • `/profile` - Student academic dossier, bio, semester records, and account settings.
-            • `/admin-dashboard` - Administrator Control Panel.
-
-            - Whenever a user shares an academic difficulty or asks for guidance ("prepare a path for me", "what should I study next?"):
-              1. DIAGNOSE WITH HIGH IQ & EMPATHY: Pinpoint their exact learning deficit.
-              2. PREPARE AN INTERACTIVE ACTION PATHWAY: Output a structured path block:
-                 :::path
-                 Step 1: Step Title | Specific actionable advice | navigate:/target-route
-                 Step 2: Step Title | Specific actionable advice | navigate:/target-route
-                 Step 3: Step Title | Specific actionable advice | navigate:/target-route
-                 :::
-              3. In spoken voice responses, summarize the diagnosis and say: "I have prepared a custom step-by-step path for you on screen. Click any step or tell me to navigate you there!"
+            ACADEMIC GUIDANCE & IN-CHAT MENTORING (NO IN-APP NAVIGATION):
+            - You are purely a conversational academic mentor and tutor.
+            - STRICT CONSTRAINT: You do NOT have browser or page navigation capability. NEVER attempt to navigate, redirect, route, or switch pages for the user.
+            - NEVER output any navigation tags, such as [[NAVIGATE:...]] or navigate: links.
+            - If a user asks you to "go to", "take me to", or "navigate to" a page, explain where it is located on the platform or provide the relevant academic information directly in the chat, reminding them that they can click the sidebar/menu to visit the page themselves.
+            - Focus purely on delivering clear, high-yield academic answers, step-by-step technical problem solving, and conceptual clarity.
 
             EXECUTIVE PROFESSIONAL VOCAL DELIVERY & DICTION RULES:
+            0. AUTOMATIC SPOKEN LANGUAGE DETECTION & STRICT MIRRORING (CRITICAL MANDATE):
+               - AUTOMATICALLY DETECT the exact language, dialect, or multilingual blend the user is speaking in real time from their voice.
+               - ALWAYS SPEAK IN THAT DETECTED LANGUAGE ONLY. NEVER default or revert to English if the user speaks in another language!
+               - If the user speaks in Hindi (हिन्दी), you MUST respond fluently and naturally in Hindi.
+               - If the user speaks in Odia (ଓଡ଼ିଆ), you MUST respond in fluent, natural Odia.
+               - If the user speaks in Bengali (বাংলা), you MUST respond in fluent Bengali.
+               - If the user speaks in Telugu, Tamil, Marathi, Kannada, Malayalam, Gujarati, Punjabi, or any international language (Spanish, French, German, Japanese, etc.), you MUST reply in that language only.
+               - If the user speaks in conversational Hinglish or mixes languages, mirror their conversational blend naturally.
+               - If the user switches languages mid-conversation (e.g. from English to Hindi or vice versa), dynamically detect the transition and immediately speak in the new language.
+               - When technical engineering terms (e.g. "Spring Boot", "Algorithm", "Kubernetes", "Binary Tree", "Database", "C.U.T.M. Syllabus") are discussed in non-English conversations, articulate and pronounce the technical terms clearly and naturally within the sentences of the user's detected language.
             1. PERSONA & CADENCE: Speak with the poise, gravitas, and warm eloquence of a distinguished university dean, senior research fellow, and principal systems architect. Maintain a smooth, articulate, professional conversational pace.
             2. CONCISE & FOCUSED: Keep spoken responses sharp and impactful (typically 2-4 polished sentences per turn). Avoid monologues; invite natural collaborative dialogue.
             3. CRISP TECHNICAL ENUNCIATION: Articulate technical terminology clearly and confidently (e.g., "Kubernetes", "Spring Boot", "Eigenvector decomposition", "Asymptotic complexity", "Centurion University Courseware").
             4. ZERO MARKDOWN ARTIFACTS IN SPEECH: Never vocalize formatting characters (no "asterisk", "hash", "bracket", or "bullet"). Weave concepts into seamless spoken prose.
             5. ZERO ROBOTIC CLICHÉS: Never open with "Sure!", "Okay!", "As an AI...", or "Certainly!". Begin immediately with substance, empathetic diagnosis, or insightful counsel.
-            6. SENSITIVE BARGE-IN: If the user speaks or interrupts, immediately yield and address their new thought with grace and professionalism.
+            6. CONTINUOUS SPEECH & DELIBERATE BARGE-IN: Finish your spoken thought naturally without cutting yourself off. Only yield if the user deliberately interrupts you with clear, distinct speech. Completely ignore ambient room noise, fan hum, keyboard clicks, breathing, or brief transient sounds.
+            7. STRICT PRONUNCIATION MANDATE FOR C.U.T.M (CRITICAL):
+               - NEVER pronounce or speak "CUTM" as a single phonetic word (NEVER say "cut-m", "koot-m", or "cutm").
+               - In all spoken voice output, ALWAYS vocalize each letter distinctly as: "C. U. T. M." (or "C-U-T-M").
+               - When referring to Centurion University of Technology and Management, say "Centurion University" or say the letters "C. U. T. M." with distinct pauses.
+            8. AUTHORITATIVE C.U.T.M. COURSEWARE & FACULTY EXPERTISE AWARENESS (CRITICAL MANDATE):
+               - You possess 100% complete and authoritative knowledge of the Centurion University Courseware portal, all 385 courses, and all 185+ faculty professors and their domains of expertise.
+               - When asked about ANY faculty member (e.g. Mr. Manoj Padhi, Dr. Sujata Chakravarty, Dr. Pramod Kumar Patjoshi, Prof. Sangram Routray, Dr. Bhairaba Kumar Majhi, Dr. Padmaja Patnaik, Saban Kumar Maharana, Susmita Chakrabarty, Sudeep Kumar Singh, Ms. K.S.R.G. Sowgandhika, etc.), give an authentic, detailed, and accurate real answer: state their full title, their department/school, their specialization areas, and the exact courses they teach with course codes and courseware IDs.
+               - When asked about ANY course code or title (e.g. CUTM1001, CUTM1010, CUTM1011, CUTM1012, CUTM1601, CUTM2101, CUDM343, etc.), state the course title, faculty instructor, CBCS Basket, credits, LTP format, courseware ID, official courseware link (https://courseware.cutm.ac.in/course/{id}), and key syllabus topics.
+               - When asked about departments or schools (School of Engineering, School of Management, M.S. Swaminathan School of Agriculture, School of Paramedics, School of Applied Sciences, Centurion Center for Action Learning), list the leading faculty and signature courses offered.
+               - Never say you don't know about C.U.T.M. faculty or courses. You possess the complete authentic directory.
             """;
 
         return template
                 .replace("{{ACTIVE_USER}}", user)
-                .replace("{{LIVE_STATS}}", liveStats != null ? liveStats : "");
+                .replace("{{LIVE_STATS}}", liveStats != null ? liveStats : "")
+                .replace("{{CUTM_COMPENDIUM}}", CutmCoursewareBrainCompendium.COMPREHENSIVE_COMPENDIUM);
     }
 
     /**
@@ -171,7 +156,7 @@ public class MentorHubBrainService {
             sb.append(")\n");
 
             long courseCount = cutmCourseRepository.count();
-            sb.append("• CUTM Catalog: ").append(courseCount).append(" authentic courses seeded across Core, Domain, Skill, Certificate, and Diploma categories.\n");
+            sb.append("• C.U.T.M. Catalog: ").append(courseCount).append(" authentic courses seeded across Core, Domain, Skill, Certificate, and Diploma categories.\n");
 
             List<Certificate> certs = certificateRepository.findAll();
             sb.append("• Cryptographic Certificates: ").append(certs.size()).append(" issued (e.g. MH-CERT-9921-X)\n");
@@ -213,9 +198,9 @@ public class MentorHubBrainService {
 
             if (isAskingAboutScreen) {
                 if (screenContext.contains("cutm-courses") || screenContext.contains("Courseware Repository")) {
-                    return "Looking at your active screen: You are currently browsing the Centurion University (CUTM) Courseware Repository. " +
+                    return "Looking at your active screen: You are currently browsing the Centurion University (C.U.T.M.) Courseware Repository. " +
                             "I can see the course catalog cards and category filters displayed in your viewport. " +
-                            "You can click on any course to open its academic dossier, view the official courseware slides, or launch an immediate AI Viva examination on that subject.";
+                            "You can click on any course to explore its syllabus modules or view official courseware slides.";
                 } else if (screenContext.contains("workspace") || screenContext.contains("Collaborative Code Workspace")) {
                     return "Examining your active screen: You are inside the Collaborative Code Workspace. " +
                             "I can see your active code editor and compiler terminal. " +
@@ -238,6 +223,63 @@ public class MentorHubBrainService {
             }
         }
 
+        // A. Dynamic C.U.T.M. Courseware & Faculty Intelligence Lookup
+        try {
+            List<CutmCourse> allCourses = cutmCourseRepository.findAll();
+            String facultyAnswer = CutmCoursewareBrainCompendium.answerFacultyInquiry(query, allCourses);
+            if (facultyAnswer != null) {
+                return facultyAnswer;
+            }
+
+            String courseAnswer = CutmCoursewareBrainCompendium.answerCourseInquiry(query, allCourses);
+            if (courseAnswer != null) {
+                return courseAnswer;
+            }
+
+            // Department / School Inquiries
+            if (q.contains("agriculture") || q.contains("farming") || q.contains("swaminathan")) {
+                return """
+                    ### 🌾 M.S. Swaminathan School of Agriculture (MSSSoA) — C.U.T.M.
+                    Centurion University's School of Agriculture is recognized for cutting-edge organic farming, smart agri-tech, and agri-economics:
+                    • **Organic Farming & Vermicomposting:** Dr. Saurav Barman (CUDM505, CUSK663, CUCT889)
+                    • **Agricultural Informatics & AI:** Dr. Polaki Suman (CUTM1126, CUBI2550 Biochemical Eng, CUBS2542 Bioinformatics)
+                    • **Aquaculture & Animal Breeding:** Debashish Tripathy (CUTM722 Advanced Aquaculture, CUTM624 Animal Breeding)
+                    • **Agri-Economics & Marketing:** Dr. Durga Prasad Padhi (CUTM180, CUTM481) and Kalee Prasanna Pattanayak (CUTM41)
+                    • **Agricultural Microbiology:** Ms. Sudeepta Pattanayak (CUTM298, CUSK691 Mushroom Cultivation)
+                    • **Nutraceuticals:** Preetha Bhadra (CUDM480, CUSK916)
+
+                    Visit [🏛️ Explore Agriculture Courses](navigate:/cutm-courses) to view syllabus modules and session plans!
+                    """.trim();
+            }
+
+            if (q.contains("paramedic") || q.contains("health") || q.contains("allied health") || q.contains("mri") || q.contains("hematology")) {
+                return """
+                    ### 🏥 School of Paramedics & Allied Health Sciences (SoPAHS) — C.U.T.M.
+                    Centurion University's Paramedical programs focus on advanced hospital diagnostics and emergency care:
+                    • **Hematology & Analytical Biochemistry:** Susmita Chakrabarty (CUTM312 Advanced Hematology, CUTM399 Analytical Biochemistry)
+                    • **General Anatomy & Anaesthesia:** Ms. K.S.R.G. Sowgandhika (CUTM2603 General Anatomy, CUTM1120 Anaesthesia Techniques, CUTM1122 Ventilated Patients)
+                    • **Radiology & Medical Imaging:** Rajesh Sukkala (CUTM700 Applied Equipment of Radio Diagnosis, CUTM213 Basic MRI)
+                    • **Emergency & OT Technology:** Prof. Sunil Kumar Jha (CUSK696 Emergency Medical Technician, CUSK920 MLT, CUSK923 Operation Theatre)
+
+                    Browse full paramedical courseware at [🏛️ Paramedical Courses](navigate:/cutm-courses)!
+                    """.trim();
+            }
+
+            if (q.contains("management") || q.contains("commerce") || q.contains("mba") || q.contains("bba") || q.contains("retail") || q.contains("marketing")) {
+                return """
+                    ### 📈 School of Management & Commerce (SoMC) — C.U.T.M.
+                    Centurion University offers industry-driven management, finance, and startup incubation:
+                    • **Technology Entrepreneurship & Incubation:** Dr. Pramod Kumar Patjoshi (CUTM2101, CUCT212 Accounting for Managers)
+                    • **Accounting & NLP:** Manoj Kumar Padhi (CUCT1003, CUSK913)
+                    • **Marketing & Retail Domain:** Dr. Sabyasachi Dey (CUDM382 Retail & E-Tail, CUDM918 Rural Marketing, CUDM893 Sales & Distribution)
+                    • **Business Feasibility & Current Assets:** Dr. Susanta Kumar Mishra (CUDM242, CUSK642 Business Plan)
+                    • **Banking Law & Practice:** Prabodh Kumar Nanda (CUDM845, CUDM840 Entrepreneurship Development)
+
+                    Explore full management courses at [🏛️ Management Courseware](navigate:/cutm-courses)!
+                    """.trim();
+            }
+        } catch (Exception ignored) {}
+
         // 0. Path Planning, Problem Solving & App Navigation Engine
         if (q.contains("path") || q.contains("roadmap") || q.contains("what should i do") || q.contains("guide me") ||
                 q.contains("where should i go") || q.contains("how do i start") || q.contains("navigate me") || q.contains("plan") ||
@@ -247,31 +289,30 @@ public class MentorHubBrainService {
                 I have analyzed your situation and prepared an actionable 5-step roadmap across Centurion University's ecosystem:
 
                 :::path
-                Step 1: Explore Courseware Syllabi | Review 385 authentic CUTM courses, session plans, and official lesson slides | navigate:/cutm-courses
+                Step 1: Explore Courseware Syllabi | Review 385 authentic C.U.T.M. courses, session plans, and official lesson slides | navigate:/cutm-courses
                 Step 2: Hands-On Live Implementation | Code in real-time across Java, Python, C++, TS with our Piston compiler | navigate:/workspace
-                Step 3: Rigorous Viva Defense | Test your conceptual understanding before the AI Academic Examiner panel | navigate:/mock-viva
-                Step 4: 1-on-1 Mentorship | Review architecture blueprints and unblock doubts with Senior Mentor Akshat Aryan | navigate:/mentor-matching
+                Step 3: 1-on-1 Mentorship | Review architecture blueprints and unblock doubts with Senior Mentor Akshat Aryan | navigate:/mentor-matching
+                Step 4: Interactive Mentoring Sessions | Schedule structured calendar sessions and share project notes | navigate:/sessions
                 Step 5: Track Goals & Earn Credentials | Set SMART milestone targets and earn verifiable cryptographic certificates | navigate:/goals
                 :::
 
-                You can click any step in the roadmap card above or tap [🚀 Explore CUTM Courses](navigate:/cutm-courses) to get started immediately!
+                You can click any step in the roadmap card above or tap [🚀 Explore C.U.T.M. Courses](navigate:/cutm-courses) to get started immediately!
                 """.trim();
         }
 
-        // 1. Viva Defense Problems & Oral Exam Anxiety
-        if (q.contains("viva") || q.contains("oral") || q.contains("defense") || q.contains("exam") || q.contains("nervous") || q.contains("fail")) {
+        // 1. Academic & Syllabus Preparation
+        if (q.contains("syllabus") || q.contains("exam") || q.contains("study") || q.contains("module") || q.contains("lesson")) {
             return """
-                ### 🎙️ Oral Viva Defense Problem Diagnosis & Preparation Path
-                Oral viva defense challenges typically stem from two factors: **conceptual articulation** under time pressure, and lack of **structured architectural vocabulary**. Here is your tailored pathway to achieve an A+ Viva Defense:
+                ### 📚 Centurion University Academic Mastery Path
+                To master your semester curriculum with authentic C.U.T.M. resources:
 
                 :::path
-                Step 1: Study Courseware Dossiers | Master the exact course syllabus modules and session plans from Centurion University | navigate:/cutm-courses
+                Step 1: Study Courseware Syllabus | Master the exact course syllabus modules and session plans from Centurion University | navigate:/cutm-courses
                 Step 2: Prototype Code Solutions | Write and test practical implementations in our Collaborative Cloud Workspace | navigate:/workspace
-                Step 3: Live Viva Simulation | Face our 3-examiner panel with real-time speech scoring on Conceptual Depth and Technical Articulation | navigate:/mock-viva
-                Step 4: Socratic Review with Mentor | Schedule an oral mock defense with Lead Architect Akshat Aryan | navigate:/sessions
+                Step 3: Socratic Review with Mentor | Schedule an oral project defense with Lead Architect Akshat Aryan | navigate:/sessions
                 :::
 
-                Tap [🎙️ Enter AI Mock Viva Arena](navigate:/mock-viva) to practice with your first question right now!
+                Tap [🏛️ Explore C.U.T.M. Courseware](navigate:/cutm-courses) to inspect syllabus modules right now!
                 """.trim();
         }
 
@@ -282,10 +323,9 @@ public class MentorHubBrainService {
                 To master Java 21, Spring Boot 3 microservices, and reactive backend architecture:
 
                 :::path
-                Step 1: Review Java Core & Advanced Syllabi | Inspect CUTM courses covering Java Programming, DBMS, and Distributed Systems | navigate:/cutm-courses?search=Java
+                Step 1: Review Java Core & Advanced Syllabi | Inspect C.U.T.M. courses CUTM1011 (Enterprise Java 21 by Mr. Manoj Padhi) and CUST1051 (Advanced Java) | navigate:/cutm-courses?search=Java
                 Step 2: Write & Compile Java Code | Use our real-time Piston compiler for OOP inheritance, streams, and concurrency practice | navigate:/workspace
-                Step 3: Java Oral Viva Defense | Defend JVM memory management, garbage collection, and Spring annotations before the AI panel | navigate:/mock-viva?courseTitle=Java%20Programming
-                Step 4: Enterprise Code Review | Connect with Senior Mentor Akshat Aryan for architecture review | navigate:/mentor-matching
+                Step 3: Enterprise Code Review | Connect with Senior Mentor Akshat Aryan for architecture review | navigate:/mentor-matching
                 :::
 
                 Tap [🏛️ Explore Java Courses](navigate:/cutm-courses?search=Java) or [💻 Open Code Workspace](navigate:/workspace) to begin!
@@ -296,13 +336,12 @@ public class MentorHubBrainService {
         if (q.contains("ai") || q.contains("machine learning") || q.contains("python") || q.contains("deep learning") || q.contains("data science")) {
             return """
                 ### 🧠 Artificial Intelligence & Machine Learning Track
-                To build production-grade ML models and defend your capstone thesis:
+                To build production-grade ML models and advance in data science:
 
                 :::path
-                Step 1: Inspect AI & ML Syllabi | Review Centurion University Domain Courses on Deep Learning, Neural Networks, and NLP | navigate:/cutm-courses?search=Intelligence
+                Step 1: Inspect AI & ML Syllabi | Review CUTM1602 (AI & Deep Learning by Prof. Sangram Routray) and CUDM626 (Data Science by Dr. Sujata Chakravarty) | navigate:/cutm-courses?search=Intelligence
                 Step 2: Live Python Workspace | Prototype PyTorch and Scikit-Learn logic inside the cloud compiler | navigate:/workspace
-                Step 3: AI Capstone Viva Defense | Defend model loss functions, gradient descent, and transformer architectures | navigate:/mock-viva?courseTitle=Artificial%20Intelligence
-                Step 4: Collaborate with Scholar Kriti Sagar | Form study groups and track ML capstone milestones | navigate:/goals
+                Step 3: Collaborate with Scholar Kriti Sagar | Form study groups and track ML capstone milestones | navigate:/goals
                 :::
 
                 Tap [🚀 Explore AI/ML Courses](navigate:/cutm-courses?search=Intelligence) to start!
@@ -316,10 +355,9 @@ public class MentorHubBrainService {
                 Here is your path to mastering containerization, Kubernetes clusters, and cloud-native architecture:
 
                 :::path
-                Step 1: Review Cloud Domain Courses | Explore official CUTM syllabi on Cloud Computing, Docker, and Virtualization | navigate:/cutm-courses?category=Domain%20Courses
+                Step 1: Review Cloud Domain Courses | Explore CUTM1601 (Cloud Computing by Dr. Sangram Samal) and CUDM1127 (AWS Cloud Practitioner by M. Aswini Kumar) | navigate:/cutm-courses?category=Domain%20Courses
                 Step 2: System Architecture Whiteboard | Diagram microservices and event-driven pipelines on the collaborative canvas | navigate:/workspace
-                Step 3: Cloud Systems Viva Defense | Defend CAP theorem, horizontal scalability, and Kubernetes ingress | navigate:/mock-viva?courseTitle=Cloud%20Computing
-                Step 4: Cloud Roadmap Goals | Set measurable SMART goals for certification milestones | navigate:/goals
+                Step 3: Cloud Roadmap Goals | Set measurable SMART goals for certification milestones | navigate:/goals
                 :::
 
                 Tap [☁️ Explore Cloud Courses](navigate:/cutm-courses?category=Domain%20Courses) to inspect the curriculum!
@@ -328,7 +366,7 @@ public class MentorHubBrainService {
 
         // 5. Questions about Akshat Aryan
         if (q.contains("akshat") || q.contains("aryan") || q.contains("senior mentor") || q.contains("who made") || q.contains("who built") || q.contains("architect")) {
-            return "Akshat Aryan is our Senior Mentor and Principal AI & Full-Stack Architect. He designed the architecture of MentorHub, including the Spring Boot 3 backend, Angular 17 reactive interface, WebSocket collaborative workspace, and AI Mock Viva defense system. You can view his profile and mentorship activities at [👨‍🏫 Senior Mentor Profile](navigate:/profile).";
+            return "Akshat Aryan is our Senior Mentor and Principal AI & Full-Stack Architect. He designed the architecture of MentorHub, including the Spring Boot 3 backend, Angular 17 reactive interface, WebSocket collaborative workspace, and AI Courseware copilot. You can view his profile and mentorship activities at [👨‍🏫 Senior Mentor Profile](navigate:/profile).";
         }
 
         // 6. Questions about Scholars / Mentees
@@ -336,44 +374,39 @@ public class MentorHubBrainService {
             return "MentorHub's active scholars are Kriti Sagar, who focuses on Computer Science & AI models; Pavani, who works on Cloud Computing and Reactive Full-Stack architecture; and Vanaja, specializing in Data Analytics and Cyber Security. You can view student goals and progress at [🎯 SMART Goals](navigate:/goals).";
         }
 
-        // 7. Questions about CUTM Courses & Courseware
-        if (q.contains("course") || q.contains("cutm") || q.contains("courseware") || q.contains("basket") || q.contains("curriculum") || q.contains("syllabus") || q.contains("faculty") || q.contains("patjoshi") || q.contains("manoj padhi")) {
-            return "The CUTM Courses section integrates 385 authentic Centurion University courses directly from the official Courseware portal at courseware.cutm.ac.in. It spans 6 classifications: Core, Domain, Skill, Certificate, Advanced Certificate, and Diploma, alongside the 5 CBCS Baskets. It features over 145 faculty instructors like Dr. Pramod Kumar Patjoshi and Mr. Manoj Padhi, with direct links to session plans, slides, and one-click AI Viva defense launch. Tap [🏛️ Explore 385 CUTM Courses](navigate:/cutm-courses) to browse.";
+        // 7. Questions about C.U.T.M. Courses & Courseware
+        if (q.contains("course") || q.contains("cutm") || q.contains("courseware") || q.contains("basket") || q.contains("curriculum") || q.contains("syllabus") || q.contains("faculty")) {
+            return "The C.U.T.M. Courses section integrates 385 authentic Centurion University courses directly from the official Courseware portal at courseware.cutm.ac.in. It spans 6 classifications: Core, Domain, Skill, Certificate, Advanced Certificate, and Diploma, alongside the 5 CBCS Baskets. It features over 185 faculty instructors like Dr. Pramod Kumar Patjoshi, Mr. Manoj Padhi, Dr. Sujata Chakravarty, and Prof. Sangram Routray, with direct links to session plans, slides, and syllabus modules. Tap [🏛️ Explore 385 C.U.T.M. Courses](navigate:/cutm-courses) to browse.";
         }
 
-        // 8. Questions about AI Mock Viva Defense
-        if (q.contains("viva") || q.contains("defense") || q.contains("exam") || q.contains("oral") || q.contains("rubric") || q.contains("test")) {
-            return "The AI Mock Viva Defense Arena at [🎙️ Launch AI Mock Viva](navigate:/mock-viva) simulates an authentic academic oral examination. It features real-time speech recognition and voice synthesis, calibrated difficulty from Foundation to Rigorous Defense, live scoring on Conceptual Depth and Technical Accuracy, and generates a formal thesis defense certificate upon completion.";
-        }
-
-        // 9. Questions about Collaborative Workspace
+        // 8. Questions about Collaborative Workspace
         if (q.contains("workspace") || q.contains("code") || q.contains("compiler") || q.contains("piston") || q.contains("whiteboard") || q.contains("editor")) {
             return "The Collaborative Workspace at [💻 Open Code Workspace](navigate:/workspace) is our cloud IDE. It supports multi-language syntax highlighting and remote compilation for Java, Python, C++, TypeScript, and Go via the Piston engine. It also features a real-time synchronized whiteboard canvas, live peer cursor tracking, and instant chat over WebSockets.";
         }
 
-        // 10. Questions about Certificates
+        // 9. Questions about Certificates
         if (q.contains("certificate") || q.contains("verify") || q.contains("credential") || q.contains("cert")) {
             return "MentorHub issues cryptographically verified completion certificates with tamper-proof identification codes like MH-CERT-9921-X. Anyone can verify certificate authenticity publicly by visiting [📜 Verified Credentials](navigate:/certificates).";
         }
 
-        // 11. Questions about Goals or Sessions
+        // 10. Questions about Goals or Sessions
         if (q.contains("goal") || q.contains("session") || q.contains("meeting") || q.contains("calendar")) {
             return "You can track your milestone achievements in the [🎯 SMART Goals Tracker](navigate:/goals), and schedule or join 1-on-1 and group mentoring sessions with video room links in the [📅 Mentoring Sessions Hub](navigate:/sessions).";
         }
 
-        // 12. General default platform summary with navigation
+        // 11. General default platform summary with navigation
         return """
             ### 🏛️ MentorHub AI Platform & Academic Copilot
             MentorHub is Centurion University's premier AI-powered mentoring and collaborative engineering platform.
 
             :::path
-            Step 1: CUTM Academic Repository | 385 authentic course syllabi & courseware slides | navigate:/cutm-courses
+            Step 1: C.U.T.M. Academic Repository | 385 authentic course syllabi & courseware slides | navigate:/cutm-courses
             Step 2: Collaborative Cloud IDE | Real-time multi-language code compiler & whiteboard | navigate:/workspace
-            Step 3: AI Mock Viva Arena | Calibrated oral defense panel & rubric scoring | navigate:/mock-viva
-            Step 4: Smart Mentorship | 1-on-1 sessions with Lead Architect Akshat Aryan | navigate:/mentor-matching
+            Step 3: Smart Mentorship | 1-on-1 sessions with Lead Architect Akshat Aryan | navigate:/mentor-matching
+            Step 4: Goal Telemetry | Track SMART milestones & verified completion credentials | navigate:/goals
             :::
 
-            Tap [🏛️ Explore CUTM Courses](navigate:/cutm-courses) or [🎙️ Launch AI Viva](navigate:/mock-viva) to begin!
+            Tap [🏛️ Explore C.U.T.M. Courses](navigate:/cutm-courses) to begin!
             """.trim();
     }
 }

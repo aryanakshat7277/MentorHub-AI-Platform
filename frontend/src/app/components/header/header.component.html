@@ -42,12 +42,6 @@
       <span class="gesture-label">{{ (gestureService.isEnabled$ | async) ? 'GESTURES ON' : 'GESTURES' }}</span>
     </button>
 
-    <!-- What's New / Feature Spotlight Modal Button -->
-    <button class="features-spotlight-btn clay-badge-3d" (click)="openFeaturesModal()" title="Explore 6 Unique New Features">
-      <span class="spotlight-sparkle">✨</span>
-      <span class="spotlight-label serif-title">WHAT'S NEW</span>
-    </button>
-
     <!-- Interactive Notifications Bell & Dropdown Tray -->
     <div class="notification-wrapper">
       <div class="notification-btn clay-badge-3d" (click)="toggleNotifications($event)" title="Notifications">
@@ -163,84 +157,6 @@
       <div class="spotlight-empty" *ngIf="filteredSpotlightItems.length === 0">
         <span>No matching results for "{{ searchQuery }}"</span>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- 3D What's New Feature Spotlight Modal -->
-<div class="features-modal-overlay" *ngIf="showFeaturesModal" (click)="closeFeaturesModal()">
-  <div class="features-spotlight-dialog clay-panel elevated-card-3d" (click)="$event.stopPropagation()">
-    <div class="features-header">
-      <div class="features-title-row">
-        <span class="features-crest">✨</span>
-        <div>
-          <h2 class="serif-title">WHAT'S NEW IN MENTORHUB AI</h2>
-          <p class="features-subtitle serif-title">6 unique features designed to make peer mentoring delightful and verified</p>
-        </div>
-      </div>
-      <button class="close-features-btn tactile-btn-3d" (click)="closeFeaturesModal()">✕</button>
-    </div>
-
-    <div class="features-grid">
-      <div class="feature-card" (click)="navigateToFeature('/sessions')">
-        <div class="feature-icon">🚨</div>
-        <div class="feature-info">
-          <h4 class="serif-title">10-Minute SOS Bug Rescue</h4>
-          <p class="serif-title">Fast help queue for stuck students. Mentors claim and earn +100 Karma XP upon solving.</p>
-          <span class="feature-link serif-title">Open SOS Queue ➔</span>
-        </div>
-      </div>
-
-      <div class="feature-card" (click)="navigateToFeature('/workspace')">
-        <div class="feature-icon">🎙️</div>
-        <div class="feature-info">
-          <h4 class="serif-title">Live Interview Confidence Coach</h4>
-          <p class="serif-title">Real-time speech pacing (WPM), filler word detector ('um', 'like'), and live voice activity meter.</p>
-          <span class="feature-link serif-title">Launch Workspace ➔</span>
-        </div>
-      </div>
-
-      <div class="feature-card" (click)="navigateToFeature('/sessions')">
-        <div class="feature-icon">👥</div>
-        <div class="feature-info">
-          <h4 class="serif-title">Silent Co-Pilot (Shadow Mode)</h4>
-          <p class="serif-title">Observe senior engineers coding live in read-only mode with floating kudos and quiet Q&amp;A.</p>
-          <span class="feature-link serif-title">Join Live Session ➔</span>
-        </div>
-      </div>
-
-      <div class="feature-card" (click)="navigateToFeature('/sessions')">
-        <div class="feature-icon">🔄</div>
-        <div class="feature-info">
-          <h4 class="serif-title">Reverse Mentoring Exchange</h4>
-          <p class="serif-title">Students teach mentors modern tools, earn +150 XP, and unlock the "Two-Way Learner" badge.</p>
-          <span class="feature-link serif-title">Schedule Exchange ➔</span>
-        </div>
-      </div>
-
-      <div class="feature-card" (click)="navigateToFeature('/mentor-matching')">
-        <div class="feature-icon">🔋</div>
-        <div class="feature-info">
-          <h4 class="serif-title">Mentor Battery Recharge Shield</h4>
-          <p class="serif-title">Burnout prevention shield that shows resting status and kindly refers students to peers.</p>
-          <span class="feature-link serif-title">View Mentors ➔</span>
-        </div>
-      </div>
-
-      <div class="feature-card" (click)="navigateToFeature('/portfolio/pavani')">
-        <div class="feature-icon">📄</div>
-        <div class="feature-info">
-          <h4 class="serif-title">1-Click Proof of Growth Portfolio</h4>
-          <p class="serif-title">Public verified profile with QR validation, Knowledge Impact score, and print resume view.</p>
-          <span class="feature-link serif-title">View Public Profile ➔</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="features-footer">
-      <button class="btn-primary tactile-btn-3d serif-title" (click)="closeFeaturesModal()">
-        <span>AWESOME, LET'S EXPLORE!</span>
-      </button>
     </div>
   </div>
 </div>

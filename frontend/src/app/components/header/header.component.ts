@@ -69,12 +69,9 @@ export class HeaderComponent implements OnInit {
     { title: 'Resource Hub & Docs', category: 'PAGE', path: '/resource-hub', icon: '📚' },
     { title: 'Analytics & Learning Progress', category: 'PAGE', path: '/analytics', icon: '📊' },
     { title: 'User Profile & Settings', category: 'PAGE', path: '/profile', icon: '👤' },
-    { title: '10-Minute SOS Bug Rescue', category: 'PAGE', path: '/sessions', icon: '🚨' },
     { title: 'Live Interview Confidence Coach', category: 'PAGE', path: '/workspace', icon: '🎙️' },
     { title: 'Verified Proof of Growth Portfolio', category: 'PAGE', path: '/portfolio/pavani', icon: '📄' }
   ];
-
-  showFeaturesModal = false;
 
   constructor(
     private apiService: ApiService,
@@ -197,24 +194,6 @@ export class HeaderComponent implements OnInit {
       document.exitFullscreen().catch(err => console.warn(err));
     }
     this.soundService.playClick();
-  }
-
-  openFeaturesModal() {
-    this.soundService.playSuccess();
-    this.showFeaturesModal = true;
-    this.showNotifications = false;
-    this.showDropdown = false;
-    this.showSpotlightSearch = false;
-  }
-
-  closeFeaturesModal() {
-    this.soundService.playClick();
-    this.showFeaturesModal = false;
-  }
-
-  navigateToFeature(path: string) {
-    this.closeFeaturesModal();
-    this.router.navigateByUrl(path);
   }
 
   logout() {

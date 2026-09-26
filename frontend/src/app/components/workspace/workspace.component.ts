@@ -312,15 +312,6 @@ print("Sorted:  ", quick_sort(unsorted))`
   newSpectatorQuestion = '';
   showSpectatorQna = false;
 
-  // ==========================================
-  // Feature 1: 10-Minute SOS Bug Rescue Mode
-  // ==========================================
-  isSosSession = false;
-  sosSecondsRemaining = 582; // ~9:42 remaining
-  sosTimerDisplay = '09:42';
-  sosTimerInterval: any = null;
-  sosResolved = false;
-
   constructor(
     private route: ActivatedRoute,
     private apiService: ApiService,
@@ -418,16 +409,13 @@ print("Sorted:  ", quick_sort(unsorted))`
       }
     });
 
-    // Check if entered in Silent Co-Pilot Spectator mode, SOS Rescue mode, or CUTM Lab exercise mode
+    // Check if entered in Silent Co-Pilot Spectator mode or CUTM Lab exercise mode
     this.route.queryParams.subscribe(params => {
       if (params['mode'] === 'spectator') {
         this.isSpectator = true;
         this.showToast('👁️ Joined session in Silent Co-Pilot Spectator Mode (Read-Only).');
         const sid = params['sessionId'] ? parseInt(params['sessionId']) : this.sessionId;
         this.apiService.joinShadowSession(sid).subscribe();
-      }
-      if (params['sos'] === '1' || params['sos'] === 'true') {
-        this.startSosRescueMode();
       }
       if (params['course'] && params['lab']) {
         this.loadCutmLabExercise(
@@ -898,41 +886,6 @@ console.log("[✓] Execution complete.");
   onJitsiStatusChanged(status: JitsiMeetingStatus) {
     this.jitsiStatus = status;
     this.isVideoConnected = status === 'CONNECTED';
-  }
-
-  // ==========================================
-  // SOS BUG RESCUE CONTROLS
-  // ==========================================
-  startSosRescueMode() {
-    this.isSosSession = true;
-    this.sosResolved = false;
-    this.showToast('🚨 10-Minute SOS Bug Rescue Activated! Fix the bug to earn +100 XP!');
-    if (this.sosTimerInterval) clearInterval(this.sosTimerInterval);
-    this.sosTimerInterval = setInterval(() => {
-      if (this.sosSecondsRemaining > 0 && !this.sosResolved) {
-        this.sosSecondsRemaining--;
-        const mins = Math.floor(this.sosSecondsRemaining / 60);
-        const secs = this.sosSecondsRemaining % 60;
-        this.sosTimerDisplay = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
-      } else {
-        clearInterval(this.sosTimerInterval);
-      }
-    }, 1000);
-  }
-
-  resolveSosBug() {
-    this.sosResolved = true;
-    if (this.sosTimerInterval) clearInterval(this.sosTimerInterval);
-    this.apiService.resolveSosRequest(1).subscribe({
-      next: () => {
-        this.soundService.playVictoryFanfare();
-        this.showToast('🎉 Bravo! SOS Bug Solved! +100 XP & Karma awarded to mentor!');
-      },
-      error: () => {
-        this.soundService.playVictoryFanfare();
-        this.showToast('🎉 Bravo! SOS Bug Solved! +100 XP & Karma awarded to mentor!');
-      }
-    });
   }
 
   // ==========================================

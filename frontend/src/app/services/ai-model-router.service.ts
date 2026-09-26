@@ -17,7 +17,7 @@ export interface ModelRoutingConfig {
 })
 export class AiModelRouterService {
   public readonly config: ModelRoutingConfig = {
-    textModel: 'gemini-3.6-flash',
+    textModel: 'gemini-3.8-flash',
     groqModel: 'openai/gpt-oss-120b',
     liveModel: 'gemini-3.1-flash-live-preview',
     fallbackSttModel: 'whisper-large-v3-turbo',
@@ -32,6 +32,8 @@ export class AiModelRouterService {
     private liveService: GeminiLiveService
   ) {}
 
+  private readonly conciseSystemDirective = 'Keep all responses brief, crisp, and limited to 2-3 short lines or bullet points. Avoid long paragraphs or verbose intros.';
+
   public sendTextMessage(
     message: string,
     history?: { role: string; content: string }[],
@@ -45,7 +47,7 @@ export class AiModelRouterService {
       message,
       provider,
       chosenModel,
-      undefined,
+      this.conciseSystemDirective,
       'en-US',
       history,
       screenImage,
@@ -66,7 +68,7 @@ export class AiModelRouterService {
       message,
       provider,
       chosenModel,
-      undefined,
+      this.conciseSystemDirective,
       'en-US',
       history,
       screenImage,

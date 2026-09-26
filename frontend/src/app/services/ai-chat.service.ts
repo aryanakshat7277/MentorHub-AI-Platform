@@ -113,7 +113,7 @@ export class AiChatService {
   getProvidersAndModels(): Observable<any> {
     return this.http.get(`${this.baseUrl}/providers`).pipe(
       catchError(() => of({
-        GEMINI: ['gemini-3.6-flash', 'gemini-2.0-flash'],
+        GEMINI: ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-2.0-flash'],
         GROQ: ['openai/gpt-oss-120b', 'llama-3.1-8b-instant', 'whisper-large-v3-turbo'],
         DEEPSEEK: ['deepseek-chat'],
         BRAIN: ['cutm-academic-brain-copilot']

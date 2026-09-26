@@ -71,40 +71,6 @@
     <div *ngFor="let k of spectatorKudos" class="floating-kudo-glyph">{{ k.emoji }}</div>
   </div>
 
-  <!-- 10-Minute SOS Bug Rescue Active Ribbon -->
-  <div *ngIf="isSosSession" class="sos-rescue-hud-ribbon clay-panel elevated-card-3d" [class.solved]="sosResolved">
-    <div class="sos-hud-left">
-      <span class="sos-hud-pulse-dot"></span>
-      <span class="sos-hud-icon">🚨</span>
-      <div class="sos-hud-text">
-        <h3 class="sos-hud-title serif-title">{{ sosResolved ? '🎉 BUG RESCUED SUCCESSFULLY!' : '10-MINUTE SOS BUG RESCUE IN PROGRESS' }}</h3>
-        <p class="sos-hud-desc serif-title">{{ sosResolved ? 'Congratulations! +100 XP & Karma points awarded to mentor.' : 'Rapid debugging huddle: Student is stuck and needs quick guidance!' }}</p>
-      </div>
-    </div>
-
-    <div class="sos-hud-right">
-      <div class="sos-hud-timer-badge 3d-inset-well" *ngIf="!sosResolved">
-        <span class="timer-clock-icon">⏱️</span>
-        <span class="timer-countdown-val serif-title">{{ sosTimerDisplay }}</span>
-        <span class="timer-unit-lbl serif-title">REMAINING</span>
-      </div>
-
-      <button *ngIf="!sosResolved" (click)="resolveSosBug()" class="btn-resolve-sos tactile-btn-3d serif-title" title="Mark bug resolved and award +100 XP">
-        <span>✅ MARK BUG SOLVED (+100 XP)</span>
-        <span class="shine-sweep"></span>
-      </button>
-
-      <div *ngIf="sosResolved" class="sos-resolved-tag serif-title">
-        <span>⭐ +100 XP AWARDED</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Floating Kudos Layer for Silent Co-Pilot -->
-  <div class="floating-kudos-layer" *ngIf="spectatorKudos.length > 0">
-    <div *ngFor="let k of spectatorKudos" class="floating-kudo-glyph">{{ k.emoji }}</div>
-  </div>
-
   <!-- Silent Co-Pilot Spectator Announcement Banner -->
   <div *ngIf="isSpectator" class="spectator-mode-banner clay-panel elevated-card-3d">
     <div class="banner-left">

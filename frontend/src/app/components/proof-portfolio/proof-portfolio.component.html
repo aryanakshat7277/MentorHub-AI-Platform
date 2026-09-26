@@ -28,7 +28,7 @@
     <header class="portfolio-hero clay-panel elevated-card-3d">
       <div class="hero-left">
         <div class="avatar-frame gold-seal-ring">
-          <img [src]="portfolio.profile.avatarUrl" alt="Verified Scholar" class="avatar-img" />
+          <img [src]="portfolio.profile.avatarUrl" (error)="portfolio.profile.avatarUrl = 'assets/akshat-profile.jpg'" [alt]="portfolio.profile.name" class="avatar-img" />
           <div class="verified-check-badge" title="Identity Cryptographically Verified">✓</div>
         </div>
         <div class="hero-text">
@@ -54,6 +54,10 @@
         <div class="stat-pill">
           <span class="stat-val serif-title">⭐ {{ portfolio.knowledgeImpact.impactScore }}/100</span>
           <span class="stat-lbl serif-title">IMPACT SCORE</span>
+        </div>
+        <div class="stat-pill qr-cta-pill tactile-btn-3d" (click)="openVerificationModal()" title="View & Scan Tamper-Proof Cryptographic QR Code">
+          <span class="stat-val serif-title">📱 QR SEAL</span>
+          <span class="stat-lbl serif-title">SCAN PROOF</span>
         </div>
       </div>
     </header>
@@ -177,69 +181,105 @@
     </section>
 
     <!-- 6. Cryptographic Proof Certificate & QR Verification Seal -->
-    <footer class="portfolio-footer-seal clay-panel" (click)="openVerificationModal()" style="cursor: pointer;" title="Click to view Cryptographic Digital Certificate">
+    <footer class="portfolio-footer-seal clay-panel" (click)="openVerificationModal()" style="cursor: pointer;" title="Scan QR code with phone camera or click to inspect Cryptographic Digital Certificate">
       <div class="seal-left">
         <div class="crest-gold">
           <span class="crest-icon">🛡️</span>
         </div>
         <div class="seal-meta">
           <h3 class="seal-title serif-title">CRYPTOGRAPHIC MENTORHUB VERIFICATION SEAL</h3>
-          <p class="seal-sub serif-title">All milestones, feedback scores, and quest masteries are cryptographically signed &amp; verified on the platform. Click to inspect certificate.</p>
+          <p class="seal-sub serif-title">All milestones, feedback scores, and quest masteries for <strong>{{ portfolio.profile.name }}</strong> are cryptographically signed &amp; encoded in this unique QR code. Scan with any camera or click to inspect.</p>
           <div class="proof-code-box">
             <span class="proof-lbl serif-title">VERIFICATION ID:</span>
             <code class="proof-code">{{ portfolio.verificationCode }}</code>
             <span class="issued-tag serif-title">Issued: {{ portfolio.issuedAt }}</span>
+            <span class="qr-status-pill serif-title">● UNIQUE SCANNABLE QR</span>
           </div>
         </div>
       </div>
 
       <div class="seal-qr-box">
-        <div class="qr-mock">
-          <div class="qr-pattern"></div>
-          <span class="qr-label serif-title">CLICK TO VERIFY</span>
+        <div class="qr-real-frame">
+          <img
+            [src]="qrCodeUrl || getPortfolioQrCodeUrl(260)"
+            [alt]="'Verification QR Code for ' + portfolio.profile.name"
+            class="qr-real-img"
+          />
+          <span class="qr-label serif-title">📱 SCAN TO VERIFY</span>
         </div>
       </div>
     </footer>
   </div>
 
   <!-- 7. Interactive Cryptographic Verification Modal Dialog -->
-  <div class="modal-overlay" *ngIf="showVerificationModal">
-    <div class="verification-dialog clay-panel elevated-card-3d">
+  <div class="modal-overlay" *ngIf="showVerificationModal" (click)="closeVerificationModal()">
+    <div class="verification-dialog clay-panel elevated-card-3d" (click)="$event.stopPropagation()">
       <div class="dialog-header">
         <div class="dialog-branding">
           <span class="dialog-crest">🛡️</span>
           <div>
             <h3 class="dialog-title serif-title">CRYPTOGRAPHIC VERIFICATION CERTIFICATE</h3>
-            <span class="cert-status-tag serif-title">✅ VALID &amp; TAMPER-PROOF</span>
+            <span class="cert-status-tag serif-title">✅ 100% VALID &amp; TAMPER-PROOF • {{ portfolio?.verificationCode }}</span>
           </div>
         </div>
         <button class="close-dialog-btn tactile-btn-3d" (click)="closeVerificationModal()">✕</button>
       </div>
 
       <div class="dialog-body" *ngIf="portfolio">
-        <div class="cert-row">
-          <span class="cert-lbl serif-title">CERTIFIED INDIVIDUAL:</span>
-          <strong class="cert-val serif-title">{{ portfolio.profile.name }}</strong>
+        <div class="modal-qr-split">
+          <div class="modal-qr-card">
+            <img
+              [src]="modalQrCodeUrl || getPortfolioQrCodeUrl(360)"
+              [alt]="'Unique Verification QR for ' + portfolio.profile.name"
+              class="modal-qr-img"
+            />
+            <span class="modal-qr-caption serif-title">📱 Scan with phone camera for full portfolio proof</span>
+          </div>
+
+          <div class="modal-cert-meta">
+            <div class="cert-row">
+              <span class="cert-lbl serif-title">CERTIFIED INDIVIDUAL:</span>
+              <strong class="cert-val serif-title">{{ portfolio.profile.name }} — {{ portfolio.profile.title }}</strong>
+            </div>
+            <div class="cert-row">
+              <span class="cert-lbl serif-title">UNIQUE VERIFICATION ID:</span>
+              <code class="cert-code">{{ portfolio.verificationCode }}</code>
+            </div>
+            <div class="cert-row">
+              <span class="cert-lbl serif-title">VERIFIED PORTFOLIO SUMMARY:</span>
+              <span class="cert-val serif-title">
+                Level {{ portfolio.profile.level }} ({{ portfolio.profile.xpPoints }} XP) •
+                {{ portfolio.conqueredQuests?.length || 0 }} Milestones •
+                {{ portfolio.verifiedGoals?.length || 0 }} Verified Goals •
+                Impact {{ portfolio.knowledgeImpact?.impactScore }}/100
+              </span>
+            </div>
+            <div class="cert-row">
+              <span class="cert-lbl serif-title">DIGITAL FINGERPRINT (SHA-256):</span>
+              <code class="hash-code">{{ portfolio.signatureHash }}</code>
+            </div>
+            <div class="cert-row">
+              <span class="cert-lbl serif-title">PUBLIC VERIFICATION LINK:</span>
+              <a [href]="portfolio.verificationUrl" target="_blank" class="cert-link serif-title">{{ portfolio.verificationUrl }}</a>
+            </div>
+          </div>
         </div>
-        <div class="cert-row">
-          <span class="cert-lbl serif-title">VERIFICATION ID:</span>
-          <code class="cert-code">{{ portfolio.verificationCode }}</code>
-        </div>
-        <div class="cert-row">
-          <span class="cert-lbl serif-title">ISSUING AUTHORITY:</span>
-          <span class="cert-val serif-title">MentorHub AI Trust Engine v2.4 (Ed25519 Signed)</span>
-        </div>
-        <div class="cert-row">
-          <span class="cert-lbl serif-title">DIGITAL FINGERPRINT (SHA-256):</span>
-          <code class="hash-code">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</code>
-        </div>
-        <div class="cert-row">
-          <span class="cert-lbl serif-title">PUBLIC RECORD:</span>
-          <a [href]="portfolio.verificationUrl" target="_blank" class="cert-link serif-title">{{ portfolio.verificationUrl }}</a>
+
+        <div class="qr-payload-preview">
+          <div class="payload-header">
+            <span class="cert-lbl serif-title">📄 EMBEDDED QR SCAN DATA PREVIEW ({{ portfolio.profile.name | uppercase }}):</span>
+            <button type="button" class="copy-payload-btn serif-title" (click)="copyVerificationPayload($event)">
+              {{ isPayloadCopied ? '✓ COPIED TO CLIPBOARD' : '📋 COPY FULL RECORD' }}
+            </button>
+          </div>
+          <pre class="payload-pre">{{ getVerificationQrPayload() }}</pre>
         </div>
       </div>
 
       <div class="dialog-footer">
+        <a [href]="getPortfolioQrCodeUrl(600)" target="_blank" rel="noopener noreferrer" class="btn-secondary-qr tactile-btn-3d serif-title">
+          <span>🔍 OPEN HD QR IMAGE</span>
+        </a>
         <button class="btn-primary tactile-btn-3d serif-title" (click)="closeVerificationModal()">
           <span>CLOSE VERIFICATION</span>
         </button>

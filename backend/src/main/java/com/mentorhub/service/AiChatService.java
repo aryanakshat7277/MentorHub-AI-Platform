@@ -114,13 +114,13 @@ public class AiChatService {
             String screenContext
     ) {
         String reqProvider = (provider != null) ? provider.toUpperCase() : "GEMINI";
-        String reqModel = (model != null && !model.isEmpty()) ? model : "gemini-3.6-flash";
+        String reqModel = (model != null && !model.isEmpty()) ? model : "gemini-3.8-flash";
 
         if (reqModel.endsWith("-latest")) {
             reqModel = reqModel.replace("-latest", "");
         }
         if ("gemini-2.5-flash".equalsIgnoreCase(reqModel)) {
-            reqModel = "gemini-3.6-flash";
+            reqModel = "gemini-3.8-flash";
         }
 
         Map<String, Object> result = new HashMap<>();
@@ -257,10 +257,13 @@ public class AiChatService {
 
     private String resolveGeminiModel(String model) {
         if (model == null || model.isEmpty()) {
-            return "gemini-3.6-flash";
+            return "gemini-3.8-flash";
         }
         if (model.contains("pro")) {
             return "gemini-1.5-pro";
+        }
+        if (model.contains("3.8")) {
+            return "gemini-3.8-flash";
         }
         if (model.contains("3.6") || model.contains("3.5") || model.contains("3.1")) {
             return "gemini-3.6-flash";
@@ -271,7 +274,7 @@ public class AiChatService {
         if (model.contains("1.5")) {
             return "gemini-1.5-flash";
         }
-        return "gemini-3.6-flash";
+        return "gemini-3.8-flash";
     }
 
     private void streamGemini(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload, String screenImage, String screenContext, SseEmitter emitter) throws Exception {

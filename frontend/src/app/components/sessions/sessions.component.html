@@ -21,36 +21,10 @@
     </div>
 
     <div class="header-action-group">
-      <button class="btn-sos tactile-btn-3d serif-title" (click)="openSosModal()" title="Ask for a quick 10-minute SOS bug rescue from active online mentors">
-        <span class="btn-icon">🚨</span>
-        <span>10-MIN SOS BUG RESCUE</span>
-      </button>
-
       <button class="btn-primary schedule-session-btn tactile-btn-3d serif-title" (click)="showBookingModal = true">
         <span class="btn-icon">✨</span>
         <span>+ SCHEDULE NEW SESSION</span>
         <span class="shine-sweep"></span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Active 10-Minute SOS Bug Rescue Queue Banner -->
-  <div *ngIf="activeSosRequests.length > 0" class="sos-rescue-banner clay-panel elevated-card-3d">
-    <div class="sos-banner-left">
-      <div class="sos-beacon-circle">🚨</div>
-      <div class="sos-banner-meta">
-        <div class="sos-title-row">
-          <h3 class="sos-banner-title serif-title">ACTIVE SOS BUG RESCUE QUEUE ({{ activeSosRequests.length }})</h3>
-          <span class="sos-karma-tag serif-title">⚡ 10-MIN QUICK HUDDLE • +100 XP / KARMA</span>
-        </div>
-        <p class="sos-banner-desc serif-title">
-          <strong>{{ activeSosRequests[0].menteeName }}</strong> is stuck on <strong>{{ activeSosRequests[0].techStack }}</strong>: "{{ activeSosRequests[0].title }}"
-        </p>
-      </div>
-    </div>
-    <div class="sos-banner-actions">
-      <button (click)="claimSos(activeSosRequests[0])" class="btn-claim-sos tactile-btn-3d serif-title">
-        <span>🛡️ CLAIM &amp; RESCUE (+100 XP) ➔</span>
       </button>
     </div>
   </div>
@@ -462,65 +436,6 @@
         <button class="btn-outline tactile-btn-3d serif-title" (click)="closeTransferModal()">CANCEL</button>
         <button class="btn-primary transfer-submit-btn tactile-btn-3d serif-title" (click)="submitTransfer()">
           <span>🔄 CONFIRM & HANDOVER MENTEE</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================================================
-       MODAL 3: 10-MINUTE SOS BUG RESCUE MODAL
-       ========================================================= -->
-  <div class="modal-overlay" *ngIf="showSosModal" (click)="closeSosModal()">
-    <div class="modal-content sos-modal-card clay-panel elevated-modal-3d" (click)="$event.stopPropagation()">
-      <div class="modal-header sos-header">
-        <div class="modal-title-wrap">
-          <div class="modal-seal-badge sos-seal">🚨</div>
-          <div>
-            <h2 class="serif-title">10-MINUTE SOS BUG RESCUE</h2>
-            <p class="modal-sub serif-title">Stuck on a stubborn bug? Fire a beacon to active online mentors for a quick 10-min huddle.</p>
-          </div>
-        </div>
-        <button class="close-modal tactile-btn-3d" (click)="closeSosModal()">✕</button>
-      </div>
-
-      <div class="modal-body">
-        <div class="form-group">
-          <label class="serif-title">TECH STACK / FRAMEWORK</label>
-          <div class="input-wrapper">
-            <select [(ngModel)]="newSosRequest.techStack" class="modal-input inset-input-3d serif-title">
-              <option value="Spring Boot">Spring Boot 3 (Java)</option>
-              <option value="Angular 17">Angular 17 Standalone (TypeScript)</option>
-              <option value="Docker">Docker / Container Networking</option>
-              <option value="Database">H2 / PostgreSQL SQL Database</option>
-              <option value="Python">Python / AI Inference</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="serif-title">1-LINE PROBLEM / ERROR SUMMARY</label>
-          <div class="input-wrapper">
-            <input type="text" [(ngModel)]="newSosRequest.title" class="modal-input inset-input-3d serif-title" placeholder="e.g. CORS preflight failing on Angular POST request to Spring 8080" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="serif-title">DETAILED ERROR LOG OR SYMPTOMS</label>
-          <div class="input-wrapper">
-            <textarea [(ngModel)]="newSosRequest.problemDescription" rows="4" class="modal-input modal-textarea inset-input-3d serif-title" placeholder="Paste the exact error message or terminal stack trace here..."></textarea>
-          </div>
-        </div>
-
-        <div class="sos-reward-notice 3d-inset-well">
-          <span class="reward-icon">🎁</span>
-          <span class="reward-txt serif-title">Online mentors receive <strong>+100 Karma XP</strong> for claiming and helping resolve this blocker within 10 minutes.</span>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn-outline tactile-btn-3d serif-title" (click)="closeSosModal()">CANCEL</button>
-        <button class="btn-sos-submit tactile-btn-3d serif-title" (click)="submitSosRequest()">
-          <span>🚨 FIRE SOS BEACON NOW</span>
         </button>
       </div>
     </div>

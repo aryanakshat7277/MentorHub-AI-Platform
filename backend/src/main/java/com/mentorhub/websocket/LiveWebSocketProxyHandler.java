@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
@@ -21,6 +22,7 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
     private final GeminiLiveSessionService sessionService;
     private final Map<String, WebSocketSession> clientToGeminiSessions = new ConcurrentHashMap<>();
     private final WebSocketClient webSocketClient;
+    private final AtomicInteger currentKeyIndex = new AtomicInteger(0);
 
     public LiveWebSocketProxyHandler(GeminiLiveSessionService sessionService) {
         this.sessionService = sessionService;
@@ -34,6 +36,14 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession clientSession) throws Exception {
         String clientSessionId = clientSession.getId();
         logger.info("Client connected to Live Voice Proxy on /ws-ai-live: {}", clientSessionId);
+
+        // Clean up any previous upstream session for this client
+        WebSocketSession oldSession = clientToGeminiSessions.remove(clientSessionId);
+        if (oldSession != null && oldSession.isOpen()) {
+            try {
+                oldSession.close();
+            } catch (Exception ignored) {}
+        }
 
         java.util.List<String> apiKeys = sessionService.getGeminiApiKeys();
         String requestedModel = sessionService.getLiveModel();
@@ -51,36 +61,46 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
         Exception lastException = null;
 
         String requestedVoice = sessionService.getLiveVoice();
+        if (requestedVoice == null || requestedVoice.isBlank()) {
+            requestedVoice = "Kore";
+        }
         try {
             if (clientSession.getUri() != null && clientSession.getUri().getQuery() != null) {
                 for (String param : clientSession.getUri().getQuery().split("&")) {
                     String[] pair = param.split("=");
-                    if (pair.length == 2) {
-                        if ("voice".equalsIgnoreCase(pair[0])) {
-                            String v = pair[1].trim();
-                            if (v.equalsIgnoreCase("Aoede") || v.equalsIgnoreCase("Charon") ||
-                                v.equalsIgnoreCase("Fenrir") || v.equalsIgnoreCase("Kore") ||
-                                v.equalsIgnoreCase("Puck")) {
-                                requestedVoice = v.substring(0, 1).toUpperCase() + v.substring(1).toLowerCase();
-                            }
-                        } else if ("model".equalsIgnoreCase(pair[0])) {
-                            String m = pair[1].trim();
-                            if (!m.isEmpty()) {
-                                requestedModel = m;
-                            }
+                    if (pair.length == 2 && "model".equalsIgnoreCase(pair[0])) {
+                        String m = pair[1].trim();
+                        if (!m.isEmpty()) {
+                            requestedModel = m;
+                        }
+                    } else if (pair.length == 2 && "voice".equalsIgnoreCase(pair[0])) {
+                        String v = pair[1].trim();
+                        if (!v.isEmpty()) {
+                            requestedVoice = v;
                         }
                     }
                 }
             }
         } catch (Exception ignored) {}
+
+        // Google BidiGenerateContent endpoint exclusively supports gemini-3.1-flash-live-preview.
+        if (requestedModel == null || !requestedModel.contains("live") || requestedModel.contains("3.8") || requestedModel.contains("3.6")) {
+            logger.info("Normalizing live model '{}' to Google BidiGenerateContent live streaming model 'gemini-3.1-flash-live-preview'", requestedModel);
+            requestedModel = "gemini-3.1-flash-live-preview";
+        }
+
         final String effectiveVoice = requestedVoice;
         final String effectiveModel = requestedModel;
         logger.info("Live Voice Proxy for client {}: Model={}, Voice={}", clientSessionId, effectiveModel, effectiveVoice);
 
-        for (int i = 0; i < apiKeys.size(); i++) {
-            String apiKey = apiKeys.get(i);
+        int totalKeys = apiKeys.size();
+        int startIndex = currentKeyIndex.get() % totalKeys;
+
+        for (int attempt = 0; attempt < totalKeys; attempt++) {
+            int keyIdx = (startIndex + attempt) % totalKeys;
+            String apiKey = apiKeys.get(keyIdx);
             try {
-                logger.info("Attempting Live API upstream connection with key index {}...", i);
+                logger.info("Attempting Live API upstream connection with key index {}...", keyIdx);
                 String geminiWsUri = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=" + apiKey;
                 
                 geminiSession = webSocketClient.execute(new AbstractWebSocketHandler() {
@@ -103,6 +123,8 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
                                     }
                                   }
                                 },
+                                "inputAudioTranscription": {},
+                                "outputAudioTranscription": {},
                                 "systemInstruction": {
                                   "parts": [
                                     {
@@ -147,6 +169,10 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
                     @Override
                     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
                         logger.info("Upstream Gemini session closed for client {}: {}", clientSessionId, status);
+                        if (status.getCode() == 1011 || (status.getReason() != null && status.getReason().toLowerCase().contains("quota"))) {
+                            logger.warn("Upstream Gemini quota exceeded for key index {}. Rotating to next key.", keyIdx);
+                            currentKeyIndex.incrementAndGet();
+                        }
                         try {
                             if (clientSession.isOpen()) {
                                 clientSession.sendMessage(new TextMessage("{\"type\":\"DISCONNECTED\",\"status\":\"" + status.getReason() + "\"}"));
@@ -167,12 +193,13 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
 
                 if (geminiSession != null && geminiSession.isOpen()) {
                     clientToGeminiSessions.put(clientSessionId, geminiSession);
-                    logger.info("Successfully established Live API session for client {} using key index {}", clientSessionId, i);
+                    logger.info("Successfully established Live API session for client {} using key index {}", clientSessionId, keyIdx);
                     return;
                 }
             } catch (Exception e) {
                 lastException = e;
-                logger.warn("Failed to connect to Gemini Live Bidi WebSocket using key index {}: {}", i, e.getMessage());
+                logger.warn("Failed to connect to Gemini Live Bidi WebSocket using key index {}: {}", keyIdx, e.getMessage());
+                currentKeyIndex.incrementAndGet();
             }
         }
 
@@ -191,15 +218,10 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
             logger.info("Client -> Gemini message: {}", payload);
         }
 
-        // Sanitize incoming mediaChunks to prevent Gemini Live CloseStatus 1007 (malformed base64)
+        // Drop deprecated mediaChunks to prevent Gemini 3.1 Flash Live Preview CloseStatus 1007
         if (payload != null && payload.contains("mediaChunks")) {
-            if (payload.contains("\"data\":\"data:,") ||
-                payload.contains("\"data\":\"data:image") ||
-                payload.contains("\"data\":\"\"") ||
-                payload.contains("\"data\": \"data:,")) {
-                logger.warn("LiveWebSocketProxyHandler: Dropped malformed mediaChunk to prevent upstream 1007 crash for client {}", clientSession.getId());
-                return;
-            }
+            logger.warn("LiveWebSocketProxyHandler: Blocked deprecated mediaChunks payload for client {} (use video/audio/text instead)", clientSession.getId());
+            return;
         }
 
         WebSocketSession geminiSession = clientToGeminiSessions.get(clientSession.getId());
@@ -233,12 +255,16 @@ public class LiveWebSocketProxyHandler extends AbstractWebSocketHandler {
 
     private String escapeJsonString(String input) {
         if (input == null) return "\"\"";
-        return "\"" + input
-            .replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\t", "\\t")
-            + "\"";
+        try {
+            return new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(input);
+        } catch (Exception e) {
+            return "\"" + input
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t")
+                + "\"";
+        }
     }
 }
