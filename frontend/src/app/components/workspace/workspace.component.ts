@@ -173,6 +173,27 @@ fn main() {
   lastAutoFixResult: any = null;
   highlightedFixedLines: number[] = [];
   previousBuggyCode = '';
+
+  // ==========================================
+  // Feature 3: Cross-Language Code Converter (Polyglot)
+  // "Write same code in other languages for same output with clean UI"
+  // ==========================================
+  isPolyglotModalOpen = false;
+  isTranspiling = false;
+  targetLanguage = 'python';
+  transpiledCode = '';
+  transpiledExplanation = '';
+  transpiledDifferences: string[] = [];
+  transpileProvider = '';
+  transpileModel = '';
+  transpileLatency = 0;
+  transpileCache: Record<string, { code: string; explanation: string; differences: string[]; provider: string; model: string; latency: number }> = {};
+
+  // In-Modal Test Run State to verify identical output
+  isTestingTranspiled = false;
+  transpiledTestOutput = '';
+  transpiledTestStatus: 'IDLE' | 'SUCCESS' | 'ERROR' = 'IDLE';
+
   chatInput = '';
   activeTab: 'video' | 'notes' | 'chat' = 'video';
 
@@ -949,6 +970,148 @@ console.log("[✓] Execution complete.");
     if (this.terminalTab === 'autofix') {
       this.terminalTab = 'stdout';
     }
+  }
+
+  // ==========================================
+  // Polyglot Feature: Cross-Language Code Converter
+  // ==========================================
+  openPolyglotModal() {
+    this.isPolyglotModalOpen = true;
+    this.soundService.playClickSound();
+
+    const current = (this.activeLanguage || '').toLowerCase();
+    const available = this.supportedTargetLanguages;
+    if (this.targetLanguage === current || !available.includes(this.targetLanguage)) {
+      this.targetLanguage = current === 'python' ? 'java' : (current === 'javascript' ? 'python' : 'javascript');
+    }
+
+    this.transpileCache = {};
+    this.transpiledTestOutput = '';
+    this.transpiledTestStatus = 'IDLE';
+    this.transpileCurrentCode();
+  }
+
+  closePolyglotModal() {
+    this.isPolyglotModalOpen = false;
+  }
+
+  get supportedTargetLanguages(): string[] {
+    return ['python', 'java', 'cpp', 'c', 'javascript', 'typescript', 'go', 'csharp', 'rust'];
+  }
+
+  selectTargetLanguage(lang: string) {
+    if (this.targetLanguage === lang) return;
+    this.targetLanguage = lang;
+    this.soundService.playClickSound();
+    this.transpiledTestOutput = '';
+    this.transpiledTestStatus = 'IDLE';
+
+    if (this.transpileCache[lang]) {
+      const cached = this.transpileCache[lang];
+      this.transpiledCode = cached.code;
+      this.transpiledExplanation = cached.explanation;
+      this.transpiledDifferences = cached.differences;
+      this.transpileProvider = cached.provider;
+      this.transpileModel = cached.model;
+      this.transpileLatency = cached.latency;
+      return;
+    }
+
+    this.transpileCurrentCode();
+  }
+
+  transpileCurrentCode() {
+    if (this.isTranspiling) return;
+    this.isTranspiling = true;
+    const src = this.activeLanguage;
+    const tgt = this.targetLanguage;
+
+    this.compilerService.transpileCode({
+      sourceLanguage: src,
+      targetLanguage: tgt,
+      code: this.code
+    }).subscribe({
+      next: (res) => {
+        this.isTranspiling = false;
+        if (res && res.success && res.translatedCode) {
+          this.transpiledCode = res.translatedCode;
+          this.transpiledExplanation = res.explanation;
+          this.transpiledDifferences = res.keyDifferences || [];
+          this.transpileProvider = res.provider;
+          this.transpileModel = res.model;
+          this.transpileLatency = res.latencyMs;
+
+          this.transpileCache[tgt] = {
+            code: res.translatedCode,
+            explanation: res.explanation,
+            differences: res.keyDifferences || [],
+            provider: res.provider,
+            model: res.model,
+            latency: res.latencyMs
+          };
+        } else {
+          this.showToast('⚠️ Could not convert code to ' + this.formatLanguageName(tgt));
+        }
+      },
+      error: () => {
+        this.isTranspiling = false;
+        this.showToast('⚠️ Code translation request failed.');
+      }
+    });
+  }
+
+  applyTranspiledCode() {
+    if (!this.transpiledCode) return;
+    this.code = this.transpiledCode;
+    this.activeLanguage = this.targetLanguage;
+    const matched = this.runtimes.find(r => r.language.toLowerCase() === this.activeLanguage.toLowerCase());
+    if (matched) {
+      this.activeVersion = matched.version;
+    }
+    this.updateCode(this.code);
+    this.soundService.playSuccessSound();
+    this.showToast(`✅ Loaded ${this.formatLanguageName(this.targetLanguage)} code into IDE! Ready to run.`);
+    this.closePolyglotModal();
+  }
+
+  copyTranspiledCode() {
+    if (!this.transpiledCode) return;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(this.transpiledCode).then(() => {
+        this.showToast(`📋 ${this.formatLanguageName(this.targetLanguage)} code copied to clipboard!`);
+        this.soundService.playClickSound();
+      });
+    }
+  }
+
+  testRunTranspiledCode() {
+    if (this.isTestingTranspiled || !this.transpiledCode) return;
+    this.isTestingTranspiled = true;
+    this.transpiledTestOutput = '⏳ Compiling & running in ' + this.formatLanguageName(this.targetLanguage) + ' sandbox...';
+    this.transpiledTestStatus = 'IDLE';
+
+    this.compilerService.executeCode({
+      language: this.targetLanguage,
+      code: this.transpiledCode,
+      stdin: this.stdin
+    }).subscribe({
+      next: (res) => {
+        this.isTestingTranspiled = false;
+        if (res.success && res.status === 'SUCCESS') {
+          this.transpiledTestStatus = 'SUCCESS';
+          this.transpiledTestOutput = res.stdout ? res.stdout.trim() : '(Program executed successfully with no STDOUT output)';
+          this.soundService.playSuccessSound();
+        } else {
+          this.transpiledTestStatus = 'ERROR';
+          this.transpiledTestOutput = (res.stderr || res.compileOutput || 'Execution error in ' + this.formatLanguageName(this.targetLanguage)).trim();
+        }
+      },
+      error: (err) => {
+        this.isTestingTranspiled = false;
+        this.transpiledTestStatus = 'ERROR';
+        this.transpiledTestOutput = 'Execution test failed: ' + (err.message || 'Network error');
+      }
+    });
   }
 
   updateCode(content: string) {

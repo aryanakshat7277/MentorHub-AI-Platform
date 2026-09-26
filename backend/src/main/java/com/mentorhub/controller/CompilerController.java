@@ -47,6 +47,12 @@ public class CompilerController {
         return ResponseEntity.ok(copilotService.autoFixCode(request));
     }
 
+    @PostMapping("/transpile")
+    public ResponseEntity<com.mentorhub.compiler.dto.CodeTranspileResponse> transpile(
+            @RequestBody com.mentorhub.compiler.dto.CodeTranspileRequest request) {
+        return ResponseEntity.ok(copilotService.transpileCode(request));
+    }
+
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> checkHealth() {
         return ResponseEntity.ok(compilerService.checkHealth());

@@ -120,4 +120,31 @@ export class CompilerService {
       }))
     );
   }
+
+  transpileCode(req: { sourceLanguage: string; targetLanguage: string; code: string }): Observable<{
+    success: boolean;
+    sourceLanguage: string;
+    targetLanguage: string;
+    translatedCode: string;
+    explanation: string;
+    keyDifferences: string[];
+    provider: string;
+    model: string;
+    latencyMs: number;
+  }> {
+    return this.http.post<any>(`${this.baseUrl}/transpile`, req).pipe(
+      catchError((err) => of({
+        success: false,
+        sourceLanguage: req.sourceLanguage,
+        targetLanguage: req.targetLanguage,
+        translatedCode: req.code,
+        explanation: 'Language translation failed: ' + (err.message || 'Network error'),
+        keyDifferences: ['Unable to reach transpile service'],
+        provider: 'NONE',
+        model: 'none',
+        latencyMs: 0
+      }))
+    );
+  }
 }
+
