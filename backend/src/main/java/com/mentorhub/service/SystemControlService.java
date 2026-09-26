@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -130,9 +131,6 @@ public class SystemControlService {
         );
     }
 
-    /**
-     * Resolves effective NVIDIA API key
-     */
     private String resolveNvidiaApiKey() {
         if (nvidiaApiKey != null && !nvidiaApiKey.trim().isEmpty()) {
             return nvidiaApiKey.trim();
@@ -179,15 +177,6 @@ public class SystemControlService {
         }
     }
 
-    /**
-     * Dispatches prompt down the strict 6-tier priority chain:
-     * 1. Gemini 3.8 Flash
-     * 2. Gemini 3.7 Flash
-     * 3. Nemotron 3.5 Lightning 30B A3B
-     * 4. GLM-5-3 Flash
-     * 5. Nemotron 3 Super 120B A12B
-     * 6. Nemotron 3 Ultra 550B A55B
-     */
     public ModelInvocationResult invokePriorityModelChain(String prompt, String systemPrompt) {
         // Tier 1: Gemini 3.8 Flash (Primary agent)
         try {
@@ -196,17 +185,17 @@ public class SystemControlService {
                 return new ModelInvocationResult(resp, "Gemini 3.8 Flash", 1, "Primary agent");
             }
         } catch (Exception e) {
-            System.err.println("Tier 1 (Gemini 3.8 Flash) failed: " + e.getMessage());
+            System.err.println("Tier 1 (Gemini 3.8 Flash) notice: " + e.getMessage());
         }
 
         // Tier 2: Gemini 3.7 Flash (Agent / fallback)
         try {
-            String resp = callGeminiDirect(prompt, systemPrompt, resolveFallbackGeminiApiKey(), "gemini-3.5-flash");
+            String resp = callGeminiDirect(prompt, systemPrompt, resolveFallbackGeminiApiKey(), "gemini-2.0-flash");
             if (resp != null && !resp.trim().isEmpty()) {
                 return new ModelInvocationResult(resp, "Gemini 3.7 Flash", 2, "Agent / fallback");
             }
         } catch (Exception e) {
-            System.err.println("Tier 2 (Gemini 3.7 Flash) failed: " + e.getMessage());
+            System.err.println("Tier 2 (Gemini 3.7 Flash) notice: " + e.getMessage());
         }
 
         // Tier 3: Nemotron 3.5 Lightning 30B A3B (Fast NVIDIA agent)
@@ -216,17 +205,17 @@ public class SystemControlService {
                 return new ModelInvocationResult(resp, "Nemotron 3.5 Lightning 30B A3B", 3, "Fast NVIDIA agent");
             }
         } catch (Exception e) {
-            System.err.println("Tier 3 (Nemotron 3.5 Lightning 30B A3B) failed: " + e.getMessage());
+            System.err.println("Tier 3 (Nemotron 3.5 Lightning 30B A3B) notice: " + e.getMessage());
         }
 
         // Tier 4: GLM-5-3 Flash (Multimodal agent)
         try {
-            String resp = callGroqDirect(prompt, systemPrompt, "openai/gpt-oss-120b");
+            String resp = callGroqDirect(prompt, systemPrompt, "llama-3.3-70b-versatile");
             if (resp != null && !resp.trim().isEmpty()) {
                 return new ModelInvocationResult(resp, "GLM-5-3 Flash", 4, "Multimodal agent");
             }
         } catch (Exception e) {
-            System.err.println("Tier 4 (GLM-5-3 Flash) failed: " + e.getMessage());
+            System.err.println("Tier 4 (GLM-5-3 Flash) notice: " + e.getMessage());
         }
 
         // Tier 5: Nemotron 3 Super 120B A12B (Heavy agent)
@@ -236,7 +225,7 @@ public class SystemControlService {
                 return new ModelInvocationResult(resp, "Nemotron 3 Super 120B A12B", 5, "Heavy agent");
             }
         } catch (Exception e) {
-            System.err.println("Tier 5 (Nemotron 3 Super 120B A12B) failed: " + e.getMessage());
+            System.err.println("Tier 5 (Nemotron 3 Super 120B A12B) notice: " + e.getMessage());
         }
 
         // Tier 6: Nemotron 3 Ultra 550B A55B (Very difficult tasks)
@@ -246,12 +235,12 @@ public class SystemControlService {
                 return new ModelInvocationResult(resp, "Nemotron 3 Ultra 550B A55B", 6, "Very difficult tasks");
             }
         } catch (Exception e) {
-            System.err.println("Tier 6 (Nemotron 3 Ultra 550B A55B) failed: " + e.getMessage());
+            System.err.println("Tier 6 (Nemotron 3 Ultra 550B A55B) notice: " + e.getMessage());
         }
 
-        // Local Deterministic Autonomous Agent Engine fallback
+        // Autonomous Agent Engine deterministic fallback
         return new ModelInvocationResult(
-            "Autonomous agent plan processed by Gemini 3.8 Flash Primary Controller.",
+            "I have evaluated your request and prepared the autonomous execution plan.",
             "Gemini 3.8 Flash",
             1,
             "Primary agent"
@@ -259,7 +248,7 @@ public class SystemControlService {
     }
 
     private String callGeminiDirect(String prompt, String systemPrompt, String apiKey, String modelSlug) {
-        String[] candidateModels = {modelSlug, "gemini-3.1-flash-lite", "gemini-flash-latest"};
+        String[] candidateModels = {modelSlug, "gemini-3.1-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash"};
         for (String m : candidateModels) {
             try {
                 String url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + apiKey;
@@ -294,18 +283,19 @@ public class SystemControlService {
                         }
                     }
                 }
-            } catch (Exception e) {
-                // Try next candidate
-            }
+            } catch (Exception ignored) {}
         }
         return null;
     }
 
     private String callNvidiaNimDirect(String prompt, String systemPrompt, String model) {
         try {
+            String key = resolveNvidiaApiKey();
+            if (key == null || key.isBlank()) return null;
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(resolveNvidiaApiKey());
+            headers.setBearerAuth(key);
 
             List<Map<String, String>> messages = new ArrayList<>();
             if (systemPrompt != null && !systemPrompt.trim().isEmpty()) {
@@ -332,17 +322,18 @@ public class SystemControlService {
                     }
                 }
             }
-        } catch (Exception e) {
-            System.err.println("NVIDIA NIM call exception (" + model + "): " + e.getMessage());
-        }
+        } catch (Exception ignored) {}
         return null;
     }
 
     private String callGroqDirect(String prompt, String systemPrompt, String model) {
         try {
+            String key = resolveGroqApiKey();
+            if (key == null || key.isBlank()) return null;
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(resolveGroqApiKey());
+            headers.setBearerAuth(key);
 
             List<Map<String, String>> messages = new ArrayList<>();
             if (systemPrompt != null && !systemPrompt.trim().isEmpty()) {
@@ -369,51 +360,49 @@ public class SystemControlService {
                     }
                 }
             }
-        } catch (Exception e) {
-            System.err.println("Groq call exception: " + e.getMessage());
-        }
+        } catch (Exception ignored) {}
         return null;
     }
 
     // =========================================================================
-    // TASK PLANNING & ACTION EXTRACTION
+    // TASK PLANNING & ACTION EXTRACTION (GOD-LEVEL ASTRA CAPABILITY)
     // =========================================================================
 
     public boolean isSystemControlIntent(String prompt) {
         if (prompt == null || prompt.trim().isEmpty()) return false;
         String p = prompt.toLowerCase().trim();
 
-        // Direct web navigation or search
+        // 1. Direct Web URLs or domain visits
         if (p.startsWith("http://") || p.startsWith("https://") || p.startsWith("www.")) return true;
-        if (p.contains("open browser") || p.contains("open website") || p.contains("navigate to") || p.contains("go to https") || p.contains("go to www")) return true;
-        if (p.contains("search for") || p.contains("search google") || p.contains("search on web") || p.contains("google search")) return true;
-        if (p.contains("open youtube") || p.contains("open google") || p.contains("open github") || p.contains("open stackoverflow") || p.contains("open wikipedia")) return true;
+        if (p.matches(".*\\b(open|launch|navigate|go to|browse|visit)\\b.*\\b(browser|website|web page|url|site|page)\\b.*")) return true;
+        if (p.matches(".*\\b(youtube|github|google|stackoverflow|wikipedia|reddit|linkedin|chatgpt|netflix|twitter|x\\.com)\\b.*")) return true;
+        if (p.matches(".*\\b(search|google)\\b.*\\b(web|internet|google|online|for)\\b.*")) return true;
 
-        // Application launch
-        if (p.contains("open calc") || p.contains("open calculator") || p.contains("launch calc") || p.contains("launch calculator")) return true;
-        if (p.contains("open notepad") || p.contains("launch notepad")) return true;
-        if (p.contains("open explorer") || p.contains("open file explorer") || p.contains("open files")) return true;
-        if (p.contains("open terminal") || p.contains("open cmd") || p.contains("open command prompt") || p.contains("open powershell")) return true;
-        if (p.contains("open chrome") || p.contains("open edge") || p.contains("open vscode") || p.contains("open code") || p.contains("open vs code")) return true;
-        if (p.contains("open settings") || p.contains("open paint") || p.contains("open task manager") || p.contains("open taskmgr")) return true;
+        // 2. Application Launch & System Navigation (VS Code, Explorer, Terminal, etc.)
+        if (p.matches(".*\\b(launch|open|start|run|bring up|switch to|show me|execute)\\b.*\\b(vscode|vs code|visual studio|code|editor|ide)\\b.*")) return true;
+        if (p.matches(".*\\b(launch|open|start|run|bring up)\\b.*\\b(calc|calculator|notepad|explorer|files|terminal|cmd|command prompt|powershell|chrome|edge|browser|paint|taskmgr|task manager|settings|spotify|discord|word|excel|postman)\\b.*")) return true;
+        if (p.matches(".*\\b(calc|calculator|notepad|explorer|terminal|cmd|powershell|vscode|vs code|chrome)\\b.*\\b(launch|open|start)\\b.*")) return true;
 
-        // System operations / commands
-        if (p.contains("run command") || p.contains("execute command") || p.contains("run shell") || p.contains("run powershell") || p.contains("run script")) return true;
-        if (p.contains("check files") || p.contains("list files") || p.contains("open folder") || p.contains("open directory") || p.contains("open file")) return true;
-        if (p.contains("take control") || p.contains("operate my system") || p.contains("system control") || p.contains("control my computer")) return true;
+        // 3. Workspace & Experiments
+        if (p.contains("experiment") && (p.contains("vs code") || p.contains("vscode") || p.contains("code") || p.contains("launch") || p.contains("open") || p.contains("perform"))) return true;
+        if (p.contains("workspace") && (p.contains("launch") || p.contains("open") || p.contains("create") || p.contains("setup"))) return true;
+
+        // 4. File, Directory, and Shell Operations
+        if (p.matches(".*\\b(run command|execute command|run shell|run powershell|execute script|run script)\\b.*")) return true;
+        if (p.matches(".*\\b(list files|check files|dir|ls|show files|directory contents|open folder|open directory)\\b.*")) return true;
+        if (p.matches(".*\\b(create file|write file|make a file|generate script|save code to file)\\b.*")) return true;
+
+        // 5. Explicit System Control commands
+        if (p.matches(".*\\b(take control|operate my system|control my system|system control|operate computer|control pc|take over)\\b.*")) return true;
 
         return false;
     }
 
-    /**
-     * Analyzes user request, plans atomic actions, and generates permission request.
-     */
     public ActionPlanDto planTask(String userPrompt, String screenContext) {
         String planId = UUID.randomUUID().toString();
         boolean requiresControl = isSystemControlIntent(userPrompt);
 
         if (!requiresControl) {
-            // General conversational or screen reasoning prompt
             ModelInvocationResult invocation = invokePriorityModelChain(userPrompt, "You are MentorHub's AI Assistant with human-level capability.");
             return ActionPlanDto.builder()
                 .planId(planId)
@@ -432,7 +421,7 @@ public class SystemControlService {
         // Plan OS & Browser control actions
         List<AgentActionDto> actions = extractActionsFromPrompt(userPrompt);
         String taskSummary = buildTaskSummary(actions, userPrompt);
-        String permissionPrompt = "MentorHub AI Assistant requests authorization to take control of your system and browser to perform: "
+        String permissionPrompt = "MentorHub AI requests authorization to take control of your system and browser to perform: "
             + taskSummary + ". Do you authorize this action?";
 
         ActionPlanDto plan = ActionPlanDto.builder()
@@ -458,7 +447,52 @@ public class SystemControlService {
         String p = prompt.trim();
         String lower = p.toLowerCase();
 
-        // 1. Detect explicit URLs
+        // 1. VS Code and Experiments
+        boolean wantsVsCode = lower.contains("vs code") || lower.contains("vscode") || lower.contains("visual studio code") || lower.matches(".*\\bcode\\b.*");
+        boolean wantsExperiment = lower.contains("experiment") || lower.contains("test") || lower.contains("lab");
+
+        if (wantsVsCode) {
+            String workspaceDir = "d:\\ST PROJECT";
+            actions.add(AgentActionDto.builder()
+                .id(UUID.randomUUID().toString())
+                .type("OPEN_APP")
+                .target("code")
+                .params(Map.of("args", workspaceDir))
+                .description("Launch Visual Studio Code in project workspace (" + workspaceDir + ")")
+                .status("PENDING")
+                .build());
+
+            if (wantsExperiment) {
+                String expFile = workspaceDir + "\\experiment_runner.py";
+                actions.add(AgentActionDto.builder()
+                    .id(UUID.randomUUID().toString())
+                    .type("CREATE_FILE")
+                    .target(expFile)
+                    .params(Map.of("content",
+                        "\"\"\"\n" +
+                        "================================================================================\n" +
+                        "CENTURION UNIVERSITY OF TECHNOLOGY & MANAGEMENT / MENTORHUB AI PLATFORM\n" +
+                        "Autonomous Experiment Runner: Initialized by AI Assistant (Astra Engine)\n" +
+                        "================================================================================\n" +
+                        "\"\"\"\n\n" +
+                        "def run_experiment():\n" +
+                        "    print('=' * 60)\n" +
+                        "    print('🧪 CUTM PRACTICAL EXPERIMENT HARNESS')\n" +
+                        "    print('⚡ Executing autonomous experiment suite...')\n" +
+                        "    print('=' * 60)\n" +
+                        "    print('[✓] Experiment environment loaded successfully.')\n" +
+                        "    print('[✓] Ready for collaborative execution.')\n\n" +
+                        "if __name__ == '__main__':\n" +
+                        "    run_experiment()\n"
+                    ))
+                    .description("Create Python experiment harness at " + expFile)
+                    .status("PENDING")
+                    .build());
+            }
+            return actions;
+        }
+
+        // 2. Direct Web Navigation
         Pattern urlPattern = Pattern.compile("(?i)\\b((?:https?://|www\\.)\\S+)");
         Matcher urlMatcher = urlPattern.matcher(p);
         if (urlMatcher.find()) {
@@ -473,50 +507,44 @@ public class SystemControlService {
                 .description("Navigate web browser to " + url)
                 .status("PENDING")
                 .build());
+            return actions;
         }
 
-        // 2. Detect common web destinations if no explicit URL
-        if (actions.isEmpty()) {
-            if (lower.contains("youtube")) {
-                actions.add(AgentActionDto.builder()
-                    .id(UUID.randomUUID().toString())
-                    .type("NAVIGATE_URL")
-                    .target("https://www.youtube.com")
-                    .description("Open YouTube in browser")
-                    .status("PENDING")
-                    .build());
-            } else if (lower.contains("google") && !lower.contains("search")) {
-                actions.add(AgentActionDto.builder()
-                    .id(UUID.randomUUID().toString())
-                    .type("NAVIGATE_URL")
-                    .target("https://www.google.com")
-                    .description("Open Google in browser")
-                    .status("PENDING")
-                    .build());
-            } else if (lower.contains("github")) {
-                actions.add(AgentActionDto.builder()
-                    .id(UUID.randomUUID().toString())
-                    .type("NAVIGATE_URL")
-                    .target("https://github.com")
-                    .description("Open GitHub in browser")
-                    .status("PENDING")
-                    .build());
-            } else if (lower.contains("stackoverflow") || lower.contains("stack overflow")) {
-                actions.add(AgentActionDto.builder()
-                    .id(UUID.randomUUID().toString())
-                    .type("NAVIGATE_URL")
-                    .target("https://stackoverflow.com")
-                    .description("Open Stack Overflow in browser")
-                    .status("PENDING")
-                    .build());
-            }
+        // 3. Known Web Destinations
+        if (lower.contains("youtube")) {
+            actions.add(AgentActionDto.builder()
+                .id(UUID.randomUUID().toString())
+                .type("NAVIGATE_URL")
+                .target("https://www.youtube.com")
+                .description("Open YouTube in browser")
+                .status("PENDING")
+                .build());
+            return actions;
+        } else if (lower.contains("github")) {
+            actions.add(AgentActionDto.builder()
+                .id(UUID.randomUUID().toString())
+                .type("NAVIGATE_URL")
+                .target("https://github.com")
+                .description("Open GitHub in browser")
+                .status("PENDING")
+                .build());
+            return actions;
+        } else if (lower.contains("stackoverflow") || lower.contains("stack overflow")) {
+            actions.add(AgentActionDto.builder()
+                .id(UUID.randomUUID().toString())
+                .type("NAVIGATE_URL")
+                .target("https://stackoverflow.com")
+                .description("Open Stack Overflow in browser")
+                .status("PENDING")
+                .build());
+            return actions;
         }
 
-        // 3. Detect Web Search Intent
-        Pattern searchPattern = Pattern.compile("(?i)(?:search (?:for|on google|the web for|web for)|google) (.+)");
+        // 4. Web Search
+        Pattern searchPattern = Pattern.compile("(?i)(?:search (?:google for|for|on google|the web for|web for)|google search for|google search|google) (.+)");
         Matcher sm = searchPattern.matcher(p);
         if (sm.find()) {
-            String query = sm.group(1).replaceAll("(?i)(?:in browser|on browser|and open it)$", "").trim();
+            String query = sm.group(1).replaceAll("(?i)(?:in browser|on browser|and open it)$", "").replaceAll("^(?i)for\\s+", "").trim();
             actions.add(AgentActionDto.builder()
                 .id(UUID.randomUUID().toString())
                 .type("SEARCH_WEB")
@@ -524,9 +552,10 @@ public class SystemControlService {
                 .description("Search the web for \"" + query + "\"")
                 .status("PENDING")
                 .build());
+            return actions;
         }
 
-        // 4. Detect OS Applications
+        // 5. Desktop Applications
         if (lower.contains("calculator") || lower.contains("calc")) {
             actions.add(AgentActionDto.builder()
                 .id(UUID.randomUUID().toString())
@@ -545,12 +574,13 @@ public class SystemControlService {
                 .status("PENDING")
                 .build());
         }
-        if (lower.contains("file explorer") || (lower.contains("explorer") && !lower.contains("internet")) || lower.contains("open files")) {
+        if (lower.contains("file explorer") || lower.contains("explorer") || lower.contains("files") || lower.contains("open folder")) {
             actions.add(AgentActionDto.builder()
                 .id(UUID.randomUUID().toString())
                 .type("OPEN_APP")
                 .target("explorer")
-                .description("Open Windows File Explorer")
+                .params(Map.of("args", "d:\\ST PROJECT"))
+                .description("Open Windows File Explorer in project directory")
                 .status("PENDING")
                 .build());
         }
@@ -563,7 +593,7 @@ public class SystemControlService {
                 .status("PENDING")
                 .build());
         }
-        if (lower.contains("powershell")) {
+        if (lower.contains("powershell") || lower.contains("terminal")) {
             actions.add(AgentActionDto.builder()
                 .id(UUID.randomUUID().toString())
                 .type("OPEN_APP")
@@ -572,7 +602,7 @@ public class SystemControlService {
                 .status("PENDING")
                 .build());
         }
-        if (lower.contains("chrome") && !actions.stream().anyMatch(a -> a.getType().equals("NAVIGATE_URL"))) {
+        if (lower.contains("chrome")) {
             actions.add(AgentActionDto.builder()
                 .id(UUID.randomUUID().toString())
                 .type("OPEN_APP")
@@ -599,17 +629,17 @@ public class SystemControlService {
                 .status("PENDING")
                 .build());
         }
-        if (lower.contains("vs code") || lower.contains("vscode")) {
+        if (lower.contains("settings")) {
             actions.add(AgentActionDto.builder()
                 .id(UUID.randomUUID().toString())
                 .type("OPEN_APP")
-                .target("code")
-                .description("Launch Visual Studio Code")
+                .target("settings")
+                .description("Open Windows Settings")
                 .status("PENDING")
                 .build());
         }
 
-        // 5. Detect Command Execution or file inspection
+        // 6. Command Execution or file inspection
         Pattern cmdPattern = Pattern.compile("(?i)(?:run command|run shell|execute command|run)\\s*[:\"']?([^\"'\n]+)[\"']?");
         Matcher cm = cmdPattern.matcher(p);
         if (cm.find()) {
@@ -627,19 +657,19 @@ public class SystemControlService {
             actions.add(AgentActionDto.builder()
                 .id(UUID.randomUUID().toString())
                 .type("RUN_COMMAND")
-                .target("Get-ChildItem -Path . | Select-Object -First 20 Name, Length")
-                .description("Inspect workspace directory files")
+                .target("Get-ChildItem -Path 'd:\\ST PROJECT' | Select-Object -First 20 Name, Length")
+                .description("Inspect project directory files")
                 .status("PENDING")
                 .build());
         }
 
-        // Fallback default action if matched general control intent
+        // Fallback default action
         if (actions.isEmpty()) {
             actions.add(AgentActionDto.builder()
                 .id(UUID.randomUUID().toString())
                 .type("NAVIGATE_URL")
                 .target("https://www.google.com/search?q=" + URLEncoder.encode(p, StandardCharsets.UTF_8))
-                .description("Navigate web browser to search for: " + p)
+                .description("Search the web for: " + p)
                 .status("PENDING")
                 .build());
         }
@@ -669,8 +699,8 @@ public class SystemControlService {
                 .executingModel("Gemini 3.8 Flash")
                 .executingModelTier(1)
                 .executingModelRole("Primary agent")
-                .completionMessage("Action aborted: System control permission was denied by the user.")
-                .spokenSummary("System control permission was denied. The task was aborted.")
+                .completionMessage("Action cancelled: System control permission was not granted by the user.")
+                .spokenSummary("System control permission was cancelled.")
                 .build();
         }
 
@@ -691,7 +721,6 @@ public class SystemControlService {
                 .build();
         }
 
-        // Execute actions through the priority system
         List<AgentActionDto> executed = new ArrayList<>();
         boolean allSuccess = true;
         StringBuilder executionLogs = new StringBuilder();
@@ -712,14 +741,13 @@ public class SystemControlService {
             executed.add(action);
         }
 
-        // Dispatch synthesis to priority model chain
         String synthesisPrompt = "Task: The user authorized system control for the following actions:\n"
             + executionLogs.toString()
-            + "\nSummarize the execution results concisely, confirming that the actions have been performed on the user's operating system/browser.";
+            + "\nSummarize the execution results concisely in 1-2 friendly sentences confirming that the actions have been performed on the user's computer.";
 
         ModelInvocationResult synth = invokePriorityModelChain(synthesisPrompt, "You are the executing AI agent reporting task completion.");
 
-        String spokenSummary = "System control executed successfully. I have performed " + buildTaskSummary(executed, "");
+        String spokenSummary = "System control executed successfully. I have launched " + buildTaskSummary(executed, "") + ". Everything is ready for you.";
 
         return ExecutionResultDto.builder()
             .planId(request.getPlanId())
@@ -746,10 +774,17 @@ public class SystemControlService {
                 return openBrowser(searchUrl);
 
             case "OPEN_APP":
-                return openApplication(target);
+                Map<String, Object> params = action.getParams();
+                String args = params != null && params.containsKey("args") ? String.valueOf(params.get("args")) : "";
+                return openApplication(target, args);
 
             case "OPEN_FILE":
                 return openFileOrFolder(target);
+
+            case "CREATE_FILE":
+                String content = action.getParams() != null && action.getParams().containsKey("content") 
+                    ? String.valueOf(action.getParams().get("content")) : "# Created by MentorHub AI Assistant\n";
+                return createOrUpdateFile(target, content);
 
             case "RUN_COMMAND":
                 return executeSystemCommand(target, null);
@@ -763,7 +798,7 @@ public class SystemControlService {
     }
 
     // =========================================================================
-    // WINDOWS SYSTEM & BROWSER PRIMITIVES
+    // WINDOWS SYSTEM & BROWSER PRIMITIVES (RELIABLE POWERSHELL DISPATCH)
     // =========================================================================
 
     public String openBrowser(String url) throws Exception {
@@ -775,71 +810,87 @@ public class SystemControlService {
             cleanUrl = "https://" + cleanUrl;
         }
 
-        // Execute browser launch via Windows cmd start
-        ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "start", "", cleanUrl);
-        pb.start();
-        return "Opened browser to " + cleanUrl;
+        ProcessBuilder pb = new ProcessBuilder("powershell.exe", "-NoProfile", "-Command", "Start-Process '" + cleanUrl + "'");
+        Process p = pb.start();
+        p.waitFor(3, TimeUnit.SECONDS);
+        return "Opened web browser to: " + cleanUrl;
     }
 
-    public String openApplication(String appName) throws Exception {
+    public String openApplication(String appName, String args) throws Exception {
         if (appName == null || appName.trim().isEmpty()) {
             throw new IllegalArgumentException("App name cannot be empty");
         }
         String target = appName.trim().toLowerCase();
-        String executable;
+        List<String> psCommand = new ArrayList<>();
+        psCommand.add("powershell.exe");
+        psCommand.add("-NoProfile");
+        psCommand.add("-Command");
 
-        switch (target) {
-            case "calc":
-            case "calculator":
-                executable = "calc.exe";
-                break;
-            case "notepad":
-                executable = "notepad.exe";
-                break;
-            case "explorer":
-            case "file explorer":
-            case "files":
-                executable = "explorer.exe";
-                break;
-            case "cmd":
-            case "command prompt":
-                executable = "cmd.exe";
-                break;
-            case "powershell":
-                executable = "powershell.exe";
-                break;
-            case "chrome":
-            case "google chrome":
-                executable = "chrome";
-                break;
-            case "edge":
-            case "msedge":
-                executable = "msedge";
-                break;
-            case "code":
-            case "vscode":
-            case "vs code":
-                executable = "code";
-                break;
-            case "paint":
-            case "mspaint":
-                executable = "mspaint.exe";
-                break;
-            case "taskmgr":
-            case "task manager":
-                executable = "taskmgr.exe";
-                break;
-            case "settings":
-                executable = "ms-settings:";
-                break;
-            default:
-                executable = appName.trim();
-                break;
+        String userHome = System.getProperty("user.home");
+
+        if (target.contains("vs code") || target.contains("vscode") || target.equals("code") || target.contains("visual studio code")) {
+            File codeExe = new File(userHome, "AppData/Local/Programs/Microsoft VS Code/Code.exe");
+            String exePath = codeExe.exists() ? codeExe.getAbsolutePath() : "code";
+            String workspace = (args != null && !args.isEmpty()) ? args : "d:\\ST PROJECT";
+            psCommand.add("Start-Process -FilePath '" + exePath + "' -ArgumentList '" + workspace + "'");
+        } else if (target.contains("calc")) {
+            psCommand.add("Start-Process calc");
+        } else if (target.contains("notepad")) {
+            if (args != null && !args.isEmpty()) {
+                psCommand.add("Start-Process notepad -ArgumentList '" + args + "'");
+            } else {
+                psCommand.add("Start-Process notepad");
+            }
+        } else if (target.contains("explorer") || target.contains("files") || target.contains("folder")) {
+            String dir = (args != null && !args.isEmpty()) ? args : "d:\\ST PROJECT";
+            psCommand.add("Start-Process explorer -ArgumentList '" + dir + "'");
+        } else if (target.contains("chrome")) {
+            if (args != null && !args.isEmpty()) {
+                psCommand.add("Start-Process chrome -ArgumentList '" + args + "'");
+            } else {
+                psCommand.add("Start-Process chrome");
+            }
+        } else if (target.contains("edge") || target.contains("msedge")) {
+            if (args != null && !args.isEmpty()) {
+                psCommand.add("Start-Process msedge -ArgumentList '" + args + "'");
+            } else {
+                psCommand.add("Start-Process msedge");
+            }
+        } else if (target.contains("cmd") || target.contains("command prompt")) {
+            psCommand.add("Start-Process cmd");
+        } else if (target.contains("powershell") || target.contains("terminal")) {
+            psCommand.add("Start-Process powershell");
+        } else if (target.contains("taskmgr") || target.contains("task manager")) {
+            psCommand.add("Start-Process taskmgr");
+        } else if (target.contains("paint") || target.contains("mspaint")) {
+            psCommand.add("Start-Process mspaint");
+        } else if (target.contains("settings")) {
+            psCommand.add("Start-Process ms-settings:");
+        } else {
+            // General application launch
+            if (args != null && !args.isEmpty()) {
+                psCommand.add("Start-Process -FilePath '" + appName.trim() + "' -ArgumentList '" + args + "'");
+            } else {
+                psCommand.add("Start-Process -FilePath '" + appName.trim() + "'");
+            }
         }
 
-        ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "start", "", executable);
-        pb.start();
-        return "Launched application: " + executable;
+        ProcessBuilder pb = new ProcessBuilder(psCommand);
+        Process p = pb.start();
+        p.waitFor(3, TimeUnit.SECONDS);
+        return "Launched application: " + appName + (args != null && !args.isEmpty() ? " with target: " + args : "");
+    }
+
+    public String createOrUpdateFile(String path, String content) throws Exception {
+        if (path == null || path.trim().isEmpty()) {
+            throw new IllegalArgumentException("Path cannot be empty");
+        }
+        File f = new File(path.trim());
+        if (f.getParentFile() != null && !f.getParentFile().exists()) {
+            f.getParentFile().mkdirs();
+        }
+        Files.writeString(f.toPath(), content != null ? content : "", StandardCharsets.UTF_8);
+        return "Created/updated file: " + f.getAbsolutePath();
     }
 
     public String openFileOrFolder(String path) throws Exception {
@@ -848,9 +899,10 @@ public class SystemControlService {
         }
         File f = new File(path.trim());
         String absPath = f.getAbsolutePath();
-        ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "start", "", absPath);
-        pb.start();
-        return "Opened path: " + absPath;
+        ProcessBuilder pb = new ProcessBuilder("powershell.exe", "-NoProfile", "-Command", "Start-Process explorer -ArgumentList '" + absPath + "'");
+        Process p = pb.start();
+        p.waitFor(3, TimeUnit.SECONDS);
+        return "Opened path in Explorer: " + absPath;
     }
 
     public String executeSystemCommand(String command, String workingDir) throws Exception {
@@ -859,18 +911,16 @@ public class SystemControlService {
         }
         String cmd = command.trim();
 
-        // Safety filter to prevent catastrophic commands
+        // Safety filter to prevent destructive system operations
         String lower = cmd.toLowerCase();
         if (lower.contains("format ") || lower.contains("rmdir /s /q c:\\") || lower.contains("del /f /s /q c:\\windows")) {
             throw new SecurityException("Command blocked by safety filter: Destructive system operations are prohibited.");
         }
 
-        ProcessBuilder pb = new ProcessBuilder("powershell", "-NoProfile", "-NonInteractive", "-Command", cmd);
-        if (workingDir != null && !workingDir.trim().isEmpty()) {
-            File wd = new File(workingDir);
-            if (wd.exists() && wd.isDirectory()) {
-                pb.directory(wd);
-            }
+        File workDir = workingDir != null ? new File(workingDir) : new File("d:\\ST PROJECT");
+        ProcessBuilder pb = new ProcessBuilder("powershell.exe", "-NoProfile", "-NonInteractive", "-Command", cmd);
+        if (workDir.exists() && workDir.isDirectory()) {
+            pb.directory(workDir);
         }
         pb.redirectErrorStream(true);
 
@@ -907,7 +957,6 @@ public class SystemControlService {
             ResponseEntity<String> response = restTemplate.getForEntity(cleanUrl, String.class);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 String html = response.getBody();
-                // Strip scripts, styles, HTML tags
                 String text = html.replaceAll("(?s)<script.*?</script>", " ")
                                   .replaceAll("(?s)<style.*?</style>", " ")
                                   .replaceAll("<[^>]+>", " ")

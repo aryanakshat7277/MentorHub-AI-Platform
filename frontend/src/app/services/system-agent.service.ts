@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 export interface AgentAction {
   id: string;
-  type: 'NAVIGATE_URL' | 'SEARCH_WEB' | 'OPEN_APP' | 'OPEN_FILE' | 'RUN_COMMAND' | 'READ_WEB';
+  type: 'NAVIGATE_URL' | 'SEARCH_WEB' | 'OPEN_APP' | 'OPEN_FILE' | 'CREATE_FILE' | 'RUN_COMMAND' | 'READ_WEB';
   target: string;
   params?: Record<string, any>;
   description: string;
@@ -80,12 +80,13 @@ export class SystemAgentService {
     if (!prompt || typeof prompt !== 'string') return false;
     const p = prompt.toLowerCase().trim();
     if (p.startsWith('http://') || p.startsWith('https://') || p.startsWith('www.')) return true;
-    if (/\b(open browser|navigate to|go to|search for|google search|open website)\b/i.test(p)) return true;
-    if (/\b(youtube|github|stackoverflow|wikipedia)\b/i.test(p) && /\b(open|go to|browse|launch)\b/i.test(p)) return true;
-    if (/\b(open|launch|start)\b.*\b(calc|calculator|notepad|explorer|terminal|cmd|powershell|chrome|edge|vscode|code|paint|task manager)\b/i.test(p)) return true;
-    if (/\b(calc|calculator|notepad|explorer|cmd|powershell)\b/i.test(p) && /\b(open|launch|start)\b/i.test(p)) return true;
-    if (/\b(run command|execute command|run shell|run powershell|list files|check files|open folder|open directory)\b/i.test(p)) return true;
-    if (/\b(take control|operate my system|control my system|system control|operate system)\b/i.test(p)) return true;
+    if (/\b(open|launch|start|run|execute|bring up|show|switch to|navigate to|go to|search for|google search|open website)\b/i.test(p)) return true;
+    if (/\b(youtube|github|stackoverflow|wikipedia|google|reddit)\b/i.test(p) && /\b(open|go to|browse|launch|visit)\b/i.test(p)) return true;
+    if (/\b(open|launch|start|run)\b.*\b(calc|calculator|notepad|explorer|terminal|cmd|powershell|chrome|edge|vscode|vs code|code|visual studio|paint|task manager|taskmgr|settings|spotify|discord)\b/i.test(p)) return true;
+    if (/\b(calc|calculator|notepad|explorer|cmd|powershell|vscode|vs code|code)\b/i.test(p) && /\b(open|launch|start|run)\b/i.test(p)) return true;
+    if (/\b(experiment|test|script|workspace)\b/i.test(p) && /\b(vs code|vscode|code|launch|open|perform|run)\b/i.test(p)) return true;
+    if (/\b(run command|execute command|run shell|run powershell|list files|check files|open folder|open directory|create file|write file)\b/i.test(p)) return true;
+    if (/\b(take control|operate my system|control my system|system control|operate system|system navigation|take over)\b/i.test(p)) return true;
     return false;
   }
 }

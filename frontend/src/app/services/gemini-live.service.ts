@@ -124,9 +124,18 @@ export class GeminiLiveService {
       };
       this.ws.send(JSON.stringify(payload));
       console.log('GeminiLiveService: Dispatched multimodal screen analysis turn to Live Voice model');
+
+      // Safety watchdog: Automatically restore LISTENING if model response is delayed or dropped
+      setTimeout(() => {
+        if (this.status$.value === 'THINKING' && !this.audioPlayback.isSpeaking$.value) {
+          this.setStatus('LISTENING');
+        }
+      }, 3500);
+
       return true;
     } catch (err) {
       console.error('GeminiLiveService: sendPromptToLiveModel failed:', err);
+      this.setStatus('LISTENING');
       return false;
     }
   }

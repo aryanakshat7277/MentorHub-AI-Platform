@@ -227,7 +227,7 @@
               <div class="auth-action-item" *ngFor="let act of pendingActionPlan.actions; let idx = index">
                 <span class="act-index">{{ idx + 1 }}</span>
                 <span class="act-type-tag serif-title">
-                  {{ act.type === 'NAVIGATE_URL' ? '🌐 BROWSER' : (act.type === 'SEARCH_WEB' ? '🔍 WEB SEARCH' : (act.type === 'OPEN_APP' ? '💻 APP LAUNCH' : (act.type === 'RUN_COMMAND' ? '⚙️ SHELL' : '📁 OS ACTION'))) }}
+                  {{ act.type === 'NAVIGATE_URL' ? '🌐 BROWSER' : (act.type === 'SEARCH_WEB' ? '🔍 WEB SEARCH' : (act.type === 'OPEN_APP' ? '💻 APP LAUNCH' : (act.type === 'CREATE_FILE' ? '🧪 EXPERIMENT FILE' : (act.type === 'RUN_COMMAND' ? '⚙️ SHELL' : '📁 OS ACTION')))) }}
                 </span>
                 <span class="act-desc serif-title">{{ act.description }}</span>
               </div>

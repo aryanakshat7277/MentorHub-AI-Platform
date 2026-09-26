@@ -1107,25 +1107,13 @@ Instruction: You are the MentorHub AI Live Voice assistant speaking in your natu
           this.cdr.detectChanges();
           this.scrollToBottom();
 
-          const vocalPrompt = `[PERMISSION AUTHORIZATION REQUIRED]
-The user gave this command: "${userText}"
-The AI planned these actions on the system: "${plan.taskSummary}"
-Instruction: In your natural Kore voice, politely ask the user for permission to take control of their system to perform this task. For example: "I have prepared the plan to ${plan.taskSummary}. May I take control of your system to proceed? Please say authorize or confirm on screen."`;
-
-          if (this.isLiveVoiceActive && this.liveService.isConnected()) {
-            this.liveService.sendPromptToLiveModel(vocalPrompt);
-          } else {
-            this.speakVoiceResponse(`I have prepared the plan to ${plan.taskSummary}. May I take control of your system to proceed? Please authorize on screen.`);
-          }
+          const spokenPrompt = `I have prepared the plan to ${plan.taskSummary}. May I take control of your system to proceed? Please say authorize or confirm on screen.`;
+          this.speakVoiceResponse(spokenPrompt, true);
         } else {
           planningMsg.text = plan.naturalResponse || 'Task evaluated.';
           this.cdr.detectChanges();
           this.scrollToBottom();
-          if (this.isLiveVoiceActive && this.liveService.isConnected()) {
-            this.liveService.sendPromptToLiveModel(plan.naturalResponse || 'Task evaluated.');
-          } else {
-            this.speakVoiceResponse(plan.naturalResponse || 'Task evaluated.');
-          }
+          this.speakVoiceResponse(plan.naturalResponse || 'Task evaluated.', true);
         }
       },
       error: (err) => {
@@ -1175,16 +1163,7 @@ Instruction: In your natural Kore voice, politely ask the user for permission to
         this.scrollToBottom();
 
         if (isVoice || this.isLiveVoiceActive) {
-          if (this.isLiveVoiceActive && this.liveService.isConnected()) {
-            this.liveService.sendPromptToLiveModel(
-              `[SYSTEM CONTROL TASK COMPLETED]
-Executing Agent: ${result.executingModel} (${result.executingModelRole})
-Summary: ${result.spokenSummary}
-Instruction: Speak this completion confirmation in your natural Kore voice to the user. Be concise and pleasant.`
-            );
-          } else {
-            this.speakVoiceResponse(result.spokenSummary);
-          }
+          this.speakVoiceResponse(result.spokenSummary, true);
         }
       },
       error: (err) => {
@@ -1192,6 +1171,9 @@ Instruction: Speak this completion confirmation in your natural Kore voice to th
         this.pendingActionPlan = null;
         execAiMessage.text = `❌ **Execution Error:** Unable to complete system actions. ${err?.message || ''}`;
         this.scrollToBottom();
+        if (isVoice || this.isLiveVoiceActive) {
+          this.speakVoiceResponse("Unable to complete system action: " + (err?.message || 'system error'), true);
+        }
       }
     });
   }
@@ -1216,11 +1198,7 @@ Instruction: Speak this completion confirmation in your natural Kore voice to th
     this.scrollToBottom();
 
     if (isVoice || this.isLiveVoiceActive) {
-      if (this.isLiveVoiceActive && this.liveService.isConnected()) {
-        this.liveService.sendPromptToLiveModel('The user denied system control permission. Confirm to the user in your Kore voice that system control was aborted and no actions were executed.');
-      } else {
-        this.speakVoiceResponse('System control was cancelled and no actions were performed.');
-      }
+      this.speakVoiceResponse('System control was cancelled and no actions were performed.', true);
     }
   }
 
