@@ -3,7 +3,6 @@
   <div class="top-nav-bar no-print">
     <div class="nav-left">
       <a routerLink="/dashboard" class="back-link serif-title">← Return to MentorHub</a>
-      <span class="verified-live-pill serif-title">● LIVE VERIFIED PROOF PAGE</span>
 
       <div class="profile-switcher-pill">
         <span class="switcher-lbl serif-title">View Profile:</span>
@@ -193,7 +192,6 @@
             <span class="proof-lbl serif-title">VERIFICATION ID:</span>
             <code class="proof-code">{{ portfolio.verificationCode }}</code>
             <span class="issued-tag serif-title">Issued: {{ portfolio.issuedAt }}</span>
-            <span class="qr-status-pill serif-title">● UNIQUE SCANNABLE QR</span>
           </div>
         </div>
       </div>
@@ -218,8 +216,8 @@
         <div class="dialog-branding">
           <span class="dialog-crest">🛡️</span>
           <div>
-            <h3 class="dialog-title serif-title">CRYPTOGRAPHIC VERIFICATION CERTIFICATE</h3>
-            <span class="cert-status-tag serif-title">✅ 100% VALID &amp; TAMPER-PROOF • {{ portfolio?.verificationCode }}</span>
+            <h3 class="dialog-title serif-title">VERIFICATION CERTIFICATE</h3>
+            <span class="cert-status-tag serif-title">Verification Code: {{ portfolio?.verificationCode }}</span>
           </div>
         </div>
         <button class="close-dialog-btn tactile-btn-3d" (click)="closeVerificationModal()">✕</button>
