@@ -37,6 +37,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/", "/api", "/api-overview").permitAll()
                 .requestMatchers("/api/auth/**", "/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/compiler/**", "/api/v1/compiler/**").permitAll()
+                .requestMatchers("/api/agent/**").permitAll()
                 .requestMatchers("/ws-workspace/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/api/mentor/**", "/api/v1/mentor/**").hasRole("MENTOR")

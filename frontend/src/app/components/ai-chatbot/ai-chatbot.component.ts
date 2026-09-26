@@ -10,6 +10,7 @@ import { AiModelRouterService } from '../../services/ai-model-router.service';
 import { AppScreenReaderService, ScreenCaptureResult } from '../../services/app-screen-reader.service';
 import { VoiceCoordinatorService } from '../../services/voice-coordinator.service';
 import { AiTutorService, TutorSessionRequest } from '../../services/ai-tutor.service';
+import { SystemAgentService, ActionPlan, AgentAction, ExecutionResult, PrioritizedModel } from '../../services/system-agent.service';
 
 export interface LiveChatMessage extends ChatMessage {
   avatar?: string;
@@ -75,14 +76,24 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   private tutorSub: Subscription | null = null;
   private activeScreenAiMessage: LiveChatMessage | null = null;
   private liveVoiceScreenFallbackTimer: any = null;
+  // Autonomous Operating System & Browser Agent State
+  pendingActionPlan: ActionPlan | null = null;
+  isExecutingPlan: boolean = false;
+  executedPlanResult: ExecutionResult | null = null;
+  showModelsModal: boolean = false;
+  prioritizedModels: PrioritizedModel[] = [];
 
   quickPrompts: { label: string; prompt: string; icon: string }[] = [
+    { icon: '🌐', label: 'Open Google', prompt: 'Open browser and navigate to https://www.google.com' },
+    { icon: '💻', label: 'Calculator', prompt: 'Launch Windows Calculator application' },
+    { icon: '📝', label: 'Notepad', prompt: 'Open Notepad editor on my system' },
+    { icon: '📁', label: 'File Explorer', prompt: 'Open Windows File Explorer' },
+    { icon: '⚡', label: 'System Date', prompt: 'Run command: Get-Date' },
     { icon: '🖥️', label: 'External Screen', prompt: 'Look at my active screen outside this app and explain what is open and what errors or code you see.' },
     { icon: '👁️', label: 'Explain Screen', prompt: 'Look at my current screen and explain what is displayed and what actions I should take.' },
     { icon: '📸', label: 'Analyze Screen', prompt: 'Read my active screen carefully and provide key insights or recommendations.' },
     { icon: '💻', label: 'Code Workspace', prompt: 'Inspect the code and compiler terminal on my screen and diagnose any issues.' },
-    { icon: '🎓', label: 'CUTM Courses', prompt: 'Summarize the core engineering curriculum and courses visible on my screen.' },
-    { icon: '🎯', label: 'My Goals', prompt: 'Review my active SMART goals on screen and give me 3 actionable tips.' }
+    { icon: '🎓', label: 'CUTM Courses', prompt: 'Summarize the core engineering curriculum and courses visible on my screen.' }
   ];
 
   messages: LiveChatMessage[] = [
@@ -140,10 +151,17 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     public voiceCoordinator: VoiceCoordinatorService,
     public screenReader: AppScreenReaderService,
     public aiTutorService: AiTutorService,
+    public systemAgent: SystemAgentService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    // Load 6-tier prioritized models table
+    this.systemAgent.getPrioritizedModels().subscribe({
+      next: (models) => { this.prioritizedModels = models; },
+      error: (err) => console.warn('Could not load prioritized models:', err)
+    });
+
     // Subscribe to CUTM Course AI Tutoring requests
     this.tutorSub = this.aiTutorService.tutorRequest$.subscribe((req: TutorSessionRequest) => {
       this.startAcademicTutorSession(req);
@@ -177,6 +195,25 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
       if (event.role === 'user') {
+        // If a system control plan is pending authorization, check for spoken confirmation or denial
+        if (this.pendingActionPlan) {
+          const authWords = /\b(authorize|yes|proceed|confirm|allow|do it|okay|sure|execute|go ahead)\b/i;
+          const denyWords = /\b(cancel|deny|no|stop|abort|reject|don't)\b/i;
+          if (authWords.test(event.text)) {
+            this.authorizeAndExecutePlan(true);
+            return;
+          } else if (denyWords.test(event.text)) {
+            this.denyPlan(true);
+            return;
+          }
+        }
+
+        // Check if spoken command requires Operating System or Browser control
+        if (this.systemAgent.isControlIntent(event.text)) {
+          this.handleLiveVoiceControlTask(event.text);
+          return;
+        }
+
         if (this.liveService.isScreenReadingIntent(event.text)) {
           this.handleLiveVoiceScreenQuery(event.text);
           return;
@@ -865,6 +902,12 @@ Instruction: You are the MentorHub AI Live Voice assistant speaking in your natu
 
     const query = this.userInput.trim();
 
+    // Route system & browser control tasks to Autonomous Agent Engine
+    if (this.systemAgent.isControlIntent(query)) {
+      this.handleTextControlTask(query);
+      return;
+    }
+
     // Route screen-targeted queries to Gemini 3.1 Flash-Lite multimodal reader
     const isScreenTargeted = this.isScreenPerceptionActive || 
                              this.isExternalScreenActive ||
@@ -956,6 +999,233 @@ Instruction: You are the MentorHub AI Live Voice assistant speaking in your natu
         this.scrollToBottom();
       }
     });
+  }
+
+  // ========================================================
+  // Autonomous System & Browser Control Agent Methods
+  // Strict 6-Tier Priority Model Dispatcher & Permission UX
+  // ========================================================
+
+  handleTextControlTask(query: string) {
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    this.messages.push({
+      id: 'msg-' + Date.now(),
+      sender: 'user',
+      avatar: 'U',
+      text: query,
+      mode: 'TEXT',
+      timestamp: timeStr
+    });
+    this.userInput = '';
+    this.isGenerating = true;
+    this.scrollToBottom();
+
+    let screenCtx: string | undefined;
+    if (this.isExternalScreenActive) {
+      screenCtx = '[EXTERNAL SCREEN ACTIVE] Visual feed captured from external OS window/desktop.';
+    } else if (this.isScreenPerceptionActive) {
+      const route = typeof window !== 'undefined' && window.location ? window.location.pathname : '/';
+      screenCtx = this.screenReader.extractSemanticContext(route);
+    }
+
+    const aiMsgId = 'msg-' + Date.now();
+    const planningMsg: LiveChatMessage = {
+      id: aiMsgId,
+      sender: 'ai',
+      avatar: 'AI',
+      text: '🛡️ Analyzing task with **Gemini 3.8 Flash (Primary Agent)** and formulating execution plan...',
+      provider: 'GEMINI',
+      model: 'Gemini 3.8 Flash',
+      mode: 'TEXT',
+      timestamp: timeStr
+    };
+    this.messages.push(planningMsg);
+    this.scrollToBottom();
+
+    this.systemAgent.planTask(query, screenCtx).subscribe({
+      next: (plan) => {
+        this.isGenerating = false;
+        if (plan.requiresPermission) {
+          this.pendingActionPlan = plan;
+          planningMsg.text = `### 🛡️ System & Browser Control Request\n` +
+            `**Assigned Model:** ${plan.assignedModel} (${plan.modelRole})\n\n` +
+            `MentorHub AI requests authorization to operate your system and browser to perform the following actions:\n\n` +
+            plan.actions.map((a, idx) => `${idx + 1}. **${a.description}** \`[${a.type}]\``).join('\n') +
+            `\n\n*Please confirm below to grant authorization or deny to cancel.*`;
+        } else {
+          planningMsg.text = plan.naturalResponse || 'Task evaluated.';
+        }
+        this.cdr.detectChanges();
+        this.scrollToBottom();
+      },
+      error: (err) => {
+        this.isGenerating = false;
+        planningMsg.text = '⚠️ Unable to formulate plan: ' + (err?.message || 'Server error');
+        this.scrollToBottom();
+      }
+    });
+  }
+
+  handleLiveVoiceControlTask(userText: string) {
+    if (!userText || !userText.trim()) return;
+    this.liveService.handleInterruption();
+    this.voiceCoordinator.stopAllVoices();
+
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    this.messages.push({
+      id: 'msg-' + Date.now(),
+      sender: 'user',
+      avatar: 'U',
+      text: userText,
+      mode: 'VOICE',
+      timestamp: timeStr
+    });
+
+    const aiMsgId = 'msg-' + Date.now();
+    const planningMsg: LiveChatMessage = {
+      id: aiMsgId,
+      sender: 'ai',
+      avatar: 'AI',
+      text: '🛡️ Planning system action with **Gemini 3.8 Flash** and requesting permission...',
+      provider: 'GEMINI',
+      model: 'Gemini 3.8 Flash',
+      mode: 'VOICE',
+      timestamp: timeStr
+    };
+    this.messages.push(planningMsg);
+    this.scrollToBottom();
+
+    this.systemAgent.planTask(userText).subscribe({
+      next: (plan) => {
+        if (plan.requiresPermission) {
+          this.pendingActionPlan = plan;
+          planningMsg.text = `### 🛡️ System & Browser Control Request\n` +
+            `**Assigned Model:** ${plan.assignedModel} (${plan.modelRole})\n\n` +
+            `MentorHub AI requests authorization to operate your system and browser to perform the following actions:\n\n` +
+            plan.actions.map((a, idx) => `${idx + 1}. **${a.description}** \`[${a.type}]\``).join('\n') +
+            `\n\n*Please confirm below or say "Authorize" to proceed.*`;
+          this.cdr.detectChanges();
+          this.scrollToBottom();
+
+          const vocalPrompt = `[PERMISSION AUTHORIZATION REQUIRED]
+The user gave this command: "${userText}"
+The AI planned these actions on the system: "${plan.taskSummary}"
+Instruction: In your natural Kore voice, politely ask the user for permission to take control of their system to perform this task. For example: "I have prepared the plan to ${plan.taskSummary}. May I take control of your system to proceed? Please say authorize or confirm on screen."`;
+
+          if (this.isLiveVoiceActive && this.liveService.isConnected()) {
+            this.liveService.sendPromptToLiveModel(vocalPrompt);
+          } else {
+            this.speakVoiceResponse(`I have prepared the plan to ${plan.taskSummary}. May I take control of your system to proceed? Please authorize on screen.`);
+          }
+        } else {
+          planningMsg.text = plan.naturalResponse || 'Task evaluated.';
+          this.cdr.detectChanges();
+          this.scrollToBottom();
+          if (this.isLiveVoiceActive && this.liveService.isConnected()) {
+            this.liveService.sendPromptToLiveModel(plan.naturalResponse || 'Task evaluated.');
+          } else {
+            this.speakVoiceResponse(plan.naturalResponse || 'Task evaluated.');
+          }
+        }
+      },
+      error: (err) => {
+        planningMsg.text = '⚠️ Unable to formulate plan: ' + (err?.message || 'Server error');
+        this.scrollToBottom();
+      }
+    });
+  }
+
+  authorizeAndExecutePlan(isVoice: boolean = false) {
+    if (!this.pendingActionPlan || this.isExecutingPlan) return;
+    const plan = this.pendingActionPlan;
+    this.isExecutingPlan = true;
+    this.showToast('⚡ System control authorized. Executing actions with ' + plan.assignedModel + '...');
+
+    const execAiMessage: LiveChatMessage = {
+      id: 'msg-' + Date.now(),
+      sender: 'ai',
+      avatar: 'AI',
+      text: `⚙️ **Executing Authorized Actions** via **${plan.assignedModel}** (${plan.modelRole})...\n\n` +
+            plan.actions.map(a => `⏳ ${a.description}`).join('\n'),
+      provider: 'GEMINI',
+      model: plan.assignedModel,
+      mode: isVoice ? 'VOICE' : 'TEXT',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    this.messages.push(execAiMessage);
+    this.scrollToBottom();
+
+    this.systemAgent.executePlan(plan.planId, plan.actions, true).subscribe({
+      next: (result) => {
+        this.isExecutingPlan = false;
+        this.pendingActionPlan = null;
+        this.executedPlanResult = result;
+
+        const summaryActions = result.executedActions && result.executedActions.length > 0
+          ? result.executedActions.map(a => `${a.status === 'COMPLETED' ? '✅' : '❌'} **${a.description}**\n${a.output ? '```\n' + a.output + '\n```' : ''}`).join('\n\n')
+          : '';
+
+        execAiMessage.text = `### 🛡️ System Control Task Completed\n` +
+          `**Executing Agent:** ${result.executingModel} (${result.executingModelRole})\n\n` +
+          `${summaryActions}\n\n` +
+          `${result.completionMessage}`;
+        execAiMessage.model = result.executingModel;
+
+        this.cdr.detectChanges();
+        this.scrollToBottom();
+
+        if (isVoice || this.isLiveVoiceActive) {
+          if (this.isLiveVoiceActive && this.liveService.isConnected()) {
+            this.liveService.sendPromptToLiveModel(
+              `[SYSTEM CONTROL TASK COMPLETED]
+Executing Agent: ${result.executingModel} (${result.executingModelRole})
+Summary: ${result.spokenSummary}
+Instruction: Speak this completion confirmation in your natural Kore voice to the user. Be concise and pleasant.`
+            );
+          } else {
+            this.speakVoiceResponse(result.spokenSummary);
+          }
+        }
+      },
+      error: (err) => {
+        this.isExecutingPlan = false;
+        this.pendingActionPlan = null;
+        execAiMessage.text = `❌ **Execution Error:** Unable to complete system actions. ${err?.message || ''}`;
+        this.scrollToBottom();
+      }
+    });
+  }
+
+  denyPlan(isVoice: boolean = false) {
+    if (!this.pendingActionPlan) return;
+    const plan = this.pendingActionPlan;
+    this.pendingActionPlan = null;
+    this.isExecutingPlan = false;
+    this.showToast('🛑 System control permission denied by user.');
+
+    this.messages.push({
+      id: 'msg-' + Date.now(),
+      sender: 'ai',
+      avatar: 'AI',
+      text: `🛑 **System Control Cancelled:** Permission was denied for: *${plan.taskSummary}*. No actions were performed on your system.`,
+      provider: 'GEMINI',
+      model: plan.assignedModel,
+      mode: isVoice ? 'VOICE' : 'TEXT',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+    this.scrollToBottom();
+
+    if (isVoice || this.isLiveVoiceActive) {
+      if (this.isLiveVoiceActive && this.liveService.isConnected()) {
+        this.liveService.sendPromptToLiveModel('The user denied system control permission. Confirm to the user in your Kore voice that system control was aborted and no actions were executed.');
+      } else {
+        this.speakVoiceResponse('System control was cancelled and no actions were performed.');
+      }
+    }
+  }
+
+  toggleModelsModal() {
+    this.showModelsModal = !this.showModelsModal;
   }
 
   copyMessage(msg: LiveChatMessage) {

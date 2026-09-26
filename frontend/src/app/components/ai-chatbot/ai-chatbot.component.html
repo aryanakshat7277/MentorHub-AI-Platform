@@ -50,6 +50,15 @@
     <!-- Controls Bar: Action Toggles -->
     <div class="header-controls-bar">
       <div class="header-actions-right">
+        <!-- Prioritized Agent Models Hierarchy Toggle -->
+        <button class="models-pill-btn tactile-btn-3d serif-title" 
+                [class.active-mode]="showModelsModal" 
+                (click)="toggleModelsModal()" 
+                title="View Prioritized AI Agent Models & Multi-Tier Execution Hierarchy">
+          <span class="models-pill-icon">⚡</span>
+          <span>MODELS</span>
+        </button>
+
         <!-- External Screen (Outside App) Link Button -->
         <button class="screen-external-pill-btn tactile-btn-3d serif-title" 
                 [class.active-mode]="isExternalScreenActive" 
@@ -197,10 +206,58 @@
           <div class="gemini-thinking-sparkle gold-seal-emboss">
             <span>✨</span>
           </div>
-          <span class="thinking-text serif-title">Gemini 3.1 Flash-Lite reading screen & synthesizing answer</span>
+          <span class="thinking-text serif-title">Analyzing request & preparing action plan</span>
           <span class="thinking-dots">
             <span></span><span></span><span></span>
           </span>
+        </div>
+      </div>
+
+      <!-- Interactive System Control Permission Authorization Card -->
+      <div class="system-control-auth-card elevated-card-3d animated-msg" *ngIf="pendingActionPlan">
+        <div class="auth-card-header">
+          <div class="auth-header-left">
+            <span class="auth-shield-icon">🛡️</span>
+            <div>
+              <h4 class="auth-title serif-title">System & Browser Control Authorization</h4>
+              <p class="auth-subtitle serif-title">MentorHub Autonomous AI Agent requires permission to operate your system.</p>
+            </div>
+          </div>
+          <span class="auth-model-badge serif-title">
+            ⚡ {{ pendingActionPlan.assignedModel }} • {{ pendingActionPlan.modelRole }}
+          </span>
+        </div>
+
+        <div class="auth-card-body">
+          <div class="auth-task-recap">
+            <span class="auth-recap-label serif-title">Planned System Operations:</span>
+            <div class="auth-actions-list">
+              <div class="auth-action-item" *ngFor="let act of pendingActionPlan.actions; let idx = index">
+                <span class="act-index">{{ idx + 1 }}</span>
+                <span class="act-type-tag serif-title">
+                  {{ act.type === 'NAVIGATE_URL' ? '🌐 BROWSER' : (act.type === 'SEARCH_WEB' ? '🔍 WEB SEARCH' : (act.type === 'OPEN_APP' ? '💻 APP LAUNCH' : (act.type === 'RUN_COMMAND' ? '⚙️ SHELL' : '📁 OS ACTION'))) }}
+                </span>
+                <span class="act-desc serif-title">{{ act.description }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="auth-notice-banner serif-title">
+            ⚠️ <strong>Safety Confirmation:</strong> The agent will directly open windows or run tasks on your computer. You retain full control to authorize or abort.
+          </div>
+
+          <div class="auth-actions-cta-bar">
+            <button class="auth-confirm-btn tactile-btn-3d serif-title" 
+                    [disabled]="isExecutingPlan"
+                    (click)="authorizeAndExecutePlan()">
+              {{ isExecutingPlan ? '⏳ EXECUTING ACTIONS...' : '✔ AUTHORIZE & TAKE CONTROL' }}
+            </button>
+            <button class="auth-deny-btn tactile-btn-3d serif-title" 
+                    [disabled]="isExecutingPlan"
+                    (click)="denyPlan()">
+              ✕ DENY / ABORT
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -291,6 +348,63 @@
         <span>✨ SEND</span>
         <span class="shine-sweep"></span>
       </button>
+    </div>
+  </div>
+
+  <!-- Prioritized AI Agent Models Hierarchy Modal -->
+  <div class="agent-models-modal-backdrop" *ngIf="showModelsModal" (click)="toggleModelsModal()">
+    <div class="agent-models-modal clay-panel elevated-card-3d" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-crest">⚡</span>
+          <div>
+            <h3 class="serif-title modal-heading">Autonomous Agent Model Hierarchy</h3>
+            <p class="modal-subheading serif-title">Priority Order • Multi-Step Execution • Operating System & Browser Control</p>
+          </div>
+        </div>
+        <button class="modal-close-btn tactile-btn-3d" (click)="toggleModelsModal()" title="Close Hierarchy">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="models-table-wrap debossed-track">
+          <table class="models-priority-table serif-title">
+            <thead>
+              <tr>
+                <th>Tier</th>
+                <th>Model</th>
+                <th>Best Role</th>
+                <th>Agent Capability</th>
+                <th>Tool Calling</th>
+                <th>Speed</th>
+                <th>Coding</th>
+                <th>Multistep Execution</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let m of prioritizedModels" [class.tier-primary]="m.priority === 1" [class.tier-fallback]="m.priority === 2">
+                <td class="tier-cell">
+                  <span class="tier-pill">#{{ m.priority }}</span>
+                </td>
+                <td class="model-name-cell">
+                  <strong>{{ m.name }}</strong>
+                  <span class="status-live-dot" *ngIf="m.active" title="API Ready"></span>
+                </td>
+                <td class="role-cell">
+                  <span class="role-badge" [class.primary]="m.priority === 1">{{ m.bestRole }}</span>
+                </td>
+                <td class="rating-cell">{{ m.agentCapability }}</td>
+                <td class="rating-cell">{{ m.toolCalling }}</td>
+                <td class="speed-cell">{{ m.speed }}</td>
+                <td class="rating-cell">{{ m.coding }}</td>
+                <td class="rating-cell">{{ m.multistepExecution }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer-note serif-title">
+          <span>🛡️ Strict Safety Policy: Tasks requiring OS or browser control will ALWAYS prompt for authorization before execution.</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
