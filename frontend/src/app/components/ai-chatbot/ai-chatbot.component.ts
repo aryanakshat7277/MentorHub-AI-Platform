@@ -73,6 +73,8 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   private textChatSub: Subscription | null = null;
   private voiceQuerySub: Subscription | null = null;
   private tutorSub: Subscription | null = null;
+  private activeScreenAiMessage: LiveChatMessage | null = null;
+  private liveVoiceScreenFallbackTimer: any = null;
 
   quickPrompts: { label: string; prompt: string; icon: string }[] = [
     { icon: '🖥️', label: 'External Screen', prompt: 'Look at my active screen outside this app and explain what is open and what errors or code you see.' },
@@ -175,6 +177,11 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
       if (event.role === 'user') {
+        if (this.liveService.isScreenReadingIntent(event.text)) {
+          this.handleLiveVoiceScreenQuery(event.text);
+          return;
+        }
+
         this.messages.push({
           id: 'msg-' + Date.now(),
           sender: 'user',
@@ -184,16 +191,21 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
           timestamp: timeStr
         });
       } else if (event.role === 'assistant') {
-        this.messages.push({
-          id: 'msg-' + Date.now(),
-          sender: 'ai',
-          avatar: 'AI',
-          text: event.text,
-          provider: 'GEMINI',
-          model: 'gemini-3.1-flash-live-preview',
-          mode: 'VOICE',
-          timestamp: timeStr
-        });
+        if (this.activeScreenAiMessage) {
+          // Gemini 3.1 Flash-Lite analysis card is already in place; clear reference
+          this.activeScreenAiMessage = null;
+        } else {
+          this.messages.push({
+            id: 'msg-' + Date.now(),
+            sender: 'ai',
+            avatar: 'AI',
+            text: event.text,
+            provider: 'GEMINI',
+            model: 'gemini-3.1-flash-live-preview',
+            mode: 'VOICE',
+            timestamp: timeStr
+          });
+        }
       }
       this.scrollToBottom();
     });
@@ -253,6 +265,10 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     if (this.textChatSub) this.textChatSub.unsubscribe();
     if (this.voiceQuerySub) this.voiceQuerySub.unsubscribe();
     if (this.tutorSub) this.tutorSub.unsubscribe();
+    if (this.liveVoiceScreenFallbackTimer) {
+      clearTimeout(this.liveVoiceScreenFallbackTimer);
+      this.liveVoiceScreenFallbackTimer = null;
+    }
   }
 
   scrollToBottom() {
@@ -508,12 +524,151 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
         // Speak aloud if query was asked via voice or voiceMode returned
         if (isVoice || res.voiceMode) {
           const speakText = res.spokenText || aiMessage.text;
-          this.speakVoiceResponse(speakText);
+          if (this.isLiveVoiceActive && this.liveService.isConnected()) {
+            const liveVoicePrompt = `[MULTIMODAL SCREEN ANALYSIS FROM GEMINI 3.1 FLASH-LITE]
+User asked: "${query}"
+Gemini 3.1 Flash-Lite inspected the active screen snapshot and provided this analysis:
+"${speakText}"
+
+Instruction: You are the MentorHub AI Live Voice assistant speaking in your natural Kore voice. Speak this screen analysis answer clearly and naturally to the user. Speak in the exact language used by the user. Be concise, direct, and helpful.`;
+            const sent = this.liveService.sendPromptToLiveModel(liveVoicePrompt);
+            if (!sent) {
+              this.speakVoiceResponse(speakText, true);
+            }
+          } else {
+            this.speakVoiceResponse(speakText);
+          }
         }
       },
       error: () => {
         this.isGenerating = false;
         aiMessage.text = "I'm unable to analyze your screen right now. Please try again.";
+        this.scrollToBottom();
+      }
+    });
+  }
+
+  /**
+   * Handles spoken screen queries in Live Voice conversation mode.
+   * Intercepts the speech turn, captures live screen (in-app or external OS),
+   * queries Gemini 3.1 Flash-Lite for multimodal perception,
+   * and feeds the resulting analysis back to the Gemini Live voice model (Kore voice) to speak aloud.
+   */
+  async handleLiveVoiceScreenQuery(userText: string) {
+    if (!userText || !userText.trim()) return;
+
+    // Immediately stop any blind audio output and signal screen query processing
+    this.liveService.handleInterruption();
+    this.liveService.isProcessingScreenQuery = true;
+    if (this.liveVoiceScreenFallbackTimer) {
+      clearTimeout(this.liveVoiceScreenFallbackTimer);
+      this.liveVoiceScreenFallbackTimer = null;
+    }
+
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    this.messages.push({
+      id: 'msg-' + Date.now(),
+      sender: 'user',
+      avatar: 'U',
+      text: userText,
+      mode: 'VOICE',
+      timestamp: timeStr
+    });
+
+    const aiMessageId = 'msg-' + Date.now();
+    const aiMessage: LiveChatMessage = {
+      id: aiMessageId,
+      sender: 'ai',
+      avatar: 'AI',
+      text: '🔍 Capturing live screen and analyzing with Gemini 3.1 Flash-Lite...',
+      provider: 'GEMINI',
+      model: 'gemini-3.1-flash-lite',
+      mode: 'VOICE',
+      timestamp: timeStr
+    };
+    this.messages.push(aiMessage);
+    this.activeScreenAiMessage = aiMessage;
+    this.scrollToBottom();
+
+    // Check if user asked about external windows / OS desktop
+    const wantsExternal = /\b(outside|desktop|external|vs code|vscode|other window|another app|other tab|entire screen|my computer)\b/i.test(userText);
+    if (wantsExternal && !this.isExternalScreenActive) {
+      this.showToast('🖥️ Requesting permission to read your external screen/window...');
+      const granted = await this.screenReader.startExternalScreenCapture();
+      if (!granted) {
+        this.showToast('⚠️ External screen permission needed to view outside windows.');
+      }
+    }
+
+    this.isCapturingScreen = true;
+    let screenSnapshot = null;
+    try {
+      screenSnapshot = await this.screenReader.captureScreen();
+    } catch (e) {
+      console.warn('Live voice screen capture exception:', e);
+    } finally {
+      this.isCapturingScreen = false;
+    }
+
+    const screenImg = screenSnapshot ? screenSnapshot.imageBase64 : undefined;
+    let screenCtx = screenSnapshot ? screenSnapshot.semanticContext : undefined;
+
+    if (this.isExternalScreenActive) {
+      screenCtx = `[EXTERNAL SCREEN ACTIVE] Visual feed captured from external OS window/desktop/application outside MentorHub. User is asking a direct question in live voice regarding their external screen.\n` + (screenCtx || '');
+    } else if (!screenCtx) {
+      const route = typeof window !== 'undefined' && window.location ? window.location.pathname : '/';
+      screenCtx = this.screenReader.extractSemanticContext(route);
+    }
+
+    const historyPayload = this.buildHistoryPayload();
+
+    this.aiChatService.askAboutScreen(
+      userText,
+      true,
+      screenImg,
+      screenCtx,
+      historyPayload
+    ).subscribe({
+      next: (res) => {
+        aiMessage.text = res.response || res.message || 'I analyzed your active screen.';
+        aiMessage.provider = res.provider || 'GEMINI';
+        aiMessage.model = res.model || 'gemini-3.1-flash-lite';
+        this.cdr.detectChanges();
+        this.scrollToBottom();
+
+        const spokenAnalysis = res.spokenText || res.response || res.message || 'I analyzed your active screen.';
+
+        // Route the Flash-Lite multimodal analysis to the Live Voice model (Kore persona)
+        if (this.isLiveVoiceActive && this.liveService.isConnected()) {
+          const liveVoicePrompt = `[MULTIMODAL SCREEN ANALYSIS FROM GEMINI 3.1 FLASH-LITE]
+The user asked via live voice: "${userText}"
+Gemini 3.1 Flash-Lite inspected the active screen snapshot and provided this analysis:
+"${spokenAnalysis}"
+
+Instruction: You are the MentorHub AI Live Voice assistant speaking in your natural Kore voice. Speak this screen analysis answer clearly and naturally to the user. Speak in the exact language used by the user. Be concise, direct, and helpful.`;
+
+          const sent = this.liveService.sendPromptToLiveModel(liveVoicePrompt);
+          if (sent) {
+            // Latency safety guard: if Live Voice model does not begin speaking in 2500ms, use speech synthesis fallback
+            this.liveVoiceScreenFallbackTimer = setTimeout(() => {
+              if (!this.audioPlayback.isSpeaking$.value && this.liveService.status$.value !== 'SPEAKING') {
+                console.log('GeminiLiveService: Live voice audio latency guard triggered, falling back to TTS');
+                this.speakVoiceResponse(spokenAnalysis, true);
+              }
+            }, 2500);
+          } else {
+            this.speakVoiceResponse(spokenAnalysis, true);
+          }
+        } else {
+          this.speakVoiceResponse(spokenAnalysis, true);
+        }
+      },
+      error: (err) => {
+        console.error('Live voice screen query error:', err);
+        aiMessage.text = "I'm unable to analyze your screen right now. Please try again.";
+        this.liveService.isProcessingScreenQuery = false;
+        this.activeScreenAiMessage = null;
+        this.cdr.detectChanges();
         this.scrollToBottom();
       }
     });
@@ -643,9 +798,9 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     return voices.find(v => v.lang.startsWith('en')) || null;
   }
 
-  speakVoiceResponse(text: string) {
-    // STRICT SINGLE VOICE GUARANTEE: Never allow browser speechSynthesis to speak if Gemini Live is active!
-    if (this.isLiveVoiceActive || this.liveService.status$.value !== 'IDLE' || this.voiceCoordinator.isChannelActive('gemini-live') || this.audioPlayback.isSpeaking$.value) {
+  speakVoiceResponse(text: string, forceFallback: boolean = false) {
+    // STRICT SINGLE VOICE GUARANTEE: Never allow browser speechSynthesis to speak if Gemini Live is active (unless forcing fallback)!
+    if (!forceFallback && (this.isLiveVoiceActive || this.liveService.status$.value !== 'IDLE' || this.voiceCoordinator.isChannelActive('gemini-live') || this.audioPlayback.isSpeaking$.value)) {
       return;
     }
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;

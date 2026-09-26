@@ -55,6 +55,81 @@ export class GeminiLiveService {
   private currentTurnId = 0;
   private isTurnInProgress = false;
   private pendingUserTranscript = '';
+  public isProcessingScreenQuery = false;
+
+  public isScreenReadingIntent(text: string): boolean {
+    if (!text || typeof text !== 'string') return false;
+    const q = text.toLowerCase().trim();
+    if (q.length < 3) return false;
+
+    if (/\b(read|analyze|inspect|check|examine|look at|see|view|scan|explain|describe)\b.*\b(screen|desktop|window|display|monitor|page|ide|code|terminal)\b/i.test(q)) {
+      return true;
+    }
+    if (/\b(screen|desktop|display|monitor|window)\b.*\b(read|analyze|inspect|check|explain|describe|view|scan)\b/i.test(q)) {
+      return true;
+    }
+    if (/\b(what('?s| is| are)|what do you see|what can you see|tell me what)\b.*\b(on|in|at)\b.*\b(screen|desktop|display|monitor|window|page)\b/i.test(q)) {
+      return true;
+    }
+    if (/\b(can you (see|read|check|inspect|analyze|look at)) (my|the|this)? ?(screen|desktop|window|display)\b/i.test(q)) {
+      return true;
+    }
+    if (/\b(what am i (seeing|looking at))\b/i.test(q)) {
+      return true;
+    }
+    if (/\b(read (my|the|this|active|current)? ?screen)\b/i.test(q)) {
+      return true;
+    }
+    if (/\b(look at (my|the|this)? ?screen)\b/i.test(q)) {
+      return true;
+    }
+    if (/\b(error|bug|code|issue)\b.*\b(on (my|the) screen)\b/i.test(q)) {
+      return true;
+    }
+    if (/\b(screen|desktop)\b.*\b(pe|par)? ?(kya|dekho|padho|batao)\b/i.test(q)) {
+      return true;
+    }
+    return false;
+  }
+
+  public isConnected(): boolean {
+    return !!this.ws && this.ws.readyState === WebSocket.OPEN && this.isSetupComplete;
+  }
+
+  public sendPromptToLiveModel(promptText: string): boolean {
+    if (!promptText || !this.ws || this.ws.readyState !== WebSocket.OPEN || !this.isSetupComplete) {
+      console.warn('GeminiLiveService: Cannot send prompt to live model - WebSocket not open or setup incomplete');
+      return false;
+    }
+    try {
+      this.isProcessingScreenQuery = false;
+      this.outputTranscript$.next('');
+      this.currentTurnId = this.audioPlayback.startNewTurn();
+      this.setStatus('THINKING');
+
+      const payload = {
+        clientContent: {
+          turns: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  text: promptText
+                }
+              ]
+            }
+          ],
+          turnComplete: true
+        }
+      };
+      this.ws.send(JSON.stringify(payload));
+      console.log('GeminiLiveService: Dispatched multimodal screen analysis turn to Live Voice model');
+      return true;
+    } catch (err) {
+      console.error('GeminiLiveService: sendPromptToLiveModel failed:', err);
+      return false;
+    }
+  }
 
   constructor(
     private http: HttpClient,
@@ -248,11 +323,21 @@ export class GeminiLiveService {
         if (sc.inputTranscription && sc.inputTranscription.text) {
           this.pendingUserTranscript += sc.inputTranscription.text;
           this.inputTranscript$.next(this.pendingUserTranscript.trim());
+          if (this.isScreenReadingIntent(this.pendingUserTranscript)) {
+            if (!this.isProcessingScreenQuery) {
+              console.log('GeminiLiveService: Detected screen reading query from live speech transcription. Halting blind audio and routing to Gemini 3.1 Flash-Lite.');
+              this.isProcessingScreenQuery = true;
+              this.audioPlayback.interrupt();
+              this.setStatus('THINKING');
+            }
+          }
         }
 
         if (sc.outputTranscription && sc.outputTranscription.text) {
-          const currentOut = this.outputTranscript$.value + sc.outputTranscription.text;
-          this.outputTranscript$.next(currentOut);
+          if (!this.isProcessingScreenQuery) {
+            const currentOut = this.outputTranscript$.value + sc.outputTranscription.text;
+            this.outputTranscript$.next(currentOut);
+          }
         }
 
         if (sc.interrupted) {
@@ -269,6 +354,11 @@ export class GeminiLiveService {
             this.ngZone.run(() => {
               this.transcriptEvent$.next({ role: 'user', text: userText });
             });
+          }
+
+          if (this.isProcessingScreenQuery) {
+            // Drop blind audio chunks and suppress blind speech turn while Gemini 3.1 Flash-Lite is inspecting the screen
+            return;
           }
 
           if (!this.isTurnInProgress) {
@@ -304,6 +394,12 @@ export class GeminiLiveService {
             this.ngZone.run(() => {
               this.transcriptEvent$.next({ role: 'user', text: userText });
             });
+          }
+
+          if (this.isProcessingScreenQuery) {
+            // Screen analysis is actively in flight with Gemini 3.1 Flash-Lite; maintain THINKING state
+            this.outputTranscript$.next('');
+            return;
           }
 
           const finalOutput = this.outputTranscript$.value.trim();
@@ -464,6 +560,7 @@ export class GeminiLiveService {
     this.isTurnInProgress = false;
     this.loudFrameCount = 0;
     this.pendingUserTranscript = '';
+    this.isProcessingScreenQuery = false;
     this.voiceCoordinator.stopAllVoices();
     this.audioCapture.stopCapture();
 
