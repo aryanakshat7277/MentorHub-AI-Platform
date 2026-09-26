@@ -1,6 +1,8 @@
-import { Component, EventEmitter, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, NavigationEnd, RouterModule } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
 
@@ -18,11 +20,14 @@ export interface MenuItem {
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
 })
-export class SidebarComponent implements OnInit {
-  isCollapsed = false;
+export class SidebarComponent implements OnInit, OnDestroy {
+  // Navigation drawer is closed/collapsed by default
+  isCollapsed = true;
   userRole = '';
   @Output() toggleCollapse = new EventEmitter<boolean>();
   @Output() closeMobile = new EventEmitter<void>();
+
+  private navSub: Subscription | null = null;
 
   allMenuItems: MenuItem[] = [
     { label: 'Dashboard', route: '/dashboard', icon: '📊' },
@@ -41,7 +46,11 @@ export class SidebarComponent implements OnInit {
     { label: 'My Profile', route: '/profile', icon: '👤' }
   ];
 
-  constructor(private authService: AuthService, private apiService: ApiService) {}
+  constructor(
+    private authService: AuthService, 
+    private apiService: ApiService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.userRole = (this.authService.getUserRole() || '').toUpperCase();
@@ -50,6 +59,25 @@ export class SidebarComponent implements OnInit {
         this.userRole = (u.role || '').toUpperCase();
       }
     });
+
+    // Notify parent on startup that drawer is collapsed by default
+    this.toggleCollapse.emit(this.isCollapsed);
+
+    // Auto-close navigation drawer whenever navigating to any section
+    this.navSub = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      if (!this.isCollapsed) {
+        this.isCollapsed = true;
+        this.toggleCollapse.emit(this.isCollapsed);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.navSub) {
+      this.navSub.unsubscribe();
+    }
   }
 
   get visibleMenuItems(): MenuItem[] {
@@ -69,5 +97,11 @@ export class SidebarComponent implements OnInit {
 
   onNavClick() {
     this.closeMobile.emit();
+    // Auto-close navigation drawer when clicked for any section
+    if (!this.isCollapsed) {
+      this.isCollapsed = true;
+      this.toggleCollapse.emit(this.isCollapsed);
+    }
   }
 }
+

@@ -29,7 +29,7 @@ import { AiTutorService } from './services/ai-tutor.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit, OnDestroy {
-  isSidebarCollapsed = false;
+  isSidebarCollapsed = true;
   isMobileSidebarOpen = false;
   isAiChatbotOpen = false;
 
@@ -71,6 +71,7 @@ export class AppComponent implements OnInit, OnDestroy {
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       this.closeMobileSidebar();
+      this.isSidebarCollapsed = true;
       this.checkAuthRoute(event.urlAfterRedirects || event.url);
     });
 

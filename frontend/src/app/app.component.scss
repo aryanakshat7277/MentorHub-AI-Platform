@@ -57,6 +57,12 @@
   padding: 34px 38px 64px 38px;
   flex: 1;
   animation: pageReveal 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  &:has(.workspace-page),
+  &:has(app-workspace) {
+    margin-top: 58px;
+    padding: 10px 16px 16px 16px;
+  }
 }
 
 .auth-page-container {

@@ -30,14 +30,14 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   isEditorMaximized = false;
 
   // Resizable Display Area State
-  splitRatioPercent = 58; // Left pane width percentage
+  splitRatioPercent = 65; // Left pane width percentage (spacious code writing area)
   terminalHeightPx = 185; // Terminal height in pixels
   isTerminalCollapsed = false;
   isDraggingHorizontal = false;
   isDraggingVertical = false;
 
   private startX = 0;
-  private startWidthPercent = 58;
+  private startWidthPercent = 65;
   private startY = 0;
   private startTerminalHeight = 185;
 
@@ -1374,7 +1374,7 @@ console.log("[✓] Execution complete.");
   }
 
   resetLayout() {
-    this.splitRatioPercent = 58;
+    this.splitRatioPercent = 65;
     this.terminalHeightPx = 185;
     this.isTerminalCollapsed = false;
     this.isEditorMaximized = false;

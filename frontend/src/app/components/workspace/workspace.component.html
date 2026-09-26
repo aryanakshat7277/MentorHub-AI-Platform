@@ -183,6 +183,7 @@
          [style.display]="splitRatioPercent === 0 ? 'none' : 'flex'">
       <div class="pane-tabs">
         <div class="tab-selectors">
+          <!-- Supported Language Selector -->
           <div class="select-wrapper 3d-inset-well">
             <select [(ngModel)]="activeLanguage" (change)="onLanguageChange()" class="lang-select serif-title">
               <option *ngFor="let r of runtimes" [value]="r.language">{{ formatLanguageName(r.language) }} (v{{ r.version }})</option>
@@ -198,52 +199,39 @@
             </select>
           </div>
 
-          <!-- Version Badge -->
-          <span class="version-badge serif-title">v{{ activeVersion }}</span>
-
-          <!-- Maximize / Restore Editor Button -->
-          <button class="maximize-btn tactile-btn-3d serif-title" (click)="toggleEditorMaximize()" [title]="isEditorMaximized ? 'Restore View' : 'Maximize Code Editor'">
-            {{ isEditorMaximized ? '🗗 RESTORE' : '🗖 MAXIMIZE' }}
+          <!-- Reset Code Template -->
+          <button class="ide-tool-btn tactile-btn-3d serif-title" (click)="resetCodeToTemplate()" title="Reset code to clean template">
+            🔄 Reset
           </button>
 
-          <!-- Reset Code Template Button -->
-          <button class="reset-code-btn tactile-btn-3d serif-title" (click)="resetCodeToTemplate()" title="Reset code to default language template">
-            🔄 RESET
+          <!-- Maximize / Restore Editor View -->
+          <button class="ide-tool-btn tactile-btn-3d serif-title" (click)="toggleEditorMaximize()" [title]="isEditorMaximized ? 'Restore View' : 'Maximize Code Editor'">
+            {{ isEditorMaximized ? '🗗 Restore' : '🗖 Maximize' }}
           </button>
 
-          <!-- AI Auto-Complete Button (VS Code Copilot Ghost Writing) -->
-          <button class="copilot-btn tactile-btn-3d serif-title" 
+          <!-- AI Auto-Complete (Inline Copilot trigger) -->
+          <button class="ide-tool-btn copilot-pill tactile-btn-3d serif-title" 
                   (click)="triggerAutocomplete(true)" 
                   [disabled]="isCompleting || isSpectator" 
-                  title="VS Code-style inline auto-completion (Shortcut: Tab or Alt+\)">
-            <span *ngIf="!isCompleting">✨ AUTO-COMPLETE</span>
-            <span *ngIf="isCompleting" class="pulse-beacon">⏳ THINKING...</span>
+                  title="AI Code Auto-Completion (Shortcut: Tab or Alt+\)">
+            <span>{{ isCompleting ? '⏳ Thinking...' : '✨ Copilot' }}</span>
           </button>
 
-          <!-- In-IDE AI Auto-Fix Error Button -->
-          <button *ngIf="stderrLogs.length > 0 || compileOutputLogs.length > 0 || executionStatus === 'RUNTIME_ERROR' || executionStatus === 'COMPILATION_ERROR' || lastAutoFixResult"
-                  class="autofix-btn tactile-btn-3d serif-title" 
+          <!-- Auto-Fix Error (Only shown when active unresolved errors occur) -->
+          <button *ngIf="(stderrLogs.length > 0 || compileOutputLogs.length > 0 || executionStatus === 'RUNTIME_ERROR' || executionStatus === 'COMPILATION_ERROR') && !lastAutoFixResult"
+                  class="ide-tool-btn autofix-pill tactile-btn-3d serif-title" 
                   [class.fixing]="isAutoFixing"
                   (click)="triggerAutoFix()" 
                   [disabled]="isAutoFixing || isSpectator" 
-                  title="Diagnose root cause and auto-fix code with Priority AI (Groq Priority 1 ➔ Gemini)">
-            <span *ngIf="!isAutoFixing">🛠️ AUTO-FIX ERROR</span>
-            <span *ngIf="isAutoFixing" class="pulse-beacon">⏳ FIXING...</span>
+                  title="Diagnose & Auto-Fix Error with Priority AI">
+            <span>{{ isAutoFixing ? '⏳ Fixing...' : '🛠️ Fix Error' }}</span>
           </button>
 
-          <!-- Quick Algorithm Snippets -->
-          <div class="select-wrapper 3d-inset-well hidden md:block">
-            <select #snippetSelect (change)="insertSnippet(snippetSelect.value); snippetSelect.value=''" class="lang-select serif-title text-xs">
-              <option value="">⚡ INSERT ALGORITHM...</option>
-              <option *ngFor="let snip of snippetOptions" [value]="snip.key">{{ snip.label }}</option>
-            </select>
-          </div>
-
-          <span class="compiler-badge serif-title hidden lg:inline-block">⚡ PISTON SANDBOX</span>
           <span *ngIf="isSpectator" class="readonly-badge serif-title">🔒 READ-ONLY SPECTATOR</span>
         </div>
 
-        <button class="btn-primary btn-sm run-btn tactile-btn-3d serif-title" (click)="runCode()" [disabled]="isCompiling || isSpectator" [title]="isSpectator ? 'Read-only spectator mode' : 'Run Code'">
+        <!-- Primary Run Code Action -->
+        <button class="btn-primary run-btn tactile-btn-3d serif-title" (click)="runCode()" [disabled]="isCompiling || isSpectator" [title]="isSpectator ? 'Read-only spectator mode' : 'Run Code (Ctrl+Enter)'">
           <span *ngIf="!isCompiling" class="run-label">{{ isSpectator ? '🔒 SPECTATING' : '▶ RUN CODE' }}</span>
           <span *ngIf="isCompiling" class="running-spinner">⏳ RUNNING...</span>
           <span class="shine-sweep"></span>
@@ -257,22 +245,6 @@
           <span class="pulse-beacon"></span>
           <span class="banner-title serif-title">🛠️ AI COPILOT ANALYZING ERROR:</span>
           <span class="banner-desc serif-title">{{ autoFixStatusMsg }}</span>
-        </div>
-
-        <!-- AI Auto-Fix Applied Sticky Banner -->
-        <div class="editor-ai-banner autofix-applied-banner" *ngIf="lastAutoFixResult && highlightedFixedLines.length > 0">
-          <div class="banner-left">
-            <span class="banner-badge">✨ AI AUTO-FIX APPLIED</span>
-            <span class="banner-text serif-title">
-              Fixed Lines <strong>[{{ highlightedFixedLines.join(', ') }}]</strong>: {{ lastAutoFixResult.fixSummary }}
-            </span>
-          </div>
-          <div class="banner-right">
-            <button class="banner-btn rerun-btn serif-title" (click)="runCode()">▶ RE-RUN CODE</button>
-            <button class="banner-btn view-btn serif-title" (click)="terminalTab = 'autofix'; isTerminalCollapsed = false">🔍 VIEW WHAT & HOW FIXED</button>
-            <button class="banner-btn revert-btn serif-title" (click)="revertAutoFix()">↩ REVERT</button>
-            <button class="banner-close-btn" (click)="dismissAutoFixCard()">✕</button>
-          </div>
         </div>
 
         <!-- VS Code Copilot Ghost Suggestion Preview Pill -->
