@@ -89,6 +89,15 @@ int main() {
     return 0;
 }`,
 
+    c: `// MentorHub C Execution (GCC Compiler)
+#include <stdio.h>
+
+int main() {
+    printf("Matching KRITI SAGAR with AKSHAT ARYAN...\\n");
+    printf("AI Compatibility Score: 98.4%%\\n");
+    return 0;
+}`,
+
     typescript: `// MentorHub TypeScript Execution (Piston API Sandbox)
 console.log("Compiler is ready to use");
 console.log("Start working on your skills");`,
@@ -365,10 +374,11 @@ print("Sorted:  ", quick_sort(unsorted))`
       }
     });
 
-    // Load Available Piston Runtimes
+    // Load Available Verified Compiler Runtimes
     this.compilerService.getRuntimes().subscribe(runtimesList => {
       if (runtimesList && runtimesList.length > 0) {
-        this.runtimes = runtimesList;
+        const allowedLanguages = ['python', 'java', 'cpp', 'c', 'javascript', 'typescript', 'go', 'csharp', 'rust'];
+        this.runtimes = runtimesList.filter(r => allowedLanguages.includes(r.language.toLowerCase()));
         const currentRuntime = this.runtimes.find(r => r.language.toLowerCase() === this.activeLanguage.toLowerCase());
         if (currentRuntime) {
           this.activeVersion = currentRuntime.version;
@@ -673,6 +683,22 @@ console.log("[✓] Execution complete.");
     });
 
     return html;
+  }
+
+  formatLanguageName(lang: string): string {
+    const l = (lang || '').toLowerCase();
+    switch (l) {
+      case 'cpp': return 'C++';
+      case 'csharp': return 'C#';
+      case 'c': return 'C';
+      case 'javascript': return 'JAVASCRIPT';
+      case 'typescript': return 'TYPESCRIPT';
+      case 'python': return 'PYTHON';
+      case 'java': return 'JAVA';
+      case 'go': return 'GO';
+      case 'rust': return 'RUST';
+      default: return (lang || '').toUpperCase();
+    }
   }
 
   onLanguageChange() {

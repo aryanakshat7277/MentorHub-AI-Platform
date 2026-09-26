@@ -185,14 +185,15 @@
         <div class="tab-selectors">
           <div class="select-wrapper 3d-inset-well">
             <select [(ngModel)]="activeLanguage" (change)="onLanguageChange()" class="lang-select serif-title">
-              <option *ngFor="let r of runtimes" [value]="r.language">{{ r.language | uppercase }} (v{{ r.version }})</option>
-              <option *ngIf="runtimes.length === 0" value="javascript">JAVASCRIPT (v18.15.0)</option>
+              <option *ngFor="let r of runtimes" [value]="r.language">{{ formatLanguageName(r.language) }} (v{{ r.version }})</option>
               <option *ngIf="runtimes.length === 0" value="python">PYTHON (v3.10.0)</option>
               <option *ngIf="runtimes.length === 0" value="java">JAVA (v17.0.0)</option>
               <option *ngIf="runtimes.length === 0" value="cpp">C++ (v10.2.0)</option>
+              <option *ngIf="runtimes.length === 0" value="c">C (v10.2.0)</option>
+              <option *ngIf="runtimes.length === 0" value="javascript">JAVASCRIPT (v18.15.0)</option>
               <option *ngIf="runtimes.length === 0" value="typescript">TYPESCRIPT (v5.0.3)</option>
-              <option *ngIf="runtimes.length === 0" value="csharp">C# (v6.12.0)</option>
               <option *ngIf="runtimes.length === 0" value="go">GO (v1.16.2)</option>
+              <option *ngIf="runtimes.length === 0" value="csharp">C# (v6.12.0)</option>
               <option *ngIf="runtimes.length === 0" value="rust">RUST (v1.68.2)</option>
             </select>
           </div>

@@ -49,6 +49,26 @@ public class PistonCompilerService implements CompilerService {
         } catch (IOException ignored) {}
     }
 
+    public static final Set<String> SUPPORTED_LANGUAGES = Set.of(
+            "python", "java", "cpp", "c", "javascript", "typescript", "csharp", "go", "rust"
+    );
+
+    private static final List<String> CANONICAL_ORDER = List.of(
+            "python", "java", "cpp", "c", "javascript", "typescript", "go", "csharp", "rust"
+    );
+
+    private static final List<RuntimeResponse> FALLBACK_RUNTIMES = List.of(
+            new RuntimeResponse("python", "3.10.0", List.of("py", "python3")),
+            new RuntimeResponse("java", "17.0.0", List.of("java")),
+            new RuntimeResponse("cpp", "10.2.0", List.of("c++", "cpp")),
+            new RuntimeResponse("c", "10.2.0", List.of("c")),
+            new RuntimeResponse("javascript", "18.15.0", List.of("js", "node")),
+            new RuntimeResponse("typescript", "5.0.3", List.of("ts")),
+            new RuntimeResponse("go", "1.16.2", List.of("golang")),
+            new RuntimeResponse("csharp", "6.12.0", List.of("cs")),
+            new RuntimeResponse("rust", "1.68.2", List.of("rs"))
+    );
+
     @Override
     public List<RuntimeResponse> getRuntimes() {
         long now = System.currentTimeMillis();
@@ -56,35 +76,42 @@ public class PistonCompilerService implements CompilerService {
             return cachedRuntimes;
         }
 
-        List<RuntimeResponse> runtimes = fetchRuntimesFromUrl(pistonProperties.getBaseUrl());
-        if (runtimes != null && !runtimes.isEmpty()) {
-            cachedRuntimes = runtimes;
-            lastRuntimesFetchTime = now;
-            return runtimes;
+        List<RuntimeResponse> rawList = fetchRuntimesFromUrl(pistonProperties.getBaseUrl());
+        if ((rawList == null || rawList.isEmpty()) && !pistonProperties.getBaseUrl().contains("emkc.org")) {
+            rawList = fetchRuntimesFromUrl("https://emkc.org");
         }
 
-        if (!pistonProperties.getBaseUrl().contains("emkc.org")) {
-            runtimes = fetchRuntimesFromUrl("https://emkc.org");
-            if (runtimes != null && !runtimes.isEmpty()) {
-                cachedRuntimes = runtimes;
-                lastRuntimesFetchTime = now;
-                return runtimes;
+        List<RuntimeResponse> filtered = filterSupportedRuntimes(rawList);
+        cachedRuntimes = filtered;
+        lastRuntimesFetchTime = now;
+        return filtered;
+    }
+
+    private List<RuntimeResponse> filterSupportedRuntimes(List<RuntimeResponse> allRuntimes) {
+        Map<String, RuntimeResponse> found = new HashMap<>();
+        if (allRuntimes != null) {
+            for (RuntimeResponse r : allRuntimes) {
+                String lang = r.getLanguage().toLowerCase().trim();
+                if (SUPPORTED_LANGUAGES.contains(lang)) {
+                    found.putIfAbsent(lang, r);
+                }
             }
         }
 
-        // Fallback default runtimes
-        List<RuntimeResponse> fallback = List.of(
-                new RuntimeResponse("python", "3.10.0", List.of("py", "python3")),
-                new RuntimeResponse("javascript", "18.15.0", List.of("js", "node")),
-                new RuntimeResponse("typescript", "5.0.3", List.of("ts")),
-                new RuntimeResponse("java", "17.0.0", List.of("java")),
-                new RuntimeResponse("cpp", "10.2.0", List.of("c++", "cpp")),
-                new RuntimeResponse("csharp", "6.12.0", List.of("cs")),
-                new RuntimeResponse("go", "1.16.2", List.of("golang")),
-                new RuntimeResponse("rust", "1.68.2", List.of("rs"))
-        );
-        cachedRuntimes = fallback;
-        return fallback;
+        Map<String, RuntimeResponse> fallbackMap = new HashMap<>();
+        for (RuntimeResponse r : FALLBACK_RUNTIMES) {
+            fallbackMap.put(r.getLanguage().toLowerCase().trim(), r);
+        }
+
+        List<RuntimeResponse> result = new ArrayList<>();
+        for (String lang : CANONICAL_ORDER) {
+            if (found.containsKey(lang)) {
+                result.add(found.get(lang));
+            } else if (fallbackMap.containsKey(lang)) {
+                result.add(fallbackMap.get(lang));
+            }
+        }
+        return result;
     }
 
     private List<RuntimeResponse> fetchRuntimesFromUrl(String baseUrl) {
@@ -292,6 +319,8 @@ public class PistonCompilerService implements CompilerService {
             case "cpp":
             case "c++":
                 return runCpp(code, stdin);
+            case "c":
+                return runC(code, stdin);
             case "typescript":
             case "ts":
                 return runTypeScript(code, stdin);
@@ -404,6 +433,28 @@ public class PistonCompilerService implements CompilerService {
         }
     }
 
+    private Map<String, String> runC(String code, String stdin) {
+        try {
+            Path sourceFile = Files.createTempFile(TEMP_DIR, "c_src_", ".c");
+            Files.writeString(sourceFile, code, StandardCharsets.UTF_8);
+            String exeName = "c_exec_" + System.nanoTime() + (isWindows() ? ".exe" : "");
+            Path exeFile = TEMP_DIR.resolve(exeName);
+
+            Map<String, String> compileRes = runProcess(TEMP_DIR, "", "gcc", "-O2", sourceFile.getFileName().toString(), "-o", exeFile.getFileName().toString());
+            tryDelete(sourceFile);
+
+            if ("0".equals(compileRes.getOrDefault("exitCode", "1"))) {
+                Map<String, String> execRes = runProcess(TEMP_DIR, stdin, exeFile.toAbsolutePath().toString());
+                tryDelete(exeFile);
+                return execRes;
+            }
+            tryDelete(exeFile);
+            return Map.of("stdout", "", "stderr", compileRes.getOrDefault("stderr", ""), "exitCode", "1");
+        } catch (Exception e) {
+            return Map.of("stdout", "", "stderr", "C Execution Error: " + e.getMessage(), "exitCode", "1");
+        }
+    }
+
     private Map<String, String> runCSharp(String code, String stdin) {
         String jsCode = convertCSharpToJs(code);
         return runJavaScript(jsCode, stdin);
@@ -431,17 +482,20 @@ public class PistonCompilerService implements CompilerService {
             Map<String, String> compileRes = runProcess(TEMP_DIR, "", "rustc", sourceFile.getFileName().toString(), "-o", exeFile.getFileName().toString());
             tryDelete(sourceFile);
 
-            if (!"0".equals(compileRes.getOrDefault("exitCode", "1"))) {
+            if ("0".equals(compileRes.getOrDefault("exitCode", "1"))) {
+                Map<String, String> execRes = runProcess(TEMP_DIR, stdin, exeFile.toAbsolutePath().toString());
                 tryDelete(exeFile);
+                return execRes;
+            }
+            tryDelete(exeFile);
+            if (compileRes.getOrDefault("stderr", "").contains("error:")) {
                 return Map.of("stdout", "", "stderr", compileRes.getOrDefault("stderr", ""), "exitCode", "1");
             }
+        } catch (Exception ignored) {}
 
-            Map<String, String> execRes = runProcess(TEMP_DIR, stdin, exeFile.toAbsolutePath().toString());
-            tryDelete(exeFile);
-            return execRes;
-        } catch (Exception e) {
-            return Map.of("stdout", "", "stderr", "Rust Execution Error: " + e.getMessage(), "exitCode", "1");
-        }
+        // Fallback transpiler simulation if rustc is not in local PATH
+        String jsCode = convertRustToJs(code);
+        return runJavaScript(jsCode, stdin);
     }
 
     private boolean isWindows() {
