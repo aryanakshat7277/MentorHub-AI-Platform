@@ -47,36 +47,9 @@
       </div>
     </div>
 
-    <!-- Controls Bar: Telemetry Badges & Interactive Mode Toggles -->
+    <!-- Controls Bar: Action Toggles -->
     <div class="header-controls-bar">
-      <div class="status-badges-group">
-        <span class="brain-status-badge serif-title" title="Multimodal Screen Intelligence Active">
-          👁️ Screen AI
-        </span>
-        <span class="model-pill-badge serif-title" [title]="selectedProvider === 'GROQ' ? 'Groq Cloud (openai/gpt-oss-120b)' : 'Google Gemini 3.1 Flash-Lite'">
-          {{ selectedProvider === 'GROQ' ? '⚡ Groq 120B' : '⚡ Gemini 3.1 Flash-Lite' }}
-        </span>
-      </div>
-
       <div class="header-actions-right">
-        <!-- Engine selector toggle: Auto (Gemini) vs Forced Groq Ultra-Fast -->
-        <button class="engine-toggle-btn tactile-btn-3d serif-title"
-                (click)="toggleAiEngine()"
-                [class.groq-mode]="selectedProvider === 'GROQ'"
-                [title]="selectedProvider === 'GROQ' ? 'Active Engine: Groq Cloud (Ultra-Fast 1s). Click to switch to Auto' : 'Active Engine: Auto (Gemini Multimodal Vision + Groq Failover). Click to force Groq Ultra-Fast'">
-          <span class="engine-dot" [class.groq]="selectedProvider === 'GROQ'"></span>
-          <span>{{ selectedProvider === 'GROQ' ? '⚡ GROQ' : '✨ AUTO' }}</span>
-        </button>
-
-        <!-- Screen Perception Vision Toggle Button -->
-        <button class="screen-vision-pill-btn tactile-btn-3d serif-title" 
-                [class.active-mode]="isScreenPerceptionActive" 
-                (click)="toggleScreenPerception()" 
-                [title]="isScreenPerceptionActive ? 'Screen Perception is ACTIVE (AI reads your app screen)' : 'Screen Perception is PAUSED'">
-          <span class="vision-pulse-dot" [class.active]="isScreenPerceptionActive"></span>
-          <span>{{ isScreenPerceptionActive ? '👁️ VISION' : '👁️ OFF' }}</span>
-        </button>
-
         <!-- External Screen (Outside App) Link Button -->
         <button class="screen-external-pill-btn tactile-btn-3d serif-title" 
                 [class.active-mode]="isExternalScreenActive" 
