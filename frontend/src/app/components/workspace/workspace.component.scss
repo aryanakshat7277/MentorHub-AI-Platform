@@ -1004,14 +1004,18 @@
         }
 
         &.autofix-pill {
-          background: linear-gradient(135deg, rgba(220, 38, 38, 0.08) 0%, rgba(185, 28, 28, 0.04) 100%);
-          border-color: rgba(220, 38, 38, 0.4);
+          background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+          border-color: #EF4444;
           color: #DC2626;
+          font-weight: 900;
+          box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
 
           &:hover:not(:disabled) {
             background: #FEE2E2;
-            border-color: #DC2626;
-            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+            border-color: #B91C1C;
+            color: #B91C1C;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+            transform: translateY(-1px);
           }
 
           &.fixing {
@@ -1780,10 +1784,23 @@
   align-items: center !important;
   gap: 6px !important;
 
+  &.pulsing-alert {
+    background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%) !important;
+    border-color: #EF4444 !important;
+    color: #DC2626 !important;
+    animation: beaconPulse 2s infinite ease-in-out;
+  }
+
   &.active {
     background: #10B981 !important;
     color: #FFFFFF !important;
     border-color: #047857 !important;
+
+    &.pulsing-alert {
+      background: #DC2626 !important;
+      color: #FFFFFF !important;
+      border-color: #991B1B !important;
+    }
   }
 
   .autofix-count-pill {
@@ -1796,12 +1813,144 @@
   }
 }
 
+/* Terminal Inline Error Action Bar */
+.terminal-error-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg, #FEF2F2 0%, #FFF7ED 100%);
+  border: 1.5px solid rgba(239, 68, 68, 0.45);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.08);
+
+  .error-action-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+
+    .error-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #DC2626;
+      box-shadow: 0 0 8px #DC2626;
+      animation: beaconPulse 1.5s infinite;
+      flex-shrink: 0;
+    }
+
+    .error-action-text {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #991B1B;
+      line-height: 1.4;
+    }
+  }
+
+  .btn-terminal-autofix {
+    padding: 6px 14px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+    color: #FFFFFF;
+    border: 1px solid #991B1B;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.45);
+      background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
 /* AI Diagnosis & Auto-Fix Terminal Tab View */
 .autofix-tab-view {
   padding: 12px 16px;
   overflow-y: auto;
   max-height: 100%;
   box-sizing: border-box;
+
+  .autofix-prompt-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: #FFFFFF;
+    border: 1.5px solid rgba(214, 198, 183, 0.95);
+    border-radius: var(--radius-lg);
+    margin-bottom: 14px;
+
+    .prompt-crest {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      border-radius: 50%;
+      background: #FEE2E2;
+      border: 1.5px solid #EF4444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .prompt-details {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-start;
+
+      h4 {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 900;
+        color: #991B1B;
+        letter-spacing: 0.5px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+      }
+
+      .btn-run-diagnosis {
+        margin-top: 6px;
+        padding: 8px 18px;
+        font-size: 11.5px;
+        font-weight: 900;
+        letter-spacing: 0.5px;
+        border-radius: var(--radius-full);
+        background: linear-gradient(135deg, #DE7048 0%, #BA4F27 100%);
+        color: #FFFFFF;
+        border: 1px solid #8E3013;
+        cursor: pointer;
+        box-shadow: 0 3px 10px rgba(166, 59, 25, 0.3);
+
+        &:hover:not(:disabled) {
+          transform: translateY(-1px);
+          box-shadow: 0 5px 16px rgba(166, 59, 25, 0.45);
+        }
+      }
+    }
+  }
 
   .autofix-loading-card {
     display: flex;

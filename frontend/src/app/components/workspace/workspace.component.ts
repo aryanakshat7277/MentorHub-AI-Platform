@@ -902,6 +902,24 @@ console.log("[✓] Execution complete.");
     this.showGhostSuggestion = false;
   }
 
+  get hasActiveError(): boolean {
+    return (
+      (this.stderrLogs && this.stderrLogs.length > 0) ||
+      (this.compileOutputLogs && this.compileOutputLogs.length > 0) ||
+      this.executionStatus === 'RUNTIME_ERROR' ||
+      this.executionStatus === 'COMPILATION_ERROR' ||
+      this.executionStatus === 'NETWORK_ERROR'
+    );
+  }
+
+  onAutoFixTabClick() {
+    this.terminalTab = 'autofix';
+    this.isTerminalCollapsed = false;
+    if (!this.lastAutoFixResult && !this.isAutoFixing && this.hasActiveError) {
+      this.triggerAutoFix();
+    }
+  }
+
   // ==========================================
   // Copilot Feature 2: In-IDE Auto-Fix & Error Diagnosis
   // Priority: Groq (qwen3.8-27b) -> Gemini -> Local
@@ -911,6 +929,8 @@ console.log("[✓] Execution complete.");
     this.isAutoFixing = true;
     this.autoFixStatusMsg = 'AI Copilot analyzing error stack trace with Groq Priority 1 (qwen3.8-27b)...';
     this.previousBuggyCode = this.code;
+    this.terminalTab = 'autofix';
+    this.isTerminalCollapsed = false;
 
     let errorText = customError;
     if (!errorText || errorText.trim().length === 0) {
@@ -923,7 +943,7 @@ console.log("[✓] Execution complete.");
       }
     }
 
-    this.showToast('🔍 Error detected! AI Auto-Fix is diagnosing root cause & repairing code...');
+    this.showToast('🔍 AI Copilot diagnosing root cause & repairing code...');
 
     this.compilerService.autoFixCode({
       language: this.activeLanguage,
@@ -1149,6 +1169,8 @@ console.log("[✓] Execution complete.");
     this.outputLogs = [];
     this.stderrLogs = [];
     this.compileOutputLogs = [];
+    this.lastAutoFixResult = null;
+    this.highlightedFixedLines = [];
 
     this.compilerService.executeCode({
       language: this.activeLanguage,
@@ -1196,9 +1218,11 @@ console.log("[✓] Execution complete.");
           this.terminalTab = 'stdout';
         }
 
-        // Automatic AI Error Diagnosis & In-IDE Auto-Fix on failure
+        // When an error is detected: do NOT execute AI diagnosis and fix directly!
+        // We present the error in the terminal and let the user click the "Fix Error" button.
         if (hasError && (res.status === 'RUNTIME_ERROR' || res.status === 'COMPILATION_ERROR' || !res.success)) {
-          this.triggerAutoFix(errorMessage, res.status);
+          this.isTerminalCollapsed = false;
+          this.showToast('⚠️ Error detected in code execution. Click "🛠️ Fix Error" to diagnose with AI.');
         }
       },
       error: (err) => {
@@ -1206,7 +1230,8 @@ console.log("[✓] Execution complete.");
         this.executionStatus = 'NETWORK_ERROR';
         this.stderrLogs = [err.message || 'Compiler request error.'];
         this.terminalTab = 'stderr';
-        this.triggerAutoFix(err.message || 'Network compilation error', 'NETWORK_ERROR');
+        this.isTerminalCollapsed = false;
+        this.showToast('⚠️ Execution error. Click "🛠️ Fix Error" to diagnose with AI.');
       }
     });
   }

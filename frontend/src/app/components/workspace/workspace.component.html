@@ -226,13 +226,13 @@
           </button>
 
           <!-- Auto-Fix Error (Only shown when active unresolved errors occur) -->
-          <button *ngIf="(stderrLogs.length > 0 || compileOutputLogs.length > 0 || executionStatus === 'RUNTIME_ERROR' || executionStatus === 'COMPILATION_ERROR') && !lastAutoFixResult"
+          <button *ngIf="hasActiveError && !lastAutoFixResult"
                   class="ide-tool-btn autofix-pill tactile-btn-3d serif-title" 
                   [class.fixing]="isAutoFixing"
                   (click)="triggerAutoFix()" 
                   [disabled]="isAutoFixing || isSpectator" 
                   title="Diagnose & Auto-Fix Error with Priority AI">
-            <span>{{ isAutoFixing ? '⏳ Fixing...' : '🛠️ Fix Error' }}</span>
+            <span>{{ isAutoFixing ? '⏳ Diagnosing...' : '🛠️ Fix Error' }}</span>
           </button>
 
           <span *ngIf="isSpectator" class="readonly-badge serif-title">🔒 READ-ONLY SPECTATOR</span>
@@ -332,12 +332,14 @@
               ⌨️ STDIN INPUT
             </button>
             <!-- AI Diagnosis & Auto-Fix Tab -->
-            <button *ngIf="lastAutoFixResult || isAutoFixing" 
+            <button *ngIf="hasActiveError || lastAutoFixResult || isAutoFixing" 
                     class="term-tab autofix-tab tactile-btn-3d serif-title" 
                     [class.active]="terminalTab === 'autofix'" 
-                    (click)="terminalTab = 'autofix'; isTerminalCollapsed = false">
+                    [class.pulsing-alert]="hasActiveError && !lastAutoFixResult && !isAutoFixing"
+                    (click)="onAutoFixTabClick()">
               <span *ngIf="isAutoFixing">⏳ ANALYZING...</span>
-              <span *ngIf="!isAutoFixing">🛠️ AI DIAGNOSIS & FIX</span>
+              <span *ngIf="!isAutoFixing && lastAutoFixResult">🛠️ AI DIAGNOSIS & FIX</span>
+              <span *ngIf="!isAutoFixing && !lastAutoFixResult">🛠️ DIAGNOSE & FIX</span>
               <span *ngIf="lastAutoFixResult" class="autofix-count-pill">1</span>
             </button>
           </div>
@@ -364,18 +366,48 @@
 
           <!-- STDERR View -->
           <ng-container *ngIf="terminalTab === 'stderr'">
+            <div class="terminal-error-action-bar" *ngIf="stderrLogs.length > 0 && !lastAutoFixResult">
+              <div class="error-action-info">
+                <span class="error-pulse-dot"></span>
+                <span class="error-action-text serif-title">Runtime error detected. Click button to diagnose root cause and repair code with AI:</span>
+              </div>
+              <button class="btn-terminal-autofix tactile-btn-3d serif-title" (click)="triggerAutoFix()" [disabled]="isAutoFixing">
+                <span>{{ isAutoFixing ? '⏳ Diagnosing Error...' : '🛠️ DIAGNOSE & FIX ERROR' }}</span>
+              </button>
+            </div>
             <p *ngFor="let log of stderrLogs" class="stderr-line">{{ log }}</p>
             <p *ngIf="stderrLogs.length === 0" class="empty-log-msg">// Clean execution. Zero runtime errors recorded.</p>
           </ng-container>
 
           <!-- Compile Output View -->
           <ng-container *ngIf="terminalTab === 'compile'">
+            <div class="terminal-error-action-bar" *ngIf="compileOutputLogs.length > 0 && !lastAutoFixResult">
+              <div class="error-action-info">
+                <span class="error-pulse-dot"></span>
+                <span class="error-action-text serif-title">Compilation error detected. Click button to diagnose root cause and repair code with AI:</span>
+              </div>
+              <button class="btn-terminal-autofix tactile-btn-3d serif-title" (click)="triggerAutoFix()" [disabled]="isAutoFixing">
+                <span>{{ isAutoFixing ? '⏳ Diagnosing Error...' : '🛠️ DIAGNOSE & FIX ERROR' }}</span>
+              </button>
+            </div>
             <p *ngFor="let log of compileOutputLogs" class="compile-line">{{ log }}</p>
             <p *ngIf="compileOutputLogs.length === 0" class="empty-log-msg">// Zero compilation errors recorded.</p>
           </ng-container>
 
           <!-- AI Diagnosis & Auto-Fix Tab View -->
           <div class="autofix-tab-view" *ngIf="terminalTab === 'autofix'">
+            <!-- Prompt State (before user clicks diagnose) -->
+            <div *ngIf="!isAutoFixing && !lastAutoFixResult" class="autofix-prompt-card clay-panel debossed-well">
+              <div class="prompt-crest">🛠️</div>
+              <div class="prompt-details">
+                <h4 class="serif-title">AI ERROR DIAGNOSIS & CODE REPAIR</h4>
+                <p class="serif-title">Error stack trace detected in execution. Click below to analyze root cause and generate an idiomatic fix.</p>
+                <button class="btn-primary btn-run-diagnosis tactile-btn-3d serif-title" (click)="triggerAutoFix()" [disabled]="isAutoFixing">
+                  <span>🛠️ RUN AI DIAGNOSIS & REPAIR CODE</span>
+                </button>
+              </div>
+            </div>
+
             <!-- In-Progress Loading State -->
             <div *ngIf="isAutoFixing" class="autofix-loading-card">
               <div class="spinner-circle"></div>
