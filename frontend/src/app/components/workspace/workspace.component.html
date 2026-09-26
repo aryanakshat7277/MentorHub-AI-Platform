@@ -2,69 +2,7 @@
   <!-- Backdrop for Maximized Editor Pane -->
   <div class="editor-modal-backdrop" *ngIf="isEditorMaximized" (click)="toggleEditorMaximize()"></div>
 
-  <!-- Top Audio/Video Collaboration Toolbar (3D Elevated Clay Studio Bar) -->
-  <div class="collaboration-toolbar clay-panel elevated-card-3d">
-    <div class="toolbar-left">
-      <div class="gold-seal-emboss session-seal" title="Active Live Studio Workspace">
-        <span class="seal-glyph">⚡</span>
-      </div>
-      <div class="session-badge 3d-inset-well">
-        <span class="live-beacon beacon-pulse"></span>
-        <span class="session-id-text serif-title">WORKSPACE #{{ sessionId }}</span>
-      </div>
-      <div class="session-title-wrap">
-        <span class="room-title serif-title">REAL-TIME PISTON COMPILER & WEBRTC SUITE</span>
-      </div>
-    </div>
 
-    <div class="toolbar-center">
-      <div class="status-chip-pill 3d-inset-well" [class.online]="wsService.isConnected">
-        <span class="status-dot" [class.connected]="wsService.isConnected"></span>
-        <span class="status-text serif-title">{{ wsService.isConnected ? 'WEBSOCKET ACTIVE' : 'RECONNECTING' }}</span>
-      </div>
-
-      <div class="status-chip-pill 3d-inset-well" [class.video-live]="isVideoConnected">
-        <span class="status-dot" [class.live]="isVideoConnected"></span>
-        <span class="status-text serif-title">{{ isVideoConnected ? 'LIVE VIDEO CONNECTED' : 'VIDEO STANDBY' }}</span>
-      </div>
-
-      <div class="status-chip-pill 3d-inset-well">
-        <span class="status-dot connected"></span>
-        <span class="status-text serif-title">PISTON CLUSTER ONLINE</span>
-      </div>
-    </div>
-
-    <!-- Layout Presets & Invite -->
-    <div class="toolbar-actions">
-      <div class="layout-presets 3d-inset-well" title="Adjust Display Split Ratio">
-        <button class="preset-ratio-btn tactile-btn-3d serif-title" [class.active]="splitRatioPercent === 50" (click)="setLayoutPreset(50)">
-          ⚖️ 50:50
-        </button>
-        <button class="preset-ratio-btn tactile-btn-3d serif-title" [class.active]="splitRatioPercent === 70" (click)="setLayoutPreset(70)">
-          💻 70:30
-        </button>
-        <button class="preset-ratio-btn tactile-btn-3d serif-title" [class.active]="splitRatioPercent === 30" (click)="setLayoutPreset(30)">
-          📹 30:70
-        </button>
-        <button class="preset-ratio-btn tactile-btn-3d serif-title" [class.active]="splitRatioPercent === 0" (click)="setLayoutPreset(0)" title="Collapse editor completely to left (0:100)">
-          📺 0:100 VIDEO
-        </button>
-      </div>
-
-      <button (click)="toggleConfidenceCoach()" 
-              class="coach-toggle-btn tactile-btn-3d serif-title" 
-              [class.active]="isConfidenceCoachActive"
-              [title]="isConfidenceCoachActive ? 'Pause Confidence Coach' : 'Activate Live Interview Confidence Coach'">
-        <span>{{ isConfidenceCoachActive ? '🎙️ COACH ACTIVE' : '🎙️ INTERVIEW COACH' }}</span>
-      </button>
-
-      <button class="invite-btn btn-primary tactile-btn-3d serif-title" (click)="copyInviteLink()" title="Copy Session Meeting Invite Link for Mentees">
-        <span class="btn-icon">🔗</span>
-        <span>INVITE MENTEE</span>
-        <span class="shine-sweep"></span>
-      </button>
-    </div>
-  </div>
 
   <!-- Floating Kudos Layer for Silent Co-Pilot -->
   <div class="floating-kudos-layer" *ngIf="spectatorKudos.length > 0">
@@ -509,6 +447,18 @@
           </button>
           <button class="tab-btn tactile-btn-3d serif-title" [class.active]="activeTab === 'chat'" (click)="activeTab = 'chat'">
             💬 CHAT ({{ chatMessages.length }})
+          </button>
+        </div>
+
+        <div class="right-actions-cluster">
+          <button (click)="toggleConfidenceCoach()" 
+                  class="coach-mini-btn tactile-btn-3d serif-title" 
+                  [class.active]="isConfidenceCoachActive"
+                  [title]="isConfidenceCoachActive ? 'Pause Confidence Coach' : 'Activate Live Interview Confidence Coach'">
+            <span>{{ isConfidenceCoachActive ? '🎙️ COACH ON' : '🎙️ COACH' }}</span>
+          </button>
+          <button class="invite-mini-btn btn-primary tactile-btn-3d serif-title" (click)="copyInviteLink()" title="Copy Session Meeting Invite Link for Mentees">
+            <span>🔗 INVITE</span>
           </button>
         </div>
       </div>
