@@ -315,243 +315,675 @@
   50%      { transform: scale(1.40); opacity: 0.75; }
 }
 
-/* ── LIVE VOICE HERO STAGE ── */
+/* ── NEXT-GEN 3D ACOUSTIC AMPHITHEATER LIVE VOICE STAGE ── */
 .gemini-live-hero-stage {
-  margin: 16px 20px 0 20px; padding: 26px 20px 22px 20px;
-  background: linear-gradient(135deg, rgba(250,244,238,0.98) 0%, rgba(245,236,227,0.96) 100%);
-  border: 1.5px solid rgba(212,175,55,0.28); border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-clay-raised), 0 0 0 1px rgba(212,175,55,0.12);
-  display: flex; flex-direction: column; align-items: center; gap: 14px;
-  position: relative; overflow: hidden;
-  animation: stageReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  flex-shrink: 0; z-index: 5;
+  margin: 16px 20px 0 20px;
+  padding: 22px 24px 20px 24px;
+  background: linear-gradient(160deg, #FCF9F5 0%, #F7EFE6 45%, #F0E3D5 100%);
+  border: 1.5px solid rgba(212, 175, 55, 0.42);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 16px 40px rgba(61, 28, 11, 0.12),
+    0 4px 12px rgba(61, 28, 11, 0.06),
+    inset 0 2px 4px rgba(255, 255, 255, 0.95),
+    inset 0 -2px 6px rgba(166, 59, 25, 0.05),
+    0 0 0 1px rgba(212, 175, 55, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  animation: stageReveal 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+  z-index: 5;
 
   &::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.6), rgba(222,112,72,0.4), rgba(212,175,55,0.6), transparent);
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(212, 175, 55, 0.7) 25%, 
+      rgba(222, 112, 72, 0.85) 50%, 
+      rgba(212, 175, 55, 0.7) 75%, 
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: borderSheenFlow 4s linear infinite;
   }
 
-  .gemini-stage-orb-wrap {
-    position: relative; width: 130px; height: 130px;
-    display: flex; align-items: center; justify-content: center; margin-bottom: 2px;
-
-    .sound-wave-ripple {
-      position: absolute; border-radius: 50%; pointer-events: none; opacity: 0;
-      border: 2px solid rgba(222,112,72,0.30);
-      &.ripple-1 { width: 95px;  height: 95px;  }
-      &.ripple-2 { width: 115px; height: 115px; }
-      &.ripple-3 { width: 138px; height: 138px; }
-      &.active              { animation: rippleExpand 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite; }
-      &.ripple-2.active     { animation-delay: 0.65s; }
-      &.ripple-3.active     { animation-delay: 1.30s; }
-    }
-
-    .gemini-fluid-aura {
-      position: absolute; width: 120px; height: 120px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(222,112,72,0.42) 0%, rgba(212,175,55,0.22) 55%, transparent 75%);
-      filter: blur(14px); animation: auraPulse 2.5s infinite ease-in-out;
-      &.speaking  { background: radial-gradient(circle, rgba(42,90,61,0.58) 0%, rgba(222,112,72,0.32) 60%, transparent 80%); animation: auraPulseFast 1.1s infinite ease-in-out; }
-      &.listening { }
-    }
-
-    .gemini-multimodal-orb {
-      width: 86px; height: 86px; border-radius: 50%;
-      background: linear-gradient(135deg, #DE7048 0%, #E8C96E 40%, #A63B19 80%, #DE7048 100%);
-      background-size: 200% 200%;
-      box-shadow: 0 0 28px rgba(222,112,72,0.60), 0 0 60px rgba(222,112,72,0.25), inset 0 3px 8px rgba(255,255,255,0.65);
-      display: flex; align-items: center; justify-content: center;
-      position: relative; z-index: 2;
-      animation: liquidMorph 4.5s infinite ease-in-out, gradientFlow 6s ease infinite;
-
-      &.speaking-orb {
-        animation: liquidMorphFast 1.2s infinite ease-in-out, gradientFlowFast 3s ease infinite;
-        box-shadow: 0 0 36px rgba(42,90,61,0.80), 0 0 70px rgba(42,90,61,0.30), inset 0 3px 8px rgba(255,255,255,0.75);
-      }
-
-      .orb-glass-surface {
-        width: 62px; height: 62px; border-radius: 50%;
-        background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95) 0%, rgba(250,244,238,0.7) 60%, rgba(240,230,215,0.4) 100%);
-        border: 2.5px solid rgba(255,255,255,0.90);
-        display: flex; align-items: center; justify-content: center;
-        box-shadow: inset 0 2px 8px rgba(255,255,255,0.80), 0 4px 12px rgba(0,0,0,0.15);
-
-        .orb-glyph        { font-size: 28px; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        .speaking-glyph   { font-size: 24px; animation: spinSheen 4s linear infinite; }
-      }
-    }
-  }
-
-  .live-voice-state-meta {
-    text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 2;
-    .voice-state-title { font-size: 16.5px; font-weight: 900; color: var(--text-primary); margin: 0; letter-spacing: 0.2px; }
-    .voice-badge-pill {
-      font-size: 11px; color: var(--accent-terracotta); font-weight: 800;
-      background: var(--accent-terracotta-tint);
-      border: 1px solid rgba(166,59,25,0.28); padding: 4px 16px;
-      border-radius: var(--radius-full);
-      box-shadow: var(--shadow-inset-well), 0 0 12px rgba(166,59,25,0.08);
-      white-space: nowrap;
-      animation: statusGlow 3s ease-in-out infinite;
-    }
-  }
-
-  .gemini-harmonic-waves {
-    display: flex; align-items: flex-end; justify-content: center; gap: 5px;
-    height: 44px; min-height: 44px; max-height: 44px; margin: 4px 0 6px 0; overflow: hidden; z-index: 2;
-
-    .harmonic-bar {
-      width: 5px; border-radius: 5px;
-      background: linear-gradient(180deg, #DE7048 0%, #C85A32 60%, #A63B19 100%);
-      box-shadow: 0 0 10px rgba(222,112,72,0.50);
-      transition: height 0.07s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-  }
-
-  .live-transcript-ribbon {
-    padding: 9px 20px;
-    background: var(--bg-surface-sunken); border: 1.5px solid rgba(212,175,55,0.22);
-    border-radius: var(--radius-full); font-size: 12.5px; font-weight: 700;
-    color: var(--text-primary); box-shadow: var(--shadow-inset-well);
-    max-width: 92%; text-align: center; line-height: 1.4; z-index: 2;
-    .tx-sparkle { color: var(--accent-terracotta); margin-right: 5px; }
-  }
-
-  /* ── SINGLE PROFESSIONAL VOICE BADGE ── */
-  .single-voice-badge {
-    width: 94%;
-    max-width: 480px;
-    background: linear-gradient(145deg, #FFFFFF 0%, #FAF5EE 100%);
-    border: 1.5px solid rgba(212, 175, 55, 0.40);
-    border-radius: 12px;
-    padding: 9px 16px;
-    box-shadow: 0 4px 14px rgba(61, 28, 11, 0.06), inset 0 1px 0 #FFFFFF;
-    z-index: 2;
-    margin: 6px 0;
+  /* ── 1. Top Telemetry Header ── */
+  .stage-telemetry-header {
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    padding: 0 4px 6px 4px;
+    border-bottom: 1px solid rgba(214, 198, 183, 0.45);
+    z-index: 2;
 
-    .voice-badge-info {
-      display: flex;
+    .telemetry-badge-left {
+      display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
 
-      .voice-status-pulsar {
+      .live-acoustic-beacon {
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background: #16A34A;
-        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6);
-        animation: pulsePulsar 2s infinite;
+        background: #10B981;
+        box-shadow: 0 0 10px #10B981;
+        transition: all 0.3s ease;
+
+        &.speaking {
+          background: #E06A3B;
+          box-shadow: 0 0 12px #E06A3B, 0 0 24px rgba(224, 106, 59, 0.6);
+          animation: beaconPulseSpeaking 0.9s infinite ease-in-out;
+        }
+
+        &.thinking {
+          background: #D97706;
+          box-shadow: 0 0 10px #D97706;
+          animation: beaconPulseThinking 1.4s infinite ease-in-out;
+        }
+
+        &.listening {
+          background: #10B981;
+          box-shadow: 0 0 10px #10B981;
+          animation: beaconPulseListening 2.2s infinite ease-in-out;
+        }
       }
 
-      .voice-badge-icon {
-        font-size: 15px;
-      }
-
-      .voice-badge-title {
-        font-size: 11px;
+      .telemetry-mode-text {
+        font-size: 10px;
         font-weight: 900;
-        color: var(--text-dark-crimson);
-        letter-spacing: 0.5px;
+        letter-spacing: 0.8px;
+        color: #78350F;
+        text-transform: uppercase;
       }
+    }
 
-      .voice-badge-persona {
-        font-size: 11.5px;
+    .telemetry-badge-right {
+      .duplex-indicator {
+        font-size: 9.5px;
         font-weight: 800;
-        color: var(--text-dark-navy);
-        background: var(--badge-navy-bg);
+        letter-spacing: 0.5px;
+        color: #92400E;
+        background: rgba(254, 243, 199, 0.7);
+        border: 1px solid rgba(217, 119, 6, 0.3);
         padding: 2px 8px;
-        border-radius: 6px;
-        border: 1px solid var(--badge-navy-border);
+        border-radius: 12px;
+      }
+    }
+  }
+
+  /* ── 2. 3D Celestial Gyro-Orb Stage ── */
+  .gemini-stage-orb-wrap {
+    position: relative;
+    width: 154px;
+    height: 154px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 4px 0 2px 0;
+    perspective: 800px;
+
+    /* Ambient Bioluminescent Plasma Aura */
+    .ambient-acoustic-aura {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(222, 112, 72, 0.45) 0%, rgba(212, 175, 55, 0.25) 50%, transparent 72%);
+      filter: blur(18px);
+      animation: auraBreath 3s infinite ease-in-out;
+      transition: all 0.5s ease;
+
+      &.speaking {
+        background: radial-gradient(circle, rgba(224, 106, 59, 0.65) 0%, rgba(245, 158, 11, 0.4) 45%, rgba(153, 27, 27, 0.2) 70%, transparent 85%);
+        animation: auraBreathFast 1s infinite ease-in-out;
+        transform: scale(1.15);
+      }
+
+      &.thinking {
+        background: radial-gradient(circle, rgba(217, 119, 6, 0.55) 0%, rgba(139, 92, 246, 0.3) 55%, transparent 75%);
+        animation: auraBreath 1.8s infinite ease-in-out;
+      }
+
+      &.listening {
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.45) 0%, rgba(212, 175, 55, 0.22) 50%, transparent 72%);
       }
     }
 
-    .voice-quality-tag {
-      font-size: 10px;
-      font-weight: 800;
-      color: var(--text-dark-amber);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      white-space: nowrap;
+    /* Concentric Expanding Shockwave Ripples */
+    .sound-wave-ripple {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+      border: 1.5px solid rgba(222, 112, 72, 0.35);
+
+      &.ripple-1 { width: 105px; height: 105px; }
+      &.ripple-2 { width: 125px; height: 125px; }
+      &.ripple-3 { width: 148px; height: 148px; }
+      &.ripple-4 { width: 172px; height: 172px; }
+
+      &.active          { animation: shockwaveExpand 2.2s cubic-bezier(0.12, 0.8, 0.32, 1) infinite; }
+      &.ripple-2.active { animation-delay: 0.55s; }
+      &.ripple-3.active { animation-delay: 1.10s; }
+      &.ripple-4.active { animation-delay: 1.65s; }
+    }
+
+    /* 3D Celestial Gyroscopic Gimbal Rings */
+    .celestial-gyro-gimbal {
+      position: absolute;
+      width: 142px;
+      height: 142px;
+      pointer-events: none;
+      transform-style: preserve-3d;
+      opacity: 0.85;
+      transition: opacity 0.4s ease;
+
+      &.active {
+        opacity: 1;
+      }
+
+      .gyro-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        box-sizing: border-box;
+
+        &.gyro-ring-outer {
+          border: 1.5px dashed rgba(212, 175, 55, 0.65);
+          box-shadow: 0 0 10px rgba(212, 175, 55, 0.25);
+          animation: gyroSpinOuter 12s linear infinite;
+
+          .gyro-particle.gyro-p1 {
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #F59E0B;
+            box-shadow: 0 0 8px #F59E0B, 0 0 14px #DE7048;
+            transform: translateX(-50%);
+          }
+        }
+
+        &.gyro-ring-inner {
+          inset: 12px;
+          border: 1.5px solid rgba(222, 112, 72, 0.55);
+          box-shadow: 0 0 8px rgba(222, 112, 72, 0.2);
+          animation: gyroSpinInner 8s linear infinite reverse;
+
+          .gyro-particle.gyro-p2 {
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #FFFBEB;
+            box-shadow: 0 0 8px #FFFFFF, 0 0 12px #F59E0B;
+            transform: translateX(-50%);
+          }
+        }
+
+        &.gyro-ring-equator {
+          inset: 22px;
+          border: 1px dotted rgba(214, 198, 183, 0.8);
+          animation: gyroSpinEquator 16s linear infinite;
+        }
+      }
+    }
+
+    /* Center Multimodal Fluid Plasma Sphere */
+    .gemini-multimodal-orb {
+      width: 94px;
+      height: 94px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #F59E0B 0%, #DE7048 40%, #A63B19 75%, #78350F 100%);
+      background-size: 200% 200%;
+      box-shadow:
+        0 10px 30px rgba(222, 112, 72, 0.5),
+        0 0 45px rgba(212, 175, 55, 0.35),
+        inset 0 3px 10px rgba(255, 255, 255, 0.8),
+        inset 0 -4px 12px rgba(61, 28, 11, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+      animation: liquidMorphOrb 5s infinite ease-in-out;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+      &.speaking-orb {
+        animation: liquidMorphOrbFast 1.3s infinite ease-in-out;
+        box-shadow:
+          0 12px 38px rgba(224, 106, 59, 0.7),
+          0 0 60px rgba(245, 158, 11, 0.5),
+          inset 0 4px 12px rgba(255, 255, 255, 0.9),
+          inset 0 -5px 14px rgba(153, 27, 27, 0.7);
+        transform: scale(1.06);
+      }
+
+      &.thinking-orb {
+        background: radial-gradient(circle at 35% 30%, #FCD34D 0%, #D97706 45%, #7C3AED 85%, #4C1D95 100%);
+        box-shadow: 0 10px 30px rgba(217, 119, 6, 0.5), 0 0 45px rgba(124, 58, 237, 0.35);
+      }
+
+      .orb-chroma-mesh {
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(135deg, transparent 20%, rgba(255, 255, 255, 0.3) 50%, transparent 80%);
+        mix-blend-mode: overlay;
+        animation: chromaRotate 4s linear infinite;
+        pointer-events: none;
+      }
+
+      /* 3D Glass Surface with Specular Dome */
+      .orb-glass-surface {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 32% 28%, 
+          rgba(255, 255, 255, 0.96) 0%, 
+          rgba(255, 255, 255, 0.75) 35%, 
+          rgba(250, 244, 238, 0.45) 70%, 
+          rgba(240, 230, 215, 0.2) 100%
+        );
+        border: 2.5px solid rgba(255, 255, 255, 0.92);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+          inset 0 3px 10px rgba(255, 255, 255, 0.9),
+          inset 0 -2px 6px rgba(0, 0, 0, 0.12),
+          0 6px 16px rgba(0, 0, 0, 0.18);
+        position: relative;
+        overflow: hidden;
+
+        &::after {
+          content: '';
+          position: absolute;
+          top: 6px;
+          left: 10px;
+          width: 22px;
+          height: 12px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.85);
+          filter: blur(1px);
+          transform: rotate(-30deg);
+          pointer-events: none;
+        }
+
+        .orb-glyph-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 44px;
+          height: 44px;
+
+          &.pulsing {
+            animation: glyphPulse 1.2s ease-in-out infinite;
+          }
+
+          /* Neural Star Constellation SVG */
+          .neural-star-svg {
+            width: 38px;
+            height: 38px;
+            filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8));
+            animation: starRotateGlow 6s linear infinite;
+          }
+
+          /* Acoustic Studio Microphone SVG */
+          .acoustic-mic-svg {
+            width: 30px;
+            height: 30px;
+            filter: drop-shadow(0 2px 6px rgba(5, 150, 105, 0.45));
+            animation: micBreathe 2.5s ease-in-out infinite;
+          }
+
+          /* Thinking Gyroscopic Spinner */
+          .thinking-gyro-spinner {
+            position: relative;
+            width: 30px;
+            height: 30px;
+            animation: spinnerRotate 1.8s linear infinite;
+
+            .spinner-particle {
+              position: absolute;
+              width: 7px;
+              height: 7px;
+              border-radius: 50%;
+              background: #F59E0B;
+              box-shadow: 0 0 6px #F59E0B;
+
+              &.p-1 { top: 0; left: 11px; background: #DE7048; }
+              &.p-2 { bottom: 2px; left: 2px; background: #D97706; }
+              &.p-3 { bottom: 2px; right: 2px; background: #B45309; }
+            }
+          }
+        }
+      }
     }
   }
 
-  @keyframes pulsePulsar {
-    0% {
-      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+  /* ── 3. State Typography & Persona Caption ── */
+  .live-voice-state-meta {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    z-index: 2;
+
+    .voice-state-title {
+      font-size: 17.5px;
+      font-weight: 900;
+      color: #1F2937;
+      margin: 0;
+      letter-spacing: 0.3px;
+      transition: all 0.3s ease;
+
+      &.title-speaking {
+        background: linear-gradient(90deg, #991B1B 0%, #D97706 40%, #B45309 70%, #991B1B 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: textShimmer 3s linear infinite;
+        text-shadow: 0 2px 12px rgba(222, 112, 72, 0.2);
+      }
     }
-    70% {
-      box-shadow: 0 0 0 6px rgba(22, 163, 74, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+
+    .voice-persona-ribbon {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: #78350F;
+      background: rgba(254, 243, 199, 0.85);
+      border: 1px solid rgba(217, 119, 6, 0.32);
+      padding: 3px 14px;
+      border-radius: var(--radius-full);
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.8), 0 2px 6px rgba(120, 53, 15, 0.06);
+
+      .persona-tag strong {
+        color: #9A3412;
+      }
+
+      .persona-dot {
+        opacity: 0.6;
+      }
+
+      .persona-sub {
+        font-size: 10.5px;
+        opacity: 0.9;
+      }
     }
   }
 
+  /* ── 4. Symmetrical 19-Bar Liquid Audio Frequency Spectrum ── */
+  .gemini-harmonic-waves {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 4.5px;
+    height: 52px;
+    min-height: 52px;
+    max-height: 52px;
+    padding: 0 10px;
+    margin: 2px 0 4px 0;
+    overflow: hidden;
+    z-index: 2;
+
+    .harmonic-bar {
+      width: 4.5px;
+      border-radius: 6px;
+      background: linear-gradient(180deg, #FDE68A 0%, #F59E0B 20%, #DE7048 65%, #991B1B 100%);
+      box-shadow: 0 -1px 6px rgba(245, 158, 11, 0.6), 0 0 10px rgba(222, 112, 72, 0.3);
+      transition: height 0.08s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: barIdleBreathe 2.4s ease-in-out infinite;
+
+      &:nth-child(1)  { animation-delay: 0.00s; }
+      &:nth-child(2)  { animation-delay: 0.12s; }
+      &:nth-child(3)  { animation-delay: 0.24s; }
+      &:nth-child(4)  { animation-delay: 0.36s; }
+      &:nth-child(5)  { animation-delay: 0.48s; }
+      &:nth-child(6)  { animation-delay: 0.60s; }
+      &:nth-child(7)  { animation-delay: 0.72s; }
+      &:nth-child(8)  { animation-delay: 0.84s; }
+      &:nth-child(9)  { animation-delay: 0.96s; }
+      &:nth-child(10) { animation-delay: 1.08s; }
+      &:nth-child(11) { animation-delay: 0.96s; }
+      &:nth-child(12) { animation-delay: 0.84s; }
+      &:nth-child(13) { animation-delay: 0.72s; }
+      &:nth-child(14) { animation-delay: 0.60s; }
+      &:nth-child(15) { animation-delay: 0.48s; }
+      &:nth-child(16) { animation-delay: 0.36s; }
+      &:nth-child(17) { animation-delay: 0.24s; }
+      &:nth-child(18) { animation-delay: 0.12s; }
+      &:nth-child(19) { animation-delay: 0.00s; }
+    }
+
+    &.speaking {
+      .harmonic-bar {
+        background: linear-gradient(180deg, #FEF08A 0%, #F59E0B 18%, #EA580C 60%, #991B1B 100%);
+        box-shadow: 0 -2px 10px rgba(245, 158, 11, 0.8), 0 0 14px rgba(234, 88, 12, 0.5);
+      }
+    }
+
+    &.listening {
+      .harmonic-bar {
+        background: linear-gradient(180deg, #A7F3D0 0%, #10B981 30%, #059669 70%, #064E3B 100%);
+        box-shadow: 0 -2px 8px rgba(16, 185, 129, 0.7), 0 0 12px rgba(5, 150, 105, 0.4);
+      }
+    }
+  }
+
+  /* ── 5. Live Streaming Transcript Preview Ribbon ── */
+  .live-transcript-ribbon {
+    padding: 8px 18px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(212, 175, 55, 0.32);
+    border-radius: var(--radius-full);
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #1F2937;
+    box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.9), 0 4px 14px rgba(61, 28, 11, 0.08);
+    max-width: 90%;
+    text-align: center;
+    line-height: 1.45;
+    z-index: 2;
+    animation: fadeInSlideUp 0.3s ease-out;
+
+    .tx-sparkle {
+      color: #D97706;
+      margin-right: 6px;
+    }
+  }
+
+  /* ── 6. Ergonomic Tactile Action Controls ── */
   .live-controls-row {
-    display: flex; align-items: center; gap: 12px; margin-top: 4px; z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+    z-index: 2;
 
     .live-interrupt-btn {
-      background: rgba(220,38,38,0.10); border: 1.5px solid rgba(220,38,38,0.40);
-      color: #DC2626; font-size: 11px; font-weight: 900; padding: 8px 20px;
-      border-radius: var(--radius-full); cursor: pointer; box-shadow: 0 2px 10px rgba(220,38,38,0.12);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+      border: 1.5px solid #F87171;
+      color: #DC2626;
+      font-size: 11.5px;
+      font-weight: 900;
+      padding: 8px 18px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.16);
       transition: all 0.22s var(--ease-spring);
-      &:hover { background: #DC2626; color: #FFF; transform: translateY(-3px) scale(1.04); box-shadow: 0 8px 20px rgba(220,38,38,0.40); }
+
+      .btn-icon {
+        color: #DC2626;
+        font-size: 13px;
+        animation: lightningPulse 1.2s infinite ease-in-out;
+      }
+
+      &:hover {
+        background: #DC2626;
+        color: #FFFFFF;
+        border-color: #B91C1C;
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 8px 20px rgba(220, 38, 38, 0.35);
+
+        .btn-icon {
+          color: #FFFFFF;
+        }
+      }
     }
 
     .live-stop-btn {
-      background: var(--bg-surface-sunken); border: 1.5px solid rgba(212,175,55,0.35);
-      color: var(--text-primary); font-size: 11px; font-weight: 800;
-      padding: 8px 20px; border-radius: var(--radius-full); cursor: pointer;
-      box-shadow: var(--shadow-clay-card); transition: all 0.22s var(--ease-spring);
-      &:hover { border-color: var(--accent-terracotta); color: var(--accent-terracotta); transform: translateY(-3px) scale(1.04); }
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #FFFFFF;
+      border: 1.5px solid rgba(212, 175, 55, 0.45);
+      color: #78350F;
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 8px 18px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(61, 28, 11, 0.08);
+      transition: all 0.22s var(--ease-spring);
+
+      &:hover {
+        border-color: #DE7048;
+        color: #B45309;
+        background: #FFFBEB;
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 8px 18px rgba(222, 112, 72, 0.22);
+      }
     }
   }
 }
 
+/* ── NEXT-GEN ANIMATION KEYFRAMES ── */
 @keyframes stageReveal {
-  from { opacity: 0; transform: translateY(-12px) scale(0.97); }
+  from { opacity: 0; transform: translateY(-14px) scale(0.96); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ── LIVE VOICE AURA ANIMATIONS ── */
-@keyframes rippleExpand {
-  0%   { transform: scale(0.7); opacity: 0.8; }
-  100% { transform: scale(1.6); opacity: 0; }
+@keyframes borderSheenFlow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
 }
 
-@keyframes auraPulse {
-  0%,100% { transform: scale(1);    opacity: 0.75; }
-  50%      { transform: scale(1.14); opacity: 1; }
+@keyframes auraBreath {
+  0%, 100% { transform: scale(1); opacity: 0.65; }
+  50%      { transform: scale(1.15); opacity: 0.95; }
 }
 
-@keyframes auraPulseFast {
-  0%,100% { transform: scale(1);    opacity: 0.80; }
-  50%      { transform: scale(1.20); opacity: 1; }
+@keyframes auraBreathFast {
+  0%, 100% { transform: scale(1.06); opacity: 0.75; }
+  50%      { transform: scale(1.24); opacity: 1; }
 }
 
-@keyframes liquidMorph {
-  0%,100% { border-radius: 50%; transform: scale(1); }
-  33%      { border-radius: 46% 54% 52% 48% / 50% 48% 52% 50%; transform: scale(1.04); }
-  66%      { border-radius: 54% 46% 48% 52% / 48% 52% 48% 52%; transform: scale(0.97); }
+@keyframes shockwaveExpand {
+  0%   { transform: scale(0.68); opacity: 0.85; border-width: 2px; }
+  100% { transform: scale(1.68); opacity: 0; border-width: 0.5px; }
 }
 
-@keyframes liquidMorphFast {
-  0%,100% { border-radius: 50%; transform: scale(1); }
-  33%      { border-radius: 44% 56% 54% 46% / 50% 46% 54% 50%; transform: scale(1.07); }
-  66%      { border-radius: 56% 44% 46% 54% / 46% 54% 46% 54%; transform: scale(0.94); }
+@keyframes gyroSpinOuter {
+  0%   { transform: rotateX(68deg) rotateY(18deg) rotateZ(0deg); }
+  100% { transform: rotateX(68deg) rotateY(18deg) rotateZ(360deg); }
 }
 
-@keyframes gradientFlow {
-  0%,100% { background-position: 0%   50%; }
-  50%      { background-position: 100% 50%; }
+@keyframes gyroSpinInner {
+  0%   { transform: rotateX(-52deg) rotateY(38deg) rotateZ(360deg); }
+  100% { transform: rotateX(-52deg) rotateY(38deg) rotateZ(0deg); }
 }
 
-@keyframes gradientFlowFast {
-  0%,100% { background-position: 0%   50%; }
-  50%      { background-position: 100% 50%; }
+@keyframes gyroSpinEquator {
+  0%   { transform: rotateX(84deg) rotateZ(0deg); }
+  100% { transform: rotateX(84deg) rotateZ(360deg); }
+}
+
+@keyframes liquidMorphOrb {
+  0%, 100% { border-radius: 50%; }
+  33%      { border-radius: 46% 54% 52% 48% / 50% 47% 53% 50%; }
+  66%      { border-radius: 53% 47% 49% 51% / 48% 52% 48% 52%; }
+}
+
+@keyframes liquidMorphOrbFast {
+  0%, 100% { border-radius: 50%; }
+  33%      { border-radius: 43% 57% 55% 45% / 51% 45% 55% 49%; }
+  66%      { border-radius: 56% 44% 47% 53% / 46% 54% 46% 54%; }
+}
+
+@keyframes chromaRotate {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes glyphPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.12); }
+}
+
+@keyframes starRotateGlow {
+  0%   { transform: rotate(0deg); filter: drop-shadow(0 0 6px #F59E0B); }
+  50%  { transform: rotate(180deg); filter: drop-shadow(0 0 16px #DE7048); }
+  100% { transform: rotate(360deg); filter: drop-shadow(0 0 6px #F59E0B); }
+}
+
+@keyframes micBreathe {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50%      { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.6)); }
+}
+
+@keyframes spinnerRotate {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes textShimmer {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes barIdleBreathe {
+  0%, 100% { transform: scaleY(0.75); }
+  50%      { transform: scaleY(1.3); }
+}
+
+@keyframes beaconPulseSpeaking {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 12px #E06A3B; }
+  50%      { transform: scale(1.35); box-shadow: 0 0 20px #E06A3B, 0 0 32px rgba(224, 106, 59, 0.7); }
+}
+
+@keyframes beaconPulseThinking {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50%      { transform: scale(1.25); opacity: 1; }
+}
+
+@keyframes beaconPulseListening {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 8px #10B981; }
+  50%      { transform: scale(1.25); box-shadow: 0 0 16px #10B981; }
+}
+
+@keyframes lightningPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.25); }
 }
 
 /* ── CHAT BODY ── */
