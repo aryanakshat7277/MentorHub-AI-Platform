@@ -776,6 +776,12 @@ console.log("[✓] Execution complete.");
     }
   }
 
+  focusTextarea() {
+    if (this.codeTextarea && this.codeTextarea.nativeElement && !this.isSpectator) {
+      this.codeTextarea.nativeElement.focus();
+    }
+  }
+
   onEditorKeyDown(event: KeyboardEvent) {
     // 1. Tab Key Handling
     if (event.key === 'Tab') {

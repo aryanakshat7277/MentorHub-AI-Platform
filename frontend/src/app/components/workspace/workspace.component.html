@@ -270,35 +270,38 @@
           </div>
         </div>
 
-        <!-- Line Numbers Gutter Bar with AI Fixed Line Badges -->
-        <div class="gutter-column" #gutterCol>
-          <span *ngFor="let num of lineNumbers" 
-                class="line-number" 
-                [class.fixed-line]="isLineFixed(num)"
-                [title]="isLineFixed(num) ? 'AI Auto-Fixed Line' : 'Line ' + num">
-            {{ num }}
-            <span *ngIf="isLineFixed(num)" class="fixed-line-dot" title="AI Fixed Line">✨</span>
-          </span>
-        </div>
+        <!-- Main Editor Body (Row: Left Gutter + Right Code Surface) -->
+        <div class="editor-core-body">
+          <!-- Line Numbers Gutter Bar with AI Fixed Line Badges -->
+          <div class="gutter-column" #gutterCol (click)="focusTextarea()">
+            <span *ngFor="let num of lineNumbers" 
+                  class="line-number" 
+                  [class.fixed-line]="isLineFixed(num)"
+                  [title]="isLineFixed(num) ? 'AI Auto-Fixed Line' : 'Line ' + num">
+              {{ num }}
+              <span *ngIf="isLineFixed(num)" class="fixed-line-dot" title="AI Fixed Line">✨</span>
+            </span>
+          </div>
 
-        <!-- Synchronized Overlay Editor Surface -->
-        <div class="editor-surface">
-          <!-- Bottom Layer: Multi-Color Syntax Highlighting -->
-          <pre class="highlight-layer" #highlightLayer><code [innerHTML]="getHighlightedCode()"></code></pre>
+          <!-- Synchronized Overlay Editor Surface -->
+          <div class="editor-surface" (click)="focusTextarea()">
+            <!-- Bottom Layer: Multi-Color Syntax Highlighting -->
+            <pre class="highlight-layer" #highlightLayer><code [innerHTML]="getHighlightedCode()"></code></pre>
 
-          <!-- Top Layer: Transparent Textarea with Bright Caret -->
-          <textarea [(ngModel)]="code" 
-                    #codeTextarea
-                    [readonly]="isSpectator"
-                    (ngModelChange)="onCodeChange($event)" 
-                    (keydown)="onEditorKeyDown($event)"
-                    (scroll)="onEditorScroll($event)"
-                    (input)="onEditorScroll($event)"
-                    (keyup)="onEditorScroll($event)"
-                    (click)="onEditorScroll($event)"
-                    class="code-textarea" 
-                    spellcheck="false" 
-                    [placeholder]="isSpectator ? 'Observing code live in Silent Co-Pilot Spectator mode...' : 'Write code here (Press Tab or Alt+\\ for AI completion)...'"></textarea>
+            <!-- Top Layer: Transparent Textarea with Bright Caret -->
+            <textarea [(ngModel)]="code" 
+                      #codeTextarea
+                      [readonly]="isSpectator"
+                      (ngModelChange)="onCodeChange($event)" 
+                      (keydown)="onEditorKeyDown($event)"
+                      (scroll)="onEditorScroll($event)"
+                      (input)="onEditorScroll($event)"
+                      (keyup)="onEditorScroll($event)"
+                      (click)="onEditorScroll($event)"
+                      class="code-textarea" 
+                      spellcheck="false" 
+                      [placeholder]="isSpectator ? 'Observing code live in Silent Co-Pilot Spectator mode...' : 'Write code here (Press Tab or Alt+\\ for AI completion)...'"></textarea>
+          </div>
         </div>
       </div>
 
