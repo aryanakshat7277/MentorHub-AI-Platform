@@ -21,6 +21,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild('gutterCol') gutterCol!: ElementRef<HTMLDivElement>;
   @ViewChild('highlightLayer') highlightLayer!: ElementRef<HTMLDivElement>;
   @ViewChild('workspaceContainer') workspaceContainer?: ElementRef<HTMLDivElement>;
+  @ViewChild('codeTextarea') codeTextarea?: ElementRef<HTMLTextAreaElement>;
   @ViewChild(JitsiMeetingComponent) jitsiComp?: JitsiMeetingComponent;
 
   sessionId = 1;
@@ -149,10 +150,29 @@ fn main() {
 
   executionStatus: 'IDLE' | 'RUNNING' | 'SUCCESS' | 'COMPILATION_ERROR' | 'RUNTIME_ERROR' | 'TIME_LIMIT_EXCEEDED' | 'RATE_LIMIT_EXCEEDED' | 'NETWORK_ERROR' = 'IDLE';
   executionTime: number | null = null;
-
-  terminalTab: 'stdout' | 'stderr' | 'compile' | 'stdin' = 'stdout';
-
   isCompiling = false;
+  terminalTab: 'stdout' | 'stderr' | 'compile' | 'stdin' | 'autofix' = 'stdout';
+
+  // ==========================================
+  // Feature 1: VS Code Copilot Autocomplete
+  // Priority: Groq (qwen3.8-27b) -> Gemini -> Local
+  // ==========================================
+  isCompleting = false;
+  ghostSuggestion = '';
+  showGhostSuggestion = false;
+  copilotProvider = 'GROQ';
+  copilotModel = 'qwen3.8-27b';
+  copilotLatency = 0;
+
+  // ==========================================
+  // Feature 2: In-IDE Automated Error Diagnosis & Fix
+  // Priority: Groq (qwen3.8-27b) -> Gemini -> Local
+  // ==========================================
+  isAutoFixing = false;
+  autoFixStatusMsg = '';
+  lastAutoFixResult: any = null;
+  highlightedFixedLines: number[] = [];
+  previousBuggyCode = '';
   chatInput = '';
   activeTab: 'video' | 'notes' | 'chat' = 'video';
 
@@ -621,6 +641,10 @@ console.log("[✓] Execution complete.");
     return Array.from({ length: Math.max(lineCount, 1) }, (_, i) => i + 1);
   }
 
+  isLineFixed(line: number): boolean {
+    return !!(this.highlightedFixedLines && this.highlightedFixedLines.includes(line));
+  }
+
   getHighlightedCode(): string {
     if (!this.code) return '&nbsp;';
 
@@ -711,12 +735,219 @@ console.log("[✓] Execution complete.");
       this.code = this.sampleCodeMap[this.activeLanguage];
       this.updateCode(this.code);
     }
+    this.dismissGhostSuggestion();
+    this.dismissAutoFixCard();
   }
 
   resetCodeToTemplate() {
     if (this.sampleCodeMap[this.activeLanguage]) {
       this.code = this.sampleCodeMap[this.activeLanguage];
       this.updateCode(this.code);
+    }
+    this.dismissGhostSuggestion();
+    this.dismissAutoFixCard();
+  }
+
+  onCodeChange(newCode: string) {
+    this.updateCode(newCode);
+    if (this.showGhostSuggestion) {
+      this.dismissGhostSuggestion();
+    }
+  }
+
+  onEditorKeyDown(event: KeyboardEvent) {
+    // 1. Tab Key Handling
+    if (event.key === 'Tab') {
+      if (this.showGhostSuggestion && this.ghostSuggestion) {
+        event.preventDefault();
+        this.acceptGhostSuggestion();
+        return;
+      }
+      // Standard Tab in code editor: Insert 4 spaces at cursor
+      event.preventDefault();
+      const textarea = this.codeTextarea?.nativeElement || (event.target as HTMLTextAreaElement);
+      if (textarea) {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const before = this.code.substring(0, start);
+        const after = this.code.substring(end);
+        this.code = before + '    ' + after;
+        this.updateCode(this.code);
+        setTimeout(() => {
+          textarea.selectionStart = textarea.selectionEnd = start + 4;
+        }, 0);
+      }
+      return;
+    }
+
+    // 2. Escape Key Handling
+    if (event.key === 'Escape') {
+      if (this.showGhostSuggestion) {
+        event.preventDefault();
+        this.dismissGhostSuggestion();
+        return;
+      }
+    }
+
+    // 3. Alt + \ or Ctrl + Space for manual AI autocomplete trigger
+    if ((event.altKey && event.key === '\\') || (event.ctrlKey && event.code === 'Space')) {
+      event.preventDefault();
+      this.triggerAutocomplete(true);
+      return;
+    }
+  }
+
+  // ==========================================
+  // Copilot Feature 1: VS Code Auto-Completion
+  // Priority: Groq (qwen3.8-27b) -> Gemini -> Local
+  // ==========================================
+  triggerAutocomplete(manual = true) {
+    if (this.isCompleting || this.isSpectator) return;
+
+    const textarea = this.codeTextarea?.nativeElement;
+    let prefix = this.code;
+    let suffix = '';
+    if (textarea && textarea.selectionStart !== undefined) {
+      prefix = this.code.substring(0, textarea.selectionStart);
+      suffix = this.code.substring(textarea.selectionEnd);
+    }
+
+    this.isCompleting = true;
+    if (manual) {
+      this.soundService.playClickSound();
+    }
+
+    this.compilerService.completeCode({
+      language: this.activeLanguage,
+      code: this.code,
+      prefix: prefix,
+      suffix: suffix
+    }).subscribe({
+      next: (res) => {
+        this.isCompleting = false;
+        if (res && res.success && res.completion && res.completion.trim().length > 0) {
+          this.ghostSuggestion = res.completion;
+          this.showGhostSuggestion = true;
+          this.copilotProvider = res.provider;
+          this.copilotModel = res.model;
+          this.copilotLatency = res.latencyMs;
+          if (manual) {
+            this.showToast(`✨ AI Autocomplete ready (${res.provider} ${res.model}, ${res.latencyMs}ms)! Press Tab to accept.`);
+          }
+        } else if (manual) {
+          this.showToast('💡 AI Copilot has no continuation for this location.');
+        }
+      },
+      error: () => {
+        this.isCompleting = false;
+      }
+    });
+  }
+
+  acceptGhostSuggestion() {
+    if (!this.ghostSuggestion) return;
+    const textarea = this.codeTextarea?.nativeElement;
+    if (textarea && textarea.selectionStart !== undefined) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const before = this.code.substring(0, start);
+      const after = this.code.substring(end);
+      this.code = before + this.ghostSuggestion + after;
+      this.updateCode(this.code);
+      const newPos = start + this.ghostSuggestion.length;
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = newPos;
+        textarea.focus();
+      }, 0);
+    } else {
+      this.code = this.code + (this.code.endsWith('\n') ? '' : '\n') + this.ghostSuggestion;
+      this.updateCode(this.code);
+    }
+
+    this.soundService.playSuccessSound();
+    this.showToast('✅ AI Code Completion inserted into IDE!');
+    this.ghostSuggestion = '';
+    this.showGhostSuggestion = false;
+  }
+
+  dismissGhostSuggestion() {
+    this.ghostSuggestion = '';
+    this.showGhostSuggestion = false;
+  }
+
+  // ==========================================
+  // Copilot Feature 2: In-IDE Auto-Fix & Error Diagnosis
+  // Priority: Groq (qwen3.8-27b) -> Gemini -> Local
+  // ==========================================
+  triggerAutoFix(customError?: string, customStatus?: string) {
+    if (this.isAutoFixing) return;
+    this.isAutoFixing = true;
+    this.autoFixStatusMsg = 'AI Copilot analyzing error stack trace with Groq Priority 1 (qwen3.8-27b)...';
+    this.previousBuggyCode = this.code;
+
+    let errorText = customError;
+    if (!errorText || errorText.trim().length === 0) {
+      if (this.stderrLogs.length > 0) {
+        errorText = this.stderrLogs.join('\n');
+      } else if (this.compileOutputLogs.length > 0) {
+        errorText = this.compileOutputLogs.join('\n');
+      } else {
+        errorText = 'Runtime or compilation failure in code.';
+      }
+    }
+
+    this.showToast('🔍 Error detected! AI Auto-Fix is diagnosing root cause & repairing code...');
+
+    this.compilerService.autoFixCode({
+      language: this.activeLanguage,
+      code: this.code,
+      error: errorText,
+      status: customStatus || this.executionStatus
+    }).subscribe({
+      next: (res) => {
+        this.isAutoFixing = false;
+        this.lastAutoFixResult = res;
+
+        if (res && res.success && res.fixedCode) {
+          // 1. Write the corrected code itself directly in the IDE
+          this.code = res.fixedCode;
+          this.updateCode(this.code);
+
+          // 2. Highlighting the error previously there and how it has fixed
+          this.highlightedFixedLines = res.diffLines || [];
+
+          // 3. Switch terminal tab to AI Diagnosis
+          this.terminalTab = 'autofix';
+          this.isTerminalCollapsed = false;
+
+          this.soundService.playSuccessSound();
+          this.showToast(`🛠️ AI Auto-Fix Applied by ${res.provider} (${res.model}) in ${res.latencyMs}ms!`);
+        } else {
+          this.showToast('⚠️ AI Auto-Fix could not resolve the error.');
+        }
+      },
+      error: () => {
+        this.isAutoFixing = false;
+        this.showToast('⚠️ AI Auto-Fix request encountered an error.');
+      }
+    });
+  }
+
+  revertAutoFix() {
+    if (this.previousBuggyCode) {
+      this.code = this.previousBuggyCode;
+      this.updateCode(this.code);
+      this.highlightedFixedLines = [];
+      this.soundService.playClickSound();
+      this.showToast('↩ Reverted back to previous buggy code.');
+    }
+  }
+
+  dismissAutoFixCard() {
+    this.lastAutoFixResult = null;
+    this.highlightedFixedLines = [];
+    if (this.terminalTab === 'autofix') {
+      this.terminalTab = 'stdout';
     }
   }
 
@@ -771,8 +1002,13 @@ console.log("[✓] Execution complete.");
           this.outputLogs = ['Program executed cleanly with no output.'];
         }
 
+        let hasError = false;
+        let errorMessage = '';
+
         if (res.stderr && res.stderr.trim().length > 0) {
           this.stderrLogs = res.stderr.split('\n').filter(l => l.length > 0);
+          errorMessage = res.stderr;
+          hasError = true;
           if (res.status === 'RUNTIME_ERROR' || res.status === 'COMPILATION_ERROR') {
             this.terminalTab = 'stderr';
           }
@@ -780,13 +1016,20 @@ console.log("[✓] Execution complete.");
 
         if (res.compileOutput && res.compileOutput.trim().length > 0) {
           this.compileOutputLogs = res.compileOutput.split('\n').filter(l => l.length > 0);
+          errorMessage = (errorMessage ? errorMessage + '\n' : '') + res.compileOutput;
+          hasError = true;
           if (res.status === 'COMPILATION_ERROR') {
             this.terminalTab = 'compile';
           }
         }
 
-        if (!res.stderr && !res.compileOutput && res.stdout) {
+        if (!hasError && res.stdout) {
           this.terminalTab = 'stdout';
+        }
+
+        // Automatic AI Error Diagnosis & In-IDE Auto-Fix on failure
+        if (hasError && (res.status === 'RUNTIME_ERROR' || res.status === 'COMPILATION_ERROR' || !res.success)) {
+          this.triggerAutoFix(errorMessage, res.status);
         }
       },
       error: (err) => {
@@ -794,6 +1037,7 @@ console.log("[✓] Execution complete.");
         this.executionStatus = 'NETWORK_ERROR';
         this.stderrLogs = [err.message || 'Compiler request error.'];
         this.terminalTab = 'stderr';
+        this.triggerAutoFix(err.message || 'Network compilation error', 'NETWORK_ERROR');
       }
     });
   }
@@ -821,6 +1065,8 @@ console.log("[✓] Execution complete.");
     this.stderrLogs = [];
     this.compileOutputLogs = [];
     this.executionStatus = 'IDLE';
+    this.lastAutoFixResult = null;
+    this.highlightedFixedLines = [];
   }
 
   // Jitsi Video Conference Control Bindings

@@ -74,4 +74,50 @@ export class CompilerService {
       catchError(() => of({ available: false, service: 'piston' }))
     );
   }
+
+  completeCode(req: { language: string; code: string; prefix?: string; suffix?: string }): Observable<{
+    success: boolean;
+    completion: string;
+    provider: string;
+    model: string;
+    latencyMs: number;
+  }> {
+    return this.http.post<any>(`${this.baseUrl}/autocomplete`, req).pipe(
+      catchError(() => of({
+        success: false,
+        completion: '',
+        provider: 'NONE',
+        model: 'none',
+        latencyMs: 0
+      }))
+    );
+  }
+
+  autoFixCode(req: { language: string; code: string; error: string; status?: string }): Observable<{
+    success: boolean;
+    explanation: string;
+    fixSummary: string;
+    fixedCode: string;
+    errorSnippet: string;
+    fixedSnippet: string;
+    diffLines: number[];
+    provider: string;
+    model: string;
+    latencyMs: number;
+  }> {
+    return this.http.post<any>(`${this.baseUrl}/autofix`, req).pipe(
+      catchError((err) => of({
+        success: false,
+        explanation: 'AI diagnosis failed to reach server: ' + (err.message || 'Network error'),
+        fixSummary: 'Unable to auto-apply fix.',
+        fixedCode: req.code,
+        errorSnippet: '',
+        fixedSnippet: '',
+        diffLines: [],
+        provider: 'NONE',
+        model: 'none',
+        latencyMs: 0
+      }))
+    );
+  }
 }

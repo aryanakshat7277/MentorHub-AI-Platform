@@ -16,9 +16,11 @@ import java.util.Map;
 public class CompilerController {
 
     private final CompilerService compilerService;
+    private final com.mentorhub.compiler.service.CodeCopilotService copilotService;
 
-    public CompilerController(CompilerService compilerService) {
+    public CompilerController(CompilerService compilerService, com.mentorhub.compiler.service.CodeCopilotService copilotService) {
         this.compilerService = compilerService;
+        this.copilotService = copilotService;
     }
 
     @GetMapping("/runtimes")
@@ -31,6 +33,18 @@ public class CompilerController {
         String clientIp = getClientIp(httpRequest);
         CodeExecutionResponse response = compilerService.executeCode(request, clientIp);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/autocomplete")
+    public ResponseEntity<com.mentorhub.compiler.dto.CodeCompletionResponse> autocomplete(
+            @RequestBody com.mentorhub.compiler.dto.CodeCompletionRequest request) {
+        return ResponseEntity.ok(copilotService.completeCode(request));
+    }
+
+    @PostMapping("/autofix")
+    public ResponseEntity<com.mentorhub.compiler.dto.CodeAutoFixResponse> autoFix(
+            @RequestBody com.mentorhub.compiler.dto.CodeAutoFixRequest request) {
+        return ResponseEntity.ok(copilotService.autoFixCode(request));
     }
 
     @GetMapping("/health")
