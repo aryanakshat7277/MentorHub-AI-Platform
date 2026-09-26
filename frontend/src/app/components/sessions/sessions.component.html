@@ -240,12 +240,8 @@
         </div>
       </div>
 
-      <!-- Action Buttons Row (Including Mentor Transfer & Shadow Buttons) -->
+      <!-- Action Buttons Row (Including Mentor Transfer) -->
       <div class="session-actions">
-        <button *ngIf="s.status === 'CONFIRMED'" class="btn-shadow btn-sm tactile-btn-3d serif-title" (click)="joinShadow(s)" title="Join as a silent spectator to shadow this live debugging session">
-          <span class="shadow-icon">👁️</span>
-          <span>SHADOW ({{ s.spectatorCount || 0 }}/3)</span>
-        </button>
 
         <button *ngIf="s.status === 'PENDING'" class="btn-primary btn-sm confirm-btn tactile-btn-3d serif-title" (click)="updateStatus(s, 'CONFIRMED')">
           <span>✓ CONFIRM SESSION</span>

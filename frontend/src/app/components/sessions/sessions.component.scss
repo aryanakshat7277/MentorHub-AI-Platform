@@ -9,7 +9,7 @@
 /* Typography Enforcement */
 .serif-title, .modal-sub, .node-sub, .role-lbl, .meta-item, .meet-link-btn, .session-id-tag,
 .btn-sos, .sos-banner-title, .sos-karma-tag, .sos-banner-desc, .btn-claim-sos, 
-.reverse-mentoring-badge, .btn-shadow, .toggle-title, .toggle-sub, .toggle-switch-btn, 
+.reverse-mentoring-badge, .toggle-title, .toggle-sub, .toggle-switch-btn, 
 .btn-sos-submit, .reward-txt {
   font-family: "Times New Roman", Times, Georgia, serif !important;
 }
@@ -840,20 +840,6 @@ h1, h2, h3, h4, .tracker-title, .badge-label, .badge-value, .session-topic, .use
         &:hover {
           color: #DC2626;
           border-color: #DC2626;
-        }
-      }
-
-      &.btn-shadow {
-        background: linear-gradient(135deg, #2E4053 0%, #1B2631 100%);
-        color: #F9E7B3;
-        border: 1px solid #D4AF37;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-
-        &:hover {
-          background: linear-gradient(135deg, #1B2631 0%, #17202A 100%);
-          color: #FFFFFF;
-          transform: translateY(-2px);
-          box-shadow: 0 6px 14px rgba(212, 175, 55, 0.35);
         }
       }
     }

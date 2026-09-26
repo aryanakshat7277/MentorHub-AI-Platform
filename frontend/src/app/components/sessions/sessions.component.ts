@@ -149,14 +149,6 @@ export class SessionsComponent implements OnInit {
     }
   }
 
-  joinShadow(session: any) {
-    this.soundService.playClick();
-    this.apiService.joinShadowSession(session.id).subscribe(() => {
-      this.soundService.playSuccess();
-      this.displayToast(`👁️ Joining Session #${session.id} as a Silent Co-Pilot Spectator!`);
-      window.location.href = `/workspace?sessionId=${session.id}&mode=spectator`;
-    });
-  }
 
   createSession() {
     this.soundService.playClick();
