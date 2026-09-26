@@ -52,8 +52,6 @@ ai:
     tts-model: ${AI_GROQ_TTS_MODEL:canopylabs/orpheus-v1-english}
   deepseek:
     api-key: ${AI_DEEPSEEK_KEY:}
-  nvidia:
-    api-key: ${AI_NVIDIA_KEY:}
 
 logging:
   level:
