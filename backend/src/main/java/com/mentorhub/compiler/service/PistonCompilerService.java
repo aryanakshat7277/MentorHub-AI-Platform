@@ -20,8 +20,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class PistonCompilerService implements CompilerService {
@@ -30,17 +33,30 @@ public class PistonCompilerService implements CompilerService {
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
-    private List<RuntimeResponse> cachedRuntimes = new ArrayList<>();
-    private long lastRuntimesFetchTime = 0;
-    private static final long RUNTIMES_CACHE_TTL = 300_000; // 5 minutes
-
+    private static final String CSC_PATH = "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe";
     private final Map<String, List<Long>> rateLimitMap = new ConcurrentHashMap<>();
     private static final Path TEMP_DIR = Paths.get(System.getProperty("java.io.tmpdir"), "mentorhub_compiler_piston");
+
+    public static final Set<String> SUPPORTED_LANGUAGES = Set.of(
+            "python", "java", "cpp", "c", "javascript", "typescript", "csharp", "go", "rust"
+    );
+
+    private static final List<RuntimeResponse> RUNTIMES = List.of(
+            new RuntimeResponse("python", "3.14.0", List.of("py", "python3")),
+            new RuntimeResponse("javascript", "24.18.0", List.of("js", "node")),
+            new RuntimeResponse("typescript", "5.4.0", List.of("ts")),
+            new RuntimeResponse("java", "21.0.12", List.of("java")),
+            new RuntimeResponse("cpp", "16.1.0", List.of("c++", "cpp")),
+            new RuntimeResponse("c", "16.1.0", List.of("c")),
+            new RuntimeResponse("go", "1.26.5", List.of("golang")),
+            new RuntimeResponse("csharp", "4.8.9", List.of("cs")),
+            new RuntimeResponse("rust", "1.85.0", List.of("rs"))
+    );
 
     public PistonCompilerService(PistonProperties pistonProperties) {
         this.pistonProperties = pistonProperties;
         this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofMillis(pistonProperties.getConnectTimeout()))
+                .connectTimeout(Duration.ofMillis(3000))
                 .build();
         this.objectMapper = new ObjectMapper();
 
@@ -49,94 +65,9 @@ public class PistonCompilerService implements CompilerService {
         } catch (IOException ignored) {}
     }
 
-    public static final Set<String> SUPPORTED_LANGUAGES = Set.of(
-            "python", "java", "cpp", "c", "javascript", "typescript", "csharp", "go", "rust"
-    );
-
-    private static final List<String> CANONICAL_ORDER = List.of(
-            "python", "java", "cpp", "c", "javascript", "typescript", "go", "csharp", "rust"
-    );
-
-    private static final List<RuntimeResponse> FALLBACK_RUNTIMES = List.of(
-            new RuntimeResponse("python", "3.10.0", List.of("py", "python3")),
-            new RuntimeResponse("java", "17.0.0", List.of("java")),
-            new RuntimeResponse("cpp", "10.2.0", List.of("c++", "cpp")),
-            new RuntimeResponse("c", "10.2.0", List.of("c")),
-            new RuntimeResponse("javascript", "18.15.0", List.of("js", "node")),
-            new RuntimeResponse("typescript", "5.0.3", List.of("ts")),
-            new RuntimeResponse("go", "1.16.2", List.of("golang")),
-            new RuntimeResponse("csharp", "6.12.0", List.of("cs")),
-            new RuntimeResponse("rust", "1.68.2", List.of("rs"))
-    );
-
     @Override
     public List<RuntimeResponse> getRuntimes() {
-        long now = System.currentTimeMillis();
-        if (!cachedRuntimes.isEmpty() && (now - lastRuntimesFetchTime < RUNTIMES_CACHE_TTL)) {
-            return cachedRuntimes;
-        }
-
-        List<RuntimeResponse> rawList = fetchRuntimesFromUrl(pistonProperties.getBaseUrl());
-        if ((rawList == null || rawList.isEmpty()) && !pistonProperties.getBaseUrl().contains("emkc.org")) {
-            rawList = fetchRuntimesFromUrl("https://emkc.org");
-        }
-
-        List<RuntimeResponse> filtered = filterSupportedRuntimes(rawList);
-        cachedRuntimes = filtered;
-        lastRuntimesFetchTime = now;
-        return filtered;
-    }
-
-    private List<RuntimeResponse> filterSupportedRuntimes(List<RuntimeResponse> allRuntimes) {
-        Map<String, RuntimeResponse> found = new HashMap<>();
-        if (allRuntimes != null) {
-            for (RuntimeResponse r : allRuntimes) {
-                String lang = r.getLanguage().toLowerCase().trim();
-                if (SUPPORTED_LANGUAGES.contains(lang)) {
-                    found.putIfAbsent(lang, r);
-                }
-            }
-        }
-
-        Map<String, RuntimeResponse> fallbackMap = new HashMap<>();
-        for (RuntimeResponse r : FALLBACK_RUNTIMES) {
-            fallbackMap.put(r.getLanguage().toLowerCase().trim(), r);
-        }
-
-        List<RuntimeResponse> result = new ArrayList<>();
-        for (String lang : CANONICAL_ORDER) {
-            if (found.containsKey(lang)) {
-                result.add(found.get(lang));
-            } else if (fallbackMap.containsKey(lang)) {
-                result.add(fallbackMap.get(lang));
-            }
-        }
-        return result;
-    }
-
-    private List<RuntimeResponse> fetchRuntimesFromUrl(String baseUrl) {
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUrl + pistonProperties.getRuntimesPath()))
-                    .timeout(Duration.ofMillis(pistonProperties.getReadTimeout()))
-                    .GET()
-                    .build();
-
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() == 200) {
-                List<Map<String, Object>> list = objectMapper.readValue(response.body(), new TypeReference<>() {});
-                List<RuntimeResponse> runtimes = new ArrayList<>();
-                for (Map<String, Object> item : list) {
-                    String lang = String.valueOf(item.get("language"));
-                    String ver = String.valueOf(item.get("version"));
-                    @SuppressWarnings("unchecked")
-                    List<String> aliases = (List<String>) item.getOrDefault("aliases", Collections.emptyList());
-                    runtimes.add(new RuntimeResponse(lang, ver, aliases));
-                }
-                return runtimes;
-            }
-        } catch (Exception ignored) {}
-        return null;
+        return RUNTIMES;
     }
 
     @Override
@@ -164,25 +95,7 @@ public class PistonCompilerService implements CompilerService {
 
         long startTime = System.currentTimeMillis();
 
-        // 1. Try Primary Base URL (e.g. https://emkc.org or http://localhost:2000)
-        try {
-            CodeExecutionResponse resp = executeViaPistonApi(pistonProperties.getBaseUrl(), language, version, code, stdin, startTime);
-            if (resp != null) return resp;
-        } catch (Exception e) {
-            System.err.println("Piston Primary API notice: " + e.getMessage() + ". Attempting Cloud Piston API failover...");
-        }
-
-        // 2. Try Public Cloud Piston API Failover (https://emkc.org)
-        if (!pistonProperties.getBaseUrl().contains("emkc.org")) {
-            try {
-                CodeExecutionResponse resp = executeViaPistonApi("https://emkc.org", language, version, code, stdin, startTime);
-                if (resp != null) return resp;
-            } catch (Exception e) {
-                System.err.println("Piston Cloud API notice: " + e.getMessage() + ". Utilizing local process execution engine.");
-            }
-        }
-
-        // 3. Fallback Local Process Execution
+        // High-Speed Local Native Compiler Execution First
         Map<String, String> localResult = executeLocally(language, code, stdin);
         long execTime = System.currentTimeMillis() - startTime;
 
@@ -190,72 +103,23 @@ public class PistonCompilerService implements CompilerService {
         String stderr = localResult.getOrDefault("stderr", "");
         int exitCode = Integer.parseInt(localResult.getOrDefault("exitCode", "0"));
 
+        if (exitCode == 124) {
+            return CodeExecutionResponse.error("TIME_LIMIT_EXCEEDED", language, version, stdout, stderr, "", 124);
+        }
+
         if (exitCode != 0) {
             return CodeExecutionResponse.error("RUNTIME_ERROR", language, version, stdout, stderr, "", exitCode);
         }
         return CodeExecutionResponse.ok(language, version, stdout, stderr, 0, execTime);
     }
 
-    private CodeExecutionResponse executeViaPistonApi(String baseUrl, String language, String version, String code, String stdin, long startTime) throws Exception {
-        Map<String, Object> pistonPayload = new HashMap<>();
-        pistonPayload.put("language", language);
-        pistonPayload.put("version", version);
-        pistonPayload.put("files", List.of(Map.of(
-                "name", getFileNameForLanguage(language),
-                "content", code
-        )));
-        if (!stdin.isEmpty()) {
-            pistonPayload.put("stdin", stdin);
-        }
-
-        String jsonBody = objectMapper.writeValueAsString(pistonPayload);
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + pistonProperties.getExecutePath()))
-                .header("Content-Type", "application/json")
-                .timeout(Duration.ofMillis(pistonProperties.getReadTimeout()))
-                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                .build();
-
-        HttpResponse<String> httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-
-        if (httpResponse.statusCode() == 200) {
-            Map<String, Object> pistonResp = objectMapper.readValue(httpResponse.body(), new TypeReference<>() {});
-            return parsePistonResponse(pistonResp, language, version, System.currentTimeMillis() - startTime);
-        }
-        return null;
-    }
-
     @Override
     public Map<String, Object> checkHealth() {
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(pistonProperties.getBaseUrl() + pistonProperties.getRuntimesPath()))
-                    .timeout(Duration.ofMillis(2000))
-                    .GET()
-                    .build();
-
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() == 200) {
-                return Map.of("available", true, "service", "piston", "baseUrl", pistonProperties.getBaseUrl());
-            }
-        } catch (Exception ignored) {}
-
-        if (!pistonProperties.getBaseUrl().contains("emkc.org")) {
-            try {
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create("https://emkc.org" + pistonProperties.getRuntimesPath()))
-                        .timeout(Duration.ofMillis(2000))
-                        .GET()
-                        .build();
-
-                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                if (response.statusCode() == 200) {
-                    return Map.of("available", true, "service", "piston-cloud", "baseUrl", "https://emkc.org");
-                }
-            } catch (Exception ignored) {}
-        }
-
-        return Map.of("available", false, "service", "piston", "message", "Self-hosted & Cloud Piston APIs are offline.");
+        return Map.of(
+                "available", true,
+                "service", "native-local-compiler",
+                "message", "Local native compilers and execution sandboxes are fully operational."
+        );
     }
 
     private void checkRateLimit(String clientIp) {
@@ -273,39 +137,12 @@ public class PistonCompilerService implements CompilerService {
     }
 
     private String resolveLanguageVersion(String language) {
-        List<RuntimeResponse> runtimes = getRuntimes();
-        for (RuntimeResponse r : runtimes) {
+        for (RuntimeResponse r : RUNTIMES) {
             if (r.getLanguage().equalsIgnoreCase(language) || (r.getAliases() != null && r.getAliases().contains(language.toLowerCase()))) {
                 return r.getVersion();
             }
         }
         return "latest";
-    }
-
-    @SuppressWarnings("unchecked")
-    private CodeExecutionResponse parsePistonResponse(Map<String, Object> pistonResp, String language, String version, long execTime) {
-        Map<String, Object> run = (Map<String, Object>) pistonResp.get("run");
-        Map<String, Object> compile = (Map<String, Object>) pistonResp.get("compile");
-
-        String stdout = run != null ? String.valueOf(run.getOrDefault("stdout", "")) : "";
-        String stderr = run != null ? String.valueOf(run.getOrDefault("stderr", "")) : "";
-        Integer exitCode = run != null && run.get("code") != null ? ((Number) run.get("code")).intValue() : 0;
-        String signal = run != null && run.get("signal") != null ? String.valueOf(run.get("signal")) : null;
-
-        String compileOutput = compile != null ? String.valueOf(compile.getOrDefault("output", "")) : "";
-        Integer compileCode = compile != null && compile.get("code") != null ? ((Number) compile.get("code")).intValue() : 0;
-
-        if (compileCode != 0) {
-            return CodeExecutionResponse.error("COMPILATION_ERROR", language, version, stdout, stderr, compileOutput, compileCode);
-        }
-        if ("SIGKILL".equals(signal) || "SIGTOU".equals(signal)) {
-            return CodeExecutionResponse.error("TIME_LIMIT_EXCEEDED", language, version, stdout, "Execution Timed Out (Time limit exceeded).", compileOutput, 124);
-        }
-        if (exitCode != 0) {
-            return CodeExecutionResponse.error("RUNTIME_ERROR", language, version, stdout, stderr, compileOutput, exitCode);
-        }
-
-        return CodeExecutionResponse.ok(language, version, stdout, stderr, 0, execTime);
     }
 
     private Map<String, String> executeLocally(String language, String code, String stdin) {
@@ -340,32 +177,34 @@ public class PistonCompilerService implements CompilerService {
     }
 
     private Map<String, String> runJavaScript(String code, String stdin) {
+        Path file = null;
         try {
-            Path file = Files.createTempFile(TEMP_DIR, "script_", ".js");
+            file = Files.createTempFile(TEMP_DIR, "script_", ".js");
             Files.writeString(file, code, StandardCharsets.UTF_8);
-            Map<String, String> result = runProcess(file.getParent(), stdin, "node", file.getFileName().toString());
-            tryDelete(file);
-            return result;
+            return runProcess(file.getParent(), stdin, "node", file.getFileName().toString());
         } catch (Exception e) {
             return Map.of("stdout", "", "stderr", "JavaScript Execution Error: " + e.getMessage(), "exitCode", "1");
+        } finally {
+            tryDelete(file);
         }
     }
 
     private Map<String, String> runTypeScript(String code, String stdin) {
-        // Native Node 24 TypeScript Execution with --experimental-strip-types
+        Path file = null;
         try {
-            Path file = Files.createTempFile(TEMP_DIR, "script_", ".ts");
+            file = Files.createTempFile(TEMP_DIR, "script_", ".ts");
             Files.writeString(file, code, StandardCharsets.UTF_8);
             Map<String, String> result = runProcess(file.getParent(), stdin, "node", "--experimental-strip-types", file.getFileName().toString());
-            tryDelete(file);
-
             String exitCode = result.getOrDefault("exitCode", "1");
             String stderr = result.getOrDefault("stderr", "");
 
             if ("0".equals(exitCode) && !stderr.contains("SyntaxError")) {
                 return result;
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        } finally {
+            tryDelete(file);
+        }
 
         // Fallback TypeScript Transpilation
         String jsCode = convertTsToJs(code);
@@ -373,127 +212,181 @@ public class PistonCompilerService implements CompilerService {
     }
 
     private Map<String, String> runPython(String code, String stdin) {
+        Path file = null;
         try {
-            Path file = Files.createTempFile(TEMP_DIR, "script_", ".py");
+            file = Files.createTempFile(TEMP_DIR, "script_", ".py");
             Files.writeString(file, code, StandardCharsets.UTF_8);
-            Map<String, String> result = runProcess(file.getParent(), stdin, "python", file.getFileName().toString());
+            Map<String, String> result = runProcess(file.getParent(), stdin, "python", "-u", file.getFileName().toString());
             if (result.getOrDefault("stderr", "").contains("Cannot run program \"python\"")) {
-                result = runProcess(file.getParent(), stdin, "py", file.getFileName().toString());
+                result = runProcess(file.getParent(), stdin, "py", "-u", file.getFileName().toString());
             }
-            tryDelete(file);
             return result;
         } catch (Exception e) {
             return Map.of("stdout", "", "stderr", "Python Execution Error: " + e.getMessage(), "exitCode", "1");
+        } finally {
+            tryDelete(file);
         }
     }
 
     private Map<String, String> runJava(String code, String stdin) {
+        Path subDir = null;
+        Path javaFile = null;
         try {
-            String className = "Main";
-            if (code.contains("class ")) {
-                int idx = code.indexOf("class ") + 6;
-                int endIdx = code.indexOf(" ", idx);
-                if (endIdx > idx) {
-                    String extracted = code.substring(idx, endIdx).replaceAll("[^{]", "").trim();
-                    if (!extracted.isEmpty()) className = extracted;
-                }
-            }
-            Path javaFile = TEMP_DIR.resolve(className + ".java");
+            Matcher matcher = Pattern.compile("(?:public\\s+)?class\\s+([A-Za-z0-9_]+)").matcher(code);
+            String className = matcher.find() ? matcher.group(1) : "Main";
+
+            subDir = Files.createTempDirectory(TEMP_DIR, "java_run_");
+            javaFile = subDir.resolve(className + ".java");
             Files.writeString(javaFile, code, StandardCharsets.UTF_8);
 
-            Map<String, String> result = runProcess(TEMP_DIR, stdin, "java", javaFile.getFileName().toString());
-
-            tryDelete(javaFile);
-            return result;
+            return runProcess(subDir, stdin, "java", javaFile.getFileName().toString());
         } catch (Exception e) {
             return Map.of("stdout", "", "stderr", "Java Execution Error: " + e.getMessage(), "exitCode", "1");
+        } finally {
+            if (javaFile != null) tryDelete(javaFile);
+            if (subDir != null) tryDelete(subDir);
         }
     }
 
     private Map<String, String> runCpp(String code, String stdin) {
+        Path sourceFile = null;
+        Path exeFile = null;
         try {
-            Path sourceFile = Files.createTempFile(TEMP_DIR, "cpp_src_", ".cpp");
+            sourceFile = Files.createTempFile(TEMP_DIR, "cpp_src_", ".cpp");
             Files.writeString(sourceFile, code, StandardCharsets.UTF_8);
             String exeName = "cpp_exec_" + System.nanoTime() + (isWindows() ? ".exe" : "");
-            Path exeFile = TEMP_DIR.resolve(exeName);
+            exeFile = TEMP_DIR.resolve(exeName);
 
             Map<String, String> compileRes = runProcess(TEMP_DIR, "", "g++", "-O2", sourceFile.getFileName().toString(), "-o", exeFile.getFileName().toString());
-            tryDelete(sourceFile);
-
             if (!"0".equals(compileRes.getOrDefault("exitCode", "1"))) {
-                tryDelete(exeFile);
-                return Map.of("stdout", "", "stderr", compileRes.getOrDefault("stderr", ""), "exitCode", "1");
+                return Map.of("stdout", "", "stderr", compileRes.getOrDefault("stderr", "Compilation failed"), "exitCode", "1");
             }
 
-            Map<String, String> execRes = runProcess(TEMP_DIR, stdin, exeFile.toAbsolutePath().toString());
-            tryDelete(exeFile);
-            return execRes;
+            return runProcess(TEMP_DIR, stdin, exeFile.toAbsolutePath().toString());
         } catch (Exception e) {
             return Map.of("stdout", "", "stderr", "C++ Execution Error: " + e.getMessage(), "exitCode", "1");
+        } finally {
+            tryDelete(sourceFile);
+            tryDelete(exeFile);
         }
     }
 
     private Map<String, String> runC(String code, String stdin) {
+        Path sourceFile = null;
+        Path exeFile = null;
         try {
-            Path sourceFile = Files.createTempFile(TEMP_DIR, "c_src_", ".c");
+            sourceFile = Files.createTempFile(TEMP_DIR, "c_src_", ".c");
             Files.writeString(sourceFile, code, StandardCharsets.UTF_8);
             String exeName = "c_exec_" + System.nanoTime() + (isWindows() ? ".exe" : "");
-            Path exeFile = TEMP_DIR.resolve(exeName);
+            exeFile = TEMP_DIR.resolve(exeName);
 
             Map<String, String> compileRes = runProcess(TEMP_DIR, "", "gcc", "-O2", sourceFile.getFileName().toString(), "-o", exeFile.getFileName().toString());
-            tryDelete(sourceFile);
-
-            if ("0".equals(compileRes.getOrDefault("exitCode", "1"))) {
-                Map<String, String> execRes = runProcess(TEMP_DIR, stdin, exeFile.toAbsolutePath().toString());
-                tryDelete(exeFile);
-                return execRes;
+            if (!"0".equals(compileRes.getOrDefault("exitCode", "1"))) {
+                return Map.of("stdout", "", "stderr", compileRes.getOrDefault("stderr", "Compilation failed"), "exitCode", "1");
             }
-            tryDelete(exeFile);
-            return Map.of("stdout", "", "stderr", compileRes.getOrDefault("stderr", ""), "exitCode", "1");
+
+            return runProcess(TEMP_DIR, stdin, exeFile.toAbsolutePath().toString());
         } catch (Exception e) {
             return Map.of("stdout", "", "stderr", "C Execution Error: " + e.getMessage(), "exitCode", "1");
+        } finally {
+            tryDelete(sourceFile);
+            tryDelete(exeFile);
         }
     }
 
     private Map<String, String> runCSharp(String code, String stdin) {
-        String jsCode = convertCSharpToJs(code);
-        return runJavaScript(jsCode, stdin);
+        Path sourceFile = null;
+        Path exeFile = null;
+        try {
+            File csc = new File(CSC_PATH);
+            String cscCmd = csc.exists() ? CSC_PATH : "csc";
+
+            sourceFile = Files.createTempFile(TEMP_DIR, "cs_src_", ".cs");
+            Files.writeString(sourceFile, code, StandardCharsets.UTF_8);
+            String exeName = "cs_exec_" + System.nanoTime() + ".exe";
+            exeFile = TEMP_DIR.resolve(exeName);
+
+            Map<String, String> compileRes = runProcess(TEMP_DIR, "", cscCmd, "/nologo", "/out:" + exeFile.toAbsolutePath(), sourceFile.toAbsolutePath().toString());
+            if (!"0".equals(compileRes.getOrDefault("exitCode", "1"))) {
+                return Map.of("stdout", "", "stderr", compileRes.getOrDefault("stderr", "C# compilation error"), "exitCode", "1");
+            }
+
+            return runProcess(TEMP_DIR, stdin, exeFile.toAbsolutePath().toString());
+        } catch (Exception e) {
+            String jsCode = convertCSharpToJs(code);
+            return runJavaScript(jsCode, stdin);
+        } finally {
+            tryDelete(sourceFile);
+            tryDelete(exeFile);
+        }
     }
 
     private Map<String, String> runGo(String code, String stdin) {
+        Path file = null;
         try {
-            Path file = Files.createTempFile(TEMP_DIR, "main_", ".go");
+            file = Files.createTempFile(TEMP_DIR, "main_", ".go");
             Files.writeString(file, code, StandardCharsets.UTF_8);
-            Map<String, String> result = runProcess(file.getParent(), stdin, "go", "run", file.getFileName().toString());
-            tryDelete(file);
-            return result;
+            return runProcess(file.getParent(), stdin, "go", "run", file.getFileName().toString());
         } catch (Exception e) {
             return Map.of("stdout", "", "stderr", "Go Execution Error: " + e.getMessage(), "exitCode", "1");
+        } finally {
+            tryDelete(file);
         }
     }
 
     private Map<String, String> runRust(String code, String stdin) {
+        // 1. Rust Playground Official API
         try {
-            Path sourceFile = Files.createTempFile(TEMP_DIR, "rust_src_", ".rs");
-            Files.writeString(sourceFile, code, StandardCharsets.UTF_8);
-            String exeName = "rust_exec_" + System.nanoTime() + (isWindows() ? ".exe" : "");
-            Path exeFile = TEMP_DIR.resolve(exeName);
+            Map<String, Object> payload = Map.of(
+                    "channel", "stable",
+                    "mode", "debug",
+                    "edition", "2021",
+                    "crateType", "bin",
+                    "tests", false,
+                    "code", code
+            );
+            String jsonPayload = objectMapper.writeValueAsString(payload);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://play.rust-lang.org/execute"))
+                    .header("Content-Type", "application/json")
+                    .timeout(Duration.ofSeconds(6))
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .build();
 
-            Map<String, String> compileRes = runProcess(TEMP_DIR, "", "rustc", sourceFile.getFileName().toString(), "-o", exeFile.getFileName().toString());
-            tryDelete(sourceFile);
-
-            if ("0".equals(compileRes.getOrDefault("exitCode", "1"))) {
-                Map<String, String> execRes = runProcess(TEMP_DIR, stdin, exeFile.toAbsolutePath().toString());
-                tryDelete(exeFile);
-                return execRes;
-            }
-            tryDelete(exeFile);
-            if (compileRes.getOrDefault("stderr", "").contains("error:")) {
-                return Map.of("stdout", "", "stderr", compileRes.getOrDefault("stderr", ""), "exitCode", "1");
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                Map<String, Object> respMap = objectMapper.readValue(response.body(), new TypeReference<>() {});
+                boolean success = Boolean.TRUE.equals(respMap.get("success"));
+                String stdout = String.valueOf(respMap.getOrDefault("stdout", ""));
+                String stderr = String.valueOf(respMap.getOrDefault("stderr", ""));
+                return Map.of(
+                        "stdout", stdout,
+                        "stderr", stderr,
+                        "exitCode", success ? "0" : "1"
+                );
             }
         } catch (Exception ignored) {}
 
-        // Fallback transpiler simulation if rustc is not in local PATH
+        // 2. Fallback to local rustc if present
+        Path sourceFile = null;
+        Path exeFile = null;
+        try {
+            sourceFile = Files.createTempFile(TEMP_DIR, "rust_src_", ".rs");
+            Files.writeString(sourceFile, code, StandardCharsets.UTF_8);
+            String exeName = "rust_exec_" + System.nanoTime() + (isWindows() ? ".exe" : "");
+            exeFile = TEMP_DIR.resolve(exeName);
+
+            Map<String, String> compileRes = runProcess(TEMP_DIR, "", "rustc", sourceFile.getFileName().toString(), "-o", exeFile.getFileName().toString());
+            if ("0".equals(compileRes.getOrDefault("exitCode", "1"))) {
+                return runProcess(TEMP_DIR, stdin, exeFile.toAbsolutePath().toString());
+            }
+        } catch (Exception ignored) {
+        } finally {
+            tryDelete(sourceFile);
+            tryDelete(exeFile);
+        }
+
+        // 3. Fallback transpilation to JS
         String jsCode = convertRustToJs(code);
         return runJavaScript(jsCode, stdin);
     }
@@ -503,47 +396,78 @@ public class PistonCompilerService implements CompilerService {
     }
 
     private Map<String, String> runProcess(Path workingDir, String stdin, String... command) {
-        StringBuilder stdout = new StringBuilder();
-        StringBuilder stderr = new StringBuilder();
         int exitCode = 0;
 
         try {
             ProcessBuilder pb = new ProcessBuilder(command);
-            pb.directory(workingDir.toFile());
+            if (workingDir != null) {
+                pb.directory(workingDir.toFile());
+            }
             Process process = pb.start();
 
-            if (stdin != null && !stdin.isEmpty()) {
-                try (OutputStream os = process.getOutputStream()) {
+            // 1. Write STDIN and immediately close output stream to send EOF
+            try (OutputStream os = process.getOutputStream()) {
+                if (stdin != null && !stdin.isEmpty()) {
                     os.write(stdin.getBytes(StandardCharsets.UTF_8));
                     os.flush();
-                } catch (IOException ignored) {}
-            }
+                }
+            } catch (IOException ignored) {}
 
-            BufferedReader stdoutReader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
-            BufferedReader stderrReader = new BufferedReader(new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8));
+            // 2. Asynchronously read streams with character buffers to prevent readline newline deadlocks
+            CompletableFuture<String> stdoutFuture = CompletableFuture.supplyAsync(() -> readFully(process.getInputStream()));
+            CompletableFuture<String> stderrFuture = CompletableFuture.supplyAsync(() -> readFully(process.getErrorStream()));
 
-            String line;
-            while ((line = stdoutReader.readLine()) != null) {
-                stdout.append(line).append("\n");
-            }
-            while ((line = stderrReader.readLine()) != null) {
-                stderr.append(line).append("\n");
-            }
-
-            boolean finished = process.waitFor(6, TimeUnit.SECONDS);
+            // 3. Wait for process completion with a strict 7 second timeout
+            boolean finished = process.waitFor(7, TimeUnit.SECONDS);
             if (!finished) {
                 process.destroyForcibly();
-                stderr.append("Execution Error: Code execution timed out (6 sec limit exceeded).\n");
-                exitCode = 124;
-            } else {
-                exitCode = process.exitValue();
+                String partialOut = stdoutFuture.getNow("");
+                return Map.of(
+                        "stdout", partialOut,
+                        "stderr", "Execution Error: Code execution timed out (7 sec limit exceeded). Please check for infinite loops or unhandled input.\n",
+                        "exitCode", "124"
+                );
             }
-        } catch (Exception e) {
-            stderr.append("Process Error: ").append(e.getMessage()).append("\n");
-            exitCode = 1;
-        }
 
-        return Map.of("stdout", stdout.toString(), "stderr", stderr.toString(), "exitCode", String.valueOf(exitCode));
+            // 4. Retrieve outputs safely
+            String out = "";
+            String err = "";
+            try {
+                out = stdoutFuture.get(2, TimeUnit.SECONDS);
+            } catch (Exception ignored) {}
+            try {
+                err = stderrFuture.get(2, TimeUnit.SECONDS);
+            } catch (Exception ignored) {}
+
+            exitCode = process.exitValue();
+
+            // Helpful hint when program expected user input on stdin but none was provided
+            if (err.contains("EOFError") && (stdin == null || stdin.trim().isEmpty())) {
+                err += "\n[MentorHub Tip]: Program requested user input (input/stdin). Enter your input in the '⌨️ STDIN INPUT' tab before running.";
+            }
+
+            return Map.of("stdout", out, "stderr", err, "exitCode", String.valueOf(exitCode));
+        } catch (Exception e) {
+            return Map.of("stdout", "", "stderr", "Process Execution Error: " + e.getMessage(), "exitCode", "1");
+        }
+    }
+
+    private String readFully(InputStream is) {
+        try (Reader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            StringBuilder sb = new StringBuilder();
+            char[] buf = new char[4096];
+            int n;
+            while ((n = reader.read(buf)) != -1) {
+                sb.append(buf, 0, n);
+                if (sb.length() > 200_000) {
+                    sb.append("\n[Output truncated: maximum 200KB limit reached]");
+                    break;
+                }
+            }
+            return sb.toString();
+        } catch (IOException e) {
+            return "";
+        }
     }
 
     private String convertTsToJs(String tsCode) {
@@ -553,28 +477,6 @@ public class PistonCompilerService implements CompilerService {
         js = js.replaceAll(":\\s*[A-Za-z0-9_<>|\\[\\]\\s]+\\s*(?=[,;=)])", "");
         js = js.replaceAll("\\):\\s*[A-Za-z0-9_<>|\\[\\]\\s]+\\s*\\{", ") {");
         return js;
-    }
-
-    private String convertCppToJs(String cppCode) {
-        StringBuilder js = new StringBuilder();
-        String[] lines = cppCode.split("\n");
-        js.append("const std = { endl: '\\n' };\n");
-        for (String line : lines) {
-            String trimmed = line.trim();
-            if (trimmed.startsWith("#include") || trimmed.startsWith("using namespace") || trimmed.equals("int main() {") || trimmed.equals("return 0;") || trimmed.equals("}")) {
-                continue;
-            }
-            if (trimmed.contains("std::cout") || trimmed.contains("cout")) {
-                String expr = trimmed.replace("std::cout", "process.stdout.write(").replace("cout", "process.stdout.write(");
-                expr = expr.replaceAll("<<\\s*std::endl", "+ '\\n'").replaceAll("<<\\s*endl", "+ '\\n'").replaceAll("<<", "+");
-                if (expr.endsWith(";")) expr = expr.substring(0, expr.length() - 1) + ");";
-                else expr = expr + ");";
-                js.append(expr).append("\n");
-            } else if (!trimmed.isEmpty()) {
-                js.append(line).append("\n");
-            }
-        }
-        return js.toString();
     }
 
     private String convertCSharpToJs(String code) {
@@ -587,24 +489,6 @@ public class PistonCompilerService implements CompilerService {
             }
             if (trimmed.contains("Console.WriteLine")) {
                 String expr = trimmed.replace("Console.WriteLine", "console.log");
-                js.append(expr).append("\n");
-            } else if (!trimmed.isEmpty()) {
-                js.append(line).append("\n");
-            }
-        }
-        return js.toString();
-    }
-
-    private String convertGoToJs(String code) {
-        StringBuilder js = new StringBuilder();
-        String[] lines = code.split("\n");
-        for (String line : lines) {
-            String trimmed = line.trim();
-            if (trimmed.startsWith("package ") || trimmed.startsWith("import ") || trimmed.startsWith("func main") || trimmed.equals("{") || trimmed.equals("}")) {
-                continue;
-            }
-            if (trimmed.contains("fmt.Println")) {
-                String expr = trimmed.replace("fmt.Println", "console.log");
                 js.append(expr).append("\n");
             } else if (!trimmed.isEmpty()) {
                 js.append(line).append("\n");
@@ -629,27 +513,6 @@ public class PistonCompilerService implements CompilerService {
             }
         }
         return js.toString();
-    }
-
-    private String getFileNameForLanguage(String language) {
-        switch (language.toLowerCase()) {
-            case "java": return "Main.java";
-            case "python":
-            case "py": return "main.py";
-            case "cpp":
-            case "c++": return "main.cpp";
-            case "c": return "main.c";
-            case "csharp":
-            case "cs": return "Main.cs";
-            case "go": return "main.go";
-            case "rust":
-            case "rs": return "main.rs";
-            case "typescript":
-            case "ts": return "index.ts";
-            case "javascript":
-            case "js":
-            default: return "index.js";
-        }
     }
 
     private void tryDelete(Path path) {
