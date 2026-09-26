@@ -32,7 +32,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   isMaximized = false;
   selectedProvider = 'GEMINI';
-  selectedModel = 'gemini-3.8-flash';
+  selectedModel = 'gemini-3.5-flash';
 
   userInput = '';
   isGenerating = false;
@@ -83,7 +83,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       avatar: 'AI',
       text: '👋 **Hi! How can I help you today?**\nAsk about **CUTM courses**, **code**, or tap **🟢 LIVE VOICE** to talk.',
       provider: 'GEMINI',
-      model: 'gemini-3.8-flash',
+      model: 'gemini-3.5-flash',
       mode: 'TEXT',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
@@ -354,7 +354,7 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
           avatar: 'AI',
           text: aiResponseText,
           provider: res.provider || 'GEMINI',
-          model: res.model || 'gemini-3.8-flash',
+          model: res.model || 'gemini-3.5-flash',
           mode: 'VOICE',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         });

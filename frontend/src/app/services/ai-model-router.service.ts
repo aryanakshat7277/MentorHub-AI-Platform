@@ -17,7 +17,7 @@ export interface ModelRoutingConfig {
 })
 export class AiModelRouterService {
   public readonly config: ModelRoutingConfig = {
-    textModel: 'gemini-3.8-flash',
+    textModel: 'gemini-3.5-flash',
     groqModel: 'openai/gpt-oss-120b',
     liveModel: 'gemini-3.1-flash-live-preview',
     fallbackSttModel: 'whisper-large-v3-turbo',

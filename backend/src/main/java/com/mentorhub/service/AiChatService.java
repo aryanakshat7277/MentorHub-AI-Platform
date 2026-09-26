@@ -114,13 +114,13 @@ public class AiChatService {
             String screenContext
     ) {
         String reqProvider = (provider != null) ? provider.toUpperCase() : "GEMINI";
-        String reqModel = (model != null && !model.isEmpty()) ? model : "gemini-3.8-flash";
+        String reqModel = (model != null && !model.isEmpty()) ? model : "gemini-3.5-flash";
 
         if (reqModel.endsWith("-latest")) {
             reqModel = reqModel.replace("-latest", "");
         }
-        if ("gemini-2.5-flash".equalsIgnoreCase(reqModel)) {
-            reqModel = "gemini-3.8-flash";
+        if ("gemini-2.5-flash".equalsIgnoreCase(reqModel) || "gemini-3.8-flash".equalsIgnoreCase(reqModel)) {
+            reqModel = "gemini-3.5-flash";
         }
 
         Map<String, Object> result = new HashMap<>();
@@ -205,9 +205,9 @@ public class AiChatService {
         executor.execute(() -> {
             try {
                 String query = request.getMessage();
-                String reqModel = (request.getModel() != null && !request.getModel().isEmpty()) ? request.getModel() : "gemini-3.6-flash";
-                if ("gemini-2.5-flash".equalsIgnoreCase(reqModel)) {
-                    reqModel = "gemini-3.6-flash";
+                String reqModel = (request.getModel() != null && !request.getModel().isEmpty()) ? request.getModel() : "gemini-3.5-flash";
+                if ("gemini-2.5-flash".equalsIgnoreCase(reqModel) || "gemini-3.8-flash".equalsIgnoreCase(reqModel) || "gemini-3.6-flash".equalsIgnoreCase(reqModel)) {
+                    reqModel = "gemini-3.5-flash";
                 }
                 String reqProvider = (request.getProvider() != null) ? request.getProvider().toUpperCase() : "GEMINI";
 
@@ -257,24 +257,24 @@ public class AiChatService {
 
     private String resolveGeminiModel(String model) {
         if (model == null || model.isEmpty()) {
-            return "gemini-3.8-flash";
+            return "gemini-3.5-flash";
         }
         if (model.contains("pro")) {
-            return "gemini-1.5-pro";
+            return "gemini-3.1-pro-preview";
         }
-        if (model.contains("3.8")) {
-            return "gemini-3.8-flash";
+        if (model.contains("3.5")) {
+            return "gemini-3.5-flash";
         }
-        if (model.contains("3.6") || model.contains("3.5") || model.contains("3.1")) {
-            return "gemini-3.6-flash";
+        if (model.contains("latest")) {
+            return "gemini-flash-latest";
         }
-        if (model.contains("2.0")) {
-            return "gemini-2.0-flash";
+        if (model.contains("3.8") || model.contains("3.6") || model.contains("3.7") || model.contains("3.1")) {
+            return "gemini-3.5-flash";
         }
-        if (model.contains("1.5")) {
-            return "gemini-1.5-flash";
+        if (model.contains("lite")) {
+            return "gemini-3.1-flash-lite-preview";
         }
-        return "gemini-3.8-flash";
+        return "gemini-3.5-flash";
     }
 
     private void streamGemini(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload, String screenImage, String screenContext, SseEmitter emitter) throws Exception {
@@ -331,51 +331,59 @@ public class AiChatService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        for (int k = 0; k < keys.size(); k++) {
-            String key = keys.get(k);
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/" + cleanModel + ":streamGenerateContent?alt=sse&key=" + key;
-            try {
-                restTemplate.execute(url, HttpMethod.POST, request -> {
-                    request.getHeaders().addAll(headers);
-                    mapper.writeValue(request.getBody(), body);
-                }, (ResponseExtractor<Void>) response -> {
-                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getBody(), StandardCharsets.UTF_8))) {
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            if (line.startsWith("data: ")) {
-                                String dataStr = line.substring(6).trim();
-                                if (dataStr.isEmpty()) continue;
-                                
-                                try {
-                                    JsonNode root = mapper.readTree(dataStr);
-                                    JsonNode candidates = root.get("candidates");
-                                    if (candidates != null && candidates.isArray() && candidates.size() > 0) {
-                                        JsonNode parts = candidates.get(0).path("content").path("parts");
-                                        if (parts != null && parts.isArray() && parts.size() > 0) {
-                                            JsonNode textNode = parts.get(0).path("text");
-                                            if (!textNode.isMissingNode()) {
-                                                String chunk = textNode.asText();
-                                                Map<String, Object> payload = new HashMap<>();
-                                                payload.put("text", chunk);
-                                                payload.put("provider", "GEMINI");
-                                                payload.put("model", cleanModel);
-                                                emitter.send(SseEmitter.event().data(mapper.writeValueAsString(payload)));
+        List<String> candidateModels = List.of(cleanModel, "gemini-3.5-flash", "gemini-flash-latest", "gemini-3-flash-preview");
+
+        for (String targetModel : candidateModels) {
+            for (int k = 0; k < keys.size(); k++) {
+                String key = keys.get(k);
+                String url = "https://generativelanguage.googleapis.com/v1beta/models/" + targetModel + ":streamGenerateContent?alt=sse&key=" + key;
+                try {
+                    final boolean[] receivedChunks = {false};
+                    restTemplate.execute(url, HttpMethod.POST, request -> {
+                        request.getHeaders().addAll(headers);
+                        mapper.writeValue(request.getBody(), body);
+                    }, (ResponseExtractor<Void>) response -> {
+                        try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getBody(), StandardCharsets.UTF_8))) {
+                            String line;
+                            while ((line = reader.readLine()) != null) {
+                                if (line.startsWith("data: ")) {
+                                    String dataStr = line.substring(6).trim();
+                                    if (dataStr.isEmpty()) continue;
+                                    
+                                    try {
+                                        JsonNode root = mapper.readTree(dataStr);
+                                        JsonNode candidates = root.get("candidates");
+                                        if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                                            JsonNode parts = candidates.get(0).path("content").path("parts");
+                                            if (parts != null && parts.isArray() && parts.size() > 0) {
+                                                JsonNode textNode = parts.get(0).path("text");
+                                                if (!textNode.isMissingNode()) {
+                                                    String chunk = textNode.asText();
+                                                    receivedChunks[0] = true;
+                                                    Map<String, Object> payload = new HashMap<>();
+                                                    payload.put("text", chunk);
+                                                    payload.put("provider", "GEMINI");
+                                                    payload.put("model", targetModel);
+                                                    emitter.send(SseEmitter.event().data(mapper.writeValueAsString(payload)));
+                                                }
                                             }
                                         }
+                                    } catch (Exception parseEx) {
+                                        System.err.println("Gemini SSE parse error: " + parseEx.getMessage());
                                     }
-                                } catch (Exception parseEx) {
-                                    System.err.println("Gemini SSE parse error: " + parseEx.getMessage());
                                 }
                             }
                         }
+                        return null;
+                    });
+                    if (receivedChunks[0]) {
+                        emitter.complete();
+                        return;
                     }
-                    emitter.complete();
-                    return null;
-                });
-                return;
-            } catch (Exception e) {
-                lastEx = e;
-                System.err.println("DEBUG: streamGemini failed with key index " + k + ": " + e.getMessage());
+                } catch (Exception e) {
+                    lastEx = e;
+                    System.err.println("DEBUG: streamGemini (" + targetModel + ") failed with key index " + k + ": " + e.getMessage());
+                }
             }
         }
         if (lastEx != null) throw lastEx;
@@ -456,35 +464,39 @@ public class AiChatService {
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
-        for (int k = 0; k < keys.size(); k++) {
-            String key = keys.get(k);
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/" + cleanModel + ":generateContent?key=" + key;
-            try {
-                ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
-                System.out.println("DEBUG: callGemini HTTP Status with key index " + k + ": " + response.getStatusCode());
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    Map responseBody = response.getBody();
-                    if (responseBody.containsKey("candidates")) {
-                        List candidates = (List) responseBody.get("candidates");
-                        if (candidates != null && !candidates.isEmpty()) {
-                            Map candidate = (Map) candidates.get(0);
-                            if (candidate != null && candidate.containsKey("content")) {
-                                Map content = (Map) candidate.get("content");
-                                if (content != null && content.containsKey("parts")) {
-                                    List parts = (List) content.get("parts");
-                                    if (parts != null && !parts.isEmpty()) {
-                                        Map firstPart = (Map) parts.get(0);
-                                        if (firstPart != null && firstPart.containsKey("text")) {
-                                            return (String) firstPart.get("text");
+        List<String> candidateModels = List.of(cleanModel, "gemini-3.5-flash", "gemini-flash-latest", "gemini-3-flash-preview");
+
+        for (String targetModel : candidateModels) {
+            for (int k = 0; k < keys.size(); k++) {
+                String key = keys.get(k);
+                String url = "https://generativelanguage.googleapis.com/v1beta/models/" + targetModel + ":generateContent?key=" + key;
+                try {
+                    ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+                    System.out.println("DEBUG: callGemini (" + targetModel + ") HTTP Status with key index " + k + ": " + response.getStatusCode());
+                    if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                        Map responseBody = response.getBody();
+                        if (responseBody.containsKey("candidates")) {
+                            List candidates = (List) responseBody.get("candidates");
+                            if (candidates != null && !candidates.isEmpty()) {
+                                Map candidate = (Map) candidates.get(0);
+                                if (candidate != null && candidate.containsKey("content")) {
+                                    Map content = (Map) candidate.get("content");
+                                    if (content != null && content.containsKey("parts")) {
+                                        List parts = (List) content.get("parts");
+                                        if (parts != null && !parts.isEmpty()) {
+                                            Map firstPart = (Map) parts.get(0);
+                                            if (firstPart != null && firstPart.containsKey("text")) {
+                                                return (String) firstPart.get("text");
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
+                } catch (Exception e) {
+                    System.err.println("DEBUG: callGemini (" + targetModel + ") failed with key index " + k + ": " + e.getMessage());
                 }
-            } catch (Exception e) {
-                System.err.println("DEBUG: callGemini failed with key index " + k + ": " + e.getMessage());
             }
         }
         return null;
@@ -495,8 +507,8 @@ public class AiChatService {
         String url = "https://api.groq.com/openai/v1/chat/completions";
 
         List<Map<String, String>> messages = new ArrayList<>();
-        String globalInstruction = brainService.getMasterBrainSystemPrompt("User");
-        messages.add(Map.of("role", "system", "content", globalInstruction));
+        String conciseInstruction = brainService.getConciseBrainSystemPrompt("User");
+        messages.add(Map.of("role", "system", "content", conciseInstruction));
 
         if (historyPayload != null) {
             messages.addAll(historyPayload);
@@ -506,8 +518,10 @@ public class AiChatService {
                 : query;
         messages.add(Map.of("role", "user", "content", effectiveQuery));
 
+        // Use valid Groq model
+        String targetModel = (model != null && !model.isEmpty() && !model.contains("gemini")) ? model : "openai/gpt-oss-120b";
         Map<String, Object> body = Map.of(
-                "model", model,
+                "model", targetModel,
                 "messages", messages,
                 "temperature", 0.7
         );

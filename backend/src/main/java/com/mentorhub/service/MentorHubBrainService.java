@@ -174,9 +174,33 @@ public class MentorHubBrainService {
         return sb.toString().trim();
     }
 
-    /**
-     * Intelligent local semantic brain response generator for offline fallback mode.
-     * Accurately answers questions about MentorHub, CUTM courses, faculty, and coding.
+    public String getConciseBrainSystemPrompt(String username) {
+        return """
+            You are MentorHub AI Assistant, the intelligent mentor for Centurion University of Technology and Management (C.U.T.M.).
+            University Nomenclature: Always pronounce C.U.T.M. as 'C. U. T. M.' or 'Centurion University'. Never pronounce it as a single word.
+            Constituent Schools: School of Engineering & Technology (SoET), School of Management & Commerce (SoMC), M.S. Swaminathan School of Agriculture (MSSSoA), School of Paramedics & Allied Health Sciences (SoPAHS), School of Applied Sciences (SoAS), Centurion Center for Action Learning (CCAL).
+            Key Faculty: Mr. Manoj Padhi (Enterprise Java 21, Advanced Java, Angular), Prof. Sangram Routray (Data Structures, Advanced Information Security, AI & Deep Learning), Dr. Sujata Chakravarty (Database Systems, Data Science), Dr. Bhairaba Kumar Majhi (Applied Mathematics & Statistics), Dr. Padmaja Patnaik (Quantum Physics), Dr. Pramod Kumar Patjoshi (Technology Entrepreneurship, Accounting), Saban Kumar Maharana (Action Learning & Skill Certification), Susmita Chakrabarty (Hematology & Biochemistry).
+            Rules:
+            1. Keep responses concise, direct, and limited to 2-3 short lines or bullet points when requested.
+            2. When the user asks about what is on their screen, examine the provided screen context or screenshot carefully and explain exactly what is displayed.
+            3. Answer in the same language the user uses.
+            """.trim();
+    }
+
+    private boolean containsWord(String text, String word) {
+        if (text == null || word == null) return false;
+        return text.matches(".*\\b" + java.util.regex.Pattern.quote(word) + "\\b.*");
+    }
+
+    private String cleanScreenSummary(String screenContext) {
+        if (screenContext == null) return "You are viewing your active MentorHub workspace.";
+        String clean = screenContext.replaceAll("[\\r\\n]+", " ").trim();
+        if (clean.length() > 200) {
+            clean = clean.substring(0, 200) + "...";
+        }
+        return "You are currently viewing: " + clean + " You can interact with the elements on screen or ask me to assist with your active task.";
+    }
+
     public String generateIntelligentResponse(String query) {
         return generateIntelligentResponse(query, null);
     }
@@ -190,36 +214,33 @@ public class MentorHubBrainService {
         String q = query.trim().toLowerCase();
 
         // 0. Screen Perception & Active Visual Context
-        if (screenContext != null && !screenContext.trim().isEmpty()) {
-            boolean isAskingAboutScreen = q.contains("screen") || q.contains("looking at") || q.contains("see") ||
-                    q.contains("page") || q.contains("view") || q.contains("read") || q.contains("what is this") ||
-                    q.contains("explain this") || q.contains("tell me about this") || q.contains("what am i") ||
-                    q.contains("help me with this") || q.contains("analyze") || q.contains("what should i");
+        boolean isAskingAboutScreen = q.contains("screen") || q.contains("looking at") || q.contains("see") ||
+                q.contains("page") || q.contains("view") || q.contains("read screen") || q.contains("what is this") ||
+                q.contains("explain this") || q.contains("tell me about this") || q.contains("what am i") ||
+                q.contains("help me with this") || q.contains("analyze") || q.contains("what should i");
 
-            if (isAskingAboutScreen) {
-                if (screenContext.contains("cutm-courses") || screenContext.contains("Courseware Repository")) {
-                    return "Looking at your active screen: You are currently browsing the Centurion University (C.U.T.M.) Courseware Repository. " +
-                            "I can see the course catalog cards and category filters displayed in your viewport. " +
-                            "You can click on any course to explore its syllabus modules or view official courseware slides.";
-                } else if (screenContext.contains("workspace") || screenContext.contains("Collaborative Code Workspace")) {
-                    return "Examining your active screen: You are inside the Collaborative Code Workspace. " +
-                            "I can see your active code editor and compiler terminal. " +
-                            "You can write and compile your code in real-time across Java, Python, C++, TypeScript, or Go using our Piston engine, or design architecture on the collaborative whiteboard.";
-                } else if (screenContext.contains("mock-viva") || screenContext.contains("Viva Defense")) {
-                    return "Analyzing your active screen: You are in the AI Mock Viva Defense Arena. " +
-                            "I can see your active examination panel and viva questions on screen. " +
-                            "Speak your response or type into the answer scratchpad to receive real-time scoring on Conceptual Depth, Technical Precision, and Academic Articulation.";
-                } else if (screenContext.contains("goals")) {
-                    return "Reviewing your active screen: You are on the SMART Goals Tracker. " +
-                            "I can see your active milestone targets and progress telemetry. " +
-                            "Continue checking off your milestone objectives to advance your academic portfolio.";
-                } else if (screenContext.contains("certificate")) {
-                    return "Inspecting your active screen: You are viewing the Verified Credentials portal. " +
-                            "The completion certificates shown on screen are cryptographically signed with tamper-proof SHA-256 hashes issued under Senior Mentor Akshat Aryan.";
-                } else if (screenContext.contains("dashboard")) {
-                    return "Scanning your screen: You are on the Executive Dashboard. " +
-                            "I can see your platform metrics, upcoming 1-on-1 mentoring sessions, and current course progress summary.";
+        if (isAskingAboutScreen) {
+            if (screenContext != null && !screenContext.trim().isEmpty()) {
+                String sc = screenContext.toLowerCase();
+                if (sc.contains("cutm-courses") || sc.contains("courseware")) {
+                    return "Looking at your active screen: You are browsing the Centurion University (C.U.T.M.) Courseware Repository with course catalog cards and category filters. You can click any course card to inspect its syllabus modules and official courseware slides.";
+                } else if (sc.contains("workspace") || sc.contains("collaborative")) {
+                    return "Looking at your active screen: You are in the Collaborative Cloud IDE. The code editor and live compiler terminal are ready for Java, Python, C++, TypeScript, or Go practice.";
+                } else if (sc.contains("goals")) {
+                    return "Looking at your active screen: You are viewing the SMART Goals Tracker displaying your academic milestones and progress telemetry.";
+                } else if (sc.contains("certificate")) {
+                    return "Looking at your active screen: You are on the Verified Credentials portal viewing tamper-proof completion certificates signed with cryptographic SHA-256 hashes.";
+                } else if (sc.contains("learning-path") || sc.contains("roadmap")) {
+                    return "Looking at your active screen: You are on the Academic Learning Path module, visualizing personalized milestones and semester roadmaps.";
+                } else if (sc.contains("sessions") || sc.contains("calendar")) {
+                    return "Looking at your active screen: You are in the Mentoring Sessions Hub, showing upcoming 1-on-1 calls, calendar agendas, and peer review sessions.";
+                } else if (sc.contains("dashboard")) {
+                    return "Looking at your active screen: You are on the Executive Dashboard viewing platform metrics, upcoming 1-on-1 mentoring sessions, and current course progress summary.";
+                } else {
+                    return cleanScreenSummary(screenContext);
                 }
+            } else {
+                return "Looking at your active screen in MentorHub AI: You have the AI Assistant interface open with quick action shortcuts (My Roadmap, Java & Backend, Read Screen, Code IDE, My Goals, CUTM Courses) and the prompt bar for continuous text and live voice interaction.";
             }
         }
 
@@ -252,7 +273,7 @@ public class MentorHubBrainService {
                     """.trim();
             }
 
-            if (q.contains("paramedic") || q.contains("health") || q.contains("allied health") || q.contains("mri") || q.contains("hematology")) {
+            if (q.contains("paramedic") || q.contains("allied health") || q.contains("mri") || q.contains("hematology")) {
                 return """
                     ### 🏥 School of Paramedics & Allied Health Sciences (SoPAHS) — C.U.T.M.
                     Centurion University's Paramedical programs focus on advanced hospital diagnostics and emergency care:
@@ -265,7 +286,7 @@ public class MentorHubBrainService {
                     """.trim();
             }
 
-            if (q.contains("management") || q.contains("commerce") || q.contains("mba") || q.contains("bba") || q.contains("retail") || q.contains("marketing")) {
+            if (containsWord(q, "management") || containsWord(q, "commerce") || containsWord(q, "mba") || containsWord(q, "bba") || containsWord(q, "retail") || containsWord(q, "marketing")) {
                 return """
                     ### 📈 School of Management & Commerce (SoMC) — C.U.T.M.
                     Centurion University offers industry-driven management, finance, and startup incubation:
@@ -281,9 +302,9 @@ public class MentorHubBrainService {
         } catch (Exception ignored) {}
 
         // 0. Path Planning, Problem Solving & App Navigation Engine
-        if (q.contains("path") || q.contains("roadmap") || q.contains("what should i do") || q.contains("guide me") ||
-                q.contains("where should i go") || q.contains("how do i start") || q.contains("navigate me") || q.contains("plan") ||
-                q.contains("journey") || q.contains("steps")) {
+        if (q.contains("roadmap") || q.contains("what should i do") || q.contains("guide me") ||
+                q.contains("where should i go") || q.contains("how do i start") || q.contains("navigate me") ||
+                containsWord(q, "path") || containsWord(q, "plan") || containsWord(q, "steps") || containsWord(q, "journey")) {
             return """
                 ### 🎯 Your Personalized MentorHub Academic Pathway
                 I have analyzed your situation and prepared an actionable 5-step roadmap across Centurion University's ecosystem:
@@ -301,7 +322,8 @@ public class MentorHubBrainService {
         }
 
         // 1. Academic & Syllabus Preparation
-        if (q.contains("syllabus") || q.contains("exam") || q.contains("study") || q.contains("module") || q.contains("lesson")) {
+        if (q.contains("syllabus") || containsWord(q, "exam") || containsWord(q, "exams") || containsWord(q, "study") ||
+                containsWord(q, "module") || containsWord(q, "modules") || containsWord(q, "lesson")) {
             return """
                 ### 📚 Centurion University Academic Mastery Path
                 To master your semester curriculum with authentic C.U.T.M. resources:
@@ -317,7 +339,7 @@ public class MentorHubBrainService {
         }
 
         // 2. Java / Object-Oriented & Backend Engineering
-        if (q.contains("java") || q.contains("oop") || q.contains("spring") || q.contains("backend")) {
+        if (containsWord(q, "java") || containsWord(q, "oop") || containsWord(q, "spring") || containsWord(q, "backend")) {
             return """
                 ### ☕ Java & Enterprise Backend Mastery Path
                 To master Java 21, Spring Boot 3 microservices, and reactive backend architecture:
@@ -332,8 +354,11 @@ public class MentorHubBrainService {
                 """.trim();
         }
 
-        // 3. AI, Machine Learning & Python Track
-        if (q.contains("ai") || q.contains("machine learning") || q.contains("python") || q.contains("deep learning") || q.contains("data science")) {
+        // 3. AI, Machine Learning & Python Track (FIXED: Uses containsWord to prevent matching 'explain', etc.)
+        if (containsWord(q, "ai") || q.contains("artificial intelligence") ||
+                q.contains("machine learning") || q.contains("deep learning") ||
+                q.contains("data science") || containsWord(q, "ml") ||
+                containsWord(q, "python")) {
             return """
                 ### 🧠 Artificial Intelligence & Machine Learning Track
                 To build production-grade ML models and advance in data science:
@@ -349,7 +374,8 @@ public class MentorHubBrainService {
         }
 
         // 4. Cloud Computing, DevOps & Microservices Track
-        if (q.contains("cloud") || q.contains("devops") || q.contains("docker") || q.contains("kubernetes") || q.contains("aws")) {
+        if (containsWord(q, "cloud") || containsWord(q, "devops") || containsWord(q, "docker") ||
+                containsWord(q, "kubernetes") || containsWord(q, "aws")) {
             return """
                 ### ☁️ Cloud Computing & DevOps Engineering Pathway
                 Here is your path to mastering containerization, Kubernetes clusters, and cloud-native architecture:
@@ -370,27 +396,27 @@ public class MentorHubBrainService {
         }
 
         // 6. Questions about Scholars / Mentees
-        if (q.contains("kriti") || q.contains("pavani") || q.contains("vanaja") || q.contains("mentee") || q.contains("scholar") || q.contains("students")) {
+        if (q.contains("kriti") || q.contains("pavani") || q.contains("vanaja") || containsWord(q, "mentee") || containsWord(q, "scholar") || containsWord(q, "students")) {
             return "MentorHub's active scholars are Kriti Sagar, who focuses on Computer Science & AI models; Pavani, who works on Cloud Computing and Reactive Full-Stack architecture; and Vanaja, specializing in Data Analytics and Cyber Security. You can view student goals and progress at [🎯 SMART Goals](navigate:/goals).";
         }
 
         // 7. Questions about C.U.T.M. Courses & Courseware
-        if (q.contains("course") || q.contains("cutm") || q.contains("courseware") || q.contains("basket") || q.contains("curriculum") || q.contains("syllabus") || q.contains("faculty")) {
+        if (containsWord(q, "course") || containsWord(q, "courses") || q.contains("cutm") || q.contains("courseware") || containsWord(q, "basket") || q.contains("curriculum") || q.contains("syllabus") || containsWord(q, "faculty")) {
             return "The C.U.T.M. Courses section integrates 385 authentic Centurion University courses directly from the official Courseware portal at courseware.cutm.ac.in. It spans 6 classifications: Core, Domain, Skill, Certificate, Advanced Certificate, and Diploma, alongside the 5 CBCS Baskets. It features over 185 faculty instructors like Dr. Pramod Kumar Patjoshi, Mr. Manoj Padhi, Dr. Sujata Chakravarty, and Prof. Sangram Routray, with direct links to session plans, slides, and syllabus modules. Tap [🏛️ Explore 385 C.U.T.M. Courses](navigate:/cutm-courses) to browse.";
         }
 
         // 8. Questions about Collaborative Workspace
-        if (q.contains("workspace") || q.contains("code") || q.contains("compiler") || q.contains("piston") || q.contains("whiteboard") || q.contains("editor")) {
+        if (containsWord(q, "workspace") || containsWord(q, "code") || containsWord(q, "compiler") || containsWord(q, "piston") || containsWord(q, "whiteboard") || containsWord(q, "editor")) {
             return "The Collaborative Workspace at [💻 Open Code Workspace](navigate:/workspace) is our cloud IDE. It supports multi-language syntax highlighting and remote compilation for Java, Python, C++, TypeScript, and Go via the Piston engine. It also features a real-time synchronized whiteboard canvas, live peer cursor tracking, and instant chat over WebSockets.";
         }
 
         // 9. Questions about Certificates
-        if (q.contains("certificate") || q.contains("verify") || q.contains("credential") || q.contains("cert")) {
+        if (containsWord(q, "certificate") || containsWord(q, "certificates") || containsWord(q, "verify") || containsWord(q, "credential") || containsWord(q, "cert")) {
             return "MentorHub issues cryptographically verified completion certificates with tamper-proof identification codes like MH-CERT-9921-X. Anyone can verify certificate authenticity publicly by visiting [📜 Verified Credentials](navigate:/certificates).";
         }
 
         // 10. Questions about Goals or Sessions
-        if (q.contains("goal") || q.contains("session") || q.contains("meeting") || q.contains("calendar")) {
+        if (containsWord(q, "goal") || containsWord(q, "goals") || containsWord(q, "session") || containsWord(q, "sessions") || containsWord(q, "meeting") || containsWord(q, "calendar")) {
             return "You can track your milestone achievements in the [🎯 SMART Goals Tracker](navigate:/goals), and schedule or join 1-on-1 and group mentoring sessions with video room links in the [📅 Mentoring Sessions Hub](navigate:/sessions).";
         }
 
