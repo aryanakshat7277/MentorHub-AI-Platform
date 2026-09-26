@@ -27,7 +27,7 @@ export class ProofPortfolioComponent implements OnInit {
     { username: 'akshat', label: 'Akshat Aryan (Lead Mentor)' },
     { username: 'pavani', label: 'Pavani (Scholar)' },
     { username: 'kriti-sagar', label: 'Kriti Sagar (Mentee)' },
-    { username: 'vanaja', label: 'Vanaja (AI Engineer)' }
+    { username: 'vanaja', label: 'Vanaja (Security Engineer)' }
   ];
 
   constructor(
@@ -88,9 +88,9 @@ export class ProofPortfolioComponent implements OnInit {
         signatureHash: '8a1f3c7e9d0b2a4f6e8d1c3b5a7f9e0d2c4b6a8f1e3d5c7b9a0f2e4d6c8b0a1f',
         profile: {
           name: 'Akshat Aryan',
-          title: 'Senior Mentor & Principal AI & Full-Stack Architect',
-          company: 'Centurion University (CUTM) • MentorHub AI Platform',
-          bio: 'Principal Full-Stack & AI Systems Architect. Designed the Spring Boot 3 distributed backend, Gemini 3.1 Live bidirectional neural voice streaming engine, and cryptographic verification core.',
+          title: 'Senior Mentor & Principal Software Architect',
+          company: 'Centurion University (CUTM) • MentorHub Platform',
+          bio: 'Principal Software Architect. Designed the Spring Boot 3 distributed backend, real-time voice streaming engine, and cryptographic verification core.',
           avatarUrl: 'assets/akshat-profile.jpg',
           xpPoints: 9850,
           streak: 88,
@@ -106,12 +106,12 @@ export class ProofPortfolioComponent implements OnInit {
         },
         conqueredQuests: [
           { index: '01', title: 'Java 21 Virtual Threads & High-Concurrency Core', zone: 'Architecture Core', date: 'Jul 2026', badge: '☕ Principal JVM Architect' },
-          { index: '02', title: 'Gemini 3.1 Flash Live Bidirectional Voice Engine', zone: 'AI Citadel', date: 'Aug 2026', badge: '🎙️ Multimodal Pioneer' },
+          { index: '02', title: 'Gemini 3.1 Flash Live Bidirectional Voice Engine', zone: 'Citadel Core', date: 'Aug 2026', badge: '🎙️ Multimodal Pioneer' },
           { index: '03', title: 'Distributed WebSocket IDE & Piston Code Sandbox', zone: 'Citadel Core', date: 'Sep 2026', badge: '💻 Distributed Systems Lead' },
           { index: '04', title: 'Ed25519 Cryptographic Credential Verification', zone: 'Trust Vault', date: 'Sep 2026', badge: '👑 Master Architect' }
         ],
         verifiedGoals: [
-          { title: 'Build Sub-200ms Bidirectional AI Voice Mentorship Pipeline', category: 'AI Infrastructure', targetDate: 'Aug 2026' },
+          { title: 'Build Sub-200ms Bidirectional Voice Mentorship Pipeline', category: 'Voice Infrastructure', targetDate: 'Aug 2026' },
           { title: 'Integrate 385+ CUTM University Courses & CBCS Baskets', category: 'Academic Systems', targetDate: 'Sep 2026' },
           { title: 'Coach 45+ Engineering Mentees to Production Mastery', category: 'Leadership', targetDate: 'Sep 2026' }
         ],
@@ -125,7 +125,7 @@ export class ProofPortfolioComponent implements OnInit {
           {
             mentorName: 'Dr. Pramod Kumar Patjoshi',
             mentorRole: 'Senior Faculty, CUTM • 100% Distinction',
-            endorsement: 'Exemplary technical leadership, combining production-grade AI systems engineering with rigorous university curriculum alignment.',
+            endorsement: 'Exemplary technical leadership, combining production-grade systems engineering with rigorous university curriculum alignment.',
             endorsedAt: 'September 2026'
           }
         ]
@@ -136,7 +136,7 @@ export class ProofPortfolioComponent implements OnInit {
         profile: {
           name: 'Pavani',
           title: 'Cloud Computing & Reactive Full-Stack Scholar',
-          company: 'Centurion University (CUTM) • MentorHub AI',
+          company: 'Centurion University (CUTM) • MentorHub',
           bio: 'Senior scholar specializing in Angular 17 reactive signal architectures, Spring Boot 3 microservices, and real-time distributed web systems.',
           avatarUrl: 'assets/pavani-profile.jpg',
           xpPoints: 3250,
@@ -165,7 +165,7 @@ export class ProofPortfolioComponent implements OnInit {
         endorsements: [
           {
             mentorName: 'Akshat Aryan',
-            mentorRole: 'Principal AI & Full-Stack Architect • 99% Match',
+            mentorRole: 'Principal Software Architect • 99% Match',
             endorsement: 'Pavani engineered reactive UI states and WebSocket synchronization with outstanding architectural precision and zero latency.',
             endorsedAt: 'September 2026'
           },
@@ -212,7 +212,7 @@ export class ProofPortfolioComponent implements OnInit {
         endorsements: [
           {
             mentorName: 'Akshat Aryan',
-            mentorRole: 'Principal AI & Full-Stack Architect • 98% Match',
+            mentorRole: 'Principal Software Architect • 98% Match',
             endorsement: 'Kriti possesses deep mathematical intuition for gradient optimization, vector indexing, and modern transformer architectures.',
             endorsedAt: 'September 2026'
           },
@@ -259,7 +259,7 @@ export class ProofPortfolioComponent implements OnInit {
         endorsements: [
           {
             mentorName: 'Akshat Aryan',
-            mentorRole: 'Principal AI & Full-Stack Architect • 98% Match',
+            mentorRole: 'Principal Software Architect • 98% Match',
             endorsement: 'Vanaja’s mastery of cryptographic primitives, event streaming, and API security hardening is top-tier.',
             endorsedAt: 'September 2026'
           },

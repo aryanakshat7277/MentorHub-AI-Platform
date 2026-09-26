@@ -32,7 +32,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   allMenuItems: MenuItem[] = [
     { label: 'Dashboard', route: '/dashboard', icon: '📊' },
     { label: 'Admin Deck', route: '/admin-dashboard', icon: '🛡️' },
-    { label: 'AI Matching', route: '/mentor-matching', icon: '⚡' },
+    { label: 'Mentor Matching', route: '/mentor-matching', icon: '⚡' },
     { label: 'Sessions', route: '/sessions', icon: '📅' },
     { label: 'Live Workspace', route: '/workspace', icon: '💻' },
     { label: 'CUTM Courses', route: '/cutm-courses', icon: '🏛️', imgIcon: 'assets/cutm-seal.svg' },

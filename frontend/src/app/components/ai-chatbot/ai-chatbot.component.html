@@ -20,7 +20,7 @@
         <div class="title-info">
           <h3 class="serif-title">
             <span class="gold-foil-text">MENTORHUB</span>
-            <span class="gemini-gradient-text"> AI ASSISTANT</span>
+            <span class="gemini-gradient-text"> ASSISTANT</span>
           </h3>
           <div class="status-indicator">
             <span class="online-dot" [class.live-active]="isLiveVoiceActive"></span>
@@ -41,7 +41,7 @@
           {{ isMaximized ? '🗗' : '🗖' }}
         </button>
 
-        <button class="action-icon-btn close-btn tactile-btn-3d" (click)="close()" title="Close AI Assistant">
+        <button class="action-icon-btn close-btn tactile-btn-3d" (click)="close()" title="Close Assistant">
           ✕
         </button>
       </div>
@@ -128,7 +128,7 @@
     <!-- Interrupt Action Control -->
     <div class="live-controls-row">
       <button class="live-interrupt-btn tactile-btn-3d serif-title" *ngIf="isSpeakingAudio" (click)="triggerBargeInInterruption()">
-        ⚡ INTERRUPT AI
+        ⚡ INTERRUPT
       </button>
       <button class="live-stop-btn tactile-btn-3d serif-title" (click)="endLiveVoice()">
         ⏹️ END VOICE SESSION
@@ -152,7 +152,7 @@
                 <span *ngIf="msg.sender === 'ai'" class="gemini-sparkle-mini">✨</span>
               </div>
               <span class="sender-tag serif-title">
-                {{ msg.sender === 'ai' ? 'MENTORHUB AI ASSISTANT' : 'YOU' }}
+                {{ msg.sender === 'ai' ? 'MENTORHUB ASSISTANT' : 'YOU' }}
               </span>
               <span class="mode-badge 3d-inset-well serif-title" [class.voice-mode]="msg.mode === 'VOICE'">
                 {{ msg.mode === 'VOICE' ? '🎙️ VOICE' : '💬 TEXT' }}

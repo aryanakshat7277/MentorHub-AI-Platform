@@ -1,4 +1,4 @@
-﻿<aside class="gesture-hud-container" *ngIf="isEnabled" [class.minimized]="isMinimized" aria-label="Hand Gesture HUD Control Deck">
+<aside class="gesture-hud-container" *ngIf="isEnabled" [class.minimized]="isMinimized" aria-label="Hand Gesture HUD Control Deck">
   <!-- Toast Notification Pill for Fired Gestures -->
   <div class="gesture-toast-pill" *ngIf="recentFeedback" [class.burst-toast]="recentFeedback.gesture === 'PINCH_CLICK'">
     <span class="toast-emoji">{{ recentFeedback.emoji }}</span>
@@ -11,7 +11,7 @@
     <div class="hud-header">
       <div class="hud-title-group">
         <span class="hud-status-beacon" [class.active]="isCameraReady"></span>
-        <span class="hud-title serif-title">GESTURE AI</span>
+        <span class="hud-title serif-title">GESTURE CONTROL</span>
         <span class="hud-badge" [class.scrolling]="currentGesture === 'SCROLL'" [class.clicking]="currentGesture === 'PINCH_CLICK'">
           {{ currentGesture === 'SCROLL' ? 'SCROLL MODE' : (currentGesture === 'PINCH_CLICK' ? 'CLICK' : (currentGesture === 'NAV_DOT' ? 'DOT NAV' : 'READY')) }}
         </span>

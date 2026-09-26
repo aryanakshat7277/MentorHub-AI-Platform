@@ -147,11 +147,11 @@
             {{ isEditorMaximized ? '🗗 Restore' : '🗖 Maximize' }}
           </button>
 
-          <!-- AI Auto-Complete (Inline Copilot trigger) -->
+          <!-- Code Auto-Complete (Inline Copilot trigger) -->
           <button class="ide-tool-btn copilot-pill tactile-btn-3d serif-title" 
                   (click)="triggerAutocomplete(true)" 
                   [disabled]="isCompleting || isSpectator" 
-                  title="AI Code Auto-Completion (Shortcut: Tab or Alt+\)">
+                  title="Code Auto-Completion (Shortcut: Tab or Alt+\)">
             <span>{{ isCompleting ? '⏳ Thinking...' : '✨ Copilot' }}</span>
           </button>
 
@@ -169,7 +169,7 @@
                   [class.fixing]="isAutoFixing"
                   (click)="triggerAutoFix()" 
                   [disabled]="isAutoFixing || isSpectator" 
-                  title="Diagnose & Auto-Fix Error with Priority AI">
+                  title="Diagnose & Auto-Fix Error">
             <span>{{ isAutoFixing ? '⏳ Diagnosing...' : '🛠️ Fix Error' }}</span>
           </button>
 
@@ -186,18 +186,18 @@
 
       <!-- High-Contrast Syntax Highlighting Code Editor -->
       <div class="code-editor-wrapper debossed-track">
-        <!-- AI Notification & Copilot Sticky Banners -->
+        <!-- Notification & Suggestion Sticky Banners -->
         <div class="editor-ai-banner autofix-in-progress" *ngIf="isAutoFixing">
           <span class="pulse-beacon"></span>
-          <span class="banner-title serif-title">🛠️ AI COPILOT ANALYZING ERROR:</span>
+          <span class="banner-title serif-title">🛠️ ANALYZING ERROR:</span>
           <span class="banner-desc serif-title">{{ autoFixStatusMsg }}</span>
         </div>
 
-        <!-- VS Code Copilot Ghost Suggestion Preview Pill -->
+        <!-- Ghost Suggestion Preview Pill -->
         <div class="editor-ai-banner ghost-suggestion-banner" *ngIf="showGhostSuggestion && ghostSuggestion">
           <div class="banner-left">
             <div class="ghost-badge-row">
-              <span class="ghost-badge">✨ AI AUTO-COMPLETE ({{ copilotProvider }} {{ copilotModel }} • {{ copilotLatency }}ms)</span>
+              <span class="ghost-badge">✨ AUTO-COMPLETE ({{ copilotProvider }} {{ copilotModel }} • {{ copilotLatency }}ms)</span>
               <span class="ghost-sub">Press <strong>Tab</strong> to Accept, <strong>Esc</strong> to Dismiss</span>
             </div>
             <pre class="ghost-code-preview"><code>{{ ghostSuggestion }}</code></pre>
@@ -210,14 +210,14 @@
 
         <!-- Main Editor Body (Row: Left Gutter + Right Code Surface) -->
         <div class="editor-core-body">
-          <!-- Line Numbers Gutter Bar with AI Fixed Line Badges -->
+          <!-- Line Numbers Gutter Bar with Fixed Line Badges -->
           <div class="gutter-column" #gutterCol (click)="focusTextarea()">
             <span *ngFor="let num of lineNumbers" 
                   class="line-number" 
                   [class.fixed-line]="isLineFixed(num)"
-                  [title]="isLineFixed(num) ? 'AI Auto-Fixed Line' : 'Line ' + num">
+                  [title]="isLineFixed(num) ? 'Auto-Fixed Line' : 'Line ' + num">
               {{ num }}
-              <span *ngIf="isLineFixed(num)" class="fixed-line-dot" title="AI Fixed Line">✨</span>
+              <span *ngIf="isLineFixed(num)" class="fixed-line-dot" title="Fixed Line">✨</span>
             </span>
           </div>
 
@@ -238,7 +238,7 @@
                       (click)="onEditorScroll($event)"
                       class="code-textarea" 
                       spellcheck="false" 
-                      [placeholder]="isSpectator ? 'Observing code live in Silent Co-Pilot Spectator mode...' : 'Write code here (Press Tab or Alt+\\ for AI completion)...'"></textarea>
+                      [placeholder]="isSpectator ? 'Observing code live in Silent Co-Pilot Spectator mode...' : 'Write code here (Press Tab or Alt+\\ for autocomplete)...'"></textarea>
           </div>
         </div>
       </div>
@@ -269,14 +269,14 @@
             <button class="term-tab stdin-tab tactile-btn-3d serif-title" [class.active]="terminalTab === 'stdin'" (click)="terminalTab = 'stdin'">
               ⌨️ STDIN INPUT
             </button>
-            <!-- AI Diagnosis & Auto-Fix Tab -->
+            <!-- Diagnosis & Auto-Fix Tab -->
             <button *ngIf="hasActiveError || lastAutoFixResult || isAutoFixing" 
                     class="term-tab autofix-tab tactile-btn-3d serif-title" 
                     [class.active]="terminalTab === 'autofix'" 
                     [class.pulsing-alert]="hasActiveError && !lastAutoFixResult && !isAutoFixing"
                     (click)="onAutoFixTabClick()">
               <span *ngIf="isAutoFixing">⏳ ANALYZING...</span>
-              <span *ngIf="!isAutoFixing && lastAutoFixResult">🛠️ AI DIAGNOSIS & FIX</span>
+              <span *ngIf="!isAutoFixing && lastAutoFixResult">🛠️ DIAGNOSIS & FIX</span>
               <span *ngIf="!isAutoFixing && !lastAutoFixResult">🛠️ DIAGNOSE & FIX</span>
               <span *ngIf="lastAutoFixResult" class="autofix-count-pill">1</span>
             </button>
@@ -307,7 +307,7 @@
             <div class="terminal-error-action-bar" *ngIf="stderrLogs.length > 0 && !lastAutoFixResult">
               <div class="error-action-info">
                 <span class="error-pulse-dot"></span>
-                <span class="error-action-text serif-title">Runtime error detected. Click button to diagnose root cause and repair code with AI:</span>
+                <span class="error-action-text serif-title">Runtime error detected. Click button to diagnose root cause and repair code:</span>
               </div>
               <button class="btn-terminal-autofix tactile-btn-3d serif-title" (click)="triggerAutoFix()" [disabled]="isAutoFixing">
                 <span>{{ isAutoFixing ? '⏳ Diagnosing Error...' : '🛠️ DIAGNOSE & FIX ERROR' }}</span>
@@ -322,7 +322,7 @@
             <div class="terminal-error-action-bar" *ngIf="compileOutputLogs.length > 0 && !lastAutoFixResult">
               <div class="error-action-info">
                 <span class="error-pulse-dot"></span>
-                <span class="error-action-text serif-title">Compilation error detected. Click button to diagnose root cause and repair code with AI:</span>
+                <span class="error-action-text serif-title">Compilation error detected. Click button to diagnose root cause and repair code:</span>
               </div>
               <button class="btn-terminal-autofix tactile-btn-3d serif-title" (click)="triggerAutoFix()" [disabled]="isAutoFixing">
                 <span>{{ isAutoFixing ? '⏳ Diagnosing Error...' : '🛠️ DIAGNOSE & FIX ERROR' }}</span>
@@ -332,16 +332,16 @@
             <p *ngIf="compileOutputLogs.length === 0" class="empty-log-msg">// Zero compilation errors recorded.</p>
           </ng-container>
 
-          <!-- AI Diagnosis & Auto-Fix Tab View -->
+          <!-- Diagnosis & Auto-Fix Tab View -->
           <div class="autofix-tab-view" *ngIf="terminalTab === 'autofix'">
             <!-- Prompt State (before user clicks diagnose) -->
             <div *ngIf="!isAutoFixing && !lastAutoFixResult" class="autofix-prompt-card clay-panel debossed-well">
               <div class="prompt-crest">🛠️</div>
               <div class="prompt-details">
-                <h4 class="serif-title">AI ERROR DIAGNOSIS & CODE REPAIR</h4>
-                <p class="serif-title">Error stack trace detected in execution. Click below to analyze root cause and generate an idiomatic fix.</p>
+                <h4 class="serif-title">ERROR DIAGNOSIS & CODE REPAIR</h4>
+                <p class="serif-title">Error stack trace detected in execution. Click below to analyze root cause and generate a fix.</p>
                 <button class="btn-primary btn-run-diagnosis tactile-btn-3d serif-title" (click)="triggerAutoFix()" [disabled]="isAutoFixing">
-                  <span>🛠️ RUN AI DIAGNOSIS & REPAIR CODE</span>
+                  <span>🛠️ RUN DIAGNOSIS & REPAIR CODE</span>
                 </button>
               </div>
             </div>
@@ -350,7 +350,7 @@
             <div *ngIf="isAutoFixing" class="autofix-loading-card">
               <div class="spinner-circle"></div>
               <div class="loading-info">
-                <h4 class="serif-title">🛠️ AI COPILOT DIAGNOSING & FIXING CODE...</h4>
+                <h4 class="serif-title">🛠️ DIAGNOSING & FIXING CODE...</h4>
                 <p class="serif-title">Priority 1: Groq LPU (qwen3.8-27b) ➔ Priority 2: Google Gemini Flash</p>
               </div>
             </div>
@@ -361,7 +361,7 @@
               <div class="report-header">
                 <div class="model-badge-info">
                   <span class="bolt-icon">⚡</span>
-                  <span class="model-title serif-title">DIAGNOSED & AUTO-FIXED BY {{ lastAutoFixResult.provider }} ({{ lastAutoFixResult.model }})</span>
+                  <span class="model-title serif-title">DIAGNOSED & FIXED ({{ lastAutoFixResult.provider }} {{ lastAutoFixResult.model }})</span>
                   <span class="latency-pill serif-title">{{ lastAutoFixResult.latencyMs }}ms</span>
                   <span class="applied-badge serif-title">✅ WRITTEN TO IDE</span>
                 </div>

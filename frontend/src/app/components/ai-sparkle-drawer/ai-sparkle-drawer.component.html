@@ -7,8 +7,8 @@
         <span class="seal-glyph">✨</span>
       </div>
       <div>
-        <h3 class="serif-title">MENTORHUB <span class="terracotta-text">AI ASSISTANT</span></h3>
-        <span class="sub-status serif-title">Gemini Neural Architecture Core Active</span>
+        <h3 class="serif-title">MENTORHUB <span class="terracotta-text">ASSISTANT</span></h3>
+        <span class="sub-status serif-title">Gemini Assistant Core Active</span>
       </div>
     </div>
     <button class="close-btn tactile-btn-3d" (click)="close()">✕</button>
@@ -18,7 +18,7 @@
     <div class="chat-messages list-stagger">
       <div *ngFor="let msg of messages" [class]="'chat-bubble ' + msg.sender + ' elevated-card-3d'">
         <div class="bubble-header">
-          <span class="sender-tag serif-title">{{ msg.sender === 'ai' ? '✨ GEMINI AI' : '👤 USER' }}</span>
+          <span class="sender-tag serif-title">{{ msg.sender === 'ai' ? '✨ GEMINI' : '👤 USER' }}</span>
           <span class="time-tag serif-title">{{ msg.time }}</span>
         </div>
         <p class="bubble-text serif-title">{{ msg.text }}</p>

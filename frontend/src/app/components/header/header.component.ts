@@ -53,7 +53,7 @@ export class HeaderComponent implements OnInit {
   notifications: NotificationItem[] = [
     { id: 1, title: 'Upcoming 1-on-1 Session with Kriti in 30 mins', time: 'Just now', read: false, type: 'SESSION', icon: '📅' },
     { id: 2, title: 'Goal Milestone Achieved: Backend Spring Boot (+150 XP)', time: '2 hours ago', read: false, type: 'XP', icon: '🏆' },
-    { id: 3, title: 'New 98% AI Match Mentor: Dr. Vanaja S. (AI Research)', time: '1 day ago', read: true, type: 'MATCH', icon: '✨' },
+    { id: 3, title: 'New 98% Match Mentor: Dr. Vanaja S. (Systems Research)', time: '1 day ago', read: true, type: 'MATCH', icon: '✨' },
     { id: 4, title: 'Certificate of Excellence generated & verified', time: '2 days ago', read: true, type: 'GOAL', icon: '🎓' }
   ];
 

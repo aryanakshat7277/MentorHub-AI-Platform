@@ -28,10 +28,10 @@ export class GamificationComponent implements OnInit {
   ngOnInit() {
     this.apiService.getLeaderboard().subscribe(data => {
       const rawList = data || [
-        { rank: 1, name: 'AKSHAT ARYAN', role: 'MENTOR', xpPoints: 4890, title: 'Principal AI & Full Stack Mentor' },
-        { rank: 2, name: 'KRITI SAGAR', role: 'MENTEE', xpPoints: 2450, title: 'Junior AI Engineer & Full Stack Mentee' },
+        { rank: 1, name: 'AKSHAT ARYAN', role: 'MENTOR', xpPoints: 4890, title: 'Principal Software Architect' },
+        { rank: 2, name: 'KRITI SAGAR', role: 'MENTEE', xpPoints: 2450, title: 'Junior Software Engineer' },
         { rank: 3, name: 'PAVANI', role: 'MENTEE', xpPoints: 2120, title: 'Full Stack & Cloud Mentee' },
-        { rank: 4, name: 'VANAJA', role: 'MENTEE', xpPoints: 1980, title: 'AI Systems & DevOps Mentee' }
+        { rank: 4, name: 'VANAJA', role: 'MENTEE', xpPoints: 1980, title: 'Cloud Systems & DevOps Mentee' }
       ];
 
       // Filter out duplicate user names so AKSHAT ARYAN appears ONLY ONCE

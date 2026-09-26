@@ -111,9 +111,9 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.bootProgress < 25) {
       return `DETECTING ROLE & VERIFYING ${this.detectedUserRole || 'USER'} CREDENTIALS...`;
     } else if (this.bootProgress < 50) {
-      return `LOADING ${this.detectedUserRole || 'NEURAL'} DASHBOARD & WORKSPACE MODULES...`;
+      return `LOADING ${this.detectedUserRole || 'PLATFORM'} DASHBOARD & WORKSPACE MODULES...`;
     } else if (this.bootProgress < 75) {
-      return `SYNCHRONIZING MENTORHUB AI MATCHING & WEBSOCKETS...`;
+      return `SYNCHRONIZING MENTORHUB MATCHING & WEBSOCKETS...`;
     } else if (this.bootProgress < 99) {
       return `AUTHENTICATION SUCCESSFUL — LAUNCHING APP...`;
     } else {

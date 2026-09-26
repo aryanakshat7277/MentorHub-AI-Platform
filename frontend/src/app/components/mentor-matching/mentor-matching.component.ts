@@ -45,14 +45,14 @@ export class MentorMatchingComponent implements OnInit {
           mentor: {
             id: 1,
             name: 'AKSHAT ARYAN',
-            title: 'Principal AI & Full Stack Mentor',
-            company: 'MetaLab Cybernetics',
-            bio: 'Principal AI & Full Stack Mentor specializing in Java 21, Spring Boot 3, Angular 17 Standalone Architecture, and Enterprise AI Systems.',
-            skills: 'Java 21, Spring Boot 3, Angular 17, WebSockets, Neural Search, Microservices Architecture',
+            title: 'Principal Software Architect',
+            company: 'MetaLab Systems',
+            bio: 'Principal Software Architect specializing in Java 21, Spring Boot 3, Angular 17 Standalone Architecture, and Enterprise Systems.',
+            skills: 'Java 21, Spring Boot 3, Angular 17, WebSockets, Distributed Systems, Microservices Architecture',
             avatarUrl: 'assets/akshat-profile.jpg'
           },
           compatibilityScore: 98,
-          skillOverlap: ['Java 21', 'Spring Boot 3', 'Angular 17', 'WebSockets', 'Neural Search', 'Microservices Architecture'],
+          skillOverlap: ['Java 21', 'Spring Boot 3', 'Angular 17', 'WebSockets', 'Distributed Systems', 'Microservices Architecture'],
           aiRecommendationReason: 'High overlap in Distributed Systems, Java 21, and Reactive Architecture.',
           availableSlots: ['Today at 16:00', 'Tomorrow at 14:30']
         },
@@ -60,9 +60,9 @@ export class MentorMatchingComponent implements OnInit {
           mentor: {
             id: 2,
             name: 'KRITI SAGAR',
-            title: 'Full Stack & Reactive AI Engineer',
+            title: 'Full Stack & Distributed Systems Engineer',
             company: 'Quantum Dynamics',
-            bio: 'Leading AI peer collaboration, full-stack microservices, reactive Spring Boot data streams, and software architecture.',
+            bio: 'Leading peer collaboration, full-stack microservices, reactive Spring Boot data streams, and software architecture.',
             skills: 'Spring Boot 3, Angular 17, Java 21, WebSockets, Python, C++',
             avatarUrl: 'assets/kriti-profile.jpg'
           },
@@ -94,15 +94,15 @@ export class MentorMatchingComponent implements OnInit {
           mentor: {
             id: 4,
             name: 'VANAJA',
-            title: 'AI Systems & Data Pipeline Engineer',
+            title: 'Data Systems & Pipeline Engineer',
             company: 'CyberSystems Labs',
-            bio: 'Engineering high-throughput asynchronous event brokers, Vector Database integration, and real-time Angular visualization.',
-            skills: 'AI Systems, Python, Spring Boot 3, Angular 17, PostgreSQL, Redis',
+            bio: 'Engineering high-throughput asynchronous event brokers, Database integration, and real-time Angular visualization.',
+            skills: 'Data Systems, Python, Spring Boot 3, Angular 17, PostgreSQL, Redis',
             avatarUrl: 'assets/vanaja-profile.jpg'
           },
           compatibilityScore: 89,
-          skillOverlap: ['AI Systems', 'Spring Boot 3', 'Angular 17', 'PostgreSQL'],
-          aiRecommendationReason: 'Strong synergy in Asynchronous Data Streaming and AI Pipeline Orchestration.',
+          skillOverlap: ['Data Systems', 'Spring Boot 3', 'Angular 17', 'PostgreSQL'],
+          aiRecommendationReason: 'Strong synergy in Asynchronous Data Streaming and Pipeline Orchestration.',
           availableSlots: ['Tomorrow at 18:00', 'Saturday at 12:00'],
           isRecharging: false
         }

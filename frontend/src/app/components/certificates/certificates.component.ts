@@ -225,7 +225,7 @@ for demonstrating exceptional technical capability, architectural mastery, and 1
 ✍️ CERTIFIED & AUDITED BY:
 👨‍🏫 MASTER MENTOR: ${mentor}
 DESIGNATION: Senior Software Architect & Master Mentor
-ORGANIZATION: MentorHub AI Engineering Academy
+ORGANIZATION: MentorHub Engineering Academy
 
 🛡️ OFFICIAL VERIFICATION METADATA:
 CERTIFICATE NUMBER: ${certNo}
@@ -454,7 +454,7 @@ VERIFICATION PORTAL: ${verifyUrl}
 
     ctx.font = '22px "Times New Roman", Times, serif';
     ctx.fillStyle = '#726650';
-    ctx.fillText('MentorHub AI Engineering Academy', 260, 1950);
+    ctx.fillText('MentorHub Engineering Academy', 260, 1950);
 
     // 17. Footer — Right Certificate ID & Cryptographic QR Block
     ctx.textAlign = 'right';
@@ -468,7 +468,7 @@ VERIFICATION PORTAL: ${verifyUrl}
     ctx.fillText(`Issue Date: ${cert.completionDate || '2026-07-10'}`, W - 260, 1915);
 
     ctx.font = '22px "Times New Roman", Times, serif'; ctx.fillStyle = '#8A6D2B';
-    ctx.fillText('mentorhub.ai/verify', W - 260, 1950);
+    ctx.fillText('mentorhub.io/verify', W - 260, 1950);
 
     // 18. Draw Cryptographic Verification QR Code (If Approved)
     if (cert.status === 'APPROVED' || cert.status === 'VALID') {
