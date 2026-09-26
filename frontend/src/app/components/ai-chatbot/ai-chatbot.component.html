@@ -77,6 +77,15 @@
           <span>{{ isScreenPerceptionActive ? '👁️ VISION' : '👁️ OFF' }}</span>
         </button>
 
+        <!-- External Screen (Outside App) Link Button -->
+        <button class="screen-external-pill-btn tactile-btn-3d serif-title" 
+                [class.active-mode]="isExternalScreenActive" 
+                (click)="toggleExternalScreen()" 
+                [title]="isExternalScreenActive ? 'External Screen LINKED (Gemini reads VS Code, Desktop, etc.). Click to disconnect.' : 'Link External Screen / Window outside this app for Gemini 3.1 Flash-Lite'">
+          <span class="external-pulse-dot" [class.active]="isExternalScreenActive"></span>
+          <span>{{ isExternalScreenActive ? '🖥️ OS LINKED' : '🖥️ LINK SCREEN' }}</span>
+        </button>
+
         <!-- Main Live Voice Toggle Button -->
         <button class="gemini-live-pill-btn tactile-btn-3d serif-title" 
                 [class.active-mode]="isLiveVoiceActive" 
@@ -239,15 +248,21 @@
     </div>
 
     <!-- Attached Visual Screen Snapshot Preview Chip -->
-    <div class="attached-screen-chip 3d-inset-well" *ngIf="attachedScreenSnapshot">
-      <div class="screen-thumb-preview">
+    <div class="attached-screen-chip 3d-inset-well" *ngIf="attachedScreenSnapshot || isExternalScreenActive">
+      <div class="screen-thumb-preview" *ngIf="attachedScreenSnapshot">
         <img [src]="attachedScreenSnapshot.dataUrl" alt="Screen Snapshot" />
       </div>
       <div class="screen-chip-info serif-title">
-        <span class="chip-route-title">🖼️ Screen: {{ attachedScreenSnapshot.route }}</span>
-        <span class="chip-sub-desc">Visual Snapshot Attached • Ready to analyze</span>
+        <span class="chip-route-title">
+          {{ isExternalScreenActive ? '🖥️ External Screen Linked (Outside Project)' : ('🖼️ Screen: ' + (attachedScreenSnapshot ? attachedScreenSnapshot.route : '')) }}
+        </span>
+        <span class="chip-sub-desc">
+          {{ isExternalScreenActive ? 'Gemini 3.1 Flash-Lite is reading live external window / desktop' : 'Visual Snapshot Attached • Ready to analyze' }}
+        </span>
       </div>
-      <button class="remove-chip-btn tactile-btn-3d" (click)="removeAttachedScreen()" title="Remove Screen Attachment">✕</button>
+      <button class="remove-chip-btn tactile-btn-3d" 
+              (click)="isExternalScreenActive ? toggleExternalScreen() : removeAttachedScreen()" 
+              [title]="isExternalScreenActive ? 'Disconnect External Screen' : 'Remove Screen Attachment'">✕</button>
     </div>
 
     <!-- Voice Listening Active Indicator Banner (Gemini 3.1 Flash-Lite) -->
@@ -271,6 +286,14 @@
                   rows="1" 
                   placeholder="Ask about your screen in text or tap 🎙️ to ask in voice..." 
                   class="chat-textarea serif-title"></textarea>
+
+        <!-- External Screen Link Button (Outside Project) -->
+        <button class="screen-external-btn tactile-btn-3d"
+                [class.active]="isExternalScreenActive"
+                (click)="toggleExternalScreen()"
+                [title]="isExternalScreenActive ? 'Disconnect External Screen (Currently linked)' : 'Share external screen / window (VS Code, terminal, etc.) with Gemini 3.1 Flash-Lite'">
+          <span>{{ isExternalScreenActive ? '🖥️' : '💻' }}</span>
+        </button>
 
         <!-- Capture Screen Snapshot Action Button -->
         <button class="screen-snap-btn tactile-btn-3d" 

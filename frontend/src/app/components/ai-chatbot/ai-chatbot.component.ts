@@ -43,6 +43,8 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   attachedScreenSnapshot: ScreenCaptureResult | null = null;
   isCapturingScreen = false;
   isScreenPerceptionActive = true;
+  isExternalScreenActive = false;
+  private externalScreenSub: Subscription | null = null;
 
   // Voice Question STT State (Speech to Text for Screen Q&A)
   isListeningForVoice = false;
@@ -73,6 +75,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   private tutorSub: Subscription | null = null;
 
   quickPrompts: { label: string; prompt: string; icon: string }[] = [
+    { icon: '🖥️', label: 'External Screen', prompt: 'Look at my active screen outside this app and explain what is open and what errors or code you see.' },
     { icon: '👁️', label: 'Explain Screen', prompt: 'Look at my current screen and explain what is displayed and what actions I should take.' },
     { icon: '📸', label: 'Analyze Screen', prompt: 'Read my active screen carefully and provide key insights or recommendations.' },
     { icon: '💻', label: 'Code Workspace', prompt: 'Inspect the code and compiler terminal on my screen and diagnose any issues.' },
@@ -85,7 +88,7 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       id: 'msg-1',
       sender: 'ai',
       avatar: 'AI',
-      text: '👋 **Hi! How can I help you today?**\nI am powered by **Gemini 3.1 Flash-Lite** with **Multimodal Screen Vision** and **Voice Intelligence**.\n\nAsk me anything in **voice** (tap 🎙️) or **text** about your current screen, code, or courses!',
+      text: '👋 **Hi! How can I help you today?**\nI am powered by **Gemini 3.1 Flash-Lite** with **Multimodal Screen Vision** and **Voice Intelligence**.\n\nAsk me anything in **voice** (tap 🎙️) or **text** about your current screen, code, or courses! You can also click **🖥️ LINK SCREEN** to let me read outside apps like VS Code or your desktop.',
       provider: 'GEMINI',
       model: 'gemini-3.1-flash-lite',
       mode: 'TEXT',
@@ -94,7 +97,10 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   ];
 
   async sendQuickPrompt(prompt: string) {
-    if (prompt.includes('Screen') || prompt.includes('screen')) {
+    if (prompt.includes('Screen') || prompt.includes('screen') || prompt.includes('outside')) {
+      if (prompt.includes('outside') && !this.isExternalScreenActive) {
+        await this.screenReader.startExternalScreenCapture();
+      }
       if (!this.attachedScreenSnapshot) {
         await this.captureScreenSnapshot();
       }
@@ -211,6 +217,11 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
       this.isSpeakingAudio = speaking;
       this.cdr.markForCheck();
     });
+
+    this.externalScreenSub = this.screenReader.isExternalScreenActive$.subscribe(active => {
+      this.isExternalScreenActive = active;
+      this.cdr.markForCheck();
+    });
   }
 
   getUserAvatarUrl(): string {
@@ -238,6 +249,7 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     if (this.userRmsSub) this.userRmsSub.unsubscribe();
     if (this.aiRmsSub) this.aiRmsSub.unsubscribe();
     if (this.speakingSub) this.speakingSub.unsubscribe();
+    if (this.externalScreenSub) this.externalScreenSub.unsubscribe();
     if (this.textChatSub) this.textChatSub.unsubscribe();
     if (this.voiceQuerySub) this.voiceQuerySub.unsubscribe();
     if (this.tutorSub) this.tutorSub.unsubscribe();
@@ -275,6 +287,23 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
   toggleScreenPerception() {
     this.isScreenPerceptionActive = this.screenReader.toggleScreenPerception();
     this.showToast(this.isScreenPerceptionActive ? '👁️ Screen Perception: Active' : '🚫 Screen Perception: Paused');
+  }
+
+  async toggleExternalScreen() {
+    if (this.isExternalScreenActive) {
+      this.screenReader.stopExternalScreenCapture();
+      this.showToast('🖥️ External screen disconnected');
+    } else {
+      this.showToast('🖥️ Select your window or screen to share with Gemini...');
+      const granted = await this.screenReader.startExternalScreenCapture();
+      if (granted) {
+        this.showToast('🟢 External Screen Linked! Gemini 3.1 Flash-Lite can now read outside apps.');
+        await this.captureScreenSnapshot();
+      } else {
+        this.showToast('⚠️ Screen sharing was cancelled or unavailable.');
+      }
+    }
+    this.cdr.detectChanges();
   }
 
   async captureScreenSnapshot() {
@@ -412,8 +441,18 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     this.isGenerating = true;
     this.scrollToBottom();
 
-    // Auto capture freshest screen view if not already attached
-    if (!this.attachedScreenSnapshot) {
+    // Auto prompt external screen capture if user is asking about windows/desktop outside project
+    const wantsExternal = /\b(outside|desktop|external|vs code|vscode|other window|another app|other tab|entire screen|my computer)\b/i.test(query);
+    if (wantsExternal && !this.isExternalScreenActive) {
+      this.showToast('🖥️ Requesting permission to read your external screen/window...');
+      const granted = await this.screenReader.startExternalScreenCapture();
+      if (!granted) {
+        this.showToast('⚠️ External screen permission needed to view outside windows.');
+      }
+    }
+
+    // Auto capture freshest screen view (always capture fresh frame if external screen is active for follow-up turns)
+    if (this.isExternalScreenActive || !this.attachedScreenSnapshot) {
       this.isCapturingScreen = true;
       try {
         this.attachedScreenSnapshot = await this.screenReader.captureScreen();
@@ -427,7 +466,9 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     const screenImg = this.attachedScreenSnapshot ? this.attachedScreenSnapshot.imageBase64 : undefined;
     let screenCtx = this.attachedScreenSnapshot ? this.attachedScreenSnapshot.semanticContext : undefined;
 
-    if (!screenCtx) {
+    if (this.isExternalScreenActive) {
+      screenCtx = `[EXTERNAL SCREEN ACTIVE] Visual feed captured from external OS window/desktop/application outside MentorHub. User is asking a direct or follow-up question regarding their external screen.\n` + (screenCtx || '');
+    } else if (!screenCtx) {
       const route = typeof window !== 'undefined' && window.location ? window.location.pathname : '/';
       screenCtx = this.screenReader.extractSemanticContext(route);
     }
@@ -671,8 +712,9 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
 
     // Route screen-targeted queries to Gemini 3.1 Flash-Lite multimodal reader
     const isScreenTargeted = this.isScreenPerceptionActive || 
+                             this.isExternalScreenActive ||
                              !!this.attachedScreenSnapshot ||
-                             /\b(screen|page|current view|what am i seeing|this tab|this view|what is on my screen|read screen|analyze screen)\b/i.test(query);
+                             /\b(screen|page|current view|what am i seeing|this tab|this view|what is on my screen|read screen|analyze screen|outside|desktop|external|window|vscode|vs code|terminal)\b/i.test(query);
 
     if (isScreenTargeted) {
       this.submitScreenQuery(query, false);

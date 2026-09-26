@@ -314,10 +314,9 @@ public class AiChatService {
             }
         }
 
-        String effectiveQuery = query;
-        if (screenContext != null && !screenContext.trim().isEmpty()) {
-            effectiveQuery = "[ACTIVE SCREEN CONTEXT - GEMINI 3.1 FLASH-LITE VISION]\n" + screenContext + "\n\n[USER QUESTION ABOUT SCREEN]\n" + query;
-        }
+        String effectiveQuery = (screenImage != null || (screenContext != null && !screenContext.trim().isEmpty()))
+                ? formatScreenPrompt(query, screenContext)
+                : query;
         userParts.add(Map.of("text", effectiveQuery));
 
         contents.add(Map.of(
@@ -452,10 +451,9 @@ public class AiChatService {
             }
         }
 
-        String effectiveQuery = query;
-        if (screenContext != null && !screenContext.trim().isEmpty()) {
-            effectiveQuery = "[ACTIVE SCREEN CONTEXT - GEMINI 3.1 FLASH-LITE VISION]\n" + screenContext + "\n\n[USER QUESTION ABOUT SCREEN]\n" + query;
-        }
+        String effectiveQuery = (screenImage != null || (screenContext != null && !screenContext.trim().isEmpty()))
+                ? formatScreenPrompt(query, screenContext)
+                : query;
         userParts.add(Map.of("text", effectiveQuery));
 
         contents.add(Map.of(
@@ -570,5 +568,24 @@ public class AiChatService {
      */
     private String buildInstantCopilotResponse(String query, String provider, String model, String screenContext) {
         return brainService.generateIntelligentResponse(query, screenContext);
+    }
+
+    /**
+     * Multimodal Prompt Formatter for Gemini 3.1 Flash-Lite
+     * Handles in-app workspaces as well as external desktop screens, VS Code, and other applications outside the project.
+     */
+    private String formatScreenPrompt(String query, String screenContext) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[MULTIMODAL SCREEN INTELLIGENCE - GEMINI 3.1 FLASH-LITE VISION]\n");
+        sb.append("You are inspecting the user's active screen in real-time. This visual capture may be an in-app workspace, or an external application outside this project (such as VS Code, external browser, terminal, PDF document, IDE, or OS desktop window).\n");
+        if (screenContext != null && !screenContext.trim().isEmpty()) {
+            sb.append("Screen Context: ").append(screenContext).append("\n");
+        }
+        sb.append("Analysis Guidelines:\n");
+        sb.append("1. Carefully examine all visual contents: visible code, line numbers, terminal output, error logs, UI elements, and text.\n");
+        sb.append("2. Answer the user's question directly and concisely based on what is shown on their screen.\n");
+        sb.append("3. For follow-up questions, maintain continuous reasoning across previous conversation turns and track changes on screen.\n\n");
+        sb.append("[USER QUESTION ABOUT SCREEN]\n").append(query);
+        return sb.toString();
     }
 }

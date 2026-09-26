@@ -20,6 +20,11 @@ export class AppScreenReaderService {
   public isCapturing$ = new BehaviorSubject<boolean>(false);
   public lastCapture$ = new BehaviorSubject<ScreenCaptureResult | null>(null);
 
+  // Live Screen Capture API Stream (Reads Entire Screen / Any Window outside the project)
+  public activeDisplayStream: MediaStream | null = null;
+  public isExternalScreenActive$ = new BehaviorSubject<boolean>(false);
+  private sharedVideoEl: HTMLVideoElement | null = null;
+
   constructor(
     private router: Router,
     private ngZone: NgZone
@@ -36,8 +41,136 @@ export class AppScreenReaderService {
   }
 
   /**
-   * Captures the visible application viewport and extracts semantic DOM context.
-   * Seamlessly renders the underlying main app content without drawer obstruction.
+   * Prompts user to share their Entire Screen, Window (e.g. VS Code, Terminal), or Browser Tab
+   * Allows Gemini 3.1 Flash-Lite to read screens outside of this project.
+   */
+  public async startExternalScreenCapture(): Promise<boolean> {
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      console.warn('Screen Capture API is not supported in this browser.');
+      return false;
+    }
+
+    try {
+      if (this.activeDisplayStream && this.activeDisplayStream.active) {
+        return true;
+      }
+
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          displaySurface: 'monitor',
+          cursor: 'always'
+        } as any,
+        audio: false
+      });
+
+      this.activeDisplayStream = stream;
+      this.isExternalScreenActive$.next(true);
+
+      const videoTrack = stream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.onended = () => {
+          this.stopExternalScreenCapture();
+        };
+      }
+
+      if (!this.sharedVideoEl && typeof document !== 'undefined') {
+        this.sharedVideoEl = document.createElement('video');
+        this.sharedVideoEl.muted = true;
+        this.sharedVideoEl.playsInline = true;
+      }
+      if (this.sharedVideoEl) {
+        this.sharedVideoEl.srcObject = stream;
+        await this.sharedVideoEl.play().catch(e => console.warn('Display video play warning:', e));
+      }
+
+      return true;
+    } catch (e) {
+      console.warn('Screen Capture permission cancelled or denied:', e);
+      this.isExternalScreenActive$.next(false);
+      return false;
+    }
+  }
+
+  public stopExternalScreenCapture(): void {
+    if (this.activeDisplayStream) {
+      this.activeDisplayStream.getTracks().forEach(t => t.stop());
+      this.activeDisplayStream = null;
+    }
+    if (this.sharedVideoEl) {
+      this.sharedVideoEl.srcObject = null;
+    }
+    this.isExternalScreenActive$.next(false);
+  }
+
+  public toggleExternalScreenCapture(): Promise<boolean> {
+    if (this.activeDisplayStream && this.activeDisplayStream.active) {
+      this.stopExternalScreenCapture();
+      return Promise.resolve(false);
+    } else {
+      return this.startExternalScreenCapture();
+    }
+  }
+
+  /**
+   * Grabs a high-definition frame from the active external Screen Capture stream
+   */
+  private async captureExternalStreamFrame(): Promise<ScreenCaptureResult | null> {
+    if (!this.activeDisplayStream || !this.activeDisplayStream.active) {
+      return null;
+    }
+
+    if (!this.sharedVideoEl && typeof document !== 'undefined') {
+      this.sharedVideoEl = document.createElement('video');
+      this.sharedVideoEl.muted = true;
+      this.sharedVideoEl.playsInline = true;
+    }
+
+    if (this.sharedVideoEl) {
+      if (this.sharedVideoEl.srcObject !== this.activeDisplayStream) {
+        this.sharedVideoEl.srcObject = this.activeDisplayStream;
+        await this.sharedVideoEl.play().catch(e => console.warn(e));
+      }
+
+      const video = this.sharedVideoEl;
+      const width = video.videoWidth || 1920;
+      const height = video.videoHeight || 1080;
+
+      const canvas = document.createElement('canvas');
+      let targetWidth = width;
+      let targetHeight = height;
+      const maxWidth = 1280;
+      if (width > maxWidth) {
+        const ratio = maxWidth / width;
+        targetWidth = maxWidth;
+        targetHeight = Math.round(height * ratio);
+      }
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+
+      ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      const pureBase64 = dataUrl.startsWith('data:image/jpeg;base64,') ? dataUrl.substring('data:image/jpeg;base64,'.length) : '';
+
+      return {
+        imageBase64: pureBase64,
+        imageMimeType: 'image/jpeg',
+        dataUrl,
+        route: 'External OS Screen / Any Window',
+        semanticContext: 'EXTERNAL ACTIVE SCREEN VIEW (OUTSIDE PROJECT): Real-time visual screen capture of user desktop, external IDE (e.g. VS Code), terminal, browser, or document outside this project.',
+        timestamp: Date.now()
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Captures the visible application viewport or live external desktop screen
+   * Reads visual snapshot and semantic DOM context.
    */
   public async captureScreen(): Promise<ScreenCaptureResult | null> {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -45,6 +178,20 @@ export class AppScreenReaderService {
     }
 
     this.isCapturing$.next(true);
+
+    // 1. If external screen capture is active, grab live external desktop/window frame directly!
+    if (this.activeDisplayStream && this.activeDisplayStream.active) {
+      try {
+        const externalResult = await this.captureExternalStreamFrame();
+        if (externalResult && externalResult.imageBase64 && externalResult.imageBase64.length > 50) {
+          this.isCapturing$.next(false);
+          this.lastCapture$.next(externalResult);
+          return externalResult;
+        }
+      } catch (err) {
+        console.warn('Failed capturing external frame, falling back to in-app capture:', err);
+      }
+    }
 
     // 1. Temporarily hide chat drawer overlay elements so snapshot captures the underlying screen
     const chatDrawer = document.querySelector('.chatbot-drawer') as HTMLElement | null;
