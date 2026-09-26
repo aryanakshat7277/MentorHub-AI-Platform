@@ -1,8 +1,8 @@
 .dashboard-page {
   display: flex;
   flex-direction: column;
-  gap: 30px;
-  padding-bottom: 80px;
+  gap: 20px;
+  padding-bottom: 50px;
 }
 
 /* ── LUXURY PORCELAIN LIGHT HERO BANNER ── */
@@ -10,17 +10,17 @@
   background: linear-gradient(135deg, #FFFFFF 0%, #FAF4EE 50%, #F5ECE3 100%);
   border: 1.5px solid rgba(214, 198, 183, 0.95);
   box-shadow:
-    0 14px 34px rgba(140, 110, 90, 0.12),
-    0 2px 8px rgba(140, 110, 90, 0.05),
+    0 10px 24px rgba(140, 110, 90, 0.1),
+    0 2px 6px rgba(140, 110, 90, 0.04),
     inset 0 2px 0 rgba(255, 255, 255, 0.95);
-  padding: 36px 44px;
+  padding: 18px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-hero);
-  min-height: 195px;
+  min-height: 120px;
   transition: box-shadow 0.35s ease, transform 0.35s ease;
 
   &::before {
@@ -40,20 +40,20 @@
 
   &:hover {
     box-shadow:
-      0 18px 44px rgba(140, 110, 90, 0.18),
-      0 4px 12px rgba(140, 110, 90, 0.08);
+      0 14px 32px rgba(140, 110, 90, 0.14),
+      0 3px 8px rgba(140, 110, 90, 0.06);
     transform: translateY(-2px);
   }
 
   .hero-user-profile {
     display: flex;
     align-items: center;
-    gap: 32px;
+    gap: 20px;
 
     .avatar-glow-ring {
       position: relative;
-      width: 130px;
-      height: 132px;
+      width: 82px;
+      height: 82px;
       aspect-ratio: 1 / 1;
       border-radius: 50%;
       display: flex;
@@ -63,13 +63,13 @@
       flex-shrink: 0;
       box-sizing: border-box;
       background: conic-gradient(from 0deg, #FDE68A, #D4AF37 50%, #FDE68A 100%);
-      padding: 3px;
-      box-shadow: 0 0 0 6px rgba(212,175,55,0.18), 0 10px 28px rgba(140, 110, 90, 0.22);
+      padding: 2.5px;
+      box-shadow: 0 0 0 4px rgba(212,175,55,0.18), 0 6px 18px rgba(140, 110, 90, 0.2);
       animation: orbitalRingRotate 12s linear infinite;
 
       &:hover {
-        transform: scale(1.07);
-        box-shadow: 0 0 0 8px rgba(212,175,55,0.28), 0 14px 36px rgba(140, 110, 90, 0.32);
+        transform: scale(1.05);
+        box-shadow: 0 0 0 6px rgba(212,175,55,0.28), 0 10px 24px rgba(140, 110, 90, 0.28);
         .hero-avatar { border-color: #D4AF37; }
       }
 
@@ -80,23 +80,23 @@
         border-radius: 50%;
         object-fit: cover;
         object-position: center 15%;
-        border: 3px solid #FFFFFF;
-        box-shadow: 0 4px 14px rgba(140, 110, 90, 0.25);
+        border: 2px solid #FFFFFF;
+        box-shadow: 0 3px 10px rgba(140, 110, 90, 0.2);
         transition: all 0.3s ease;
         display: block;
       }
 
       .online-badge {
         position: absolute;
-        bottom: 8px;
-        right: 8px;
-        width: 22px;
-        height: 22px;
+        bottom: 2px;
+        right: 2px;
+        width: 16px;
+        height: 16px;
         border-radius: 50%;
         background: #10B981;
-        border: 3px solid #FFFFFF;
+        border: 2px solid #FFFFFF;
         z-index: 2;
-        box-shadow: 0 0 12px rgba(16, 185, 129, 0.8);
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
         animation: beaconPulse 2s ease-in-out infinite;
       }
     }
@@ -114,17 +114,17 @@
     .user-meta {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 5px;
 
       .welcome-row {
         display: flex;
         align-items: center;
-        gap: 14px;
+        gap: 10px;
 
         .greeting-prefix {
           color: var(--text-dark-crimson);
-          font-size: 13px;
-          letter-spacing: 1.5px;
+          font-size: 11.5px;
+          letter-spacing: 1.2px;
           font-weight: 800;
         }
 
@@ -132,11 +132,11 @@
           background: var(--badge-crimson-bg);
           border: 1px solid var(--badge-crimson-border);
           color: var(--text-dark-crimson) !important;
-          font-size: 11px;
-          padding: 4px 14px;
+          font-size: 10px;
+          padding: 2.5px 10px;
           border-radius: var(--radius-full);
           font-weight: 800;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.4px;
 
           &.mentee-pill {
             background: var(--badge-amber-bg);
@@ -150,13 +150,24 @@
             color: var(--text-dark-emerald) !important;
           }
         }
+
+        .gold-seal-emboss {
+          width: 26px;
+          height: 26px;
+          min-width: 26px;
+          min-height: 26px;
+
+          .seal-inner {
+            font-size: 12px;
+          }
+        }
       }
 
       .user-display-name {
-        font-size: 32px;
+        font-size: 24px;
         font-weight: 900;
         color: var(--text-primary) !important;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.4px;
         margin: 0;
 
         .profile-link {
@@ -172,33 +183,33 @@
       .xp-level-bar-box {
         display: flex;
         flex-direction: column;
-        gap: 6px;
-        width: 360px;
-        margin-top: 6px;
+        gap: 4px;
+        width: 300px;
+        margin-top: 4px;
 
         .bar-info {
           display: flex;
           justify-content: space-between;
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 800;
 
-          .bar-lbl { color: var(--text-tertiary); letter-spacing: 0.5px; font-weight: 700; }
+          .bar-lbl { color: var(--text-tertiary); letter-spacing: 0.4px; font-weight: 700; }
           .bar-val { color: var(--text-primary); font-weight: 800; }
         }
 
         .track {
           width: 100%;
-          height: 8px;
+          height: 6px;
           background: var(--bg-surface-sunken);
           border: 1px solid rgba(214, 198, 183, 0.85);
-          border-radius: 6px;
+          border-radius: 4px;
           overflow: hidden;
 
           .fill {
             height: 100%;
             background: linear-gradient(90deg, #DE7048, #C85A32);
             transition: width 0.5s ease;
-            border-radius: 6px;
+            border-radius: 4px;
 
             &.admin-fill {
               background: linear-gradient(90deg, #2A5A3D, #4E9A68);
@@ -214,27 +225,27 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 6px;
+    gap: 4px;
 
     .clock-display {
-      font-size: 34px;
+      font-size: 24px;
       font-weight: 900;
       color: #150E0B !important;
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
     }
 
     .date-display {
       color: #5C4A42;
-      font-size: 13px;
+      font-size: 11.5px;
       font-weight: 700;
     }
 
     .status-net-pill {
-      font-size: 10px;
+      font-size: 9.5px;
       color: #065F46 !important;
       background: rgba(16, 185, 129, 0.12);
       border: 1px solid rgba(16, 185, 129, 0.35);
-      padding: 4px 12px;
+      padding: 3px 10px;
       border-radius: var(--radius-full);
       font-weight: 800;
     }
@@ -244,19 +255,27 @@
 /* Top Stat Cards Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
   .stat-card {
-    padding: 20px;
+    padding: 12px 14px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
     position: relative;
     overflow: hidden;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-strong);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md, 12px);
     box-shadow: var(--shadow-clay-flat);
 
     .stat-header {
@@ -265,17 +284,17 @@
       justify-content: space-between;
 
       .stat-title {
-        font-size: 11px;
+        font-size: 10px;
         color: var(--text-tertiary);
         font-family: var(--font-sans);
-        letter-spacing: 0.5px;
+        letter-spacing: 0.4px;
         font-weight: 800;
       }
 
       .stat-badge {
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 800;
-        padding: 2px 8px;
+        padding: 1px 6px;
         border-radius: var(--radius-full);
         transition: transform 0.2s ease;
 
@@ -296,9 +315,10 @@
       justify-content: space-between;
 
       .stat-value {
-        font-size: 26px;
+        font-size: 20px;
         font-weight: 900;
         color: var(--text-primary);
+        line-height: 1.1;
         transition: transform 0.2s ease;
 
         &.purple-glow { color: var(--text-dark-amethyst); }
@@ -309,8 +329,8 @@
 
       .mini-gauge-wrap {
         position: relative;
-        width: 36px;
-        height: 36px;
+        width: 28px;
+        height: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -323,15 +343,15 @@
 
         .mini-gauge-icon {
           position: absolute;
-          font-size: 13px;
+          font-size: 11px;
         }
       }
     }
 
     .sparkline-bar {
-      height: 6px;
+      height: 4px;
       background: var(--bg-surface-sunken);
-      border-radius: 3px;
+      border-radius: 2px;
       box-shadow: var(--shadow-inset-well);
       overflow: hidden;
 
