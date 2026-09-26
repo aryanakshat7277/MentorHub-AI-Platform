@@ -204,7 +204,7 @@
           <div class="meta-row debossed-well">
             <span class="meta-item serif-title">🕒 {{ s.scheduledAt | date:'medium' }}</span>
             <span class="meta-item serif-title">⌛ {{ s.durationMinutes || 60 }} mins duration</span>
-            <a [href]="s.meetingLink || 'http://localhost:4200/workspace'" target="_blank" class="meet-link-btn tactile-btn-3d serif-title">
+            <a [routerLink]="['/workspace']" [queryParams]="{ sessionId: s.id }" class="meet-link-btn tactile-btn-3d serif-title">
               <span class="video-icon">🎥</span>
               <span>JOIN WEBRTC ROOM →</span>
             </a>

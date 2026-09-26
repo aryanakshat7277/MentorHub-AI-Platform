@@ -59,7 +59,7 @@ public class SessionController {
             session.setMenteeName("ARYANAKSHAT7277");
         }
         if (session.getMeetingLink() == null) {
-            session.setMeetingLink("https://meet.mentorhub.ai/room-" + System.currentTimeMillis());
+            session.setMeetingLink("/workspace?sessionId=" + (session.getId() != null ? session.getId() : System.currentTimeMillis()));
         }
 
         MentoringSession saved = sessionRepository.save(session);

@@ -7,7 +7,7 @@
       </div>
       <h3 class="standby-title serif-title">LIVE VIDEO COLLABORATION</h3>
       <p class="standby-desc serif-title">
-        Camera and microphone are currently in <strong>STANDBY</strong>. Click below to initialize high-definition WebRTC video connection.
+        Camera and microphone are in <strong>STANDBY</strong>. Initialize WebRTC video connection or test your hardware below.
       </p>
       
       <div class="telemetry-pill-row 3d-inset-well">
@@ -15,20 +15,80 @@
         <span class="rtc-text serif-title">● 1080P HD READY • WEBRTC SECURE</span>
       </div>
 
-      <button class="btn-primary tactile-btn-3d serif-title join-meeting-btn" (click)="initMeeting()">
-        <span class="btn-icon">🎥</span>
-        <span>OPEN CAMERA & JOIN SESSION</span>
-        <span class="shine-sweep"></span>
-      </button>
+      <!-- Live Hardware Test Preview (If run) -->
+      <div class="hardware-test-panel" *ngIf="hardwareTestDone || isTestingHardware">
+        <div class="test-preview-box" *ngIf="hardwareTestSuccess">
+          <video #testVideoPreview autoplay muted playsinline class="test-preview-vid"></video>
+          <div class="test-badges-col">
+            <span class="test-badge test-badge-ok">✓ {{ cameraName }}</span>
+            <span class="test-badge test-badge-ok">✓ {{ micName }}</span>
+          </div>
+          <button class="test-stop-btn serif-title" (click)="stopHardwareTest()">✕ Close Preview</button>
+        </div>
+
+        <div class="test-error-box" *ngIf="hardwareTestError">
+          <span class="test-error-text serif-title">⚠️ {{ hardwareTestError }}</span>
+        </div>
+
+        <div class="test-loading-text serif-title" *ngIf="isTestingHardware">
+          <span>⏳ Requesting camera &amp; mic access...</span>
+        </div>
+      </div>
+
+      <!-- Primary Action Buttons -->
+      <div class="standby-actions-group">
+        <button class="btn-primary tactile-btn-3d serif-title join-meeting-btn" (click)="initMeeting()">
+          <span class="btn-icon">🎥</span>
+          <span>OPEN CAMERA &amp; JOIN SESSION</span>
+          <span class="shine-sweep"></span>
+        </button>
+
+        <div class="standby-secondary-btns">
+          <button class="btn-outline-test tactile-btn-3d serif-title" (click)="testMediaHardware()" [disabled]="isTestingHardware">
+            <span>🧪 {{ hardwareTestDone && hardwareTestSuccess ? 'RE-TEST HARDWARE' : 'TEST CAMERA & MIC' }}</span>
+          </button>
+          
+          <button class="btn-outline-direct tactile-btn-3d serif-title" (click)="openDirectMeeting()" title="Open Room in Standalone Browser Window">
+            <span>↗️ STANDALONE TAB</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Loading State Spinner Overlay (Warm Clay) -->
-  <div class="jitsi-status-overlay warm-clay-overlay" *ngIf="status === 'LOADING'">
+  <!-- Loading / Connecting State Spinner Overlay -->
+  <div class="jitsi-status-overlay warm-clay-overlay" *ngIf="(status === 'LOADING' || status === 'CONNECTING') && !isUnsecureContext">
     <div class="loading-card-3d clay-panel elevated-card-3d">
       <div class="cyber-spinner"></div>
-      <span class="status-msg serif-title">INITIALIZING WEBRTC ENGINE...</span>
+      <span class="status-msg serif-title">
+        {{ status === 'LOADING' ? 'INITIALIZING WEBRTC ENGINE...' : 'ESTABLISHING SECURE WEBRTC SESSION...' }}
+      </span>
       <span class="sub-msg serif-title">Room: {{ roomName }}</span>
+    </div>
+  </div>
+
+  <!-- Call Disconnected / Concluded Overlay -->
+  <div class="jitsi-status-overlay warm-clay-overlay" *ngIf="status === 'DISCONNECTED' && !isUnsecureContext">
+    <div class="standby-card-3d clay-panel elevated-card-3d">
+      <div class="standby-seal gold-seal-emboss">
+        <span class="seal-glyph">📞</span>
+      </div>
+      <h3 class="standby-title serif-title">CALL CONCLUDED</h3>
+      <p class="standby-desc serif-title">
+        The WebRTC session was closed cleanly. You can reconnect at any time or continue coding.
+      </p>
+
+      <div class="standby-actions-group">
+        <button class="btn-primary tactile-btn-3d serif-title join-meeting-btn" (click)="retryConnection()">
+          <span class="btn-icon">🔄</span>
+          <span>RECONNECT / REJOIN ROOM</span>
+          <span class="shine-sweep"></span>
+        </button>
+
+        <button class="btn-outline-direct tactile-btn-3d serif-title" (click)="openDirectMeeting()" title="Open in Standalone Browser Window">
+          <span>↗️ OPEN IN STANDALONE TAB</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -53,7 +113,10 @@
       <span class="error-icon">⚠️</span>
       <h3 class="serif-title">VIDEO SERVICE CONNECTION ERROR</h3>
       <p class="error-desc serif-title">{{ errorMessage }}</p>
-      <button class="btn-primary btn-sm tactile-btn-3d serif-title" (click)="retryConnection()">🔄 RETRY CONNECTION</button>
+      <div class="standby-secondary-btns" style="margin-top: 8px;">
+        <button class="btn-primary btn-sm tactile-btn-3d serif-title" (click)="retryConnection()">🔄 RETRY CONNECTION</button>
+        <button class="btn-outline-direct tactile-btn-3d serif-title" (click)="openDirectMeeting()">↗️ OPEN DIRECT ROOM</button>
+      </div>
     </div>
   </div>
 
@@ -85,6 +148,10 @@
 
       <button class="overlay-btn tactile-btn-3d serif-title" (click)="toggleTileView()" title="Toggle Grid / Speaker View">
         {{ isTileView ? '🗂️ GRID' : '👤 SPEAKER' }}
+      </button>
+
+      <button class="overlay-btn tactile-btn-3d serif-title" (click)="openDirectMeeting()" title="Open In Standalone Window">
+        ↗️ POP-OUT
       </button>
 
       <button class="overlay-btn tactile-btn-3d serif-title" (click)="toggleFullscreen()" title="Toggle Fullscreen Video">

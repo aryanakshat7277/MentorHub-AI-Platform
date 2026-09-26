@@ -172,7 +172,7 @@ public class DataSeeder implements CommandLineRunner {
                 .scheduledAt(LocalDateTime.now().plusDays(1).withHour(15).withMinute(0))
                 .durationMinutes(60)
                 .status("CONFIRMED")
-                .meetingLink("https://meet.mentorhub.ai/ws-session-77")
+                .meetingLink("/workspace?sessionId=1")
                 .notes("Focus on TextWebSocketHandler, JSON payload parsing, and state synchronization.")
                 .build();
 
@@ -185,7 +185,7 @@ public class DataSeeder implements CommandLineRunner {
                 .scheduledAt(LocalDateTime.now().plusDays(2).withHour(16).withMinute(30))
                 .durationMinutes(45)
                 .status("CONFIRMED")
-                .meetingLink("https://meet.mentorhub.ai/ws-session-88")
+                .meetingLink("/workspace?sessionId=2")
                 .notes("Review Standalone routes, Signal inputs/outputs, and SCSS cybernetic design tokens.")
                 .build();
 
@@ -198,7 +198,7 @@ public class DataSeeder implements CommandLineRunner {
                 .scheduledAt(LocalDateTime.now().plusDays(4).withHour(11).withMinute(0))
                 .durationMinutes(60)
                 .status("PENDING")
-                .meetingLink("https://meet.mentorhub.ai/ws-session-99")
+                .meetingLink("/workspace?sessionId=3")
                 .notes("Explore H2/PostgreSQL vector extensions and cosine similarity calculation.")
                 .build();
 

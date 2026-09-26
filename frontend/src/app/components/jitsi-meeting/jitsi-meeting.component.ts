@@ -15,6 +15,7 @@ export type JitsiMeetingStatus = 'IDLE' | 'LOADING' | 'CONNECTING' | 'CONNECTED'
 })
 export class JitsiMeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('jitsiContainer', { static: false }) jitsiContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('testVideoPreview', { static: false }) testVideoPreview!: ElementRef<HTMLVideoElement>;
 
   @Input() roomName = 'mentorhub-live-workspace';
   @Input() displayName = 'AKSHAT ARYAN (Mentor)';
@@ -41,6 +42,15 @@ export class JitsiMeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   isUnsecureContext = false;
   currentHost = '';
 
+  // Local Media Hardware Self-Test
+  isTestingHardware = false;
+  hardwareTestDone = false;
+  hardwareTestSuccess = false;
+  hardwareTestError = '';
+  testMediaStream: MediaStream | null = null;
+  cameraName = '';
+  micName = '';
+
   private jitsiApi: any = null;
 
   constructor(private jitsiScriptService: JitsiScriptService) {}
@@ -60,7 +70,75 @@ export class JitsiMeetingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.stopHardwareTest();
     this.disposeMeeting();
+  }
+
+  async testMediaHardware() {
+    this.hardwareTestError = '';
+    this.isTestingHardware = true;
+    this.hardwareTestDone = false;
+
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      this.hardwareTestError = 'MediaDevices API is not available in this browser context.';
+      this.isTestingHardware = false;
+      this.hardwareTestDone = true;
+      this.hardwareTestSuccess = false;
+      return;
+    }
+
+    try {
+      this.stopHardwareTest();
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      this.testMediaStream = stream;
+
+      const videoTracks = stream.getVideoTracks();
+      const audioTracks = stream.getAudioTracks();
+
+      this.cameraName = videoTracks.length > 0 ? (videoTracks[0].label || 'Webcam Verified') : 'No camera detected';
+      this.micName = audioTracks.length > 0 ? (audioTracks[0].label || 'Microphone Verified') : 'No microphone detected';
+
+      this.hardwareTestSuccess = true;
+      this.hardwareTestDone = true;
+      this.isTestingHardware = false;
+
+      setTimeout(() => {
+        if (this.testVideoPreview && this.testVideoPreview.nativeElement) {
+          this.testVideoPreview.nativeElement.srcObject = stream;
+          this.testVideoPreview.nativeElement.play().catch(e => console.log('Preview playback failed:', e));
+        }
+      }, 50);
+
+    } catch (err: any) {
+      console.warn('Hardware test exception:', err);
+      this.hardwareTestSuccess = false;
+      this.hardwareTestDone = true;
+      this.isTestingHardware = false;
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        this.hardwareTestError = 'Camera/Microphone permission was denied. Please allow camera access in your browser.';
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        this.hardwareTestError = 'No camera or microphone found on this device.';
+      } else {
+        this.hardwareTestError = err.message || 'Unable to access local camera/mic.';
+      }
+    }
+  }
+
+  stopHardwareTest() {
+    if (this.testMediaStream) {
+      this.testMediaStream.getTracks().forEach(track => track.stop());
+      this.testMediaStream = null;
+    }
+    if (this.testVideoPreview && this.testVideoPreview.nativeElement) {
+      this.testVideoPreview.nativeElement.srcObject = null;
+    }
+    this.hardwareTestDone = false;
+  }
+
+  openDirectMeeting() {
+    if (typeof window !== 'undefined') {
+      window.open(`https://meet.jit.si/${this.roomName}`, '_blank', 'noopener,noreferrer');
+    }
   }
 
   async initMeeting() {
@@ -77,6 +155,7 @@ export class JitsiMeetingComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
+    this.stopHardwareTest();
     this.setStatus('LOADING');
     this.errorMessage = '';
 

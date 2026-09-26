@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { SoundService } from '../../services/sound.service';
 
@@ -18,7 +19,7 @@ export interface PeerMentor {
 @Component({
   selector: 'app-sessions',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './sessions.component.html',
   styleUrls: ['./sessions.component.scss']
 })
