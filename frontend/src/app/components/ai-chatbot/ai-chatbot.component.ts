@@ -32,17 +32,22 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   isMaximized = false;
   selectedProvider = 'GEMINI';
-  selectedModel = 'gemini-3.5-flash';
+  selectedModel = 'gemini-3.1-flash-lite';
 
   userInput = '';
   isGenerating = false;
   toastMessage: string | null = null;
   private shouldScrollToBottom = true;
 
-  // Multimodal Screen Reader State
+  // Multimodal Screen Reader State (Gemini 3.1 Flash-Lite)
   attachedScreenSnapshot: ScreenCaptureResult | null = null;
   isCapturingScreen = false;
   isScreenPerceptionActive = true;
+
+  // Voice Question STT State (Speech to Text for Screen Q&A)
+  isListeningForVoice = false;
+  voiceTranscript = '';
+  private speechRecognition: any = null;
 
   // Live Voice State
   liveStatus: LiveSessionStatus = 'IDLE';
@@ -68,12 +73,11 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   private tutorSub: Subscription | null = null;
 
   quickPrompts: { label: string; prompt: string; icon: string }[] = [
-    { icon: '🗺️', label: 'My Roadmap', prompt: 'Give me a short step-by-step learning roadmap.' },
-    { icon: '☕', label: 'Java & Backend', prompt: 'Recommend Java & Backend courses in 3 short points.' },
-    { icon: '📸', label: 'Read Screen', prompt: 'Briefly explain what is on my active screen in 2-3 short lines.' },
-    { icon: '💻', label: 'Code IDE', prompt: 'Explain the key features of the Live Code Workspace.' },
-    { icon: '🎯', label: 'My Goals', prompt: 'Give me 3 actionable tips for setting SMART academic goals.' },
-    { icon: '🎓', label: 'CUTM Courses', prompt: 'Summarize the core engineering curriculum in CUTM courses.' }
+    { icon: '👁️', label: 'Explain Screen', prompt: 'Look at my current screen and explain what is displayed and what actions I should take.' },
+    { icon: '📸', label: 'Analyze Screen', prompt: 'Read my active screen carefully and provide key insights or recommendations.' },
+    { icon: '💻', label: 'Code Workspace', prompt: 'Inspect the code and compiler terminal on my screen and diagnose any issues.' },
+    { icon: '🎓', label: 'CUTM Courses', prompt: 'Summarize the core engineering curriculum and courses visible on my screen.' },
+    { icon: '🎯', label: 'My Goals', prompt: 'Review my active SMART goals on screen and give me 3 actionable tips.' }
   ];
 
   messages: LiveChatMessage[] = [
@@ -81,9 +85,9 @@ export class AiChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
       id: 'msg-1',
       sender: 'ai',
       avatar: 'AI',
-      text: '👋 **Hi! How can I help you today?**\nAsk about **CUTM courses**, **code**, or tap **🟢 LIVE VOICE** to talk.',
+      text: '👋 **Hi! How can I help you today?**\nI am powered by **Gemini 3.1 Flash-Lite** with **Multimodal Screen Vision** and **Voice Intelligence**.\n\nAsk me anything in **voice** (tap 🎙️) or **text** about your current screen, code, or courses!',
       provider: 'GEMINI',
-      model: 'gemini-3.5-flash',
+      model: 'gemini-3.1-flash-lite',
       mode: 'TEXT',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
@@ -301,6 +305,179 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     this.showToast('Attachment removed');
   }
 
+  // ========================================================
+  // Voice Input Recognition for Screen Questions (STT)
+  // Powered by Gemini 3.1 Flash-Lite
+  // ========================================================
+  toggleVoiceInput() {
+    if (this.isListeningForVoice) {
+      this.stopVoiceInput();
+    } else {
+      this.startVoiceInput();
+    }
+  }
+
+  startVoiceInput() {
+    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRec) {
+      this.showToast('⚠️ Speech recognition not supported in this browser.');
+      return;
+    }
+
+    try {
+      this.voiceCoordinator.stopAllVoices();
+      this.speechRecognition = new SpeechRec();
+      this.speechRecognition.continuous = false;
+      this.speechRecognition.interimResults = true;
+      this.speechRecognition.lang = 'en-US';
+
+      this.isListeningForVoice = true;
+      this.voiceTranscript = '';
+      this.showToast('🎙️ Listening... Ask your question about the screen now!');
+
+      this.speechRecognition.onresult = (event: any) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          transcript += event.results[i][0].transcript;
+        }
+        this.userInput = transcript;
+        this.voiceTranscript = transcript;
+        this.cdr.detectChanges();
+      };
+
+      this.speechRecognition.onerror = (err: any) => {
+        console.warn('Voice STT error:', err);
+        this.isListeningForVoice = false;
+        this.cdr.detectChanges();
+      };
+
+      this.speechRecognition.onend = () => {
+        this.isListeningForVoice = false;
+        this.cdr.detectChanges();
+        if (this.userInput && this.userInput.trim().length > 0) {
+          const spokeQuery = this.userInput.trim();
+          this.userInput = '';
+          this.submitScreenQuery(spokeQuery, true);
+        }
+      };
+
+      this.speechRecognition.start();
+    } catch (e) {
+      console.warn('Unable to start voice input:', e);
+      this.isListeningForVoice = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  stopVoiceInput() {
+    if (this.speechRecognition) {
+      try {
+        this.speechRecognition.stop();
+      } catch (e) {}
+    }
+    this.isListeningForVoice = false;
+    this.cdr.detectChanges();
+  }
+
+  stopSpeaking() {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    this.isSpeakingAudio = false;
+    this.voiceCoordinator.releaseVoice('chatbot-tts');
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Submits a question about the screen to Gemini 3.1 Flash-Lite
+   * Reads visual snapshot + semantic context and optionally speaks back response.
+   */
+  async submitScreenQuery(query: string, isVoice: boolean = false) {
+    if (!query || !query.trim() || this.isGenerating) return;
+
+    this.voiceCoordinator.stopAllVoices();
+
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    this.messages.push({
+      id: 'msg-' + Date.now(),
+      sender: 'user',
+      avatar: 'U',
+      text: query,
+      mode: isVoice ? 'VOICE' : 'TEXT',
+      timestamp: timeStr
+    });
+
+    this.userInput = '';
+    this.voiceTranscript = '';
+    this.isGenerating = true;
+    this.scrollToBottom();
+
+    // Auto capture freshest screen view if not already attached
+    if (!this.attachedScreenSnapshot) {
+      this.isCapturingScreen = true;
+      try {
+        this.attachedScreenSnapshot = await this.screenReader.captureScreen();
+      } catch (e) {
+        console.warn('Auto screen capture exception:', e);
+      } finally {
+        this.isCapturingScreen = false;
+      }
+    }
+
+    const screenImg = this.attachedScreenSnapshot ? this.attachedScreenSnapshot.imageBase64 : undefined;
+    let screenCtx = this.attachedScreenSnapshot ? this.attachedScreenSnapshot.semanticContext : undefined;
+
+    if (!screenCtx) {
+      const route = typeof window !== 'undefined' && window.location ? window.location.pathname : '/';
+      screenCtx = this.screenReader.extractSemanticContext(route);
+    }
+
+    this.attachedScreenSnapshot = null;
+    const historyPayload = this.buildHistoryPayload();
+
+    const aiMessageId = 'msg-' + Date.now();
+    const aiMessage: LiveChatMessage = {
+      id: aiMessageId,
+      sender: 'ai',
+      avatar: 'AI',
+      text: '',
+      provider: 'GEMINI',
+      model: 'gemini-3.1-flash-lite',
+      mode: isVoice ? 'VOICE' : 'TEXT',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    this.messages.push(aiMessage);
+    this.scrollToBottom();
+
+    this.aiChatService.askAboutScreen(
+      query,
+      isVoice,
+      screenImg,
+      screenCtx,
+      historyPayload
+    ).subscribe({
+      next: (res) => {
+        this.isGenerating = false;
+        aiMessage.text = res.response || res.message || 'I analyzed your active screen.';
+        aiMessage.provider = res.provider || 'GEMINI';
+        aiMessage.model = res.model || 'gemini-3.1-flash-lite';
+        this.cdr.detectChanges();
+        this.scrollToBottom();
+
+        // Speak aloud if query was asked via voice or voiceMode returned
+        if (isVoice || res.voiceMode) {
+          const speakText = res.spokenText || aiMessage.text;
+          this.speakVoiceResponse(speakText);
+        }
+      },
+      error: () => {
+        this.isGenerating = false;
+        aiMessage.text = "I'm unable to analyze your screen right now. Please try again.";
+        this.scrollToBottom();
+      }
+    });
+  }
+
   // Toggle Live Continuous Voice Mode
   async toggleLiveVoice() {
     if (this.isLiveVoiceActive) {
@@ -483,7 +660,7 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     window.speechSynthesis.speak(utterance);
   }
 
-  // Text Chat Handler (Gemini 3.8 Flash)
+  // Text Chat Handler (Gemini 3.1 Flash-Lite)
   sendMessage() {
     if (!this.userInput.trim() || this.isGenerating) return;
 
@@ -491,6 +668,17 @@ Please act as my Centurion University Academic Mentor and tutor me on this modul
     this.voiceCoordinator.stopAllVoices();
 
     const query = this.userInput.trim();
+
+    // Route screen-targeted queries to Gemini 3.1 Flash-Lite multimodal reader
+    const isScreenTargeted = this.isScreenPerceptionActive || 
+                             !!this.attachedScreenSnapshot ||
+                             /\b(screen|page|current view|what am i seeing|this tab|this view|what is on my screen|read screen|analyze screen)\b/i.test(query);
+
+    if (isScreenTargeted) {
+      this.submitScreenQuery(query, false);
+      return;
+    }
+
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     this.messages.push({

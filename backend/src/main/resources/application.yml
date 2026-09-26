@@ -42,7 +42,8 @@ ai:
   gemini:
     api-key: ${AI_GEMINI_KEY:}
     fallback-api-key: ${AI_GEMINI_FALLBACK_KEY:}
-    text-model: ${AI_GEMINI_TEXT_MODEL:gemini-3.5-flash}
+    text-model: ${AI_GEMINI_TEXT_MODEL:gemini-3.1-flash-lite}
+    screen-model: ${AI_GEMINI_SCREEN_MODEL:gemini-3.1-flash-lite}
     live-model: ${AI_GEMINI_LIVE_MODEL:gemini-3.1-flash-live-preview}
     live-voice: ${AI_GEMINI_LIVE_VOICE:Kore}
   groq:

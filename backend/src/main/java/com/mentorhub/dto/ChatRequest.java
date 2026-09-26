@@ -12,6 +12,7 @@ public class ChatRequest {
     private List<Map<String, String>> history; // Multi-turn conversation history
     private String screenImage; // Base64 JPEG snapshot of active screen
     private String screenContext; // Structured DOM semantic text context
+    private Boolean voiceMode = false; // Indicates if request was submitted via voice speech
 
     public ChatRequest() {}
 
@@ -58,4 +59,7 @@ public class ChatRequest {
 
     public String getScreenContext() { return screenContext; }
     public void setScreenContext(String screenContext) { this.screenContext = screenContext; }
+
+    public Boolean getVoiceMode() { return voiceMode != null && voiceMode; }
+    public void setVoiceMode(Boolean voiceMode) { this.voiceMode = voiceMode; }
 }

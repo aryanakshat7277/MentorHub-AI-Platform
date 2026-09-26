@@ -89,7 +89,7 @@ public class AiChatService {
         String respText = (String) result.get("response");
         String respProvider = (String) result.get("provider");
         String respModel = (String) result.get("model");
-        return new ChatResponse(respText, respProvider, respModel);
+        return new ChatResponse(respText, respProvider, respModel, request.getVoiceMode());
     }
 
     public Map<String, Object> chat(
@@ -114,13 +114,13 @@ public class AiChatService {
             String screenContext
     ) {
         String reqProvider = (provider != null) ? provider.toUpperCase() : "GEMINI";
-        String reqModel = (model != null && !model.isEmpty()) ? model : "gemini-3.5-flash";
+        String reqModel = (model != null && !model.isEmpty()) ? model : "gemini-3.1-flash-lite";
 
         if (reqModel.endsWith("-latest")) {
             reqModel = reqModel.replace("-latest", "");
         }
-        if ("gemini-2.5-flash".equalsIgnoreCase(reqModel) || "gemini-3.8-flash".equalsIgnoreCase(reqModel)) {
-            reqModel = "gemini-3.5-flash";
+        if ("gemini-2.5-flash".equalsIgnoreCase(reqModel) || "gemini-3.8-flash".equalsIgnoreCase(reqModel) || "gemini-3.6-flash".equalsIgnoreCase(reqModel)) {
+            reqModel = "gemini-3.1-flash-lite";
         }
 
         Map<String, Object> result = new HashMap<>();
@@ -257,24 +257,25 @@ public class AiChatService {
 
     private String resolveGeminiModel(String model) {
         if (model == null || model.isEmpty()) {
-            return "gemini-3.5-flash";
+            return "gemini-3.1-flash-lite";
         }
-        if (model.contains("pro")) {
+        String lower = model.toLowerCase();
+        if (lower.contains("lite") || lower.contains("flash-lite") || lower.contains("3.1-flash-lite")) {
+            return "gemini-3.1-flash-lite";
+        }
+        if (lower.contains("pro")) {
             return "gemini-3.1-pro-preview";
         }
-        if (model.contains("3.5")) {
+        if (lower.contains("3.5")) {
             return "gemini-3.5-flash";
         }
-        if (model.contains("latest")) {
+        if (lower.contains("latest")) {
             return "gemini-flash-latest";
         }
-        if (model.contains("3.8") || model.contains("3.6") || model.contains("3.7") || model.contains("3.1")) {
+        if (lower.contains("3.8") || lower.contains("3.6") || lower.contains("3.7")) {
             return "gemini-3.5-flash";
         }
-        if (model.contains("lite")) {
-            return "gemini-3.1-flash-lite-preview";
-        }
-        return "gemini-3.5-flash";
+        return "gemini-3.1-flash-lite";
     }
 
     private void streamGemini(String query, String model, String systemPrompt, List<Map<String, String>> historyPayload, String screenImage, String screenContext, SseEmitter emitter) throws Exception {
@@ -315,7 +316,7 @@ public class AiChatService {
 
         String effectiveQuery = query;
         if (screenContext != null && !screenContext.trim().isEmpty()) {
-            effectiveQuery = "[ACTIVE SCREEN CONTEXT]\n" + screenContext + "\n\n[USER QUESTION]\n" + query;
+            effectiveQuery = "[ACTIVE SCREEN CONTEXT - GEMINI 3.1 FLASH-LITE VISION]\n" + screenContext + "\n\n[USER QUESTION ABOUT SCREEN]\n" + query;
         }
         userParts.add(Map.of("text", effectiveQuery));
 
@@ -331,7 +332,14 @@ public class AiChatService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        List<String> candidateModels = List.of(cleanModel, "gemini-3.5-flash", "gemini-flash-latest", "gemini-3-flash-preview");
+        List<String> candidateModels = List.of(
+            cleanModel,
+            "gemini-3.1-flash-lite",
+            "gemini-3.1-flash-lite-preview",
+            "gemini-3.5-flash-lite",
+            "gemini-3.5-flash",
+            "gemini-flash-latest"
+        );
 
         for (String targetModel : candidateModels) {
             for (int k = 0; k < keys.size(); k++) {
@@ -446,7 +454,7 @@ public class AiChatService {
 
         String effectiveQuery = query;
         if (screenContext != null && !screenContext.trim().isEmpty()) {
-            effectiveQuery = "[ACTIVE SCREEN CONTEXT]\n" + screenContext + "\n\n[USER QUESTION]\n" + query;
+            effectiveQuery = "[ACTIVE SCREEN CONTEXT - GEMINI 3.1 FLASH-LITE VISION]\n" + screenContext + "\n\n[USER QUESTION ABOUT SCREEN]\n" + query;
         }
         userParts.add(Map.of("text", effectiveQuery));
 
@@ -464,7 +472,14 @@ public class AiChatService {
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
-        List<String> candidateModels = List.of(cleanModel, "gemini-3.5-flash", "gemini-flash-latest", "gemini-3-flash-preview");
+        List<String> candidateModels = List.of(
+            cleanModel,
+            "gemini-3.1-flash-lite",
+            "gemini-3.1-flash-lite-preview",
+            "gemini-3.5-flash-lite",
+            "gemini-3.5-flash",
+            "gemini-flash-latest"
+        );
 
         for (String targetModel : candidateModels) {
             for (int k = 0; k < keys.size(); k++) {

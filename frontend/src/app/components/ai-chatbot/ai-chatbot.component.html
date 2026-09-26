@@ -13,7 +13,7 @@
     <!-- Top Bar: Crest, Title, Online Status & Pinned Window Controls -->
     <div class="header-top-bar">
       <div class="title-box">
-        <div class="gemini-stellar-crest gold-seal-emboss" title="Gemini 3.8 Flash Neural Core">
+        <div class="gemini-stellar-crest gold-seal-emboss" title="Gemini 3.1 Flash-Lite Multimodal Core">
           <div class="orbit-glow-ring"></div>
           <span class="gemini-sparkle-icon">✨</span>
         </div>
@@ -25,7 +25,7 @@
           <div class="status-indicator">
             <span class="online-dot" [class.live-active]="isLiveVoiceActive"></span>
             <span class="sub-status serif-title">
-              {{ isLiveVoiceActive ? 'Live Voice Stream' : 'Master Brain Online' }}
+              {{ isLiveVoiceActive ? 'Live Voice Stream' : 'Gemini 3.1 Flash-Lite Active' }}
             </span>
           </div>
         </div>
@@ -50,11 +50,11 @@
     <!-- Controls Bar: Telemetry Badges & Interactive Mode Toggles -->
     <div class="header-controls-bar">
       <div class="status-badges-group">
-        <span class="brain-status-badge serif-title" title="Full Platform Awareness Active">
-          🧠 Master Brain
+        <span class="brain-status-badge serif-title" title="Multimodal Screen Intelligence Active">
+          👁️ Screen AI
         </span>
-        <span class="model-pill-badge serif-title" [title]="selectedProvider === 'GROQ' ? 'Groq Cloud (openai/gpt-oss-120b)' : 'Google Gemini 3.8 Flash'">
-          {{ selectedProvider === 'GROQ' ? '⚡ Groq 120B' : '✨ Gemini 3.8' }}
+        <span class="model-pill-badge serif-title" [title]="selectedProvider === 'GROQ' ? 'Groq Cloud (openai/gpt-oss-120b)' : 'Google Gemini 3.1 Flash-Lite'">
+          {{ selectedProvider === 'GROQ' ? '⚡ Groq 120B' : '⚡ Gemini 3.1 Flash-Lite' }}
         </span>
       </div>
 
@@ -190,6 +190,12 @@
 
           <!-- Action Toolbar per Message -->
           <div class="bubble-actions-bar" *ngIf="msg.sender === 'ai'">
+            <button class="action-sub-btn tactile-btn-3d serif-title" 
+                    [class.speaking-active]="isSpeakingAudio"
+                    (click)="isSpeakingAudio ? stopSpeaking() : speakVoiceResponse(msg.text)" 
+                    [title]="isSpeakingAudio ? 'Stop speaking' : 'Read aloud with AI voice'">
+              {{ isSpeakingAudio ? '⏹️ STOP' : '🔊 LISTEN' }}
+            </button>
             <button class="action-sub-btn tactile-btn-3d serif-title" (click)="copyMessage(msg)" [title]="msg.isCopied ? 'Copied!' : 'Copy response text'">
               {{ msg.isCopied ? '✅ COPIED' : '📋 COPY' }}
             </button>
@@ -209,7 +215,7 @@
           <div class="gemini-thinking-sparkle gold-seal-emboss">
             <span>✨</span>
           </div>
-          <span class="thinking-text serif-title">Gemini 3.8 Flash synthesizing answer</span>
+          <span class="thinking-text serif-title">Gemini 3.1 Flash-Lite reading screen & synthesizing answer</span>
           <span class="thinking-dots">
             <span></span><span></span><span></span>
           </span>
@@ -244,13 +250,26 @@
       <button class="remove-chip-btn tactile-btn-3d" (click)="removeAttachedScreen()" title="Remove Screen Attachment">✕</button>
     </div>
 
+    <!-- Voice Listening Active Indicator Banner (Gemini 3.1 Flash-Lite) -->
+    <div class="voice-listening-banner clay-panel elevated-card-3d" *ngIf="isListeningForVoice">
+      <div class="voice-pulse-ring"></div>
+      <span class="voice-banner-mic">🎙️</span>
+      <div class="voice-banner-text serif-title">
+        <span class="voice-listening-label">LISTENING... ASK ANYTHING ABOUT YOUR SCREEN</span>
+        <span class="voice-transcript-preview" *ngIf="voiceTranscript">"{{ voiceTranscript }}"</span>
+      </div>
+      <button class="voice-stop-btn tactile-btn-3d serif-title" (click)="stopVoiceInput()" title="Cancel Voice Input">
+        ✕ CANCEL
+      </button>
+    </div>
+
     <div class="input-row">
       <!-- 3D Inset Track with Textarea, Camera and Mic Button -->
       <div class="input-deck-track 3d-inset-well">
         <textarea [(ngModel)]="userInput" 
                   (keyup.enter)="$event.preventDefault(); sendMessage()" 
                   rows="1" 
-                  placeholder="Ask MentorHub AI Assistant anything or tap 🎙️ for Live Voice..." 
+                  placeholder="Ask about your screen in text or tap 🎙️ to ask in voice..." 
                   class="chat-textarea serif-title"></textarea>
 
         <!-- Capture Screen Snapshot Action Button -->
@@ -262,9 +281,12 @@
           <span>{{ isCapturingScreen ? '⏳' : '📸' }}</span>
         </button>
 
-        <!-- Live Voice Toggle Button -->
-        <button class="stt-btn tactile-btn-3d" [class.live-active]="isLiveVoiceActive" (click)="toggleLiveVoice()" [title]="isLiveVoiceActive ? 'End Live Voice Session' : 'Start Google Gemini Live Voice Session'">
-          <span class="mic-wave-icon">{{ isLiveVoiceActive ? '🔴' : '🎙️' }}</span>
+        <!-- Voice Ask Screen Action Button (Gemini 3.1 Flash-Lite) -->
+        <button class="voice-screen-btn tactile-btn-3d" 
+                [class.listening]="isListeningForVoice"
+                (click)="toggleVoiceInput()" 
+                [title]="isListeningForVoice ? 'Stop Listening' : 'Ask anything in Voice about your active Screen (Gemini 3.1 Flash-Lite)'">
+          <span class="mic-wave-icon">{{ isListeningForVoice ? '🔴' : '🎙️' }}</span>
         </button>
       </div>
 

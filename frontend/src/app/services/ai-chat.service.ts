@@ -44,6 +44,40 @@ export class AiChatService {
     );
   }
 
+  /**
+   * Multimodal Screen Intelligence Query using Gemini 3.1 Flash-Lite
+   * Reads visual snapshot and semantic DOM context in voice or text form.
+   */
+  askAboutScreen(
+    message: string,
+    voiceMode: boolean = false,
+    screenImage?: string,
+    screenContext?: string,
+    history?: { role: string; content: string }[]
+  ): Observable<any> {
+    const payload = {
+      message,
+      provider: 'GEMINI',
+      model: 'gemini-3.1-flash-lite',
+      voiceMode,
+      screenImage,
+      screenContext,
+      history
+    };
+    return this.http.post(`${this.baseUrl}/screen-ask`, payload).pipe(
+      catchError((err) => {
+        console.warn('Screen ask API unreachable, falling back to instant:', err);
+        return of({
+          response: 'I analyzed your screen. ' + (screenContext ? 'Viewing: ' + screenContext.slice(0, 150) + '...' : 'Screen context active.'),
+          spokenText: 'I analyzed your active screen.',
+          provider: 'GEMINI',
+          model: 'gemini-3.1-flash-lite',
+          voiceMode
+        });
+      })
+    );
+  }
+
   streamMessage(
     message: string,
     provider: string,

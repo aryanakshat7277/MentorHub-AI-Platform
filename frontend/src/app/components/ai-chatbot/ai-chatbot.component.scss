@@ -1028,6 +1028,14 @@
         border-color: rgba(166,59,25,0.45);
         box-shadow: 0 0 12px rgba(166,59,25,0.15), inset 0 1px 0 rgba(255,255,255,0.80);
       }
+
+      &.speaking-active {
+        background: #DC2626 !important;
+        border-color: #B91C1C !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 0 12px rgba(220, 38, 38, 0.4) !important;
+        animation: liveMicPulse 1.5s infinite;
+      }
     }
   }
 
@@ -1193,6 +1201,82 @@
     }
   }
 
+  /* Voice Listening Active Banner (Gemini 3.1 Flash-Lite) */
+  .voice-listening-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, rgba(254, 243, 199, 0.95) 0%, rgba(253, 230, 138, 0.90) 100%);
+    border: 1.5px solid #F59E0B;
+    border-radius: var(--radius-hero);
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);
+    animation: smoothFadeInUp 0.25s ease;
+    position: relative;
+    overflow: hidden;
+
+    .voice-pulse-ring {
+      position: absolute;
+      left: 14px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(220, 38, 38, 0.25);
+      animation: liveMicPulse 1.2s infinite;
+      pointer-events: none;
+    }
+
+    .voice-banner-mic {
+      font-size: 18px;
+      animation: pulseDot 1s infinite;
+      z-index: 1;
+    }
+
+    .voice-banner-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+
+      .voice-listening-label {
+        font-size: 12px;
+        font-weight: 900;
+        color: #92400E;
+        letter-spacing: 0.5px;
+      }
+
+      .voice-transcript-preview {
+        font-size: 13px;
+        font-weight: 700;
+        color: #78350F;
+        font-style: italic;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .voice-stop-btn {
+      padding: 5px 12px;
+      background: #DC2626;
+      border: 1px solid #B91C1C;
+      color: #FFF;
+      font-size: 11px;
+      font-weight: 900;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #B91C1C;
+        transform: scale(1.05);
+      }
+    }
+  }
+
   .input-row {
     display: flex;
     align-items: center;
@@ -1265,7 +1349,7 @@
       }
     }
 
-    .stt-btn {
+    .voice-screen-btn, .stt-btn {
       width: 40px; height: 40px; min-width: 40px; min-height: 40px;
       border-radius: 50%; background: var(--bg-surface);
       border: 1.5px solid rgba(200,182,166,0.80);
@@ -1275,13 +1359,19 @@
       box-shadow: 2px 2px 6px rgba(61,28,11,0.08), inset 0 1px 0 rgba(255,255,255,0.95);
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 
-      &.live-active {
-        background: rgba(220,38,38,0.10); border-color: rgba(220,38,38,0.50);
-        color: #DC2626; box-shadow: 0 0 16px rgba(220,38,38,0.50), 0 0 32px rgba(220,38,38,0.20);
-        animation: liveMicPulse 1.5s ease-in-out infinite;
+      &.listening, &.live-active {
+        background: rgba(220,38,38,0.12);
+        border-color: #DC2626;
+        color: #DC2626;
+        box-shadow: 0 0 16px rgba(220,38,38,0.50), 0 0 32px rgba(220,38,38,0.20);
+        animation: liveMicPulse 1.2s ease-in-out infinite;
       }
 
-      &:hover { border-color: var(--accent-terracotta); transform: scale(1.10); box-shadow: 0 5px 14px rgba(166,59,25,0.25); }
+      &:hover:not(.listening):not(.live-active) {
+        border-color: var(--accent-terracotta);
+        transform: scale(1.10);
+        box-shadow: 0 5px 14px rgba(166,59,25,0.25);
+      }
     }
   }
 
