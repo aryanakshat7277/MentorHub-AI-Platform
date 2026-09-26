@@ -1638,54 +1638,7 @@ h1, h2, h3, h4, .column-title, .card-title, .step-title, .percentage {
       pointer-events: none;
     }
 
-    .card-circle-wrapper {
-      position: relative;
-      width: 78px;
-      height: 78px;
-      flex-shrink: 0;
-      border-radius: 50%;
-      background: var(--bg-surface-sunken);
-      padding: 4px;
-      box-shadow: var(--shadow-inset-well);
 
-      .circular-chart {
-        width: 100%;
-        height: 100%;
-        transform: rotate(-90deg);
-
-        .circle-bg {
-          fill: none;
-          stroke: rgba(0, 0, 0, 0.06);
-          stroke-width: 3.6;
-        }
-
-        .circle {
-          fill: none;
-          stroke-width: 3.6;
-          stroke-linecap: round;
-          transition: stroke-dasharray 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-
-          &.glow-arc {
-            filter: drop-shadow(0 0 4px currentcolor);
-          }
-        }
-      }
-
-      .dial-center-val {
-        position: absolute;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        .percentage {
-          font-size: 15px;
-          font-weight: 900;
-          color: var(--text-primary);
-        }
-      }
-    }
 
     .card-details {
       display: flex;
@@ -1739,6 +1692,12 @@ h1, h2, h3, h4, .column-title, .card-title, .step-title, .percentage {
           &.tag-terracotta { background: var(--accent-terracotta-tint); color: var(--accent-terracotta); }
           &.tag-amber { background: rgba(179, 94, 23, 0.12); color: #B35E17; }
           &.tag-forest { background: var(--accent-forest-tint); color: var(--accent-forest); }
+        }
+
+        .curricula-pct-badge {
+          font-size: 13px;
+          font-weight: 900;
+          white-space: nowrap;
         }
 
         .mini-spark-track {

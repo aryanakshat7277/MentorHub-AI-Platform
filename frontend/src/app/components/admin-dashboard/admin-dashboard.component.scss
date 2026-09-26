@@ -516,58 +516,40 @@
       gap: 20px;
 
       .gauge-card {
-        padding: 20px;
+        padding: 18px 20px;
         background: var(--bg-surface-sunken);
         border-radius: var(--radius-md);
         border: 1.5px solid var(--border-strong);
         display: flex;
         flex-direction: column;
-        align-items: center;
-        gap: 14px;
+        gap: 12px;
 
-        .gauge-circle-box {
-          position: relative;
-          width: 110px;
-          height: 110px;
+        .diag-header-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
 
-          .svg-gauge-3d {
-            width: 100%;
-            height: 100%;
-            transform: rotate(-90deg);
-
-            .gauge-track-3d {
-              fill: none;
-              stroke: rgba(0, 0, 0, 0.08);
-              stroke-width: 10;
-            }
-
-            .gauge-fill-3d {
-              fill: none;
-              stroke-width: 10;
-              stroke-linecap: round;
-              transition: stroke-dasharray 0.8s ease;
-            }
-          }
-
-          .gauge-center-content {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-
-            .gauge-icon { font-size: 20px; }
-            .gauge-val { font-size: 18px; font-weight: 900; color: var(--text-primary); margin-top: 2px; }
-          }
+          .diag-icon { font-size: 24px; }
+          .gauge-val { font-size: 20px; font-weight: 900; }
         }
 
         .gauge-title {
-          font-size: 13.5px;
+          font-size: 13px;
           font-weight: 800;
           color: var(--text-primary);
-          text-align: center;
+        }
+
+        .diag-progress-track {
+          height: 6px;
+          background: rgba(0, 0, 0, 0.08);
+          border-radius: var(--radius-full);
+          overflow: hidden;
+
+          .diag-progress-fill {
+            height: 100%;
+            border-radius: var(--radius-full);
+            transition: width 0.8s ease;
+          }
         }
       }
     }

@@ -50,25 +50,9 @@
         <p class="banner-sub serif-title">Targeting 100% mastery across active engineering & mentorship paths</p>
       </div>
 
-      <div class="completion-gauge-box">
-        <div class="gauge-dial-container">
-          <svg viewBox="0 0 100 100" class="banner-radial-svg">
-            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--bg-surface-sunken)" stroke-width="8" class="dial-bg" />
-            <circle cx="50" cy="50" r="42" fill="none" stroke="url(#goalProgressGrad)" stroke-width="8" stroke-linecap="round" 
-                    [attr.stroke-dasharray]="(overallProgress * 2.64) + ', 264'" class="dial-fill" />
-            <defs>
-              <linearGradient id="goalProgressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#DE7048" />
-                <stop offset="50%" stop-color="#D4AF37" />
-                <stop offset="100%" stop-color="#2A5A3D" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <div class="dial-center-text">
-            <span class="progress-pct-display serif-title">{{ overallProgress }}%</span>
-            <span class="dial-sub-lbl">COMPLETE</span>
-          </div>
-        </div>
+      <div class="completion-stat-display">
+        <span class="progress-pct-display serif-title">{{ overallProgress }}%</span>
+        <span class="completion-sub-lbl serif-title">COMPLETED</span>
       </div>
     </div>
 

@@ -39,29 +39,8 @@
   <!-- Mentors Matrix Grid -->
   <div class="mentors-grid grid-stagger">
     <div *ngFor="let item of filteredMentors; let i = index" class="mentor-card clay-panel elevated-card-3d" [style.animationDelay]="(i * 0.1) + 's'">
-      <!-- Top Card Header: Compatibility Gauge + Mentor Profile -->
+      <!-- Top Card Header: Mentor Profile -->
       <div class="card-top">
-        <!-- 3D Compatibility Radial Gauge Sphere -->
-        <div class="compatibility-gauge-card 3d-inset-well" [title]="item.compatibilityScore + '% Compatibility Match'">
-          <div class="gauge-svg-wrap">
-            <svg viewBox="0 0 42 42" class="circular-chart">
-              <path class="circle-bg" d="M21 2.5 a 18.5 18.5 0 0 1 0 37 a 18.5 18.5 0 0 1 0 -37" />
-              <path class="circle-fill" 
-                    [attr.stroke-dasharray]="item.compatibilityScore + ', 100'" 
-                    [class.ultra]="item.compatibilityScore >= 95"
-                    [class.high]="item.compatibilityScore >= 90 && item.compatibilityScore < 95"
-                    [class.good]="item.compatibilityScore < 90"
-                    d="M21 2.5 a 18.5 18.5 0 0 1 0 37 a 18.5 18.5 0 0 1 0 -37" />
-            </svg>
-            <div class="gauge-center-text">
-              <span class="gauge-score-num serif-title">{{ item.compatibilityScore }}</span>
-              <span class="gauge-percent-symbol serif-title">%</span>
-            </div>
-          </div>
-          <span class="gauge-pill-label serif-title">MATCH</span>
-        </div>
-
-        <!-- Mentor Avatar Crest & Bio Header -->
         <div class="mentor-profile">
           <div class="avatar-crest-container gold-seal-emboss">
             <img [src]="item.mentor.avatarUrl" [alt]="item.mentor.name" class="mentor-avatar-img" />
@@ -71,6 +50,7 @@
           <div class="mentor-info-block">
             <div class="mentor-name-heading-row">
               <h3 class="mentor-name serif-title">{{ item.mentor.name }}</h3>
+              <span class="compat-pill serif-title">{{ item.compatibilityScore }}% Match</span>
               <span *ngIf="item.isRecharging" class="recharge-badge-pill serif-title" title="Mentor is taking a well-deserved break to recharge">
                 🔋 Resting & Recharging
               </span>

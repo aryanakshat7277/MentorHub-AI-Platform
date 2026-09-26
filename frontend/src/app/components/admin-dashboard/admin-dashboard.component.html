@@ -126,17 +126,14 @@
 
     <div class="gauges-grid">
       <div *ngFor="let gauge of radialGauges" class="gauge-card clay-card-3d tactile-btn-3d">
-        <div class="gauge-circle-box">
-          <svg viewBox="0 0 120 120" class="svg-gauge-3d">
-            <circle cx="60" cy="60" r="50" class="gauge-track-3d"></circle>
-            <circle cx="60" cy="60" r="50" class="gauge-fill-3d" [style.stroke]="gauge.color" [style.stroke-dasharray]="gauge.strokeDash"></circle>
-          </svg>
-          <div class="gauge-center-content">
-            <span class="gauge-icon">{{ gauge.icon }}</span>
-            <span class="gauge-val serif-title">{{ gauge.percent }}%</span>
-          </div>
+        <div class="diag-header-row">
+          <span class="diag-icon">{{ gauge.icon }}</span>
+          <span class="gauge-val serif-title" [style.color]="gauge.color">{{ gauge.percent }}%</span>
         </div>
         <span class="gauge-title serif-title">{{ gauge.title }}</span>
+        <div class="diag-progress-track">
+          <div class="diag-progress-fill" [style.width.%]="gauge.percent" [style.background]="gauge.color"></div>
+        </div>
       </div>
     </div>
   </div>

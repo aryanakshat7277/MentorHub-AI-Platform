@@ -526,66 +526,47 @@
     }
   }
 
-  .gauges-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    align-items: center;
-    justify-items: center;
+  .achievements-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    justify-content: center;
     flex: 1;
 
-    .gauge-item {
+    .achievement-metric-row {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      transition: transform 0.25s ease;
+      gap: 6px;
 
-      &:hover {
-        transform: translateY(-4px) scale(1.04);
-      }
-
-      .gauge-circle-box {
-        position: relative;
-        width: 90px;
-        height: 90px;
+      .achievement-header {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
 
-        .gauge-svg {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-
-          .gauge-progress-circle {
-            animation: gaugeFill 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          }
-        }
-
-        .gauge-percent {
-          position: relative;
-          z-index: 5;
-          font-size: 16px !important;
-          font-weight: 900 !important;
-          line-height: 1 !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          text-align: center;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        .achievement-title {
+          font-size: 12.5px;
+          font-weight: 800;
           color: var(--text-primary);
         }
+
+        .achievement-pct {
+          font-size: 13px;
+          font-weight: 900;
+        }
       }
 
-      .gauge-title {
-        font-size: 11.5px;
-        color: var(--text-tertiary);
-        text-align: center;
-        font-weight: 800;
-        margin-top: 2px;
+      .achievement-track {
+        height: 7px;
+        background: var(--bg-surface-sunken);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+        border: 1px solid var(--border-soft);
+
+        .achievement-fill {
+          height: 100%;
+          border-radius: var(--radius-full);
+          transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
       }
     }
   }

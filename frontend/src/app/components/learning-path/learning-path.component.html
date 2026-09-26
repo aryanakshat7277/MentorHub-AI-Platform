@@ -278,16 +278,6 @@
           <div *ngFor="let card of circularProgressCards" class="circular-progress-card clay-panel elevated-card-3d">
             <div class="grid-watermark"></div>
             
-            <div class="card-circle-wrapper 3d-skeletal-dial">
-              <svg viewBox="0 0 36 36" class="circular-chart">
-                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                <path class="circle glow-arc" [attr.stroke-dasharray]="card.pct + ', 100'" [style.stroke]="card.color" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              </svg>
-              <div class="dial-center-val">
-                <span class="percentage serif-title">{{ card.pct }}%</span>
-              </div>
-            </div>
-
             <div class="card-details">
               <div class="title-row">
                 <div class="tech-icon-crest" [style.border-color]="card.color">
@@ -303,6 +293,7 @@
                 <span [class]="'status-tag serif-title ' + (card.status === 'ADVANCED' ? 'tag-forest' : (card.status === 'STARTING' ? 'tag-amber' : 'tag-terracotta'))">
                   {{ card.status === 'ADVANCED' ? '🏆 ADVANCED MASTERY' : (card.status === 'STARTING' ? '⏳ STARTING MODULE' : '⚡ IN PROGRESS') }}
                 </span>
+                <span class="curricula-pct-badge serif-title" [style.color]="card.color">{{ card.pct }}%</span>
                 <div class="mini-spark-track">
                   <div class="mini-spark-fill" [style.width.%]="card.pct" [style.background]="card.color"></div>
                 </div>
