@@ -1,9 +1,9 @@
 /* ==========================================================================
-   MENTORHUB — ULTRA-ADVANCED ADAPTIVE CLAY & CYBER-GLASS DESIGN SYSTEM (styles.scss)
-   Warm Terracotta / Deep Obsidian Glass · Plus Jakarta Sans · GPU-Accelerated
+   MENTORHUB — EXECUTIVE ACADEMIC & PROFESSIONAL GRAPHICAL DESIGN SYSTEM (styles.scss)
+   Warm Terracotta / Deep Obsidian Glass · Times New Roman · GPU-Accelerated
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&family=Cinzel:wght@600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 :root {
   /* Canvas & Surfaces (Warm Biscuit & Cream Light Theme) */
@@ -104,12 +104,12 @@
   --text-cyan: var(--text-dark-navy);
   --text-purple: var(--text-dark-amethyst);
 
-  /* Fonts - Maintained Times New Roman Font */
-  --font-sans: "Times New Roman", Times, Georgia, serif;
-  --font-serif: "Times New Roman", Times, Georgia, serif;
+  /* Fonts - Maintained Times New Roman Font Architecture */
+  --font-sans: "Times New Roman", Times, "Tinos", "Nimbus Roman No9 L", "Liberation Serif", Georgia, serif;
+  --font-serif: "Times New Roman", Times, "Tinos", "Nimbus Roman No9 L", "Liberation Serif", Georgia, serif;
   --font-mono: 'JetBrains Mono', Consolas, 'Courier New', monospace;
-  --font-heading: "Times New Roman", Times, Georgia, serif;
-  --font-body: "Times New Roman", Times, Georgia, serif;
+  --font-heading: "Times New Roman", Times, "Tinos", "Nimbus Roman No9 L", "Liberation Serif", Georgia, serif;
+  --font-body: "Times New Roman", Times, "Tinos", "Nimbus Roman No9 L", "Liberation Serif", Georgia, serif;
   --font-code: 'JetBrains Mono', monospace;
 
   /* Borders */
@@ -118,15 +118,15 @@
   --border-metal: 1px solid rgba(214,198,183,0.95);
   --border-surface: 1px solid rgba(214,198,183,0.85);
 
-  /* PREMIUM SHADOW SYSTEM */
-  --shadow-clay-flat:   8px 8px 20px rgba(140,110,90,0.30), -6px -6px 16px rgba(255,252,248,0.98), inset 0 1px 0 rgba(255,252,248,0.90);
-  --shadow-clay-raised: 12px 12px 32px rgba(140,110,90,0.38), -10px -10px 26px rgba(255,252,248,1), inset 0 2px 0 rgba(255,252,248,0.95);
-  --shadow-clay-card:   5px 5px 14px rgba(140,110,90,0.22), -5px -5px 12px rgba(255,252,248,0.95), inset 0 1px 0 rgba(255,252,248,0.85);
-  --shadow-inset-well:  inset 4px 4px 8px rgba(60,40,28,0.12), inset -4px -4px 8px rgba(255,252,248,0.98);
-  --shadow-xl:          16px 16px 48px rgba(100,70,50,0.28), -8px -8px 28px rgba(255,252,248,1);
-  --shadow-glow-terra:  0 0 24px rgba(166,59,25,0.18), 0 0 48px rgba(166,59,25,0.08);
-  --shadow-glow-gold:   0 0 20px rgba(212,175,55,0.22), 0 0 40px rgba(212,175,55,0.10);
-  --shadow-float:       0 20px 60px rgba(100,70,50,0.22), 0 8px 24px rgba(100,70,50,0.14);
+  /* CLEAN GRAPHICAL SHADOW SYSTEM */
+  --shadow-clay-flat:   0 4px 16px rgba(100, 70, 50, 0.08), 0 1px 3px rgba(100, 70, 50, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --shadow-clay-raised: 0 8px 26px rgba(100, 70, 50, 0.12), 0 2px 8px rgba(100, 70, 50, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --shadow-clay-card:   0 3px 12px rgba(100, 70, 50, 0.07), 0 1px 3px rgba(100, 70, 50, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.80);
+  --shadow-inset-well:  inset 0 2px 5px rgba(60, 40, 28, 0.08), inset 0 0 0 1px rgba(200, 182, 166, 0.35);
+  --shadow-xl:          0 16px 40px rgba(100, 70, 50, 0.16), 0 4px 12px rgba(100, 70, 50, 0.08);
+  --shadow-glow-terra:  0 0 20px rgba(140, 43, 14, 0.16);
+  --shadow-glow-gold:   0 0 18px rgba(212, 175, 55, 0.20);
+  --shadow-float:       0 14px 36px rgba(100, 70, 50, 0.14);
 
   /* Border Radii */
   --radius-sm: 10px;
@@ -183,7 +183,22 @@
   --shadow-xl:          0 24px 60px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
-/* ── RESET & BASE TYPOGRAPHY ── */
+/* ── UNIVERSAL TIMES NEW ROMAN ARCHITECTURE & BASE TYPOGRAPHY ── */
+*, *::before, *::after,
+html, body, app-root,
+h1, h2, h3, h4, h5, h6,
+p, span, a, label, strong, b, em, i,
+button, input, select, textarea, optgroup, option,
+table, th, td, tr, thead, tbody, tfoot,
+ul, ol, li, dl, dt, dd,
+div, section, article, aside, header, footer, nav, main,
+.serif-title, .title, .subtitle, .badge, .pill, .card, .btn,
+.nav-link, .nav-label, .status-badge, .status-text, .tag,
+.clay-panel, .glass-card, .wood-card, .stat-card, .hero-card,
+.modal-content, .dropdown-menu, .tooltip, [class*="card"], [class*="btn"] {
+  font-family: var(--font-sans) !important;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
 
@@ -196,10 +211,9 @@ html, body {
     radial-gradient(ellipse 50% 60% at 50% 50%,  rgba(253,248,243,0.5) 0%, transparent 80%);
   background-attachment: fixed;
   color: var(--text-primary);
-  font-family: var(--font-sans);
   font-size: 15px;
   font-weight: 500;
-  line-height: 1.55;
+  line-height: 1.6;
   overflow-x: hidden;
   text-rendering: optimizeLegibility;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -212,30 +226,35 @@ body.dark-theme, html.dark {
     radial-gradient(ellipse 50% 60% at 50% 50%,  rgba(15, 23, 42, 0.6) 0%, transparent 80%);
 }
 
-code, pre, .code-textarea, .highlight-layer, .line-number, .logs-content,
+/* Strict Monospace Exclusion for Code, Terminals, and IDE Editors */
+code, pre, kbd, samp,
+.code-textarea, .highlight-layer, .line-number, .logs-content,
 .monospace-font, .token-comment, .token-keyword, .token-string, .token-function,
-.token-class, .token-number {
-  font-family: var(--font-mono) !important; font-size: 13.5px !important;
-  font-weight: 500 !important; line-height: 22px !important;
+.token-class, .token-number, .monaco-editor, .monaco-editor *,
+.terminal, .terminal *, .console-output, .console-output *,
+pre *, code * {
+  font-family: var(--font-mono) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  line-height: 22px !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
   font-weight: 800;
   color: var(--text-primary);
   letter-spacing: -0.015em;
 }
-h1 { font-size: 30px; line-height: 1.25; color: var(--text-primary); }
-h2 { font-size: 24px; line-height: 1.30; color: var(--text-primary); }
-h3 { font-size: 20px; line-height: 1.35; font-weight: 700; color: var(--text-primary); }
-h4 { font-size: 17px; line-height: 1.40; font-weight: 700; color: var(--text-primary); }
+h1 { font-size: 28px; line-height: 1.25; color: var(--text-primary); }
+h2 { font-size: 22px; line-height: 1.30; color: var(--text-primary); }
+h3 { font-size: 19px; line-height: 1.35; font-weight: 700; color: var(--text-primary); }
+h4 { font-size: 16px; line-height: 1.40; font-weight: 700; color: var(--text-primary); }
 p { color: var(--text-secondary); line-height: 1.6; font-weight: 500; }
 span, div, a { color: inherit; }
-label { color: var(--text-secondary); font-weight: 700; }
+label { color: var(--text-secondary); font-weight: 700; letter-spacing: 0.01em; }
 strong, b { color: var(--text-primary); font-weight: 800; }
-small, .micro-copy { color: var(--text-muted); font-weight: 600; }
+small, .micro-copy { color: var(--text-muted); font-weight: 600; letter-spacing: 0.02em; }
 .subtitle, .text-muted, caption { color: var(--text-tertiary); font-weight: 600; }
-button, input, select, textarea, .nav-item { font-family: var(--font-sans); font-weight: 600; transition: all 0.22s var(--ease-smooth); }
+button, input, select, textarea, .nav-item { font-weight: 600; transition: all 0.22s var(--ease-smooth); }
 img { max-width: 100%; height: auto; }
 
 /* ==========================================================================
@@ -492,7 +511,7 @@ input[type="text"], input[type="email"], input[type="password"], select, textare
 
 /* ── SERIF TITLE / MODERN HEADING UTILITY ── */
 .serif-title { font-family: var(--font-heading); font-weight: 700; letter-spacing: -0.01em; }
-.diploma-serif { font-family: 'Cinzel', 'Times New Roman', serif !important; font-weight: 800; }
+.diploma-serif { font-family: "Times New Roman", Times, Georgia, serif !important; font-weight: 800; }
 
 /* ── STATUS PILL ── */
 .status-pill, .active-cert-pill {
