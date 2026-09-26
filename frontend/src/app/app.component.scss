@@ -62,6 +62,8 @@
   &:has(app-workspace) {
     margin-top: 58px;
     padding: 10px 16px 16px 16px;
+    animation: none !important;
+    transform: none !important;
   }
 }
 

@@ -528,145 +528,145 @@
   <!-- ========================================================================= -->
   <!-- POLYGLOT CROSS-LANGUAGE CODE CONVERTER MODAL (Clean UI / Identical Output) -->
   <!-- ========================================================================= -->
-  <div class="polyglot-backdrop" *ngIf="isPolyglotModalOpen" (click)="closePolyglotModal()"></div>
-
-  <div class="polyglot-modal clay-panel elevated-card-3d" *ngIf="isPolyglotModalOpen">
-    <!-- Modal Header -->
-    <div class="polyglot-header">
-      <div class="header-left">
-        <div class="polyglot-crest gold-seal-emboss">
-          <span>🌐</span>
-        </div>
-        <div>
-          <div class="title-row">
-            <h3 class="serif-title">CROSS-LANGUAGE CODE CONVERTER</h3>
-            <span class="guarantee-pill serif-title">🎯 IDENTICAL OUTPUT GUARANTEE</span>
+  <div class="polyglot-modal-overlay" *ngIf="isPolyglotModalOpen" (click)="closePolyglotModal()">
+    <div class="polyglot-modal clay-panel elevated-card-3d" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="polyglot-header">
+        <div class="header-left">
+          <div class="polyglot-crest gold-seal-emboss">
+            <span>🌐</span>
           </div>
-          <p class="polyglot-sub serif-title">
-            Write this same logic in other supported compiler languages producing the exact same execution output.
-          </p>
-        </div>
-      </div>
-      <button class="close-modal-btn tactile-btn-3d" (click)="closePolyglotModal()" title="Close Converter">✕</button>
-    </div>
-
-    <!-- Language Selector Track -->
-    <div class="polyglot-selector-bar">
-      <div class="source-lang-badge serif-title">
-        <span class="source-dot"></span>
-        <span>Source: <strong>{{ formatLanguageName(activeLanguage) }}</strong></span>
-      </div>
-      <span class="arrow-indicator">➔</span>
-      <div class="target-pills-row">
-        <span class="target-label serif-title">Target:</span>
-        <button *ngFor="let lang of supportedTargetLanguages"
-                class="target-pill-btn tactile-btn-3d serif-title"
-                [class.active]="targetLanguage === lang"
-                [class.current-source]="activeLanguage === lang"
-                (click)="selectTargetLanguage(lang)"
-                [disabled]="activeLanguage === lang">
-          <span>{{ formatLanguageName(lang) }}</span>
-          <span class="current-tag" *ngIf="activeLanguage === lang">(current)</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Modal Body: Side-by-Side or Clean View -->
-    <div class="polyglot-body">
-      <!-- Loading Overlay -->
-      <div class="transpile-loading-overlay" *ngIf="isTranspiling">
-        <div class="spinner-core"></div>
-        <h4 class="serif-title">Converting {{ formatLanguageName(activeLanguage) }} ➔ {{ formatLanguageName(targetLanguage) }}...</h4>
-        <p class="serif-title">Synthesizing idiomatic syntax & verifying output parity...</p>
-      </div>
-
-      <!-- Comparison Grid -->
-      <div class="code-compare-grid">
-        <!-- Left Pane: Source Code -->
-        <div class="compare-pane source-pane debossed-well">
-          <div class="pane-header">
-            <span class="pane-title serif-title">ORIGINAL: {{ formatLanguageName(activeLanguage) }}</span>
-            <span class="char-count serif-title">{{ (code || '').split('\n').length }} lines</span>
-          </div>
-          <div class="code-viewport">
-            <pre><code>{{ code }}</code></pre>
+          <div>
+            <div class="title-row">
+              <h3 class="serif-title">CROSS-LANGUAGE CODE CONVERTER</h3>
+              <span class="guarantee-pill serif-title">🎯 IDENTICAL OUTPUT GUARANTEE</span>
+            </div>
+            <p class="polyglot-sub serif-title">
+              Write this same logic in other supported compiler languages producing the exact same execution output.
+            </p>
           </div>
         </div>
+        <button class="close-modal-btn tactile-btn-3d" (click)="closePolyglotModal()" title="Close Converter">✕</button>
+      </div>
 
-        <!-- Right Pane: Transpiled Code -->
-        <div class="compare-pane target-pane debossed-well">
-          <div class="pane-header">
-            <span class="pane-title serif-title target-highlight">TRANSLATED: {{ formatLanguageName(targetLanguage) }}</span>
-            <div class="telemetry-pill serif-title" *ngIf="transpileProvider">
-              ⚡ {{ transpileProvider }} ({{ transpileModel }}) • {{ transpileLatency }}ms
+      <!-- Language Selector Track -->
+      <div class="polyglot-selector-bar">
+        <div class="source-lang-badge serif-title">
+          <span class="source-dot"></span>
+          <span>Source: <strong>{{ formatLanguageName(activeLanguage) }}</strong></span>
+        </div>
+        <span class="arrow-indicator">➔</span>
+        <div class="target-pills-row">
+          <span class="target-label serif-title">Target:</span>
+          <button *ngFor="let lang of supportedTargetLanguages"
+                  class="target-pill-btn tactile-btn-3d serif-title"
+                  [class.active]="targetLanguage === lang"
+                  [class.current-source]="activeLanguage === lang"
+                  (click)="selectTargetLanguage(lang)"
+                  [disabled]="activeLanguage === lang">
+            <span>{{ formatLanguageName(lang) }}</span>
+            <span class="current-tag" *ngIf="activeLanguage === lang">(current)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body: Side-by-Side or Clean View -->
+      <div class="polyglot-body">
+        <!-- Loading Overlay -->
+        <div class="transpile-loading-overlay" *ngIf="isTranspiling">
+          <div class="spinner-core"></div>
+          <h4 class="serif-title">Converting {{ formatLanguageName(activeLanguage) }} ➔ {{ formatLanguageName(targetLanguage) }}...</h4>
+          <p class="serif-title">Synthesizing idiomatic syntax & verifying output parity...</p>
+        </div>
+
+        <!-- Comparison Grid -->
+        <div class="code-compare-grid">
+          <!-- Left Pane: Source Code -->
+          <div class="compare-pane source-pane debossed-well">
+            <div class="pane-header">
+              <span class="pane-title serif-title">ORIGINAL: {{ formatLanguageName(activeLanguage) }}</span>
+              <span class="char-count serif-title">{{ (code || '').split('\n').length }} lines</span>
+            </div>
+            <div class="code-viewport">
+              <pre><code>{{ code }}</code></pre>
             </div>
           </div>
-          <div class="code-viewport">
-            <pre><code>{{ transpiledCode }}</code></pre>
-          </div>
-        </div>
-      </div>
 
-      <!-- Explanation & Key Language Differences -->
-      <div class="polyglot-meta-card clay-panel debossed-well" *ngIf="transpiledExplanation || transpiledDifferences.length > 0">
-        <div class="meta-section explanation-section" *ngIf="transpiledExplanation">
-          <div class="meta-label serif-title">💡 How It Works (Output Parity):</div>
-          <p class="meta-text serif-title">{{ transpiledExplanation }}</p>
-        </div>
-
-        <div class="meta-section diffs-section" *ngIf="transpiledDifferences.length > 0">
-          <div class="meta-label serif-title">⚖️ Key Language Differences:</div>
-          <div class="diff-chips-wrap">
-            <div *ngFor="let diff of transpiledDifferences" class="diff-chip serif-title">
-              <span class="diff-bullet">•</span>
-              <span>{{ diff }}</span>
+          <!-- Right Pane: Transpiled Code -->
+          <div class="compare-pane target-pane debossed-well">
+            <div class="pane-header">
+              <span class="pane-title serif-title target-highlight">TRANSLATED: {{ formatLanguageName(targetLanguage) }}</span>
+              <div class="telemetry-pill serif-title" *ngIf="transpileProvider">
+                ⚡ {{ transpileProvider }} ({{ transpileModel }}) • {{ transpileLatency }}ms
+              </div>
+            </div>
+            <div class="code-viewport">
+              <pre><code>{{ transpiledCode }}</code></pre>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Test Run Output Console (Verification Sandbox) -->
-      <div class="test-run-console debossed-well" *ngIf="transpiledTestOutput">
-        <div class="console-header">
-          <span class="console-title serif-title">
-            <span class="status-indicator" [class.success]="transpiledTestStatus === 'SUCCESS'" [class.error]="transpiledTestStatus === 'ERROR'"></span>
-            VERIFICATION RUN OUTPUT ({{ formatLanguageName(targetLanguage) }} Sandbox):
-          </span>
+        <!-- Explanation & Key Language Differences -->
+        <div class="polyglot-meta-card clay-panel debossed-well" *ngIf="transpiledExplanation || transpiledDifferences.length > 0">
+          <div class="meta-section explanation-section" *ngIf="transpiledExplanation">
+            <div class="meta-label serif-title">💡 How It Works (Output Parity):</div>
+            <p class="meta-text serif-title">{{ transpiledExplanation }}</p>
+          </div>
+
+          <div class="meta-section diffs-section" *ngIf="transpiledDifferences.length > 0">
+            <div class="meta-label serif-title">⚖️ Key Language Differences:</div>
+            <div class="diff-chips-wrap">
+              <div *ngFor="let diff of transpiledDifferences" class="diff-chip serif-title">
+                <span class="diff-bullet">•</span>
+                <span>{{ diff }}</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <pre class="console-body" [class.success-text]="transpiledTestStatus === 'SUCCESS'" [class.error-text]="transpiledTestStatus === 'ERROR'"><code>{{ transpiledTestOutput }}</code></pre>
-      </div>
-    </div>
 
-    <!-- Modal Footer Actions -->
-    <div class="polyglot-footer">
-      <div class="footer-left">
-        <button class="test-run-btn tactile-btn-3d serif-title"
-                (click)="testRunTranspiledCode()"
-                [disabled]="isTestingTranspiled || isTranspiling || !transpiledCode"
-                title="Execute translated code in Piston sandbox to verify output">
-          <span>{{ isTestingTranspiled ? '⏳ RUNNING...' : '▶ TEST RUN IN ' + formatLanguageName(targetLanguage) }}</span>
-        </button>
+        <!-- Test Run Output Console (Verification Sandbox) -->
+        <div class="test-run-console debossed-well" *ngIf="transpiledTestOutput">
+          <div class="console-header">
+            <span class="console-title serif-title">
+              <span class="status-indicator" [class.success]="transpiledTestStatus === 'SUCCESS'" [class.error]="transpiledTestStatus === 'ERROR'"></span>
+              VERIFICATION RUN OUTPUT ({{ formatLanguageName(targetLanguage) }} Sandbox):
+            </span>
+          </div>
+          <pre class="console-body" [class.success-text]="transpiledTestStatus === 'SUCCESS'" [class.error-text]="transpiledTestStatus === 'ERROR'"><code>{{ transpiledTestOutput }}</code></pre>
+        </div>
       </div>
 
-      <div class="footer-right">
-        <button class="copy-code-btn tactile-btn-3d serif-title"
-                (click)="copyTranspiledCode()"
-                [disabled]="!transpiledCode"
-                title="Copy translated code to clipboard">
-          <span>📋 COPY CODE</span>
-        </button>
+      <!-- Modal Footer Actions -->
+      <div class="polyglot-footer">
+        <div class="footer-left">
+          <button class="test-run-btn tactile-btn-3d serif-title"
+                  (click)="testRunTranspiledCode()"
+                  [disabled]="isTestingTranspiled || isTranspiling || !transpiledCode"
+                  title="Execute translated code in Piston sandbox to verify output">
+            <span>{{ isTestingTranspiled ? '⏳ RUNNING...' : '▶ TEST RUN IN ' + formatLanguageName(targetLanguage) }}</span>
+          </button>
+        </div>
 
-        <button class="apply-code-btn btn-primary tactile-btn-3d serif-title"
-                (click)="applyTranspiledCode()"
-                [disabled]="!transpiledCode"
-                title="Replace editor code with this translated code and switch language">
-          <span>🔄 LOAD INTO IDE</span>
-          <span class="shine-sweep"></span>
-        </button>
+        <div class="footer-right">
+          <button class="copy-code-btn tactile-btn-3d serif-title"
+                  (click)="copyTranspiledCode()"
+                  [disabled]="!transpiledCode"
+                  title="Copy translated code to clipboard">
+            <span>📋 COPY CODE</span>
+          </button>
 
-        <button class="cancel-btn tactile-btn-3d serif-title" (click)="closePolyglotModal()">
-          CLOSE
-        </button>
+          <button class="apply-code-btn btn-primary tactile-btn-3d serif-title"
+                  (click)="applyTranspiledCode()"
+                  [disabled]="!transpiledCode"
+                  title="Replace editor code with this translated code and switch language">
+            <span>🔄 LOAD INTO IDE</span>
+            <span class="shine-sweep"></span>
+          </button>
+
+          <button class="cancel-btn tactile-btn-3d serif-title" (click)="closePolyglotModal()">
+            CLOSE
+          </button>
+        </div>
       </div>
     </div>
   </div>

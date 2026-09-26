@@ -619,7 +619,8 @@ button:hover .shine-sweep { left: 160%; }
    GOD-LEVEL ANIMATION SUITE
    ========================================================================== */
 
-main.page-content > * { animation: smoothFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+main.page-content > *:not(app-workspace) { animation: smoothFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+main.page-content > app-workspace { animation: none !important; transform: none !important; }
 
 .stagger-1 { animation: smoothFadeInUp 0.5s var(--ease-smooth) 0.06s both; }
 .stagger-2 { animation: smoothFadeInUp 0.5s var(--ease-smooth) 0.12s both; }
@@ -749,7 +750,8 @@ main.page-content > * { animation: smoothFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3
 .modal-backdrop,
 .quest-modal-backdrop,
 .spotlight-modal-overlay,
-.editor-modal-backdrop {
+.editor-modal-backdrop,
+.polyglot-modal-overlay {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
@@ -757,7 +759,7 @@ main.page-content > * { animation: smoothFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3
   bottom: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  z-index: 100000 !important;
+  z-index: 100005 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -765,7 +767,7 @@ main.page-content > * { animation: smoothFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
   margin: 0 !important;
-  padding: 20px !important;
+  padding: 24px !important;
   box-sizing: border-box !important;
 }
 
@@ -774,9 +776,10 @@ main.page-content > * { animation: smoothFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3
 .preview-modal,
 .edit-modal,
 .quest-modal-card,
-.spotlight-dialog {
+.spotlight-dialog,
+.polyglot-modal {
   position: relative !important;
-  z-index: 100001 !important;
+  z-index: 100006 !important;
   max-height: 90vh !important;
   overflow-y: auto !important;
   box-sizing: border-box !important;
