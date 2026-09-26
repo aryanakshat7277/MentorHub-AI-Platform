@@ -519,6 +519,17 @@ export class LearningPathComponent implements OnInit, OnDestroy {
     return nodes;
   }
 
+  isNodeMatchingFilter(node: QuestNode): boolean {
+    if (this.filterMode === 'ALL') return true;
+    if (this.filterMode === 'ACTIVE') {
+      return node.status === 'ACTIVE_QUEST' || node.status === 'AVAILABLE';
+    }
+    if (this.filterMode === 'CHESTS') {
+      return node.type === 'CHEST' || node.type === 'BOSS';
+    }
+    return true;
+  }
+
   getCompletedObjectivesCount(node: QuestNode): number {
     if (!node || !node.objectives) return 0;
     return node.objectives.filter(o => o.done).length;

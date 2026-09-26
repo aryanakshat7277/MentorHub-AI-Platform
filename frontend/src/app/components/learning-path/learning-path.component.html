@@ -5,15 +5,15 @@
   <!-- Page Header & View Mode Switcher -->
   <div class="page-header-row">
     <div class="header-branding">
-      <div class="gold-seal-emboss header-seal" title="Gamified Career Quest Engine">
-        <span class="seal-glyph">🗺️</span>
+      <div class="gold-seal-emboss header-seal" title="Systems Architecture & Curriculum Roadmap">
+        <span class="seal-glyph">🏛️</span>
       </div>
       <div>
         <div class="title-with-pill">
-          <h1 class="serif-title">CAREER QUEST MAP & ADVENTURE ROADMAP</h1>
-          <span class="status-pill active-path-pill">⚡ RPG LEVELING ACTIVE</span>
+          <h1 class="serif-title">SYSTEMS ARCHITECTURE &amp; LEARNING ROADMAP</h1>
+          <span class="status-pill active-path-pill">● ACTIVE CURRICULUM</span>
         </div>
-        <p class="subtitle serif-title">Conquer technical trials, level up your engineering hero, and unlock verified milestones</p>
+        <p class="subtitle serif-title">Master full-stack system architecture, complete engineering deliverables, and unlock verified milestones</p>
       </div>
     </div>
 
@@ -23,22 +23,22 @@
         (click)="switchView('quest_map')"
         [class.active]="activeView === 'quest_map'"
         class="view-tab-btn">
-        <span>🗺️</span> RPG Quest Map
+        <span>🏛️</span> Architecture Pipeline
       </button>
       <button 
         (click)="switchView('curricula_matrix')"
         [class.active]="activeView === 'curricula_matrix'"
         class="view-tab-btn">
-        <span>📊</span> Curricula Matrix & Tree
+        <span>📊</span> Curriculum Matrix &amp; Modules
       </button>
     </div>
   </div>
 
-  <!-- HERO CHARACTER SHEET HUD (Always Visible) -->
+  <!-- ENGINEERING PROGRESSION HUD (Always Visible) -->
   <div class="hero-character-hud clay-panel elevated-card-3d">
     <div class="hud-left-profile">
       <div class="hero-avatar-frame" [class.aura-glow]="(user?.currentStreak || 0) > 5">
-        <img [src]="user?.avatarUrl || 'assets/mentorhub-logo.png'" alt="Hero Avatar" class="hero-avatar-img" />
+        <img [src]="user?.avatarUrl || 'assets/mentorhub-logo.png'" alt="Engineer Avatar" class="hero-avatar-img" />
         <div class="hero-level-badge">
           <span>Lv.{{ heroLevel }}</span>
         </div>
@@ -46,7 +46,7 @@
       <div class="hero-meta">
         <div class="hero-name-row">
           <h2 class="hero-name serif-title">{{ user?.name || 'KRITI SAGAR' }}</h2>
-          <span class="hero-rank-tag serif-title">👑 {{ heroClass }}</span>
+          <span class="hero-rank-tag serif-title">🎓 {{ heroClass }}</span>
         </div>
         <p class="hero-tagline serif-title">{{ user?.title || 'Full Stack Engineer & Mentee' }}</p>
       </div>
@@ -54,7 +54,7 @@
 
     <div class="hud-middle-xp">
       <div class="xp-bar-header">
-        <span class="xp-label serif-title">⭐ EXPERIENCE POINTS (XP)</span>
+        <span class="xp-label serif-title">MILESTONE CREDITS &amp; PROGRESSION</span>
         <span class="xp-numbers serif-title">{{ currentXp }} / {{ nextLevelXp }} XP ({{ levelProgressPct }}%)</span>
       </div>
       <div class="xp-track-wrapper">
@@ -63,11 +63,11 @@
         </div>
       </div>
       <div class="xp-sub-stats">
-        <span class="streak-boost-tag serif-title" title="Daily Activity Streak Multiplier">
-          🔥 {{ user?.currentStreak || 14 }}d Streak • <strong>{{ streakMultiplier.toFixed(1) }}x XP Boost</strong>
+        <span class="streak-boost-tag serif-title" title="Daily Activity Streak">
+          🔥 {{ user?.currentStreak || 14 }}d Active Streak • <strong>{{ streakMultiplier.toFixed(1) }}x Multiplier</strong>
         </span>
         <span class="quests-count-tag serif-title">
-          🛡️ {{ completedNodesCount }} / {{ totalNodesCount }} Quests Conquered in Realm
+          ✓ {{ completedNodesCount }} of {{ totalNodesCount }} Milestones Completed
         </span>
       </div>
     </div>
@@ -76,7 +76,7 @@
       <button 
         (click)="toggleSoundMute()" 
         class="sound-toggle-btn tactile-btn-3d serif-title" 
-        [title]="isSoundMuted ? 'Unmute Audio Synthesizers' : 'Mute Audio Synthesizers'">
+        [title]="isSoundMuted ? 'Unmute Audio Feedback' : 'Mute Audio Feedback'">
         <span>{{ isSoundMuted ? '🔇 MUTED' : '🔊 SOUND ON' }}</span>
       </button>
 
@@ -85,10 +85,10 @@
         [disabled]="dailyBountyClaimed"
         [class.claimed]="dailyBountyClaimed"
         class="bounty-dice-btn tactile-btn-3d">
-        <span class="bounty-icon">🎲</span>
+        <span class="bounty-icon">🎯</span>
         <div class="bounty-text">
-          <span class="bounty-title serif-title">{{ dailyBountyClaimed ? '✓ BOUNTY CLAIMED' : 'ROLL DAILY BOUNTY' }}</span>
-          <span class="bounty-reward serif-title">{{ dailyBountyClaimed ? 'Come back tomorrow!' : '+150 XP Daily Roll' }}</span>
+          <span class="bounty-title serif-title">{{ dailyBountyClaimed ? '✓ GOAL CLAIMED' : 'DAILY LEARNING BONUS' }}</span>
+          <span class="bounty-reward serif-title">{{ dailyBountyClaimed ? 'Claimed for today' : '+150 XP Daily Goal' }}</span>
         </div>
       </button>
     </div>
@@ -151,99 +151,86 @@
       </div>
 
       <!-- Executive Engineering Architecture & Milestone Pipeline Viewport -->
-      <div class="rpg-map-viewport">
-        <!-- Architectural Blueprint Stage Columns Backdrop -->
-        <div class="blueprint-grid-columns">
-          <div class="blueprint-col" *ngFor="let node of activeRealm.nodes; let idx = index">
-            <div class="blueprint-col-header serif-title">
-              <span class="col-stage-idx">0{{ idx + 1 }}</span>
-              <span class="col-stage-domain">{{ node.zone.split('•')[1] || node.zone }}</span>
-            </div>
-            <div class="blueprint-col-guide"></div>
-          </div>
-        </div>
+      <div class="pipeline-viewport">
+        <div class="architecture-pipeline-flow">
+          <div 
+            *ngFor="let node of activeRealm.nodes; let idx = index; let isLast = last; let isFirst = first"
+            class="pipeline-station"
+            [class.completed]="node.status === 'COMPLETED'"
+            [class.active-station]="node.status === 'ACTIVE_QUEST'"
+            [class.available]="node.status === 'AVAILABLE'"
+            [class.locked]="node.status === 'LOCKED'"
+            [class.dimmed]="!isNodeMatchingFilter(node)"
+            (click)="openNodeModal(node)"
+            title="{{ node.title }} (Click to inspect engineering deliverables)">
 
-        <!-- SVG Connecting Architectural Pipeline -->
-        <svg class="map-svg-conduit" viewBox="0 0 1000 500" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#117A65" stop-opacity="0.95" />
-              <stop offset="55%" stop-color="#D4AF37" stop-opacity="0.95" />
-              <stop offset="100%" stop-color="#1A5276" stop-opacity="0.85" />
-            </linearGradient>
-            <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="4" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-
-          <!-- Pipeline Track Rail Shadow -->
-          <path [attr.d]="generateMapSvgPath()" class="path-shadow" />
-          <!-- Solid Precision Base Conduit -->
-          <path [attr.d]="generateMapSvgPath()" class="path-glowing-line" />
-          <!-- Animated Signal Telemetry Stream -->
-          <path [attr.d]="generateMapSvgPath()" class="path-energy-flow" />
-          <path [attr.d]="generateMapSvgPath()" class="path-spark-pulse" />
-        </svg>
-
-        <!-- Interactive Engineering Milestone Stations -->
-        <div *ngFor="let node of getFilteredNodes()" 
-             (click)="openNodeModal(node)"
-             [class]="'map-quest-node ' + node.status.toLowerCase() + ' ' + node.type.toLowerCase()"
-             [style.left.%]="node.mapX"
-             [style.top.%]="node.mapY"
-             title="{{ node.title }} (Click to inspect engineering deliverables)">
-          
-          <!-- 3D Medallion Hub with Mathematically Centered Concentric Pulse Rings -->
-          <div class="node-medallion-wrap">
-            <div *ngIf="node.status === 'ACTIVE_QUEST'" class="active-node-rings">
-              <span class="ring-pulse pulse-1"></span>
-              <span class="ring-pulse pulse-2"></span>
+            <!-- Stage Header Label -->
+            <div class="station-header">
+              <span class="station-stage-num">0{{ idx + 1 }}</span>
+              <span class="station-domain-title">{{ node.zone.split('•')[1] || node.zone }}</span>
             </div>
 
-            <div class="node-medallion 3d-node-medallion" [class.mastered]="node.status === 'COMPLETED'">
-              <span class="node-icon">{{ node.icon }}</span>
-              <div class="node-level-tag serif-title">0{{ node.nodeIndex }}</div>
-            </div>
-          </div>
-
-          <!-- Attached Executive Milestone Station Card -->
-          <div class="node-station-card">
-            <div class="station-card-top">
-              <span class="station-status-badge serif-title">
-                <ng-container *ngIf="node.status === 'COMPLETED'">✓ VERIFIED</ng-container>
-                <ng-container *ngIf="node.status === 'ACTIVE_QUEST'">● IN PROGRESS</ng-container>
-                <ng-container *ngIf="node.status === 'AVAILABLE'">○ AVAILABLE</ng-container>
-                <ng-container *ngIf="node.status === 'LOCKED'">🔒 CAPSTONE</ng-container>
-              </span>
-              <span class="station-xp-tag serif-title">+{{ node.xpReward }} XP</span>
-            </div>
-
-            <h4 class="station-card-title serif-title">{{ node.title }}</h4>
-            <span class="station-card-zone serif-title">{{ node.subtitle }}</span>
-
-            <div class="station-card-progress" *ngIf="node.objectives?.length">
-              <div class="station-progress-bar">
-                <div class="station-progress-fill" [style.width.%]="getObjectiveProgressPct(node)"></div>
+            <!-- Stepper Node Hub with Pipeline Connectors -->
+            <div class="station-node-hub">
+              <!-- Left connector line -->
+              <div 
+                *ngIf="!isFirst" 
+                class="pipeline-connector-line line-left"
+                [class.connector-completed]="node.status === 'COMPLETED' || node.status === 'ACTIVE_QUEST'">
               </div>
-              <div class="station-progress-meta serif-title">
-                <span>{{ getCompletedObjectivesCount(node) }}/{{ node.objectives.length }} Modules</span>
-                <span>{{ getObjectiveProgressPct(node) }}%</span>
+
+              <!-- Right connector line -->
+              <div 
+                *ngIf="!isLast" 
+                class="pipeline-connector-line line-right"
+                [class.connector-completed]="node.status === 'COMPLETED'">
+              </div>
+
+              <!-- Active Avatar Beacon Docked Neatly on Current Active Stage -->
+              <div class="station-active-beacon" *ngIf="node.status === 'ACTIVE_QUEST'">
+                <div class="beacon-avatar-bubble">
+                  <img [src]="user?.avatarUrl || 'assets/akshat-profile.jpg'" alt="Active User" class="beacon-avatar-img" />
+                </div>
+                <div class="beacon-pill">
+                  <span class="live-dot"></span>
+                  <span>CURRENT STAGE</span>
+                </div>
+              </div>
+
+              <!-- Milestone Hub Circle -->
+              <div class="station-node-circle" [class.mastered]="node.status === 'COMPLETED'">
+                <span class="station-node-icon" *ngIf="node.status !== 'COMPLETED'">{{ node.icon }}</span>
+                <span class="station-node-check" *ngIf="node.status === 'COMPLETED'">✓</span>
+                <span class="station-node-badge-idx">0{{ node.nodeIndex }}</span>
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Dynamic Active Architect Position Beacon -->
-        <div class="hero-avatar-pin" [style.left.%]="activeAvatarX" [style.top.%]="activeAvatarY - 12">
-          <div class="hero-pin-beacon">
-            <div class="hero-pin-avatar-frame">
-              <img [src]="user?.avatarUrl || 'assets/akshat-profile.jpg'" alt="Active User" class="hero-pin-img" />
+            <!-- Station Deliverable Card -->
+            <div class="station-deliverable-card">
+              <div class="deliverable-card-top">
+                <span class="deliverable-status-badge">
+                  <ng-container *ngIf="node.status === 'COMPLETED'">✓ VERIFIED</ng-container>
+                  <ng-container *ngIf="node.status === 'ACTIVE_QUEST'">● IN PROGRESS</ng-container>
+                  <ng-container *ngIf="node.status === 'AVAILABLE'">○ AVAILABLE</ng-container>
+                  <ng-container *ngIf="node.status === 'LOCKED'">🔒 CAPSTONE</ng-container>
+                </span>
+                <span class="deliverable-xp-tag">+{{ node.xpReward }} XP</span>
+              </div>
+
+              <h4 class="deliverable-title serif-title">{{ node.title }}</h4>
+              <p class="deliverable-subtitle serif-title">{{ node.subtitle }}</p>
+
+              <div class="deliverable-progress" *ngIf="node.objectives?.length">
+                <div class="deliverable-progress-bar">
+                  <div class="deliverable-progress-fill" [style.width.%]="getObjectiveProgressPct(node)"></div>
+                </div>
+                <div class="deliverable-progress-meta serif-title">
+                  <span>{{ getCompletedObjectivesCount(node) }}/{{ node.objectives.length }} Modules</span>
+                  <span>{{ getObjectiveProgressPct(node) }}%</span>
+                </div>
+              </div>
             </div>
-            <div class="hero-pin-tag serif-title">
-              <span class="live-pin-dot"></span>
-              <span>CURRENT STAGE</span>
-            </div>
+
           </div>
         </div>
       </div>
@@ -357,22 +344,22 @@
         </div>
         <div class="modal-title-box">
           <div class="modal-pills-row">
-            <span class="difficulty-pill serif-title">{{ selectedNode.difficulty }} TRIAL</span>
+            <span class="difficulty-pill serif-title">{{ selectedNode.difficulty }} STAGE</span>
             <span class="zone-pill serif-title">📍 {{ selectedNode.zone }}</span>
             <span class="time-pill serif-title">⏱️ {{ selectedNode.estimatedTime }}</span>
           </div>
           <h2 class="modal-quest-title serif-title">{{ selectedNode.title }}</h2>
           <p class="modal-quest-subtitle serif-title">{{ selectedNode.subtitle }}</p>
         </div>
-        <button (click)="closeModal()" class="modal-close-btn" title="Close Quest">✕</button>
+        <button (click)="closeModal()" class="modal-close-btn" title="Close Stage">✕</button>
       </div>
 
       <div class="modal-body">
-        <!-- Quest Lore Box -->
+        <!-- Architecture Briefing Box -->
         <div class="quest-lore-card">
           <div class="lore-header">
-            <span class="lore-icon">📜</span>
-            <span class="lore-title serif-title">QUEST LORE & ARCHITECTURAL BRIEFING</span>
+            <span class="lore-icon">🏛️</span>
+            <span class="lore-title serif-title">ARCHITECTURAL BRIEFING &amp; SPECIFICATION</span>
           </div>
           <p class="lore-text serif-title">{{ selectedNode.lore }}</p>
         </div>
@@ -380,7 +367,7 @@
         <!-- Objectives Checklist -->
         <div class="quest-objectives-section">
           <div class="objectives-header-row">
-            <h3 class="section-heading serif-title">⚔️ QUEST OBJECTIVES &amp; MILESTONES</h3>
+            <h3 class="section-heading serif-title">📋 ENGINEERING OBJECTIVES &amp; DELIVERABLES</h3>
             <span class="objectives-progress-tag serif-title">
               {{ getCompletedObjectivesCount(selectedNode) }} of {{ selectedNode.objectives.length }} Done ({{ getObjectiveProgressPct(selectedNode) }}%)
             </span>
@@ -428,9 +415,9 @@
           [disabled]="selectedNode.claimed || selectedNode.status === 'LOCKED'"
           [class.claimed]="selectedNode.claimed"
           class="btn-claim-reward tactile-btn-3d serif-title">
-          <span *ngIf="!selectedNode.claimed && selectedNode.status !== 'LOCKED'">👑 COMPLETE QUEST &amp; CLAIM +{{ (selectedNode.xpReward * streakMultiplier) | number:'1.0-0' }} XP</span>
-          <span *ngIf="selectedNode.claimed">✓ QUEST MASTERED &amp; REWARDS CLAIMED</span>
-          <span *ngIf="selectedNode.status === 'LOCKED'">🔒 PREREQUISITE QUESTS REQUIRED</span>
+          <span *ngIf="!selectedNode.claimed && selectedNode.status !== 'LOCKED'">✓ VERIFY STAGE &amp; CLAIM +{{ (selectedNode.xpReward * streakMultiplier) | number:'1.0-0' }} XP</span>
+          <span *ngIf="selectedNode.claimed">✓ STAGE VERIFIED &amp; REWARDS CLAIMED</span>
+          <span *ngIf="selectedNode.status === 'LOCKED'">🔒 PREREQUISITE STAGES REQUIRED</span>
         </button>
       </div>
     </div>
@@ -449,7 +436,7 @@
       </div>
 
       <button (click)="closeCelebration()" class="btn-continue-adventure serif-title">
-        CONTINUE ADVENTURE ➔
+        CONTINUE CURRICULUM ➔
       </button>
     </div>
   </div>
